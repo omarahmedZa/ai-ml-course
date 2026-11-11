@@ -20,6 +20,7 @@
   --shadow: 0 1px 2px rgba(20, 24, 29, 0.06), 0 8px 24px rgba(20, 24, 29, 0.05);
   --measure: 46rem;
   --radius: 8px;
+  --on-accent: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,10 +39,12 @@
     --bad: #ef8d7f;
     --code-bg: #1c2127;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
+    --on-accent: #111418;
   }
 }
 
 html[data-theme="light"] {
+  --on-accent: #ffffff;
   --ink: #14181d; --ink-soft: #5a626d; --ink-faint: #6b7480; --rule: #e2e6ea;
   --paper: #fdfcfa; --card: #ffffff; --accent: #a3231f; --accent-2: #1f5f7a;
   --accent-soft: #f7ece9; --ok: #1f7a4d; --warn: #9a6b00; --bad: #a3231f;
@@ -49,6 +52,7 @@ html[data-theme="light"] {
   --shadow: 0 1px 2px rgba(20,24,29,.06), 0 8px 24px rgba(20,24,29,.05);
 }
 html[data-theme="dark"] {
+  --on-accent: #111418;
   --ink: #e9e6e0; --ink-soft: #a8aeb8; --ink-faint: #9aa2ad; --rule: #2b3138;
   --paper: #111418; --card: #171b20; --accent: #ef8d7f; --accent-2: #7fc4dd;
   --accent-soft: #2a1d1b; --ok: #6fd39a; --warn: #e0b355; --bad: #ef8d7f;
@@ -299,6 +303,7 @@ details p:last-child { margin-bottom: .2rem; }
 }
 html[data-theme="dark"] .continue, .continue { color: #fff; }
 .continue:hover { filter: brightness(1.08); }
+.continue, .stepnext { color: var(--on-accent); }
 
 .unit { margin: 2.4rem 0 0; }
 .unit-head { display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap; }
@@ -433,7 +438,7 @@ ol.topics > li.topic {
   padding: .4rem .75rem; border-radius: 999px;
   border: 1px solid var(--accent); background: none; color: var(--accent); cursor: pointer;
 }
-.reveal:hover { background: var(--accent); color: #fff; }
+.reveal:hover { background: var(--accent); color: var(--on-accent); }
 .panswer {
   margin-top: .7rem; padding: .6rem .75rem;
   border-left: 3px solid var(--ok); border-radius: 0 6px 6px 0;
@@ -479,7 +484,7 @@ ol.topics > li.topic {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: .7rem; letter-spacing: .06em;
   padding: .4rem .8rem; border-radius: 999px; cursor: pointer;
-  border: 1px solid var(--accent); background: var(--accent); color: #fff;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent);
 }
 .stepnext:hover { filter: brightness(1.08); }
 .stepall {
