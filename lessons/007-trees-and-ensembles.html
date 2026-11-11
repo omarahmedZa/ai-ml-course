@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>007 — Trees and ensembles</title>
 <link rel="stylesheet" href="../assets/lesson.css">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 </head>
 <body data-lesson="007">
 <main>
@@ -64,6 +65,10 @@
   <p><strong>Second trap:</strong> reading built-in feature importance as truth. Impurity-based importance is biased toward high-cardinality and continuous features. Use permutation importance on held-out data instead (topic 31).</p>
 </div>
 
+<h2>Step by step</h2>
+<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
+<div class="steps"><script type="application/json" class="steps-data">["A tree asks one yes/no question at a time: is x₁ below 0.3?", "It tries every cut and keeps the one that makes the children purest.", "Repeat inside each child until a stopping rule says stop.", "One deep tree is unstable; average many on resampled data to cut variance.", "Boosting instead fits each new shallow tree to the previous ensemble's error."]</script></div>
+
 <h2>Retrieval check</h2>
 <ol class="quiz">
   <li>A node has 40 samples, 30 positive and 10 negative. Compute its Gini impurity.
@@ -111,12 +116,9 @@ def gini(labels):
 
 <p class="unit-res"><strong>Unit 1 resources:</strong> <a href="../output/cheatsheet-unit-1.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-1.pptx">deck · PPTX</a></p>
 
-<p class="footer-meta">
-  Primary source: <a href="https://scikit-learn.org/stable/modules/ensemble.html">scikit-learn — Ensembles</a>.<br>
-  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
-</p>
+<p class="source">Primary source: <a href="https://scikit-learn.org/stable/modules/ensemble.html">scikit-learn — Ensembles</a>.</p>
 
 </main>
-  <script src="../assets/course.js?v=5" defer></script>
+  <script src="../assets/course.js?v=6" defer></script>
 </body>
 </html>

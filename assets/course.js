@@ -141,7 +141,7 @@
     var h2s = [].slice.call(document.querySelectorAll("main h2"));
     h2s.forEach(function (h2, i) {
       var text = h2.textContent.toLowerCase();
-      if (text.indexOf("retrieval") !== -1 || text.indexOf("next") !== -1 || text.indexOf("colab") !== -1 || text.indexOf("practice") !== -1) return;
+      if (text.indexOf("retrieval") !== -1 || text.indexOf("next") !== -1 || text.indexOf("colab") !== -1 || text.indexOf("practice") !== -1 || text.indexOf("step by step") !== -1) return;
 
       /* find the last element belonging to this section */
       var node = h2.nextElementSibling;
@@ -211,6 +211,73 @@
         }
         refresh();
       });
+    });
+
+
+    /* step-by-step walkthrough: one sentence per click */
+    var stepBoxes = [].slice.call(document.querySelectorAll(".steps"));
+    stepBoxes.forEach(function (box) {
+      var raw = box.querySelector(".steps-data");
+      if (!raw) return;
+      var items;
+      try { items = JSON.parse(raw.textContent); } catch (e) { return; }
+      raw.style.display = "none";
+
+      var list = document.createElement("ol");
+      list.className = "steplist";
+      var nodes = items.map(function (text, i) {
+        var li = document.createElement("li");
+        li.className = "step" + (i === 0 ? "" : " hidden");
+        var n = document.createElement("span");
+        n.className = "n";
+        n.textContent = ("0" + (i + 1)).slice(-2);
+        var t = document.createElement("span");
+        t.className = "t";
+        t.textContent = text;
+        li.appendChild(n);
+        li.appendChild(t);
+        list.appendChild(li);
+        return li;
+      });
+      box.appendChild(list);
+
+      var bar = document.createElement("div");
+      bar.className = "stepbar";
+      var count = document.createElement("span");
+      count.className = "stepcount";
+      count.textContent = "Step 1 of " + items.length;
+      var next = document.createElement("button");
+      next.type = "button";
+      next.className = "stepnext";
+      next.textContent = "Next step →";
+      var all = document.createElement("button");
+      all.type = "button";
+      all.className = "stepall";
+      all.textContent = "Show all";
+      bar.appendChild(count);
+      bar.appendChild(next);
+      bar.appendChild(all);
+      box.appendChild(bar);
+
+      var shown = 1;
+      function paint() {
+        nodes.forEach(function (li, i) { li.classList.toggle("hidden", i >= shown); });
+        count.textContent = shown >= items.length
+          ? "All " + items.length + " steps shown"
+          : "Step " + shown + " of " + items.length;
+        next.hidden = shown >= items.length;
+        all.hidden = shown >= items.length;
+      }
+      next.addEventListener("click", function () {
+        shown = Math.min(items.length, shown + 1);
+        paint();
+        nodes[shown - 1].scrollIntoView({ block: "nearest", behavior: "smooth" });
+      });
+      all.addEventListener("click", function () {
+        shown = items.length;
+        paint();
+      });
+      paint();
     });
 
     /* extra practice: three attempts, then reveal */

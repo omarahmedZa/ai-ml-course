@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>030 — Why explainability</title>
 <link rel="stylesheet" href="../assets/lesson.css">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 </head>
 <body data-lesson="030">
 <main>
@@ -65,6 +66,10 @@
   <p><strong>Second trap:</strong> explainability theatre — producing a heatmap because it looks rigorous. An explanation nobody can act on, or that is never validated (topic 32), is decoration with a compliance cost.</p>
 </div>
 
+<h2>Step by step</h2>
+<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
+<div class="steps"><script type="application/json" class="steps-data">["A prediction feeds a decision that affects a person.", "Ask who needs the reason: applicant, operator, auditor.", "Intrinsic models explain themselves; post-hoc methods explain afterwards.", "Global explains average behaviour; local explains one output.", "State the use case first, then pick the method that serves it."]</script></div>
+
 <h2>Retrieval check</h2>
 <ol class="quiz">
   <li>A decision tree of depth 4 is used for credit scoring. Is it intrinsic or post-hoc, and local or global?
@@ -112,12 +117,9 @@ A = np.c_[income, debt, np.ones(n)]</code></pre>
 
 <p class="unit-res"><strong>Unit 8 resources:</strong> <a href="../output/cheatsheet-unit-8.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-8.pptx">deck · PPTX</a></p>
 
-<p class="footer-meta">
-  Primary source: Molnar, <a href="https://christophm.github.io/interpretable-ml-book/">Interpretable Machine Learning</a>, ch. 1–2.<br>
-  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
-</p>
+<p class="source">Primary source: Molnar, <a href="https://christophm.github.io/interpretable-ml-book/">Interpretable Machine Learning</a>, ch. 1–2.</p>
 
 </main>
-  <script src="../assets/course.js?v=5" defer></script>
+  <script src="../assets/course.js?v=6" defer></script>
 </body>
 </html>

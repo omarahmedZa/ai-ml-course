@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>033 — Federated setting and FedAvg</title>
 <link rel="stylesheet" href="../assets/lesson.css">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 </head>
 <body data-lesson="033">
 <main>
@@ -68,6 +69,10 @@
   <p><strong>Second trap:</strong> assuming the server sees updates, so privacy is solved. Gradients carry information about the data that produced them (topic 35).</p>
 </div>
 
+<h2>Step by step</h2>
+<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
+<div class="steps"><script type="application/json" class="steps-data">["The server holds global weights and sends them to a sample of clients.", "Each client trains locally on data that never leaves the device.", "Clients return weights, not examples.", "The server averages them, weighted by each client's example count.", "Repeat for many rounds; communication, not compute, is the cost."]</script></div>
+
 <h2>Retrieval check</h2>
 <ol class="quiz">
   <li>Two clients: 900 examples with local loss optimum 0.2, 100 examples with optimum 0.8. What does one FedAvg round produce?
@@ -115,12 +120,9 @@ print(f&quot;weighted FedAvg: {weighted:.3f}  (equal weighting: {equal:.3f})&quo
 
 <p class="unit-res"><strong>Unit 9 resources:</strong> <a href="../output/cheatsheet-unit-9.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-9.pptx">deck · PPTX</a></p>
 
-<p class="footer-meta">
-  Primary source: McMahan et al., <a href="https://arxiv.org/abs/1602.05629">Communication-Efficient Learning of Deep Networks from Decentralized Data</a> (2017).<br>
-  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
-</p>
+<p class="source">Primary source: McMahan et al., <a href="https://arxiv.org/abs/1602.05629">Communication-Efficient Learning of Deep Networks from Decentralized Data</a> (2017).</p>
 
 </main>
-  <script src="../assets/course.js?v=5" defer></script>
+  <script src="../assets/course.js?v=6" defer></script>
 </body>
 </html>

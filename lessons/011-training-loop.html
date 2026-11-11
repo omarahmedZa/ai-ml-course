@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>011 — The training loop</title>
 <link rel="stylesheet" href="../assets/lesson.css">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 </head>
 <body data-lesson="011">
 <main>
@@ -68,6 +69,10 @@
   <p><strong>Second trap:</strong> measuring accuracy in <code>train()</code> mode. Dropout and batch norm behave differently at inference; forgetting <code>model.eval()</code> makes your validation number wrong, not just noisy.</p>
 </div>
 
+<h2>Step by step</h2>
+<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
+<div class="steps"><script type="application/json" class="steps-data">["Shuffle the data and cut it into batches.", "For each batch: forward, loss, backward, step, zero the gradients.", "An epoch is one pass; steps = epochs × examples ÷ batch size.", "Watch the loss: falling means learning, flat means something is disconnected.", "If it rises or hits NaN, divide the learning rate by ten and retry."]</script></div>
+
 <h2>Retrieval check</h2>
 <ol class="quiz">
   <li>50,000 examples, batch size 250, 8 epochs. How many parameter updates?
@@ -115,12 +120,9 @@ for epoch in range(60):
 
 <p class="unit-res"><strong>Unit 2 resources:</strong> <a href="../output/cheatsheet-unit-2.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-2.pptx">deck · PPTX</a></p>
 
-<p class="footer-meta">
-  Primary source: <a href="https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html">PyTorch — Optimizing Model Parameters</a>.<br>
-  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
-</p>
+<p class="source">Primary source: <a href="https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html">PyTorch — Optimizing Model Parameters</a>.</p>
 
 </main>
-  <script src="../assets/course.js?v=5" defer></script>
+  <script src="../assets/course.js?v=6" defer></script>
 </body>
 </html>

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>022 — Two solution families</title>
 <link rel="stylesheet" href="../assets/lesson.css">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 </head>
 <body data-lesson="022">
 <main>
@@ -67,6 +68,10 @@
   <p><strong>Second trap:</strong> assuming a policy gradient needs a differentiable reward. It does not — the gradient flows through <code>log π</code>, so the reward can be a black box (a win/loss, a human rating).</p>
 </div>
 
+<h2>Step by step</h2>
+<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
+<div class="steps"><script type="application/json" class="steps-data">["Value-based methods learn Q and act greedily.", "Policy-based methods adjust action probabilities directly.", "Q-learning's target uses the max, so it can learn from old data.", "REINFORCE weights the log-probability of the action taken by the return.", "Continuous actions suit policies; discrete actions suit Q-learning and DQN."]</script></div>
+
 <h2>Retrieval check</h2>
 <ol class="quiz">
   <li>You have a robot arm with 7 continuous joints. Which family, and why?
@@ -114,12 +119,9 @@ probs = np.array([0.7, 0.3])</code></pre>
 
 <p class="unit-res"><strong>Unit 5 resources:</strong> <a href="../output/cheatsheet-unit-5.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-5.pptx">deck · PPTX</a></p>
 
-<p class="footer-meta">
-  Primary source: Sutton &amp; Barto, <a href="http://incompleteideas.net/book/the-book-2nd.html">Reinforcement Learning: An Introduction</a>, ch. 6 &amp; 13.<br>
-  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
-</p>
+<p class="source">Primary source: Sutton &amp; Barto, <a href="http://incompleteideas.net/book/the-book-2nd.html">Reinforcement Learning: An Introduction</a>, ch. 6 &amp; 13.</p>
 
 </main>
-  <script src="../assets/course.js?v=5" defer></script>
+  <script src="../assets/course.js?v=6" defer></script>
 </body>
 </html>

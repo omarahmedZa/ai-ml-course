@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>017 — RNN to LSTM</title>
 <link rel="stylesheet" href="../assets/lesson.css">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 </head>
 <body data-lesson="017">
 <main>
@@ -62,6 +63,10 @@
   <p><strong>Second trap:</strong> forgetting the sequence is sequential. Training cannot parallelise over time, which is why RNNs lost to transformers on long sequences — not because attention is more expressive per se.</p>
 </div>
 
+<h2>Step by step</h2>
+<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
+<div class="steps"><script type="application/json" class="steps-data">["Read the sequence one token at a time, updating a hidden state.", "The state has fixed size, so it must summarise everything seen so far.", "Backprop through time multiplies a derivative per step, so the past fades.", "LSTM adds gates — forget, input, output — around a separate cell state.", "The cell updates additively, giving gradients a path that does not shrink."]</script></div>
+
 <h2>Retrieval check</h2>
 <ol class="quiz">
   <li>Why does a vanilla RNN struggle with a dependency 100 tokens apart?
@@ -109,12 +114,9 @@ for t in range(20):
 
 <p class="unit-res"><strong>Unit 4 resources:</strong> <a href="../output/cheatsheet-unit-4.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-4.pptx">deck · PPTX</a></p>
 
-<p class="footer-meta">
-  Primary source: Goodfellow, Bengio &amp; Courville, <a href="https://www.deeplearningbook.org">Deep Learning</a>, ch. 10.<br>
-  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
-</p>
+<p class="source">Primary source: Goodfellow, Bengio &amp; Courville, <a href="https://www.deeplearningbook.org">Deep Learning</a>, ch. 10.</p>
 
 </main>
-  <script src="../assets/course.js?v=5" defer></script>
+  <script src="../assets/course.js?v=6" defer></script>
 </body>
 </html>

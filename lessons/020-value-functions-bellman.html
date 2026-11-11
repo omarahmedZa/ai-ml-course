@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>020 — Value functions and Bellman</title>
 <link rel="stylesheet" href="../assets/lesson.css">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 </head>
 <body data-lesson="020">
 <main>
@@ -67,6 +68,10 @@
   <p><strong>Second trap:</strong> bootstrapping off a terminal state. There is no future after termination; using <code>γV(s′)</code> there adds phantom value and inflates every trajectory that ends.</p>
 </div>
 
+<h2>Step by step</h2>
+<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
+<div class="steps"><script type="application/json" class="steps-data">["A value is the expected return from a state under a policy.", "Q is the same idea after committing to one action.", "Bellman: value = reward now + discounted value of the next state.", "That recursion turns an infinite sum into one step plus an estimate.", "Learn by bootstrapping: move V toward r + γV(s′), scaled by α."]</script></div>
+
 <h2>Retrieval check</h2>
 <ol class="quiz">
   <li><code>r = 0</code>, <code>γ = 0.9</code>, <code>V(s′) = 5</code>. What is <code>Q(s,a)</code>?
@@ -114,12 +119,9 @@ for sweep in range(50):
 
 <p class="unit-res"><strong>Unit 5 resources:</strong> <a href="../output/cheatsheet-unit-5.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-5.pptx">deck · PPTX</a></p>
 
-<p class="footer-meta">
-  Primary source: Sutton &amp; Barto, <a href="http://incompleteideas.net/book/the-book-2nd.html">Reinforcement Learning: An Introduction</a>, ch. 3–4.<br>
-  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
-</p>
+<p class="source">Primary source: Sutton &amp; Barto, <a href="http://incompleteideas.net/book/the-book-2nd.html">Reinforcement Learning: An Introduction</a>, ch. 3–4.</p>
 
 </main>
-  <script src="../assets/course.js?v=5" defer></script>
+  <script src="../assets/course.js?v=6" defer></script>
 </body>
 </html>

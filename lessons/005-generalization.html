@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>005 — Generalization</title>
 <link rel="stylesheet" href="../assets/lesson.css">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 </head>
 <body data-lesson="005">
 <main>
@@ -67,6 +68,10 @@
   <p><strong>Leakage</strong> is the same disease in disguise: scaling or imputing before the split lets test statistics into training. Fit the scaler on train only, then apply it to test.</p>
 </div>
 
+<h2>Step by step</h2>
+<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
+<div class="steps"><script type="application/json" class="steps-data">["Split the data three ways: train to fit, validation to choose, test to report once.", "Compare train and validation loss. A large gap means memorisation.", "Both high means too simple: add capacity, not regularisation.", "Low train and high validation means variance: add data or constrain the model.", "Never tune on the test set, or the reported number becomes fiction."]</script></div>
+
 <h2>Retrieval check</h2>
 <ol class="quiz">
   <li>Train accuracy 0.99, validation 0.68. Name the diagnosis and two fixes that do not involve collecting more data.
@@ -114,12 +119,9 @@ for d in (1, 3, 9):</code></pre>
 
 <p class="unit-res"><strong>Unit 1 resources:</strong> <a href="../output/cheatsheet-unit-1.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-1.pptx">deck · PPTX</a></p>
 
-<p class="footer-meta">
-  Primary source: Scott Fortmann-Roe, <a href="http://scott.fortmann-roe.com/docs/BiasVariance.html">Understanding the Bias-Variance Tradeoff</a>.<br>
-  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
-</p>
+<p class="source">Primary source: Scott Fortmann-Roe, <a href="http://scott.fortmann-roe.com/docs/BiasVariance.html">Understanding the Bias-Variance Tradeoff</a>.</p>
 
 </main>
-  <script src="../assets/course.js?v=5" defer></script>
+  <script src="../assets/course.js?v=6" defer></script>
 </body>
 </html>

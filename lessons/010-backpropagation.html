@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>010 — Backpropagation</title>
 <link rel="stylesheet" href="../assets/lesson.css">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 </head>
 <body data-lesson="010">
 <main>
@@ -62,6 +63,10 @@
   <p><strong>Second trap:</strong> reading a gradient as "how important this parameter is". It is a <em>local</em> slope at the current parameters. The same weight can have a huge gradient at initialisation and a tiny one a step later.</p>
 </div>
 
+<h2>Step by step</h2>
+<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
+<div class="steps"><script type="application/json" class="steps-data">["Write the forward pass as a chain: z = wx + b, then L = (z − y)².", "Differentiate the last step first: ∂L/∂z = 2(z − y).", "Step back once: ∂L/∂w = ∂L/∂z × x, and ∂L/∂b = ∂L/∂z.", "Multiply by the learning rate and subtract.", "Each node only needs its own local derivative; the chain rule does the rest."]</script></div>
+
 <h2>Retrieval check</h2>
 <ol class="quiz">
   <li><code>L = (3w)²</code>. What is <code>dL/dw</code> at <code>w = 2</code>?
@@ -109,12 +114,9 @@ print(f&quot;pred={pred} loss={loss} dL/dw={d_w} dL/db={d_b}&quot;)</code></pre>
 
 <p class="unit-res"><strong>Unit 2 resources:</strong> <a href="../output/cheatsheet-unit-2.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-2.pptx">deck · PPTX</a></p>
 
-<p class="footer-meta">
-  Primary source: Karpathy, <a href="https://karpathy.ai/zero-to-hero.html">Neural Networks: Zero to Hero</a>, episode 1 (backprop from scratch).<br>
-  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
-</p>
+<p class="source">Primary source: Karpathy, <a href="https://karpathy.ai/zero-to-hero.html">Neural Networks: Zero to Hero</a>, episode 1 (backprop from scratch).</p>
 
 </main>
-  <script src="../assets/course.js?v=5" defer></script>
+  <script src="../assets/course.js?v=6" defer></script>
 </body>
 </html>

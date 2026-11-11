@@ -450,3 +450,42 @@ ol.topics > li.topic {
   .opt, .reveal, .pstatus { display: none; }
   .panswer { display: block !important; }
 }
+
+/* ---------- Step by step ---------- */
+.steps-note {
+  font-size: .82rem; color: var(--ink-faint);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  letter-spacing: .04em; line-height: 1.6;
+}
+.steplist { list-style: none; padding: 0; margin: 1rem 0 0; }
+.step {
+  display: flex; gap: .8rem; align-items: flex-start;
+  padding: .75rem .85rem; margin-bottom: .5rem;
+  border: 1px solid var(--rule); border-radius: 8px; background: var(--card);
+  animation: stepin .18s ease-out;
+}
+.step.hidden { display: none; }
+.step .n {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .68rem; color: var(--accent); padding-top: .18rem; flex: none;
+}
+.step .t { font-size: .95rem; line-height: 1.55; }
+.stepbar { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin: .2rem 0 0; }
+.stepcount {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint);
+}
+.stepnext {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .7rem; letter-spacing: .06em;
+  padding: .4rem .8rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--accent); background: var(--accent); color: #fff;
+}
+.stepnext:hover { filter: brightness(1.08); }
+.stepall {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .68rem; padding: .4rem .7rem; border-radius: 999px;
+  border: 1px solid var(--rule); background: none; color: var(--ink-soft); cursor: pointer;
+}
+@keyframes stepin { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+@media print { .step.hidden { display: block; } .stepbar { display: none; } }
