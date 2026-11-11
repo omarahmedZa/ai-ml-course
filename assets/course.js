@@ -317,8 +317,15 @@
         var revealBox = document.createElement("div");
         revealBox.className = "panswer";
         revealBox.hidden = true;
-        revealBox.innerHTML = "<strong>Answer:</strong> " + item.o[item.a] +
-          "<br><span class='why'>" + item.why + "</span>";
+        var lead = document.createElement("strong");
+        lead.textContent = "Answer: ";
+        revealBox.appendChild(lead);
+        revealBox.appendChild(document.createTextNode(item.o[item.a]));
+        revealBox.appendChild(document.createElement("br"));
+        var why = document.createElement("span");
+        why.className = "why";
+        why.textContent = item.why;
+        revealBox.appendChild(why);
         card.appendChild(revealBox);
 
         var revealBtn = document.createElement("button");
