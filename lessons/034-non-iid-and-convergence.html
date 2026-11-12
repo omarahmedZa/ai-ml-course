@@ -81,6 +81,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/034-non-iid-and-convergence.ipynb">open the notebook in Colab</a> · <a href="../notebooks/034-non-iid-and-convergence.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+# two clients with opposite single-class data
+A, B = np.array([-1.0]), np.array([1.0])
+global_w = 0.0
+for rnd in range(4):
+    locals_ = []
+    for data in (A, B):</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 35: Privacy and threat model.</strong> You can now train without centralising data. Topic 35 asks the harder question: what does the server still learn?</p>
   <div class="pager">

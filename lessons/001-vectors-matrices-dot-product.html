@@ -121,6 +121,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/001-vectors-matrices-dot-product.ipynb">open the notebook in Colab</a> · <a href="../notebooks/001-vectors-matrices-dot-product.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+x, w, b = np.array([2., 1.]), np.array([3., -1.]), -1.
+print(&quot;x·w =&quot;, x @ w, &quot;| score =&quot;, x @ w + b)
+q = np.array([1., 0.])
+for name, v in [(&quot;A&quot;, np.array([50., 0.])), (&quot;B&quot;, np.array([1., .1]))]:
+    cos = (q @ v) / (np.linalg.norm(q) * np.linalg.norm(v))
+    print(f&quot;{name}: dot={q @ v:6.2f}  cosine={cos:.3f}&quot;)</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 2: Slope → gradient.</strong> Your score now depends on <code>w</code>. Which direction do you nudge <code>w</code> to improve it? That direction is the engine of every training loop in this course.</p>
   <div class="pager">

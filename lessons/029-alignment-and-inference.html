@@ -85,6 +85,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/029-alignment-and-inference.ipynb">open the notebook in Colab</a> · <a href="../notebooks/029-alignment-and-inference.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+def softmax(z):
+    e = np.exp(z - z.max()); return e / e.sum()
+logits = np.array([2., 1., 0.])
+for T in (0.5, 1.0, 2.0):
+    print(f&quot;T={T}: {softmax(logits / T).round(3)}&quot;)
+# DPO-style preference loss on two completions</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 30: Why explainability.</strong> Unit 8 asks a different question: not "what does it predict" but "why should anyone believe it".</p>
   <div class="pager">

@@ -79,6 +79,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/015-tokenization.ipynb">open the notebook in Colab</a> · <a href="../notebooks/015-tokenization.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>from collections import Counter
+corpus = &quot;low lower lowest newer newest wider widest&quot;
+words = [&quot; &quot;.join(w) + &quot; &lt;/w&gt;&quot; for w in corpus.split()]
+print(&quot;start:&quot;, words[:3])
+vocab = Counter()
+for w in words:
+    vocab.update(w.split())</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 16: Embeddings.</strong> An ID is a meaningless integer. Topic 16 turns each ID into a vector whose geometry encodes meaning.</p>
   <div class="pager">

@@ -95,6 +95,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/002-slope-to-gradient.ipynb">open the notebook in Colab</a> · <a href="../notebooks/002-slope-to-gradient.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+f = lambda w: w ** 2
+grad = lambda w: 2 * w
+w, lr = 3.0, 0.1
+for step in range(4):
+    print(f&quot;step {step}: w={w:7.4f}  loss={f(w):8.4f}  grad={grad(w):7.4f}&quot;)
+    w -= lr * grad(w)</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 3: Probability, expectation, likelihood.</strong> Gradient descent needs something to descend. That something is a loss, and every loss in this course is a likelihood in disguise.</p>
   <div class="pager">

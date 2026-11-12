@@ -83,6 +83,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/035-privacy-and-threat-model.ipynb">open the notebook in Colab</a> · <a href="../notebooks/035-privacy-and-threat-model.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+rng = np.random.default_rng(0)
+grad = rng.normal(size=100) * 10              # one example&#x27;s gradient
+C = 1.0
+norm = np.linalg.norm(grad)
+clipped = grad * min(1.0, C / norm)
+print(f&quot;norm {norm:.2f} -&gt; clipped norm {np.linalg.norm(clipped):.2f}&quot;)</code></pre>
+
 <div class="next">
   <p><strong>Course complete.</strong> You have the full stack: math → ML → DL → NLP → RL → DRL → attention → XAI → FL. Next: the Unit 0–2 cheat sheet, then answer the retrieval checks you skipped.</p>
   <div class="pager">

@@ -87,6 +87,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/011-training-loop.ipynb">open the notebook in Colab</a> · <a href="../notebooks/011-training-loop.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+rng = np.random.default_rng(0)
+X = rng.normal(size=(200, 2))
+y = X @ np.array([3., -2.]) + 1 + rng.normal(0, .3, 200)
+w, b, lr = np.zeros(2), 0., 0.05
+for epoch in range(60):
+    for i in rng.permutation(len(X)):</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 12: Overfitting in deep learning.</strong> Your loop now runs. Next: the four levers that stop a high-capacity network from memorising its way to a great training score.</p>
   <div class="pager">

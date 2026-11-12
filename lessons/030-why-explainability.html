@@ -84,6 +84,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/030-why-explainability.ipynb">open the notebook in Colab</a> · <a href="../notebooks/030-why-explainability.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+rng = np.random.default_rng(0)
+n = 500
+income = rng.normal(50, 15, n)
+debt = rng.normal(0.3, 0.15, n)
+y = ((income - 60 * debt) &gt; 20).astype(int)
+A = np.c_[income, debt, np.ones(n)]</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 31: Attribution methods.</strong> You know which argument you need. Topic 31 covers the four methods that produce it — and what each one actually computes.</p>
   <div class="pager">

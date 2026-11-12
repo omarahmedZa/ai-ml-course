@@ -85,6 +85,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/028-pretraining.ipynb">open the notebook in Colab</a> · <a href="../notebooks/028-pretraining.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>from collections import Counter, defaultdict
+import numpy as np
+text = (&quot;the cat sat on the mat . the cat ate the fish . &quot;
+        &quot;the dog sat on the mat . the dog ate the bone .&quot;).split()
+bigram = defaultdict(Counter)
+for a, b in zip(text, text[1:]):
+    bigram[a][b] += 1</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 29: Alignment and inference.</strong> A pretrained model completes text; it does not follow instructions. Topic 29 covers the three stages that turn one into the other.</p>
   <div class="pager">

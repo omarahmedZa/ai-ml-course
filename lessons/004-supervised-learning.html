@@ -87,6 +87,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/004-supervised-learning.ipynb">open the notebook in Colab</a> · <a href="../notebooks/004-supervised-learning.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+x = np.array([1., 50.])          # &quot;free&quot;=1, length=50
+w, b = np.array([2., -.01]), -1.
+z = w @ x + b
+p = 1 / (1 + np.exp(-z))
+print(f&quot;z={z:.2f}  p(spam)={p:.3f}&quot;)
+for y in (1, 0):</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 5: Generalization.</strong> You just saw a 100%/71% split. Topic 5 explains where that gap comes from, how to read it, and which lever fixes it.</p>
   <div class="pager">

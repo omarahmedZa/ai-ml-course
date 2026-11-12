@@ -84,6 +84,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/009-layers-and-forward-pass.ipynb">open the notebook in Colab</a> · <a href="../notebooks/009-layers-and-forward-pass.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+x = np.array([1., -1.])
+W1, b1 = np.array([[1., 2.], [-1., 0.]]), np.array([0., 1.])
+z1 = W1 @ x + b1
+a1 = np.maximum(0, z1)
+W2, b2 = np.array([1., 1.]), -.5
+z2 = W2 @ a1 + b2</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 10: Backpropagation.</strong> The forward pass computes a number. Backprop asks how that number would change if every one of those parameters moved — in one sweep.</p>
   <div class="pager">

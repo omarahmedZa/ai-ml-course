@@ -82,6 +82,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/014-architecture-families.ipynb">open the notebook in Colab</a> · <a href="../notebooks/014-architecture-families.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+# parameter counts
+conv = 3 * 3 * 64 * 64
+dense = 224 * 224 * 64 * 64
+print(f&quot;3x3 conv: {conv:,}   dense equivalent: {dense:,}   ratio {dense//conv:,}x&quot;)
+# one tiny convolution, stride 1, no padding
+img = np.arange(16.).reshape(4, 4)</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 15: Tokenization.</strong> Unit 4 starts where every language model starts: turning text into integers, and losing information in ways that show up as bugs later.</p>
   <div class="pager">

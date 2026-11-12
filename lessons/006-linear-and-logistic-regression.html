@@ -86,6 +86,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/006-linear-and-logistic-regression.ipynb">open the notebook in Colab</a> · <a href="../notebooks/006-linear-and-logistic-regression.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+rng = np.random.default_rng(0)
+X = rng.normal(size=(50, 2))
+true = np.array([2., -3.])
+y = X @ true + 1 + rng.normal(0, .1, 50)
+A = np.c_[X, np.ones(50)]
+coef, *_ = np.linalg.lstsq(A, y, rcond=None)</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 7: Trees &amp; ensembles.</strong> Linear models cannot bend. Trees can — and on tabular data they will beat your neural network more often than you expect.</p>
   <div class="pager">

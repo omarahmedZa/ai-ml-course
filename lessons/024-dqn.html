@@ -77,6 +77,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/024-dqn.ipynb">open the notebook in Colab</a> · <a href="../notebooks/024-dqn.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+rng = np.random.default_rng(0)
+buffer, r = [], 0.0
+for _ in range(1000):
+    s = rng.normal(size=4)
+    r = 0.9 * r + rng.normal()          # temporally correlated reward
+    buffer.append((s, rng.integers(2), r, s + rng.normal(size=4) * .1))</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 25: Policy gradient at scale.</strong> DQN handles discrete actions. For continuous control — and for RLHF — the other family wins, once you fix its variance.</p>
   <div class="pager">

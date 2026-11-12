@@ -77,6 +77,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/032-evaluating-explanations.ipynb">open the notebook in Colab</a> · <a href="../notebooks/032-evaluating-explanations.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+rng = np.random.default_rng(0)
+n_features = 20
+true_importance = np.zeros(n_features)
+true_importance[:3] = [3., 2., 1.]
+X = rng.normal(size=(500, n_features))
+y = (X @ true_importance &gt; 0).astype(int)</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 33: Federated learning.</strong> Unit 9 changes the constraint: the data cannot leave the device. Everything you know about training now has to work without ever seeing the dataset.</p>
   <div class="pager">

@@ -71,6 +71,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/008-the-neuron.ipynb">open the notebook in Colab</a> · <a href="../notebooks/008-the-neuron.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+W1 = np.array([[1., 2.], [3., 4.]])
+x = np.array([1., -1.])
+for W2 in (np.array([[1., -1.]]), np.array([[1., 1.]])):
+    deep = W2 @ (W1 @ x)
+    collapsed = (W2 @ W1) @ x
+    relu = W2 @ np.maximum(0, W1 @ x)</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 9: Layers and the forward pass.</strong> One neuron is a scoring function. Stack them into matrices and you can trace any network on paper — which is the only way to debug one.</p>
   <div class="pager">

@@ -81,6 +81,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/017-rnn-to-lstm.ipynb">open the notebook in Colab</a> · <a href="../notebooks/017-rnn-to-lstm.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+# vanilla recurrence: h_t = tanh(W h_{t-1} + x_t)
+W, x = np.array([[0.9]]), np.array([1.0])
+h = np.zeros(1)
+traj = []
+for t in range(20):
+    h = np.tanh(W @ h + x)</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 18: Seq2seq.</strong> Put an RNN in front of the input and another behind the output, and you can translate. The bottleneck you just met becomes impossible to ignore.</p>
   <div class="pager">

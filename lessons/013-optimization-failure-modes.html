@@ -84,6 +84,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/013-optimization-failure-modes.ipynb">open the notebook in Colab</a> · <a href="../notebooks/013-optimization-failure-modes.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+for gain in (0.25, 1.0, 1.5):
+    vals = gain ** np.arange(1, 51)
+    print(f&quot;gain {gain}: after 10={gain**10:.2e}  after 50={gain**50:.2e}&quot;)
+# the fix: residual path keeps an identity term
+for depth in (5, 50):
+    jac = 0.25 ** depth</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 14: Architecture families.</strong> You can now train a deep network. Next: which shape of network to use, because MLP, CNN and RNN each bake in a different assumption about your data.</p>
   <div class="pager">

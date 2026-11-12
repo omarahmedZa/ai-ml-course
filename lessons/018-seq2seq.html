@@ -79,6 +79,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/018-seq2seq.ipynb">open the notebook in Colab</a> · <a href="../notebooks/018-seq2seq.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+rng = np.random.default_rng(0)
+def encode(tokens, dim=8):
+    &quot;&quot;&quot;Toy encoder: mean of token vectors, i.e. a fixed-size summary.&quot;&quot;&quot;
+    return rng.normal(size=(len(tokens), dim)).mean(axis=0)
+for n in (4, 16, 64):
+    s = encode([&quot;w&quot;] * n)</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 19: The RL frame.</strong> Unit 5 changes the problem: no labels, only rewards. First we need the vocabulary — states, actions, returns.</p>
   <div class="pager">

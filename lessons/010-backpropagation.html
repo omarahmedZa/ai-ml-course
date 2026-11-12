@@ -81,6 +81,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/010-backpropagation.ipynb">open the notebook in Colab</a> · <a href="../notebooks/010-backpropagation.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+x, w, b, y = 2., 3., 1., 10.
+pred = w * x + b
+loss = (pred - y) ** 2
+d_pred = 2 * (pred - y)
+d_w, d_b = d_pred * x, d_pred
+print(f&quot;pred={pred} loss={loss} dL/dw={d_w} dL/db={d_b}&quot;)</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 11: The training loop.</strong> You have a gradient. Wrap it in five lines, add a learning rate, and you have the loop that trains every model in the rest of this course.</p>
   <div class="pager">

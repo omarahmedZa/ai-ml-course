@@ -86,6 +86,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/022-two-solution-families.ipynb">open the notebook in Colab</a> · <a href="../notebooks/022-two-solution-families.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+Q, r, gamma, alpha = 0.5, 1.0, 0.9, 0.1
+target = r + gamma * 0.8
+print(&quot;Q-learning: target&quot;, target, &quot;TD error&quot;, round(target - Q, 2),
+      &quot;new Q&quot;, round(Q + alpha * (target - Q), 3))
+# policy gradient on a two-action bandit
+probs = np.array([0.7, 0.3])</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 23: Function approximation.</strong> Tables worked for 25 grid cells. Topic 23 asks what happens when the state is a screen of pixels — and why the guarantees disappear.</p>
   <div class="pager">

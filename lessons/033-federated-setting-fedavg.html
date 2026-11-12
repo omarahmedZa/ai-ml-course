@@ -87,6 +87,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/033-federated-setting-fedavg.ipynb">open the notebook in Colab</a> · <a href="../notebooks/033-federated-setting-fedavg.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+clients = [(100, 0.10), (200, 0.50), (700, 0.90)]
+total = sum(n for n, _ in clients)
+weighted = sum(n * w for n, w in clients) / total
+equal = np.mean([w for _, w in clients])
+print(f&quot;weighted FedAvg: {weighted:.3f}  (equal weighting: {equal:.3f})&quot;)
+# simulate two rounds of local training on a quadratic</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 34: Non-IID data.</strong> Real clients do not share a distribution. Topic 34 explains why the averaging above starts to fail — and what FedProx does about it.</p>
   <div class="pager">

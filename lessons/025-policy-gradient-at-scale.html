@@ -88,6 +88,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/025-policy-gradient-at-scale.ipynb">open the notebook in Colab</a> · <a href="../notebooks/025-policy-gradient-at-scale.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+ratio, adv, eps = 1.3, 2.0, 0.2
+unclipped = ratio * adv
+clipped = np.clip(ratio, 1 - eps, 1 + eps) * adv
+print(f&quot;ratio={ratio} adv={adv} -&gt; unclipped={unclipped} clipped={clipped} objective={min(unclipped, clipped)}&quot;)
+for r in (0.5, 1.0, 1.3):
+    print(f&quot;r={r}: objective={min(r * adv, np.clip(r, 1-eps, 1+eps) * adv):.2f}&quot;)</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 26: Attention.</strong> Unit 5 and 6 are done. Unit 7 returns to sequences — and replaces recurrence with a soft lookup that scales.</p>
   <div class="pager">

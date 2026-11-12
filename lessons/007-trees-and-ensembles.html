@@ -83,6 +83,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/007-trees-and-ensembles.ipynb">open the notebook in Colab</a> · <a href="../notebooks/007-trees-and-ensembles.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+rng = np.random.default_rng(1)
+X = rng.normal(size=(200, 1))[:, 0]
+y = (X &gt; 0).astype(int)
+def gini(labels):
+    if len(labels) == 0:
+        return 0.0</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 8: The neuron.</strong> Unit 1 is done. Unit 2 asks what happens when you stack 10,000 of these weighted sums and insert a bend between them.</p>
   <div class="pager">

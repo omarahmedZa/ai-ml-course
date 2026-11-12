@@ -89,6 +89,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/026-attention.ipynb">open the notebook in Colab</a> · <a href="../notebooks/026-attention.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+def softmax(z):
+    e = np.exp(z - z.max(axis=-1, keepdims=True))
+    return e / e.sum(axis=-1, keepdims=True)
+Q = np.array([[1., 0.]])
+K = np.array([[1., 0.], [0., 1.]])
+V = np.array([[10., 0.], [0., 10.]])</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 27: The Transformer block.</strong> Attention is one of four sub-layers. Topic 27 assembles them, and explains why the other three are not optional.</p>
   <div class="pager">

@@ -86,6 +86,16 @@
   </li>
 </ol>
 
+<h2>Build it in Colab</h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/031-attribution-methods.ipynb">open the notebook in Colab</a> · <a href="../notebooks/031-attribution-methods.ipynb">local copy</a>. The cell prints numbers, not pictures — change one value and rerun to see what breaks.</p>
+<pre><code>import numpy as np
+# 1. gradient saliency on a tiny model
+w = np.array([2., -1.])
+x = np.array([1., 1.])
+saliency = w                                  # d(w·x)/dx
+print(&quot;saliency:&quot;, saliency)
+# 2. Shapley values for two features</code></pre>
+
 <div class="next">
   <p><strong>Next → Topic 32: Evaluating explanations.</strong> You can now produce four kinds of explanation. Topic 32 asks the only question that matters: is any of them true?</p>
   <div class="pager">
