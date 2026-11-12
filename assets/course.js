@@ -125,7 +125,7 @@
     var earned = 0;
 
     function refresh() {
-      var g = gradeOf(earned, totalItems);
+      var g = gradeOf(earned, totalItems * 2);
       chip.querySelector("[data-score]").textContent = g.pct + "%";
       chip.querySelector("[data-grade]").textContent = g.letter;
       chip.querySelector("[data-grade]").setAttribute("data-g", g.letter);
