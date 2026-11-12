@@ -153,8 +153,15 @@ code, .mono {
 }
 pre {
   background: var(--code-bg); border-radius: var(--radius);
-  padding: .9rem 1rem; overflow-x: auto; font-size: .82rem;
-  line-height: 1.5; border: 1px solid var(--rule);
+  padding: .95rem 1.05rem; overflow-x: auto; font-size: .88rem;
+  line-height: 1.7; border: 1px solid var(--rule);
+}
+pre:has(> code) { position: relative; padding-top: 2rem; }
+pre:has(> code)::before {
+  content: "PYTHON";
+  position: absolute; top: .45rem; left: 1.05rem;
+  font-family: ui-monospace, monospace; font-size: .55rem;
+  letter-spacing: .16em; color: var(--ink-faint);
 }
 pre code { background: none; padding: 0; font-size: 1em; }
 
@@ -496,7 +503,7 @@ ol.topics > li.topic {
 @media print { .step.hidden { display: block; } .stepbar { display: none; } }
 
 /* ---------- code blocks ---------- */
-pre code .tok-k { color: var(--accent); }              /* keyword */
+pre code .tok-k { color: var(--accent); font-weight: 600; }              /* keyword */
 pre code .tok-s { color: var(--ok); }                  /* string */
 pre code .tok-n { color: var(--warn); }                /* number */
 pre code .tok-c { color: var(--ink-faint); font-style: italic; }
@@ -505,7 +512,7 @@ pre code .tok-o { color: var(--ink-soft); }
 
 /* ---------- tour banner ---------- */
 .tour-banner {
-  display: grid; grid-template-columns: auto 1fr auto; gap: .9rem;
+  display: grid; grid-template-columns: 1fr auto; gap: .25rem .9rem;
   align-items: center; margin: 1.6rem 0 .6rem; padding: .9rem 1.1rem;
   border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--rule));
   border-radius: var(--radius); background: var(--accent-soft);
@@ -513,6 +520,7 @@ pre code .tok-o { color: var(--ink-soft); }
 }
 .tour-banner:hover { border-color: var(--accent); }
 .tour-banner .k {
+  grid-column: 1 / -1;
   font-family: ui-monospace, monospace; font-size: .62rem; letter-spacing: .12em;
   text-transform: uppercase; color: var(--accent); white-space: nowrap;
 }
@@ -523,6 +531,6 @@ pre code .tok-o { color: var(--ink-soft); }
   text-transform: uppercase; color: var(--accent); white-space: nowrap;
 }
 @media (max-width: 700px) {
-  .tour-banner { grid-template-columns: 1fr auto; }
-  .tour-banner .k { grid-column: 1 / -1; }
+  .tour-banner { grid-template-columns: 1fr; }
+  .tour-banner .go { justify-self: start; }
 }
