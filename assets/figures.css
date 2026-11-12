@@ -189,3 +189,25 @@ html[data-theme="dark"] {
 }
 .lab-ref a:hover { background: var(--accent); color: var(--on-accent); transform: translateX(2px); }
 .lab-ref .k { opacity: .65; font-size: .6rem; }
+
+/* ---------- compact lab grid ---------- */
+.lab-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
+  margin-top: .55rem;
+}
+.lab-grid a {
+  display: flex; align-items: baseline; gap: .45rem;
+  padding: .45rem .55rem; border: 1px solid var(--rule); border-radius: 6px;
+  text-decoration: none; color: var(--ink);
+  font-size: .8rem; transition: border-color .15s, background .15s;
+}
+.lab-grid a:hover { border-color: var(--accent); background: var(--accent-soft); }
+.lab-grid .n {
+  font-family: ui-monospace, monospace; font-size: .64rem;
+  color: var(--accent); flex: none;
+}
+.lab-grid .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 700px) {
+  .lab-grid { grid-template-columns: repeat(2, 1fr); }
+  .lab-grid .t { white-space: normal; }
+}

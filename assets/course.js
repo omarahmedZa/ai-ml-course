@@ -648,7 +648,41 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   }
 
+
+  function esc(t) {
+    return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function highlightCode() {
+    var KW = /^(import|from|for|in|while|if|elif|else|def|return|class|with|as|and|or|not|None|True|False|lambda|print|range|len|yield|pass|break|continue|try|except|raise)$/;
+    [].forEach.call(document.querySelectorAll("pre code"), function (block) {
+      if (block.getAttribute("data-hl")) return;
+      var src = block.textContent, out = "", last = 0;
+      var re = /(#[^\n]*)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(\b\d+(?:\.\d+)?(?:[eE][-+]?\d+)?\b)|([A-Za-z_]\w*)|(\S)/g;
+      var m;
+      while ((m = re.exec(src))) {
+        if (m.index > last) out += esc(src.slice(last, m.index));
+        if (m[1]) out += '<span class="tok-c">' + esc(m[1]) + "</span>";
+        else if (m[2]) out += '<span class="tok-s">' + esc(m[2]) + "</span>";
+        else if (m[3]) out += '<span class="tok-n">' + esc(m[3]) + "</span>";
+        else if (m[4]) {
+          var w = m[4], after = src.slice(re.lastIndex, re.lastIndex + 1);
+          if (KW.test(w)) out += '<span class="tok-k">' + esc(w) + "</span>";
+          else if (after === "(") out += '<span class="tok-f">' + esc(w) + "</span>";
+          else out += esc(w);
+        } else {
+          out += /[=+\-*/%<>!]/.test(m[5]) ? '<span class="tok-o">' + esc(m[5]) + "</span>" : esc(m[5]);
+        }
+        last = re.lastIndex;
+      }
+      out += esc(src.slice(last));
+      block.innerHTML = out;
+      block.setAttribute("data-hl", "1");
+    });
+  }
+
   /* ---------- boot ---------- */
+  highlightCode();
   var page = document.body.getAttribute("data-page");
   if (page === "index") initIndex();
   else if (page === "lab") initLab();

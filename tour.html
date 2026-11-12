@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What's inside — AI/ML in 35 topics</title>
+<link rel="stylesheet" href="assets/lesson.css?v=3">
+<link rel="stylesheet" href="assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="A two-minute tour of the course: lessons, figures, animations, equation labs, Colab notebooks and scoring.">
+</head>
+<body data-page="tour">
+<main>
+
+<nav class="topline">
+  <a href="index.html">← Course map</a>
+  <span class="pill">2-minute tour</span>
+  <span class="grow"></span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Start here</p>
+  <h1>What's inside this course</h1>
+  <p class="objective">Eight kinds of material, one loop: read, look, drag, run, answer, score. This page tells you where each one lives.</p>
+</header>
+
+<h2>1 · Lessons</h2>
+<p>Each of the 35 topics is one page, about 1,400 words, split into eight fixed sections: why it matters, the one core idea, how it works in parts, worked examples, the trap, a retrieval check, runnable code, and extra practice.</p>
+<p><strong>Every part is short.</strong> No block is longer than 60 words, and a figure or a number sits beside almost every claim.</p>
+
+<h2>2 · Figures</h2>
+<p>There are 85 figures. Some are static diagrams; some are charts you can change.</p>
+<table>
+  <tr><th>Kind</th><th>What you do</th><th>Example</th></tr>
+  <tr><td>Static</td><td>Read it</td><td>the transformer block, the FedAvg round</td></tr>
+  <tr><td>Interactive</td><td>Drag a slider, watch the readout</td><td>rotate <code>w</code> and see the dot product change</td></tr>
+  <tr><td>Animated</td><td>Play, pause, scrub</td><td>gradient descent, the forward pass</td></tr>
+</table>
+<p>Colours mean the same thing everywhere, so a figure is readable without its caption:</p>
+<p>
+  <span style="color:var(--sym-data)">■ data (fixed)</span> ·
+  <span style="color:var(--sym-param)">■ parameters θ (learned)</span> ·
+  <span style="color:var(--sym-pred)">■ prediction</span> ·
+  <span style="color:var(--sym-loss)">■ loss</span> ·
+  <span style="color:var(--sym-opt)">■ optimum</span>
+</p>
+
+<h2>3 · Equation labs</h2>
+<p>There are 42 short labs. Each isolates <em>one symbol</em> of an equation, gives it a figure, and takes about three minutes.</p>
+<p>You find them inside a lesson, right under the formula they belong to, as a compact grid of nine (or fewer) buttons. They are worth 4 points each.</p>
+<p><strong>Example:</strong> the objective θ* = argmin… has nine labs — θ, f_θ(xᵢ), L, the atom, Σ, 1/n, argmin, θ*, and the whole thing.</p>
+
+<h2>4 · Animations</h2>
+<p>Six pages animate, and only where motion <em>is</em> the idea: descent, the forward pass, the backward sweep, a hidden state updating, attention weights flowing, and one federated round.</p>
+<p>Every animation has play, pause, a scrubber and a restart. If your system asks for reduced motion, it shows the final frame instead of moving.</p>
+
+<h2>5 · Code</h2>
+<p>Each lesson ends with a Colab block: a short Python cell, coloured for reading, and a link that opens the same notebook on Google Colab.</p>
+<p>Everything runs on NumPy alone — no installs, no GPU, no downloads.</p>
+
+<h2>6 · Questions and scoring</h2>
+<table>
+  <tr><th>Where</th><th>How many</th><th>Points</th></tr>
+  <tr><td>Retrieval check (per lesson)</td><td>3 questions, answers hidden</td><td>2 each</td></tr>
+  <tr><td>Extra practice (per lesson)</td><td>2 multiple choice, 3 attempts, then reveal</td><td>2 each</td></tr>
+  <tr><td>Section confidence (per section)</td><td>“can you explain this?”</td><td>2 each</td></tr>
+  <tr><td>Equation labs</td><td>2 questions each</td><td>4 per lab</td></tr>
+</table>
+<p>Scores are self-assessed and stored in your browser only. <strong>Export record</strong> turns them into a markdown file you can keep.</p>
+
+<h2>7 · Downloads</h2>
+<p>Ten cheat sheets (PDF, one side each) and ten slide decks (PPTX, speaker notes included), linked from the dashboard and from the bottom of every lesson.</p>
+
+<h2>8 · How to use it</h2>
+<ol>
+  <li>Open a topic, read it with the answers closed.</li>
+  <li>Drag every figure; change one number and predict what happens before you look.</li>
+  <li>Answer the retrieval check, then the practice questions.</li>
+  <li>Click the lab grid if a symbol still feels abstract.</li>
+  <li>Run the Colab cell; break it on purpose.</li>
+  <li>Move on only when you can explain the idea without the page open.</li>
+</ol>
+
+<p style="margin-top:1.5rem"><a class="continue" href="index.html">Start with Topic 01 →</a></p>
+
+<div class="labnav">
+  <a href="index.html">← Course map</a>
+  <a href="lessons/001-vectors-matrices-dot-product.html">Topic 01 · dot product →</a>
+</div>
+
+</main>
+</body>
+</html>

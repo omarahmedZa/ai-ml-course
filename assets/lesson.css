@@ -494,3 +494,35 @@ ol.topics > li.topic {
 }
 @keyframes stepin { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
 @media print { .step.hidden { display: block; } .stepbar { display: none; } }
+
+/* ---------- code blocks ---------- */
+pre code .tok-k { color: var(--accent); }              /* keyword */
+pre code .tok-s { color: var(--ok); }                  /* string */
+pre code .tok-n { color: var(--warn); }                /* number */
+pre code .tok-c { color: var(--ink-faint); font-style: italic; }
+pre code .tok-f { color: var(--accent-2); }            /* call */
+pre code .tok-o { color: var(--ink-soft); }
+
+/* ---------- tour banner ---------- */
+.tour-banner {
+  display: grid; grid-template-columns: auto 1fr auto; gap: .9rem;
+  align-items: center; margin: 1.6rem 0 .6rem; padding: .9rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--rule));
+  border-radius: var(--radius); background: var(--accent-soft);
+  text-decoration: none; color: var(--ink);
+}
+.tour-banner:hover { border-color: var(--accent); }
+.tour-banner .k {
+  font-family: ui-monospace, monospace; font-size: .62rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); white-space: nowrap;
+}
+.tour-banner strong { font-size: .95rem; }
+.tour-banner span.body { font-size: .85rem; color: var(--ink-soft); display: block; margin-top: .15rem; }
+.tour-banner .go {
+  font-family: ui-monospace, monospace; font-size: .66rem; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--accent); white-space: nowrap;
+}
+@media (max-width: 700px) {
+  .tour-banner { grid-template-columns: 1fr auto; }
+  .tour-banner .k { grid-column: 1 / -1; }
+}

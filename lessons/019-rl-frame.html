@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>019 — The RL frame</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=2">
-<link rel="stylesheet" href="../assets/figures.css?v=3">
+<link rel="stylesheet" href="../assets/lesson.css?v=3">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can formalize a task as (S, A, P, R, γ) and compute a return.">
@@ -102,12 +102,10 @@
 
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 2 · about 3 minutes each</p>
-  <h3 class="lab-title">Take this apart, one symbol at a time</h3>
-  <p class="lab-sub">Each lab isolates one symbol and gives you a figure you can drag. They use the same numbers as the lesson, so you can carry the result back here.</p>
-  <ul class="lab-list">
-    <li><a href="019a-gamma.html"><span class="lab-num">019a</span><span class="lab-body"><strong>γ — the price of waiting</strong></span><span class="lab-go">Open lab →</span></a></li>
-    <li><a href="019b-horizon.html"><span class="lab-num">019b</span><span class="lab-body"><strong>1/(1−γ) — how far the agent looks</strong></span><span class="lab-go">Open lab →</span></a></li>
-  </ul>
+  <div class="lab-grid">
+    <a href="019a-gamma.html"><span class="n">19a</span><span class="t">γ</span></a>
+    <a href="019b-horizon.html"><span class="n">19b</span><span class="t">1/(1−γ)</span></a>
+  </div>
 </aside>
 
 <h2>Worked example</h2>
@@ -213,6 +211,6 @@ print(&quot;effective horizon 1/(1-gamma):&quot;, [round(1/(1-g), 1) for g in (0
 <p class="source">Primary source: Sutton &amp; Barto, <a href="http://incompleteideas.net/book/the-book-2nd.html">Reinforcement Learning: An Introduction</a>, ch. 3.</p>
 
 </main>
-  <script src="../assets/course.js?v=11" defer></script>
+  <script src="../assets/course.js?v=12" defer></script>
 </body>
 </html>
