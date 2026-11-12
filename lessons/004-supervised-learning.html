@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>004 — Supervised learning</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=4">
+<link rel="stylesheet" href="../assets/lesson.css?v=6">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -81,17 +81,19 @@
 <p>Why this part exists: the loss is the only definition of "better", so a mismatch optimises the wrong thing — squared error on a yes/no task rewards confident wrong answers while the gradient fades.</p>
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 9 · about 3 minutes each</p>
-  <div class="lab-grid">
-    <a href="004a-theta.html"><span class="n">04a</span><span class="t">θ</span></a>
-    <a href="004b-prediction.html"><span class="n">04b</span><span class="t">f_θ(xᵢ)</span></a>
-    <a href="004c-loss.html"><span class="n">04c</span><span class="t">L(·,·)</span></a>
-    <a href="004d-atom.html"><span class="n">04d</span><span class="t">L(f_θ(xᵢ), yᵢ)</span></a>
-    <a href="004e-sum.html"><span class="n">04e</span><span class="t">Σi</span></a>
-    <a href="004f-average.html"><span class="n">04f</span><span class="t">1/n</span></a>
-    <a href="004g-argmin.html"><span class="n">04g</span><span class="t">argmin vs min</span></a>
-    <a href="004h-optimal.html"><span class="n">04h</span><span class="t">θ*</span></a>
-    <a href="004i-objective.html"><span class="n">04i</span><span class="t">The whole objective</span></a>
-  </div>
+  <h3 class="lab-title">Take this formula apart, one symbol at a time</h3>
+  <p class="lab-sub">Each lab is 3 minutes, covers one symbol, and gives you a figure you can drag.</p>
+  <ul class="lab-list">
+    <li><a href="004a-theta.html"><span class="lab-num">04a</span><span class="lab-body"><strong>θ — the numbers that move</strong><span>Say which numbers training changes and which it can never touch.</span></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004b-prediction.html"><span class="lab-num">04b</span><span class="lab-body"><strong>f_θ(xᵢ) — one prediction</strong><span>Read the subscript correctly and turn one row into one number.</span></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004c-loss.html"><span class="lab-num">04c</span><span class="lab-body"><strong>L(·,·) — the price of being wrong</strong><span>Compute the squared error for one prediction, and say what the square buys you.</span></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004d-atom.html"><span class="lab-num">04d</span><span class="lab-body"><strong>L(f_θ(xᵢ), yᵢ) — the atom</strong><span>Turn one row into one loss, in two steps, without skipping the first.</span></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004e-sum.html"><span class="lab-num">04e</span><span class="lab-body"><strong>Σi — add the atoms</strong><span>Read the sum as a running total and explain why order is irrelevant.</span></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004f-average.html"><span class="lab-num">04f</span><span class="lab-body"><strong>1/n — turn a total into a rate</strong><span>Explain why dividing by n makes two datasets comparable.</span></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004g-argmin.html"><span class="lab-num">04g</span><span class="lab-body"><strong>argmin vs min</strong><span>Say which one returns a position, which returns a height, and why training needs the…</span></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004h-optimal.html"><span class="lab-num">04h</span><span class="lab-body"><strong>θ* — optimal for what?</strong><span>Say what θ* is relative to, and why it is not the true parameters.</span></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004i-objective.html"><span class="lab-num">04i</span><span class="lab-body"><strong>The whole objective</strong><span>Read the full expression left to right and say what training does to the landscape.</span></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
 </aside>
 
 
@@ -190,6 +192,6 @@ for y in (1, 0):</code></pre>
 <p class="source">Primary source: <a href="https://scikit-learn.org/stable/supervised_learning.html">scikit-learn — Supervised learning</a> (the taxonomy, with runnable examples).</p>
 
 </main>
-  <script src="../assets/course.js?v=12" defer></script>
+  <script src="../assets/course.js?v=13" defer></script>
 </body>
 </html>

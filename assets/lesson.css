@@ -534,3 +534,62 @@ pre code .tok-o { color: var(--ink-soft); }
   .tour-banner { grid-template-columns: 1fr; }
   .tour-banner .go { justify-self: start; }
 }
+
+/* ---------- responsive: phones and small tablets ---------- */
+a, code { overflow-wrap: anywhere; }
+img, svg { max-width: 100%; }
+
+@media (max-width: 760px) {
+  body { padding: 0 .85rem 5.5rem; font-size: 17px; }
+  .topline { flex-wrap: wrap; row-gap: .35rem; padding: .55rem 0; }
+  .topline .grow { display: none; }
+  h1 { font-size: clamp(1.5rem, 1.1rem + 3vw, 2rem); }
+  .masthead { margin-bottom: 1.6rem; }
+  h2 { margin-top: 2.2rem; }
+  table { display: block; overflow-x: auto; min-width: 0; -webkit-overflow-scrolling: touch; }
+  th, td { white-space: normal; }
+  pre { font-size: .8rem; padding: .8rem .85rem; }
+  .pager, .labnav { flex-direction: column; align-items: flex-start; gap: .45rem; }
+  .scorechip { right: .5rem; bottom: .5rem; padding: .35rem .6rem; font-size: .6rem; }
+  .scorechip .grade { display: none; }
+  .fig-controls label { flex: 1 1 100%; }
+  .fig-controls input[type="range"] { width: 100%; }
+  .lab-list a { grid-template-columns: 1.9rem 1fr; }
+  .lab-go { grid-column: 2; justify-self: start; margin-top: .15rem; }
+  .hero { grid-template-columns: 1fr; }
+  .ring { justify-self: start; }
+  .unit-head .bar { flex-basis: 100%; order: 3; }
+  .eqn { font-size: .78rem; }
+}
+
+@media (max-width: 430px) {
+  body { padding: 0 .7rem 5rem; font-size: 16.5px; }
+  .topline .pill { display: none; }
+  .topline a, .topline button { font-size: .58rem; padding: .25rem .45rem; }
+  .masthead h1 { font-size: 1.45rem; }
+  .scorechip { left: .5rem; right: auto; }
+  .lab-body strong { font-size: .84rem; }
+  .lab-body span { font-size: .74rem; }
+  .step, .pcard { padding: .65rem .7rem; }
+}
+
+/* phones: keep figure labels readable, stack controls */
+@media (max-width: 760px) {
+  .fig svg { cursor: zoom-in; }
+  .fig figcaption::before { content: "Tap the figure to zoom · "; color: var(--accent); }
+  .fig.zoomed {
+    position: fixed; inset: 0; z-index: 200; margin: 0; padding: .8rem;
+    background: var(--paper); overflow: auto; border-radius: 0;
+  }
+  .fig.zoomed svg { min-width: 720px; height: auto; cursor: zoom-out; }
+  .fig.zoomed figcaption { display: none; }
+  body.zoom-lock { overflow: hidden; }
+  .blockcheck { flex-direction: column; align-items: flex-start; gap: .35rem; }
+  .blockcheck .grow { flex: none; }
+  .grade-row { gap: .3rem; }
+  .grade-row .q { flex: 1 1 100%; }
+}
+@media print {
+  .fig { overflow: visible; }
+  .fig svg { min-width: 0; }
+}

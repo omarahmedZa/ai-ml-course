@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>014 — Architecture families</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=4">
+<link rel="stylesheet" href="../assets/lesson.css?v=6">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -98,9 +98,11 @@
 
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 1 · about 3 minutes each</p>
-  <div class="lab-grid">
-    <a href="014a-conv-params.html"><span class="n">14a</span><span class="t">k²·Cin·Cout</span></a>
-  </div>
+  <h3 class="lab-title">Take this formula apart, one symbol at a time</h3>
+  <p class="lab-sub">Each lab is 3 minutes, covers one symbol, and gives you a figure you can drag.</p>
+  <ul class="lab-list">
+    <li><a href="014a-conv-params.html"><span class="lab-num">14a</span><span class="lab-body"><strong>k²·Cin·Cout — where convolution parameters come from</strong><span>Count the weights in a convolution from its filter size and channel counts, and say why…</span></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
 </aside>
 
 <h2>Worked example</h2>
@@ -201,6 +203,6 @@ img = np.arange(16.).reshape(4, 4)</code></pre>
 <p class="source">Primary source: <a href="https://www.deeplearningbook.org">Deep Learning</a>, ch. 9 (convolutional networks) and ch. 10 (sequence modelling).</p>
 
 </main>
-  <script src="../assets/course.js?v=12" defer></script>
+  <script src="../assets/course.js?v=13" defer></script>
 </body>
 </html>

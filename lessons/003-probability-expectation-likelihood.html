@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>003 — Probability, expectation, likelihood</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=4">
+<link rel="stylesheet" href="../assets/lesson.css?v=6">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -67,10 +67,12 @@
 
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 2 · about 3 minutes each</p>
-  <div class="lab-grid">
-    <a href="003a-surprise.html"><span class="n">03a</span><span class="t">−log p</span></a>
-    <a href="003b-nll.html"><span class="n">03b</span><span class="t">Σ</span></a>
-  </div>
+  <h3 class="lab-title">Take this formula apart, one symbol at a time</h3>
+  <p class="lab-sub">Each lab is 3 minutes, covers one symbol, and gives you a figure you can drag.</p>
+  <ul class="lab-list">
+    <li><a href="003a-surprise.html"><span class="lab-num">03a</span><span class="lab-body"><strong>−log p — the price of surprise</strong><span>Turn a probability into a loss and say why a confident miss costs so much more than a…</span></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="003b-nll.html"><span class="lab-num">03b</span><span class="lab-body"><strong>Σ — summing surprise over the data</strong><span>Total the per-row surprises, then divide by the row count so two datasets can be compared.</span></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
 </aside>
 
 <h2>Worked example</h2>
@@ -170,6 +172,6 @@ print(&quot;softmax:&quot;, probs.round(3))</code></pre>
 
 </main>
   <script src="../assets/graph.js?v=4" defer></script>
-  <script src="../assets/course.js?v=12" defer></script>
+  <script src="../assets/course.js?v=13" defer></script>
 </body>
 </html>

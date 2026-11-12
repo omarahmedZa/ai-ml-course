@@ -681,8 +681,25 @@
     });
   }
 
+
+  function initFigureZoom() {
+    [].forEach.call(document.querySelectorAll(".fig svg"), function (svg) {
+      svg.addEventListener("click", function () {
+        var fig = svg.closest(".fig");
+        var on = fig.classList.toggle("zoomed");
+        document.body.classList.toggle("zoom-lock", on);
+      });
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      var z = document.querySelector(".fig.zoomed");
+      if (z) { z.classList.remove("zoomed"); document.body.classList.remove("zoom-lock"); }
+    });
+  }
+
   /* ---------- boot ---------- */
   highlightCode();
+  initFigureZoom();
   var page = document.body.getAttribute("data-page");
   if (page === "index") initIndex();
   else if (page === "lab") initLab();

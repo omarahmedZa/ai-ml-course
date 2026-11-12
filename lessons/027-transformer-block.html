@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>027 — The Transformer block</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=4">
+<link rel="stylesheet" href="../assets/lesson.css?v=6">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -113,9 +113,11 @@
 
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 1 · about 3 minutes each</p>
-  <div class="lab-grid">
-    <a href="027a-residual.html"><span class="n">27a</span><span class="t">x + MHA(LN(x))</span></a>
-  </div>
+  <h3 class="lab-title">Take this formula apart, one symbol at a time</h3>
+  <p class="lab-sub">Each lab is 3 minutes, covers one symbol, and gives you a figure you can drag.</p>
+  <ul class="lab-list">
+    <li><a href="027a-residual.html"><span class="lab-num">27a</span><span class="lab-body"><strong>x + MHA(LN(x)) — the residual path</strong><span>Read the line left to right, say what the addition preserves, and explain why the identity…</span></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
 </aside>
 
 <h2>Worked example</h2>
@@ -222,6 +224,6 @@ rng = np.random.default_rng(0)</code></pre>
 <p class="source">Primary source: Vaswani et al., <a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a> (2017), §3.</p>
 
 </main>
-  <script src="../assets/course.js?v=12" defer></script>
+  <script src="../assets/course.js?v=13" defer></script>
 </body>
 </html>

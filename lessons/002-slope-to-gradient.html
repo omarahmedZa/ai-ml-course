@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>002 — Slope to gradient</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=4">
+<link rel="stylesheet" href="../assets/lesson.css?v=6">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -72,10 +72,12 @@
 
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 2 · about 3 minutes each</p>
-  <div class="lab-grid">
-    <a href="002a-eta.html"><span class="n">02a</span><span class="t">η</span></a>
-    <a href="002b-update.html"><span class="n">02b</span><span class="t">Why the update subtracts</span></a>
-  </div>
+  <h3 class="lab-title">Take this formula apart, one symbol at a time</h3>
+  <p class="lab-sub">Each lab is 3 minutes, covers one symbol, and gives you a figure you can drag.</p>
+  <ul class="lab-list">
+    <li><a href="002a-eta.html"><span class="lab-num">02a</span><span class="lab-body"><strong>η — how far one step goes</strong><span>Say what η controls, and tell a step that is too small from one that is too large.</span></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="002b-update.html"><span class="lab-num">02b</span><span class="lab-body"><strong>Why the update subtracts</strong><span>Explain why w ← w − η∇f walks downhill, and why a minus sign does not mean the weights…</span></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
 </aside>
 
 <h2>Worked example</h2>
@@ -180,6 +182,6 @@ for step in range(4):
 
 </main>
   <script src="../assets/graph.js?v=4" defer></script>
-  <script src="../assets/course.js?v=12" defer></script>
+  <script src="../assets/course.js?v=13" defer></script>
 </body>
 </html>
