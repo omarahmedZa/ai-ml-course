@@ -24,55 +24,90 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">These are the baselines every project must beat before deep learning is justified, and logistic regression is literally the last layer of every classifier in Unit 7. Same dot product, one extra function.</p>
+<p class="lede">These are the baselines every project must beat before deep learning is justified, and logistic regression is literally the last layer of every classifier in Unit 7. Same dot product, one extra function. A linear model predicts a quantity — tomorrow's demand, a house price, a dose. A logistic model predicts a probability — will this customer default, is this scan abnormal — and thresholds it into yes or no. Between them they cover most tabular problems you will meet, and a stack of fifty neural layers still ends in <code>σ(w·x + b)</code>.</p>
+<p><strong>The failure it prevents.</strong> An exam question gives <code>w = [1, −2]</code>, <code>b = 1</code> and asks where the boundary sits and which side is class 1. Students who read the output as a score draw the line correctly and then label both sides backwards, because the boundary is <code>z = 0</code>, not <code>p = 0</code>. In a project the same confusion ships a classifier reporting 97% accuracy on data with 3% positives — it answers "no" to every row and the metric never notices.</p>
 
 <h2>The one core idea</h2>
-<p>A linear model computes <em>one</em> weighted sum. The <strong>link function</strong> decides whether that sum is a prediction (regression) or a probability (classification).</p>
+<p>Both models are a single weighted sum, <code>w·x + b</code>. What changes is the last step: linear regression hands that sum out unchanged, while logistic regression pushes it through a squashing function so it lands between 0 and 1. Same engine, different gauge on the dashboard — and the gauge decides what the number is allowed to mean.</p>
+<p>In one line: <strong>one weighted sum, then a link function that says whether it is a quantity or a probability.</strong> With <code>w = [1, −1]</code>, <code>b = 0</code> and <code>x = [2, 0.5]</code>, the score is 2 − 0.5 = 1.5; read raw that is 1.5 units, read through the sigmoid it is a probability of 0.818.</p>
 
 <h2>How it actually works</h2>
-<table>
-  <tr><th></th><th>Linear regression</th><th>Logistic regression</th></tr>
-  <tr><td>Score</td><td class="num">z = w·x + b</td><td class="num">z = w·x + b</td></tr>
-  <tr><td>Output</td><td class="num">ŷ = z (any real)</td><td class="num">p = σ(z) ∈ (0,1)</td></tr>
-  <tr><td>Loss</td><td class="num">squared error</td><td class="num">binary cross-entropy</td></tr>
-  <tr><td>Solved by</td><td class="num">closed form or GD</td><td class="num">gradient descent</td></tr>
-</table>
+<p>Six parts, from the sum itself to the algorithm that finds its weights.</p>
 
-<span class="formula">σ(z) = 1 / (1 + e⁻ᶻ)     boundary:  w·x + b = 0</span>
+<h3>Part 1 — One weighted sum is the whole model</h3>
+<p><code>z = w·x + b</code>, with one weight per feature and one bias. A 2-feature classifier stores exactly 3 numbers, and every prediction is arithmetic on those 3. Interpretability comes free: a weight of 2 means one more unit of that feature adds 2 to the score.</p>
+<p>Why this part exists: without the bias, every boundary is forced through the origin, so a model could not express a dividing line sitting at <code>x₂ = 0.5x₁ + 0.5</code>.</p>
 
-<ul>
-  <li><code>z</code> is the <strong>logit</strong> = log-odds: <code>z = ln(p / (1−p))</code>. The model is linear in log-odds, not in probability.</li>
-  <li>Predict class 1 when <code>p &gt; 0.5</code>, i.e. when <code>z &gt; 0</code>. So the decision boundary is the hyperplane <code>w·x + b = 0</code> — always straight, no matter how confident the probabilities get.</li>
-  <li><code>w</code> is the boundary's normal vector; <code>b</code> shifts it. Doubling <code>‖w‖</code> does not move the boundary — it only makes probabilities more extreme.</li>
-</ul>
+<h3>Part 2 — The link decides what the score means</h3>
+<p>Linear regression uses the identity link, so <code>ŷ = z</code> and any real value is allowed. Logistic regression uses the sigmoid <code>σ(z) = 1/(1 + e⁻ᶻ)</code>, which maps the whole real line into (0, 1) and equals 0.5 at <code>z = 0</code>. Choosing the link is choosing whether the output is a quantity or a probability.</p>
+<p>Why this part exists: an identity link on a probability task returns values like −0.4 or 1.7, which no likelihood can score and no threshold can interpret.</p>
+
+<h3>Part 3 — The score is log-odds, not probability</h3>
+<p>Solving the sigmoid for <code>z</code> gives <code>z = ln(p/(1−p))</code>, the <strong>log-odds</strong>. A probability of 0.8 means odds of 4:1, so <code>z = ln 4 = 1.386</code>. The model is therefore linear in log-odds, and equal steps in <code>z</code> multiply the odds by the same factor — the arithmetic of evidence that accumulates additively.</p>
+<p>Why this part exists: treating <code>z</code> as a probability puts the boundary at 0.5 instead of 0 and makes every later geometric statement wrong.</p>
+
+<h3>Part 4 — The boundary is where the score is zero</h3>
+<p>Predict class 1 when <code>p &gt; 0.5</code>, which happens exactly when <code>z &gt; 0</code>. So the decision boundary is <code>w·x + b = 0</code>, a hyperplane — the flat surface a straight boundary makes — whose normal vector is <code>w</code>, and it stays straight however confident the probabilities become. Distance from the plane sets confidence; it never changes the label.</p>
+<p>Why this part exists: half the marks in this topic live here, and scaling <code>w</code> by 10 leaves the boundary fixed while pushing probabilities to the extremes.</p>
+
+<h3>Part 5 — Match the loss to the output type</h3>
+<p>Squared error is right for a quantity and wrong for a probability. Binary cross-entropy, <code>−[y ln p + (1−y) ln(1−p)]</code>, is the likelihood from topic 3, and its gradient with respect to the score is simply <code>(p − y)</code> — large when the model is wrong, zero when it is right.</p>
+<p>Why this part exists: put a sigmoid in front of squared error and the gradient fades exactly when the prediction is most wrong, so training stalls at whatever random weights it started from.</p>
+
+<h3>Part 6 — Solve, knowing there is one valley</h3>
+<p>Linear regression has a closed form, <code>θ = (XᵀX)⁻¹Xᵀy</code>. Logistic regression has none, because the sigmoid makes the equations non-linear, so gradient descent updates <code>w ← w − η(p − y)x</code>. Both objectives are convex, so each has a single minimum.</p>
+<p>Why this part exists: knowing the surface has one valley tells you a stalled loss is a learning-rate bug, not a second valley worth exploring.</p>
 
 <h2>Worked example</h2>
 
-<h3>1. One point, one probability</h3>
-<p><code>w = [1, −1]</code>, <code>b = 0</code>, <code>x = [2, 0.5]</code>:</p>
+<h3>1. One point through the sigmoid</h3>
+<p><code>w = [1, −1]</code>, <code>b = 0</code>, <code>x = [2, 0.5]</code>. Work the score first, then the squash.</p>
 
 <table>
-  <tr><th>Step</th><th class="num">Value</th></tr>
-  <tr><td>z</td><td class="num">2 − 0.5 = 1.5</td></tr>
-  <tr><td>p = σ(1.5)</td><td class="num">1 / (1 + e⁻¹·⁵) = 0.818</td></tr>
-  <tr><td>Class</td><td class="num">1 (since z &gt; 0)</td></tr>
+  <tr><th>Step</th><th>Arithmetic</th><th class="num">Value</th></tr>
+  <tr><td>Score z</td><td class="num">1(2) + (−1)(0.5) + 0 = 2 − 0.5</td><td class="num">1.5</td></tr>
+  <tr><td>Squash term</td><td class="num">e<sup>−1.5</sup></td><td class="num">0.223</td></tr>
+  <tr><td>Probability</td><td class="num">1 / (1 + 0.223)</td><td class="num">0.818</td></tr>
+  <tr><td>Class</td><td class="num">z = 1.5 &gt; 0</td><td class="num">1</td></tr>
 </table>
 
-<p>The distance from the boundary controls confidence: <code>z = 0 → p = 0.5</code>; <code>z = 4 → p = 0.982</code>. Points far from the line are not "more correct" — only more confidently classified.</p>
+<table>
+  <tr><th class="num">z</th><th class="num">−4</th><th class="num">0</th><th class="num">1.5</th><th class="num">4</th></tr>
+  <tr><td>p = σ(z)</td><td class="num">0.018</td><td class="num">0.500</td><td class="num">0.818</td><td class="num">0.982</td></tr>
+</table>
 
-<h3>2. Where the boundary sits</h3>
-<p>With two features and <code>w = [1, −2]</code>, <code>b = 1</code>, the boundary is <code>x₁ − 2x₂ + 1 = 0</code>, i.e. <code>x₂ = 0.5x₁ + 0.5</code> — a line with slope 0.5. Everything above it is class 0; below, class 1. If the true boundary is curved, no choice of <code>w</code> will fix it: that is where hidden layers enter (Unit 2).</p>
+<p><strong>What to notice.</strong> The score is unbounded and the probability is not. At <code>z = 4</code> the model is 0.982 sure, and doubling the score again would only move it to 0.9997 — confidence saturates even though evidence keeps growing. The label flips only at the single point <code>z = 0</code>, so a probability of 0.49 and 0.02 give the same answer at different volumes.</p>
+
+<h3>2. Where the boundary sits, and which side is which</h3>
+<p>Two features, <code>w = [1, −2]</code>, <code>b = 1</code>. The boundary solves <code>x₁ − 2x₂ + 1 = 0</code>, which rearranges to <code>x₂ = 0.5x₁ + 0.5</code> — a line of slope 0.5 and intercept 0.5.</p>
+
+<table>
+  <tr><th>Point</th><th>Arithmetic x₁ − 2x₂ + 1</th><th class="num">z</th><th>p = σ(z)</th><th class="num">Class</th></tr>
+  <tr><td>(0, 0)</td><td class="num">0 − 0 + 1</td><td class="num">1</td><td class="num">0.731</td><td class="num">1</td></tr>
+  <tr><td>(1, 1)</td><td class="num">1 − 2 + 1</td><td class="num">0</td><td class="num">0.500</td><td class="num">tie</td></tr>
+  <tr><td>(0, 2)</td><td class="num">0 − 4 + 1</td><td class="num">−3</td><td class="num">0.047</td><td class="num">0</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Points above the line have <code>x₂</code> too large for the equation to stay positive, so they score below zero and land in class 0; points below the line land in class 1. (1, 1) sits exactly on the boundary and gets 0.500 — a tie, not a confident answer. If the true boundary were curved, no setting of <code>w</code> could fix it, which is precisely what hidden layers buy you in Unit 2.</p>
+
+<h3>3. Why accuracy lies on skewed data</h3>
+<p>200 test rows, 6 of them positive — a 3% positive rate. Two predictors are compared, and every count is shown.</p>
+
+<table>
+  <tr><th>Predictor</th><th>Positives found</th><th class="num">Correct</th><th class="num">Accuracy</th></tr>
+  <tr><td>Always "no"</td><td>0 of 6</td><td class="num">194 / 200</td><td class="num">97.0%</td></tr>
+  <tr><td>Model A</td><td>5 of 6</td><td class="num">190 / 200</td><td class="num">95.0%</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The useless predictor wins on accuracy, 97.0% against 95.0%, while missing every case anyone cares about. Model A costs 9 false positives to catch 5 true positives, and accuracy is blind to that trade. Report precision and recall against the trivial baseline; otherwise the metric rewards the model that does nothing.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"Use squared error, it worked for regression."</strong> For classification it is a bad objective: the sigmoid saturates, the gradient vanishes exactly when the model is most wrong, and the loss is non-convex in <code>w</code>. Cross-entropy is the correct likelihood (topic 3) and has a clean gradient, <code>(p − y)x</code>.</p>
-  <p><strong>Second trap:</strong> judging it by accuracy on imbalanced data. 99% accuracy on 1% positives is achieved by predicting "no" forever. Use precision, recall, or AUC — and always compare to that trivial baseline.</p>
+  <p><strong>"Use squared error — it worked for regression."</strong> It feels right because it is the loss you already know, it does decrease at first, and every library offers it, so nothing raises an error. But with a sigmoid in front, squared error is non-convex and its gradient shrinks to almost nothing exactly where the prediction is most wrong: the model sits at 0.49 for a clear positive and barely moves.</p>
+  <p><strong>Correction:</strong> the output type picks the loss. A quantity wants squared error; a probability wants binary cross-entropy, which is the negative log-likelihood and whose gradient stays large under exactly the mistakes you care about. Underneath sits a second, quieter assumption — that accuracy is a fair score — and on imbalanced data it is not.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Both models compute the same weighted sum, z = w·x + b.", "Linear regression reports z directly; logistic squashes it into 0..1 with σ.", "Above 0.5 means class 1, so the boundary is exactly z = 0 — a straight line.", "Train by minimising cross-entropy; its gradient is simply (p − y)x.", "If the true boundary curves, no w can fix it — that is what hidden layers are for."]</script></div>
+<p><strong>The tell:</strong> a loss curve that is flat from the first epoch while accuracy sits at the majority-class rate, or predicted probabilities bunched near 0.5 with no confident values anywhere. The other tell is a reported accuracy that exactly equals the fraction of the majority class, to the decimal — always compare against that number before celebrating.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

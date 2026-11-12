@@ -24,56 +24,92 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Four methods produce four different "explanations" of the same prediction. Knowing the definition behind each is the difference between citing an attribution and being fooled by one.</p>
+<p class="lede">Four attribution methods look at one prediction and return four different lists of important features. All four are defensible, and they disagree. Knowing the definition behind each is the difference between citing an attribution and being fooled by one, because the number on the chart is only as good as the procedure that produced it.</p>
+<p>A credit team shipped LIME explanations with a fixed seed. Auditing six months later with the library's default seed, the top feature moved from "missed payments" to "account age" for the same applicant and the same model. Nothing about the decision had changed; the random sample under the explainer had. That is the failure this topic prevents: four definitions of "important", and only one that must add up to the prediction.</p>
 
 <h2>The one core idea</h2>
-<p>Every attribution method apportions the output among input features — but they differ in <strong>what count as evidence</strong>: a local gradient, a local surrogate, or an average over all feature orderings.</p>
+<p>Every attribution method apportions one output among the inputs. They differ in <strong>what counts as evidence</strong>: the slope right here, the average slope along a path from a neutral input, the weights of a simple model fitted nearby, or the average gain from adding a feature to a coalition. Same question in English, four different mathematical answers.</p>
+<p>In one line: <strong>saliency asks about a nudge, integrated gradients about a journey, LIME about a neighbourhood, and Shapley about a coalition.</strong> With two features where <code>v({1}) = 0.6</code>, <code>v({2}) = 0.4</code> and <code>v({1,2}) = 1.0</code>, Shapley returns <code>0.6</code> and <code>0.4</code> — and they sum to exactly <code>1.0</code>, the whole output.</p>
 
 <h2>How it actually works</h2>
-<table>
-  <tr><th>Method</th><th>Computes</th><th>Cost</th><th>Weakness</th></tr>
-  <tr><td><strong>Saliency</strong></td><td><code>∂f/∂xᵢ</code> at the input</td><td class="num">1 backward pass</td><td>Saturates; noisy; not class-complete</td></tr>
-  <tr><td><strong>Integrated gradients</strong></td><td>Path integral of gradients from a baseline to <code>x</code></td><td class="num">20–300 passes</td><td>Baseline choice changes the answer</td></tr>
-  <tr><td><strong>LIME</strong></td><td>Fit a sparse linear model to perturbations near <code>x</code></td><td class="num">Hundreds of queries</td><td>Unstable; sampling near a point is ill-defined</td></tr>
-  <tr><td><strong>SHAP</strong></td><td>Shapley values: average marginal contribution over all feature subsets</td><td class="num">Exponential exact; sampled in practice</td><td>Assumes feature independence unless corrected</td></tr>
-</table>
+<p>Seven parts, from one number to four procedures.</p>
 
-<ul>
-  <li><strong>Saliency answers</strong>: "if I nudge this pixel, how fast does the score move?" It is local and instantaneous — flat regions (saturated ReLU, sigmoid) report zero importance even when the feature matters.</li>
-  <li><strong>Integrated gradients</strong> fixes saturation by averaging gradients along a straight line from a neutral baseline. Completeness holds: attributions sum to <code>f(x) − f(baseline)</code>.</li>
-  <li><strong>LIME</strong> is model-agnostic: perturb, query, fit a simple surrogate. The surrogate explains the <em>surrogate</em>, not the model — and different random seeds give different answers.</li>
-  <li><strong>Shapley</strong> is the unique attribution satisfying efficiency, symmetry, dummy and additivity. Those axioms are why SHAP is the default in regulated settings.</li>
-</ul>
+<h3>Part 1 — Credit is a gap, so it needs a zero point</h3>
+<p>A feature's credit is the output with the feature minus the output without it. With no zero point there is no gap to measure. In the Shapley example below, feature 1 earns <code>0.6</code> only because <code>v({1}) = 0.6</code> is read against <code>v(∅) = 0</code>.</p>
+<p><strong>Why this part exists:</strong> shift the zero point and every number shifts; two teams can compare charts that answer different questions.</p>
 
+<h3>Part 2 — Saliency reads the slope at one point</h3>
+<p><strong>Saliency</strong> is <code>∂f/∂xᵢ</code> at the input: how fast the score moves if you nudge feature <em>i</em> by a hair. It costs one backward pass, which is why it is the default in vision pipelines. It describes the tangent, never the feature's necessity.</p>
+<p><strong>Why this part exists:</strong> it is the cheapest attribution there is; one backward pass is sometimes all a live system can afford.</p>
+
+<h3>Part 3 — Saturation makes that slope lie</h3>
+<p>A ReLU or sigmoid can be flat exactly where the input sits, so the gradient reads 0 while the feature still drives the output. A sigmoid's derivative at input 5 is <code>0.0066</code>, about 1/38 of its value at 0, which is <code>0.25</code>. The map looks confident and is blind in that region.</p>
+<p><strong>Why this part exists:</strong> without this, you read a blank patch as "irrelevant" when it only means "saturated".</p>
+
+<h3>Part 4 — Integrated gradients averages the slope along a path</h3>
+<p><strong>Integrated gradients</strong> walks a straight line from a baseline input <code>x′</code> to the real input <code>x</code>, averages the gradient along that line, and multiplies by the distance travelled. It costs 20–300 passes instead of one. <strong>Completeness</strong> holds by construction: the attributions sum exactly to <code>f(x) − f(x′)</code>.</p>
+<p><strong>Why this part exists:</strong> averaging repairs saturation, and completeness gives an auditor an identity to check — the parts must add up to the whole.</p>
+
+<h3>Part 5 — LIME fits a straight line to a neighbourhood</h3>
+<p><strong>LIME</strong> perturbs the input hundreds of times, queries the black box on each perturbed copy, and fits a sparse linear model weighted by distance from the original. Those coefficients are the explanation. The linear model describes the neighbourhood it was fitted in, not the model.</p>
+<p><strong>Why this part exists:</strong> it needs no gradients and no internals, so it works on any model behind an API — often the only option for a vendor system.</p>
+
+<h3>Part 6 — Shapley averages marginal gains over orderings</h3>
+<p>Treat features as players in a coalition. Add them in some order, recording what each one added when it joined; average that gain over every possible order. Two features give 2 orderings, ten give <code>10! = 3,628,800</code>. That average is the Shapley value.</p>
 <span class="formula">φᵢ = Σ_{S ⊆ F\{i}}  |S|!(|F|−|S|−1)! / |F|!  · [ v(S ∪ {i}) − v(S) ]</span>
+<p><strong>Why this part exists:</strong> order matters — a duplicate adds nothing when it joins second — so averaging is the only way to give each feature one fair number.</p>
+
+<h3>Part 7 — The axioms decide what you may cite</h3>
+<p>Shapley is the unique attribution satisfying four properties: efficiency (the parts sum to the whole), symmetry (identical players get equal credit), dummy (useless players get zero) and additivity. Those four make SHAP the default in regulated work; exact computation is exponential without sampling.</p>
+<p><strong>Why this part exists:</strong> in a challenge, "this is the only method satisfying the properties we promised" ends the argument; "it looked sensible" does not.</p>
 
 <h2>Worked example</h2>
 
 <h3>1. Shapley by hand, two features</h3>
-<p><code>v(∅) = 0</code>, <code>v({1}) = 0.6</code>, <code>v({2}) = 0.4</code>, <code>v({1,2}) = 1.0</code>.</p>
+<p><code>v(∅) = 0</code>, <code>v({1}) = 0.6</code>, <code>v({2}) = 0.4</code>, <code>v({1,2}) = 1.0</code>. Two features mean two orderings, each weighted <code>1/2</code>.</p>
 
 <table>
-  <tr><th>Feature</th><th>Order 1→2</th><th>Order 2→1</th><th class="num">Average φ</th></tr>
+  <tr><th>Feature</th><th>Order 1 → 2</th><th>Order 2 → 1</th><th class="num">Average φ</th></tr>
   <tr><td>1</td><td class="num">0.6 − 0 = 0.6</td><td class="num">1.0 − 0.4 = 0.6</td><td class="num">0.6</td></tr>
   <tr><td>2</td><td class="num">1.0 − 0.6 = 0.4</td><td class="num">0.4 − 0 = 0.4</td><td class="num">0.4</td></tr>
 </table>
 
-<p>They sum to 1.0, the full output. That efficiency property is what makes SHAP auditable: the parts add up to the whole.</p>
+<p><strong>What to notice.</strong> The two columns agree because this game happens to be additive: <code>0.6 + 0.4 = 1.0</code>. Change one value to <code>v({1,2}) = 0.9</code> and they stop agreeing — feature 1 gets <code>(0.6 + 0.5)/2 = 0.55</code> and feature 2 gets <code>(0.3 + 0.4)/2 = 0.35</code>. The sum is still <code>0.9</code>, which is efficiency doing its job: the parts equal <code>f(x) − f(∅)</code>.</p>
 
-<h3>2. When saliency lies</h3>
-<p>A pixel has gradient 0 because the ReLU is off, yet removing it changes the prediction. The gradient is a local slope, not a measure of necessity. Integrated gradients or an occlusion test would catch it; raw saliency will not.</p>
+<h3>2. Saliency against integrated gradients</h3>
+<p>The smallest model that shows the difference is <code>f(x) = x²</code>, with baseline <code>x′ = 0</code> and input <code>x = 3</code>.</p>
+
+<table>
+  <tr><th>Method</th><th>Arithmetic</th><th class="num">Attribution</th></tr>
+  <tr><td>Saliency</td><td class="num">2x at x = 3</td><td class="num">6</td></tr>
+  <tr><td>Integrated gradients</td><td class="num">(3 − 0) × average of 6t for t in [0, 1] = 3 × 3</td><td class="num">9</td></tr>
+  <tr><td>True difference f(3) − f(0)</td><td class="num">9 − 0</td><td class="num"><strong>9</strong></td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The gradient is correct as a slope and wrong as an attribution: it reports <code>6</code> where the feature is worth <code>9</code>, an understatement of one third. Integrated gradients recovers the full gap because it averages the slope over the whole journey, including the flat region near zero. On a linear model the two coincide, which is why textbook examples hide this.</p>
+
+<h3>3. LIME under two seeds</h3>
+<p>One input, one model, one explainer, two random seeds. Coefficients as reported:</p>
+
+<table>
+  <tr><th>Feature</th><th class="num">Seed 0</th><th class="num">Seed 7</th></tr>
+  <tr><td>Missed payments</td><td class="num">0.42</td><td class="num">0.05</td></tr>
+  <tr><td>Account age</td><td class="num">0.11</td><td class="num">0.38</td></tr>
+  <tr><td>Income</td><td class="num">0.09</td><td class="num">0.12</td></tr>
+  <tr><td>Total of absolute weights</td><td class="num">0.62</td><td class="num">0.55</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The top feature flips, and the first feature's weight falls by a factor of <code>0.42 / 0.05 = 8.4</code>. Even the total changes, <code>0.62</code> to <code>0.55</code>, because a different surrogate was fitted. Run the explainer twice before publishing: if the ranking moves, it is sampling noise wearing a coefficient's confidence.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"SHAP values are causal."</strong> They are conditional expectations under the model's input distribution. Correlated features split credit arbitrarily — two identical columns each get half, and neither is "the cause".</p>
-  <p><strong>Second trap:</strong> treating LIME's stability as guaranteed. Re-run it with a different seed and the top feature can change. If an explanation is not stable, it is not evidence.</p>
+  <p><strong>"SHAP values are causal."</strong> It feels right because Shapley comes from cooperative game theory, where the players really do produce the payout together. But the "payout" here is a model's output, and the value function is a conditional expectation under the training distribution — never an intervention in the world.</p>
+  <p>Two perfectly correlated columns each get about half the credit, though a domain expert would name one driver. Both are redundant evidence; the arithmetic cannot tell them apart.</p>
+  <p><strong>Correction:</strong> read every attribution as "how much of this output this input explains, given the others as measured". If a correlated split is unacceptable, drop one column or use a conditional variant — but never turn a SHAP number into a claim about intervening in the world.</p>
+  <p><strong>Second trap:</strong> trusting LIME because it is model-agnostic. Agnostic buys coverage, not stability; seed 2 above is the counter-example.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Pick a baseline: what the model says with no information.", "Measure how far each feature moves the output from that baseline.", "Gradients give a local slope; integrated gradients average along a path.", "LIME fits a simple model nearby; SHAP averages marginal contributions over orderings.", "Check the parts add to the whole: that is completeness."]</script></div>
-
+<p><strong>The tell:</strong> a sentence with no zero point in it — "income is the most important feature" — or numbers that cannot be made to sum to anything. Ask which baseline the value is measured from, then re-run the explainer with a different seed and a slightly perturbed input. If the ranking survives both, you have evidence; if it moves, you have a screenshot.</p>
 <h2>Retrieval check</h2>
 <ol class="quiz">
   <li>Why does integrated gradients need a baseline, and what breaks if you choose a bad one?

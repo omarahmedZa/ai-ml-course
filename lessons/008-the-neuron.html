@@ -24,40 +24,92 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">If you cannot say why the ReLU is there, you cannot debug a network that refuses to learn. The entire expressive power of deep learning lives in that one non-linear function between layers.</p>
+<p class="lede">A neuron is the smallest trainable unit in every network here: one weighted sum, one bias, one bend. Embeddings, attention heads and output layers are stacks of it.</p>
+<p>Two failures make it worth an hour. In an exam, <em>"a 50-layer network with no activations — how much more can it represent than a single linear layer?"</em> has a one-line answer: nothing, because a product of matrices is a matrix. In a project, the same mistake shows up as a loss that drops to the level of logistic regression and sits there, because the ReLU was deleted during a cleanup. Neither symptom is visible unless you can point at the missing part.</p>
 
 <h2>The one core idea</h2>
-<p>A neuron computes <code>a = φ(w·x + b)</code>. The dot product decides <em>what it looks for</em>; <code>φ</code> is the only thing that stops the whole network from being one matrix.</p>
+<p>A neuron is a straight-line score with a gate on its output. The score says which side of a boundary the input falls on, and how far; the gate decides how much of that score survives into the next layer. Training changes only the score's weights — the gate is fixed and never learned.</p>
+<p>In one line: <strong>score first, then bend.</strong> With <code>w = [2, −3]</code> and <code>b = 1</code>, the input <code>[1, −1]</code> scores <code>2 + 3 + 1 = 6</code> and ReLU returns <code>6</code>; the input <code>[−2, 1]</code> scores <code>−4 − 3 + 1 = −6</code> and ReLU returns <code>0</code>.</p>
 
 <h2>How it actually works</h2>
-<ul>
-  <li><code>w·x + b</code> — a linear score, exactly topic 1. <code>b</code> shifts the threshold, so the neuron can fire at <code>x = 0</code> or not.</li>
-  <li><code>φ</code> — the <strong>activation</strong>, applied elementwise. Without it, a neuron is logistic regression.</li>
-  <li><strong>Why φ is mandatory</strong>: take two layers, <code>h = W₁x + b₁</code> then <code>y = W₂h + b₂</code>. Substitute: <code>y = (W₂W₁)x + (W₂b₁ + b₂)</code>. That is a single linear layer with weights <code>W₂W₁</code>. Any depth collapses.</li>
-  <li><strong>Common activations</strong>: ReLU <code>max(0, z)</code> — cheap, no saturation for positive inputs; sigmoid — probabilities, saturates; tanh — zero-centred, still saturates; GELU — smooth ReLU, standard in transformers.</li>
-</ul>
+
+<h3>Part 1 — The weighted sum is the score</h3>
+<p>A neuron holds a weight vector <code>w</code> and a bias <code>b</code>, and for one input <code>x</code> it computes <code>z = w·x + b</code>. That <code>z</code> is the <strong>pre-activation</strong>: the raw score before any bend, and exactly topic 1's dot product. For a 3-input neuron with <code>w = [2, −3, 0.5]</code> and <code>x = [1, 4, 2]</code>, the score is <code>2 − 12 + 1 = −9</code>.
+<strong>Why this part exists:</strong> it fixes what the neuron looks for before anything else touches the number, so a wrong sign here is a wrong model, not a rounding detail.</p>
+
+<h3>Part 2 — The bias decides when it fires</h3>
+<p>The bias is one number added after the dot product. It shifts the score without changing what the neuron looks for, which moves the boundary <code>w·x + b = 0</code> away from the origin. With <code>b = 0</code> and <code>w = [2, −3]</code>, inputs on <code>2x₁ − 3x₂ = 0</code> score zero; with <code>b = 1</code> those same inputs score <code>1</code> and switch on.
+<strong>Why this part exists:</strong> without it every boundary passes through the origin, so data centred elsewhere forces huge weights just to push the fence sideways.</p>
+
+<h3>Part 3 — Then bend the score</h3>
+<p>The <strong>activation</strong> <code>φ</code> is a fixed function applied to <code>z</code>, one number at a time. The default is ReLU, <code>φ(z) = max(0, z)</code>: negative scores become <code>0</code>, positive scores pass through unchanged. Being elementwise, it bends a layer's scores independently, with no mixing, so <code>z = [−1, 0, 3, 7]</code> becomes <code>a = [0, 0, 3, 7]</code>.
+<strong>Why this part exists:</strong> the bend is the only source of curvature in the network, and without curvature no amount of depth produces a new function.</p>
+
+<h3>Part 4 — Without the bend, depth is a lie</h3>
+<p>Take two layers, <code>h = W₁x + b₁</code> then <code>y = W₂h + b₂</code>, and substitute the first into the second: <code>y = W₂(W₁x + b₁) + b₂ = (W₂W₁)x + (W₂b₁ + b₂)</code>. That is one linear layer with weights <code>W₂W₁</code> and bias <code>W₂b₁ + b₂</code>. Stack fifty and you still have one matrix, plus parameters that buy nothing.
+<strong>Why this part exists:</strong> it is the proof that a nonlinearity is mandatory, and it is the first thing an examiner asks you to reproduce on paper.</p>
+
+<h3>Part 5 — Each activation trades something away</h3>
+<p>ReLU is cheap and never saturates on the positive side — its slope stays 1 — but it is flat below zero, so a unit stuck there learns nothing. Sigmoid, <code>1/(1 + e⁻ᶻ)</code>, squashes into <code>(0, 1)</code> and can be read as a probability, at the cost of saturation: at <code>z = 10</code> the output is <code>0.99995</code>. Tanh is a zero-centred sigmoid on <code>(−1, 1)</code>; GELU is a smooth ReLU and is the default inside transformers.
+<strong>Why this part exists:</strong> the choice sets the size of the gradient flowing back, so it decides whether learning is fast, glacial, or dead.</p>
+
+<h3>Part 6 — Count the parameters before you train</h3>
+<p>Each neuron owns one weight per input plus a single bias, so a layer with <code>n_in</code> inputs and <code>n_out</code> neurons has <code>n_in·n_out + n_out</code> parameters. A 2 → 2 → 1 network costs <code>(2·2 + 2) + (2·1 + 1) = 6 + 3 = 9</code>.
+<strong>Why this part exists:</strong> it gives the memory and data budget before the first run, and a mismatch with <code>sum(p.numel())</code> is the fastest way to find a layer wired to the wrong input.</p>
+
+<h3>Part 7 — A layer is one row per neuron</h3>
+<p>Stack <code>n_out</code> neurons that read the same input and you have a matrix whose rows are their weight vectors. The layer computes <code>Wx + b</code> with <code>W</code> of shape <code>n_out × n_in</code> and <code>b</code> of length <code>n_out</code>; each row is one neuron's question. The bend runs entry by entry, now on a vector.
+<strong>Why this part exists:</strong> the matrix view lets a GPU compute a thousand neurons at once, and it is the bridge to the next topic, where shapes take over.</p>
 
 <span class="formula">2 → 2 → 1 network:  (2·2 + 2) + (2·1 + 1) = 9 parameters</span>
 
 <h2>Worked example</h2>
 
-<h3>1. The collapse, with numbers</h3>
-<p><code>W₁ = [[1, 2], [3, 4]]</code>, <code>b₁ = 0</code>, <code>x = [1, 1]</code> → <code>h = [3, 7]</code>. Then <code>W₂ = [1, −1]</code>, <code>b₂ = 0</code> → <code>y = 3 − 7 = −4</code>.</p>
-<p>Now collapse: <code>W₂W₁ = [1·1 + (−1)·3, 1·2 + (−1)·4] = [−2, −2]</code>, and <code>[−2, −2]·[1, 1] = −4</code>. Identical. Two layers, one matrix, zero extra power.</p>
+<h3>1. One neuron, three inputs</h3>
+<p><code>w = [2, −3, 0.5]</code>, <code>b = 1</code>. Do each multiplication explicitly; sign errors survive when you skip them.</p>
 
-<h3>2. The same network with a ReLU</h3>
-<p><code>h = ReLU([3, 7]) = [3, 7]</code> — no change here, because both were positive. Try <code>x = [1, −1]</code>: <code>h = [1−2, 3−4] = [−1, −1] → ReLU → [0, 0]</code>. Output <code>0</code>, whereas the collapsed linear model would give <code>[−2,−2]·[1,−1] = 0</code>. Pick <code>x = [2, −1]</code> instead: linear gives <code>−2</code>; with ReLU, <code>h = [0, 2] → y = −2</code>. Coincidence again — but now change <code>W₂</code> to <code>[1, 1]</code>: linear gives <code>0</code>, ReLU gives <code>+2</code>. The bend has created a behaviour no single matrix can produce.</p>
+<table>
+  <tr><th>Input x</th><th>Term 1</th><th>Term 2</th><th>Term 3</th><th class="num">z, then ReLU</th></tr>
+  <tr><td>[1, 4, 2]</td><td class="num">2(1) = 2</td><td class="num">−3(4) = −12</td><td class="num">0.5(2) = 1</td><td class="num">−9 → <strong>0</strong></td></tr>
+  <tr><td>[1, −1, 2]</td><td class="num">2(1) = 2</td><td class="num">−3(−1) = 3</td><td class="num">0.5(2) = 1</td><td class="num">2+3+1 = 6, +1 bias → <strong>7</strong></td></tr>
+  <tr><td>[0, 0, 0]</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0+1 = 1 → <strong>1</strong></td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The neuron is not a yes/no gate. It outputs 0, 7 and 1, so the size carries confidence and the sign decides the side. The middle row changed only the second feature, from <code>4</code> to <code>−1</code>, and the score moved by <code>16</code> — a weight of <code>−3</code> reacts to a negative feature as strongly as to a positive one. The third row is the bias alone.</p>
+
+<h3>2. Two layers collapsing into one</h3>
+<p><code>W₁ = [[1, 2], [3, 4]]</code>, <code>b₁ = 0</code>, <code>x = [1, 1]</code>, then <code>W₂ = [1, −1]</code>, <code>b₂ = 0</code>. Compute the deep version and the collapsed version side by side.</p>
+
+<table>
+  <tr><th>Step</th><th>Arithmetic</th><th class="num">Result</th></tr>
+  <tr><td>h₁</td><td class="num">1(1) + 2(1)</td><td class="num">3</td></tr>
+  <tr><td>h₂</td><td class="num">3(1) + 4(1)</td><td class="num">7</td></tr>
+  <tr><td>y = W₂h</td><td class="num">1(3) + (−1)(7) = 3 − 7</td><td class="num"><strong>−4</strong></td></tr>
+  <tr><td>Collapsed row</td><td class="num">[1(1) + (−1)(3), 1(2) + (−1)(4)]</td><td class="num">[−2, −2]</td></tr>
+  <tr><td>Collapsed y</td><td class="num">(−2)(1) + (−2)(1)</td><td class="num"><strong>−4</strong></td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The two routes agree to the digit, and that is not luck: one is an algebraic rearrangement of the other. The second layer never sees anything the first did not already express as a linear function of <code>x</code>, so its weights only change the coefficient vector. Depth without a bend is an expensive way to write one matrix.</p>
+
+<h3>3. The same weights with a ReLU</h3>
+<p>Keep <code>W₁</code> and swap <code>W₂</code> to <code>[1, 1]</code>, so the collapsed linear map is <code>W₂W₁ = [4, 6]</code>. Compare the linear prediction <code>[4, 6]·x</code> with the ReLU network <code>[1, 1]·ReLU(W₁x)</code> on three inputs.</p>
+
+<table>
+  <tr><th>Input x</th><th>h = W₁x</th><th>ReLU(h)</th><th class="num">Linear: 4x₁+6x₂</th><th class="num">ReLU net</th></tr>
+  <tr><td>[1, 1]</td><td class="num">[3, 7]</td><td class="num">[3, 7]</td><td class="num">10</td><td class="num">10</td></tr>
+  <tr><td>[1, −1]</td><td class="num">[−1, −1]</td><td class="num">[0, 0]</td><td class="num">4 − 6 = −2</td><td class="num"><strong>0</strong></td></tr>
+  <tr><td>[2, −1]</td><td class="num">[0, 2]</td><td class="num">[0, 2]</td><td class="num">8 − 6 = 2</td><td class="num">2</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The ReLU network agrees with the straight line on two of the three inputs and breaks from it on the middle one. That disagreement is the whole gain: the function is now piecewise, flat on one region and sloped on another. No single matrix can produce <code>10</code>, <code>−2</code> and <code>2</code> at those inputs unless it is exactly <code>[4, 6]</code>, and <code>[4, 6]</code> gets the middle row wrong.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"A neuron is a simplified brain cell."</strong> It is a dot product and a clamp. The metaphor invites the wrong intuitions (that neurons "detect concepts") and none of the maths.</p>
-  <p><strong>Second trap:</strong> forgetting the bias. Removing <code>b</code> forces every neuron's boundary through the origin; on data not centred there, the network needs absurd weights to compensate. Always initialise and train biases.</p>
+  <p><strong>"A neuron is a simplified brain cell."</strong> It feels right because the diagram — inputs, a cell body, one output — is the textbook picture, and the word is identical.</p>
+  <p><strong>Correction:</strong> a neuron is <code>max(0, w·x + b)</code> and nothing else. There is no memory, no timing, no spiking. The inputs are a dot product, the "firing" is a clamp at zero, and training touches only weights and bias. Any biology intuition — that it detects a concept — has to be re-derived from that line or discarded.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["A neuron weights its inputs, adds a bias, and passes the sum through a bend.", "Without the bend, two layers compose into one matrix and depth buys nothing.", "With ReLU, negative sums become 0, so the network can switch regions on and off.", "The bias decides when the neuron fires, so x = 0 need not be special.", "Count parameters per layer as inputs × outputs + outputs."]</script></div>
+<p><strong>The tell:</strong> you can describe what a unit does but cannot write its four numbers — weights, input, bias, output — on one line. Debugging gives the second tell: a unit that outputs <code>0</code> for every example has all-negative pre-activations and a gradient of exactly zero forever. Check <code>z</code> first.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

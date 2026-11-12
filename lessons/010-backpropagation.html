@@ -24,50 +24,93 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Every "the model won't learn" bug is a gradient bug: wrong sign, vanished, exploded, or detached. Backprop is the one mechanism you must be able to inspect rather than trust.</p>
+<p class="lede">Every "the model won't learn" bug is a gradient bug: wrong sign, vanished, exploded, or detached from the graph. Backprop is the one mechanism you must be able to inspect rather than trust.</p>
+<p>An exam will ask you to differentiate a small graph by hand, and there is no way to bluff it: either the local slopes are multiplied in the right order or the number is wrong. In a project the same skill explains a frozen loss — a ReLU that zeroed its own gradient, a tensor cut out of the graph with <code>.detach()</code>, or a learning rate that turned a slope of <code>−12</code> into a jump past the minimum. All three look identical from outside: the curve is flat.</p>
 
 <h2>The one core idea</h2>
-<p>Backprop is the <strong>chain rule applied right-to-left</strong> over the computation graph: each node passes its local derivative back to its inputs, multiplied by the derivative flowing in from the loss.</p>
+<p>Blame flows backwards through the graph. Each operation knows its own local slope — how much its output moves when its input moves by one — and the loss hands back a single number. A node multiplies what it received by its own slope and passes the product to its inputs.</p>
+<p>In one line: <strong>upstream times local, added at every fork.</strong> For <code>L = (3w)²</code> at <code>w = 2</code>, the outside slope is <code>2(6) = 12</code>, the inside slope is <code>3</code>, and the product is <code>36</code>.</p>
 
 <h2>How it actually works</h2>
-<ul>
-  <li><strong>Graph</strong>: every operation (add, multiply, ReLU, matmul) is a node. The forward pass stores the values it needs.</li>
-  <li><strong>Upstream gradient</strong> <code>∂L/∂out</code> arrives at a node. The node multiplies it by its <strong>local derivative</strong> <code>∂out/∂in</code> and passes the product down.</li>
-  <li><strong>Fan-out adds</strong>: if a value feeds two paths, the gradients from both are summed. This is why "gradient accumulation" works.</li>
-  <li><strong>One sweep suffices</strong>: reverse-mode automatic differentiation costs roughly one extra forward pass, regardless of how many parameters there are. Numerical gradients would cost one pass <em>per</em> parameter.</li>
-</ul>
 
-<span class="formula">∂L/∂w = ∂L/∂out · ∂out/∂z · ∂z/∂w</span>
+<h3>Part 1 — Write the graph, not the formula</h3>
+<p>Every operation becomes a node: a multiply, an add, a ReLU, a matrix product, the loss. Values flow forward along the edges, and <code>L = (wx + b − y)²</code> is four nodes — multiply, add, subtract, square. Reading the same expression as a graph is what removes the ambiguity of "which derivative first".
+<strong>Why this part exists:</strong> each node then has exactly one place to send its result, so the backward order stops being a judgement call.</p>
+
+<h3>Part 2 — Forward caches what backward needs</h3>
+<p>While computing forward, each node stores its inputs and its output: the multiply node keeps <code>x</code>, the subtract node keeps <code>z − y</code>. Nothing is recomputed on the way back. The stored <code>x = 2</code> is the whole reason the gradient for <code>w</code> costs one multiplication.
+<strong>Why this part exists:</strong> without the cache, backward would redo a forward pass at every node, and training would cost depth-squared.</p>
+
+<h3>Part 3 — Seed the sweep with 1</h3>
+<p>Start at the loss and set <code>∂L/∂L = 1</code>, because the loss changes one-for-one with itself. This is the only number supplied by hand; everything after it is multiplication by local slopes. <strong>Why this part exists:</strong> without a seed the chain has no starting quantity, and every gradient downstream would be zero times something.</p>
+
+<h3>Part 4 — Multiply by the local derivative</h3>
+<p>Each node applies one rule: <code>u²</code> gives <code>2u</code>, an add passes the gradient through unchanged, a multiply by a constant scales it, ReLU passes it only where <code>z &gt; 0</code>. Walking back from <code>L</code> to <code>w</code> in the example above accumulates <code>2(z − y)·x</code>. <strong>Why this part exists:</strong> this is the chain rule, the only way a slope measured at the loss becomes a slope at a weight nine operations away.</p>
+
+<h3>Part 5 — Forks add their contributions</h3>
+<p>When one value feeds two branches, both send a gradient back and the node sums them. A value reached by two paths has a total derivative equal to the sum over paths, never the product. <strong>Why this part exists:</strong> dropping one branch silently halves the gradient, which behaves exactly like halving the learning rate for those weights alone.</p>
+
+<h3>Part 6 — One sweep prices every parameter</h3>
+<p>Reverse mode costs roughly one extra forward pass in total, regardless of parameter count. Finite differences — nudge one weight, remeasure the loss — need two forward passes per parameter: for 1,000,000 weights that is 2,000,000 passes against about 2. <strong>Why this part exists:</strong> the ratio is why deep learning is practical; the naive alternative is a million times slower for the same answer.</p>
+
+<h3>Part 7 — Sign says which way, size says how far</h3>
+<p>A gradient is a slope: positive means raising the weight raises the loss, so you subtract. With <code>∂L/∂w = −12</code> and <code>η = 0.1</code>, the step is <code>w ← w − 0.1(−12) = w + 1.2</code>. <strong>Why this part exists:</strong> the minus sign is the whole of gradient descent; write it as a plus and every step climbs the loss on purpose.</p>
 
 <h2>Worked example</h2>
 
 <h3>1. One linear unit, by hand</h3>
-<p><code>z = wx + b</code>, <code>L = (z − y)²</code>, with <code>x = 2</code>, <code>w = 3</code>, <code>b = 1</code>, <code>y = 10</code>.</p>
+<p><code>z = wx + b</code> and <code>L = (z − y)²</code>, with <code>x = 2</code>, <code>w = 3</code>, <code>b = 1</code>, <code>y = 10</code>. The forward column comes first, then the backward column.</p>
 
 <table>
   <tr><th>Quantity</th><th>Derivation</th><th class="num">Value</th></tr>
   <tr><td>z</td><td class="num">3(2) + 1</td><td class="num">7</td></tr>
   <tr><td>L</td><td class="num">(7 − 10)²</td><td class="num">9</td></tr>
-  <tr><td>∂L/∂z</td><td class="num">2(z − y)</td><td class="num">−6</td></tr>
-  <tr><td>∂L/∂w</td><td class="num">∂L/∂z · x</td><td class="num">−12</td></tr>
-  <tr><td>∂L/∂b</td><td class="num">∂L/∂z · 1</td><td class="num">−6</td></tr>
+  <tr><td>∂L/∂z</td><td class="num">2(7 − 10)</td><td class="num">−6</td></tr>
+  <tr><td>∂L/∂w</td><td class="num">∂L/∂z · x = −6 · 2</td><td class="num">−12</td></tr>
+  <tr><td>∂L/∂b</td><td class="num">∂L/∂z · 1 = −6 · 1</td><td class="num">−6</td></tr>
 </table>
 
-<p>With <code>η = 0.1</code>: <code>w = 3 − 0.1(−12) = 4.2</code>, <code>b = 1 − 0.1(−6) = 1.6</code>. Feed forward: <code>4.2(2) + 1.6 = 10</code>, loss 0. One step, exact — because this loss is quadratic and the step was chosen well.</p>
+<p>With <code>η = 0.1</code>: <code>w = 3 − 0.1(−12) = 4.2</code> and <code>b = 1 − 0.1(−6) = 1.6</code>. Feed forward again: <code>4.2(2) + 1.6 = 10</code>, loss <code>0</code>.</p>
+
+<p><strong>What to notice.</strong> Both gradients are negative, so both parameters increase, and the prediction rises from 7 to 10 in one step. That exactness is a property of this quadratic, not of training in general: the gradient is a straight-line approximation, and a curved loss would land nearby rather than on the target. The factor <code>x = 2</code> is why <code>w</code> moves twice as far as <code>b</code> — the same slope, scaled by the input that multiplies it.</p>
 
 <h3>2. Reading a real graph</h3>
-<p>For <code>L = (a·b + c)²</code> with <code>a=2, b=3, c=1</code>: <code>u = ab + c = 7</code>, <code>L = 49</code>. Then <code>∂L/∂u = 2u = 14</code>, so <code>∂L/∂a = 14·b = 42</code>, <code>∂L/∂b = 14·a = 28</code>, <code>∂L/∂c = 14</code>. Three gradients from one backward sweep — that is the entire trick.</p>
+<p><code>L = (a·b + c)²</code> with <code>a = 2</code>, <code>b = 3</code>, <code>c = 1</code>. The inner value <code>u = ab + c</code> gets one gradient; the three inputs split it.</p>
+
+<table>
+  <tr><th>Quantity</th><th>Arithmetic</th><th class="num">Value</th></tr>
+  <tr><td>u = ab + c</td><td class="num">2(3) + 1</td><td class="num">7</td></tr>
+  <tr><td>L = u²</td><td class="num">7²</td><td class="num">49</td></tr>
+  <tr><td>∂L/∂u</td><td class="num">2u</td><td class="num">14</td></tr>
+  <tr><td>∂L/∂a</td><td class="num">14 · b = 14(3)</td><td class="num">42</td></tr>
+  <tr><td>∂L/∂b</td><td class="num">14 · a = 14(2)</td><td class="num">28</td></tr>
+  <tr><td>∂L/∂c</td><td class="num">14 · 1</td><td class="num">14</td></tr>
+</table>
+
+<p>Apply one step with <code>η = 0.01</code>: <code>a = 2 − 0.42 = 1.58</code>, <code>b = 3 − 0.28 = 2.72</code>, <code>c = 1 − 0.14 = 0.86</code>. Then <code>u = 1.58(2.72) + 0.86 = 5.1576</code> and <code>L = 26.60</code>, down from 49.</p>
+
+<p><strong>What to notice.</strong> One backward sweep produced three gradients from a single incoming value of <code>14</code>: each input multiplies that value by its own local slope. The largest gradient belongs to <code>a</code>, and that is not a statement about importance — it is <code>b = 3</code> sitting in the local slope, so <code>a</code> has three times more leverage per unit than <code>c</code> does.</p>
+
+<h3>3. Checking a gradient with a small nudge</h3>
+<p>Take the first example and raise <code>w</code> by <code>0.001</code>, leaving <code>x</code>, <code>b</code> and <code>y</code> alone. A true slope of <code>−12</code> predicts a loss drop of about <code>0.012</code>.</p>
+
+<table>
+  <tr><th>w</th><th>z = 2w + 1</th><th class="num">L = (z − 10)²</th></tr>
+  <tr><td>3</td><td class="num">7</td><td class="num">9</td></tr>
+  <tr><td>3.001</td><td class="num">7.002</td><td class="num">8.988004</td></tr>
+</table>
+
+<p>Dividing: <code>(8.988004 − 9) / 0.001 = −11.996</code>, which is <code>−12</code> to within the nudge. Two evaluations of the loss bought one gradient, and that is the point of comparison in Part 6: this method is honest but needs one extra pass per parameter.</p>
+
+<p><strong>What to notice.</strong> The check is a finite difference, so it is always slightly off and always the same sign. Use it on one weight when a hand-derived gradient and the library disagree; a large gap means a missing term, a wrong sign, or a tensor that was detached before the graph noticed it.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"Backprop is a special algorithm for neural networks."</strong> It is reverse-mode autodiff, and it works on any differentiable graph — physics simulations, rendering, control. Networks are just the most profitable place to point it.</p>
-  <p><strong>Second trap:</strong> reading a gradient as "how important this parameter is". It is a <em>local</em> slope at the current parameters. The same weight can have a huge gradient at initialisation and a tiny one a step later.</p>
+  <p><strong>"A big gradient means an important parameter."</strong> It feels right because the update is proportional to the gradient, so the big ones visibly move first.</p>
+  <p><strong>Correction:</strong> a gradient is a local slope at the current weights, not a property of the parameter. It depends on the input scale, the loss scale and everything downstream, and it is recomputed from scratch every step. The same weight can have a gradient of <code>−12</code> at initialisation and <code>−0.01</code> one update later.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Write the forward pass as a chain: z = wx + b, then L = (z − y)².", "Differentiate the last step first: ∂L/∂z = 2(z − y).", "Step back once: ∂L/∂w = ∂L/∂z × x, and ∂L/∂b = ∂L/∂z.", "Multiply by the learning rate and subtract.", "Each node only needs its own local derivative; the chain rule does the rest."]</script></div>
+<p><strong>The tell:</strong> keep the prediction identical while multiplying one input by 100 and dividing its weight by 100 — the loss does not move, but that weight's gradient grows 100×. A quantity that changes when units change is a slope, not an importance score. The second tell is a ranking — "this feature matters least because its gradient is smallest" — that reorders when you standardise the columns.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

@@ -24,56 +24,89 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Phones, hospitals and banks hold data that legally or practically cannot be centralised. Federated learning is the answer that keeps the data where it is and ships the model instead.</p>
+<p class="lede">Federated learning is how you train when the examples cannot be collected in one place: a phone keyboard that improves without uploading your messages, a hospital network that shares a tumour model but never the scans, a bank consortium that shares a fraud detector but never transactions. The data stays with its owner; only the model's numbers travel.</p>
+<p>In an exam the question is almost always one round of averaging — three clients hold 100, 200 and 700 examples, their local weights are 0.10, 0.50 and 0.90, so what is the new global weight? Equal averaging writes 0.50 and loses the marks; the weighted answer is 0.74. In a project the same mistake is one line, <code>np.mean(client_weights)</code>, sitting in the aggregation step. Training runs, the loss curve falls, and the client that owns 70% of the data quietly receives a model that has stopped listening to it.</p>
 
 <h2>The one core idea</h2>
-<p>Move the <strong>model</strong> to the data, not the data to the model: each client trains locally, and the server averages the resulting weights.</p>
+<p>Picture a class where the teacher may not collect the homework. Each student marks their own work at home, and the teacher averages the sheets into one master copy that everyone uses next week. The master copy is never exactly right for any single student, but it is close for the class, and no exercise book left the house.</p>
+<p>In one line: <strong>the model is a list of numbers, each client pulls those numbers toward what its own data prefers, and the server replaces them with the evidence-weighted average.</strong> Weights 0.10, 0.50 and 0.90 from clients holding 100, 200 and 700 examples give <code>0.1(0.10) + 0.2(0.50) + 0.7(0.90) = 0.74</code>.</p>
 
 <h2>How it actually works</h2>
-<ol>
-  <li><strong>Broadcast</strong>: server sends current weights <code>w_t</code> to a sample of clients.</li>
-  <li><strong>Local training</strong>: each client runs <code>E</code> epochs of SGD on its own data, producing <code>w_t^k</code>.</li>
-  <li><strong>Upload</strong>: clients send weights (or updates) — never examples.</li>
-  <li><strong>Aggregate</strong>: server computes a sample-weighted average.</li>
-</ol>
+<p>One round is six steps. Keep each client's example count in view throughout; it decides how loudly that client speaks.</p>
 
-<span class="formula">w_{t+1} = Σ_k (n_k / n) · w_t^k     where n = Σ_k n_k</span>
+<h3>Part 1 — Start from one shared model</h3>
+<p>The server initialises a global parameter vector <code>w_0</code>, perhaps 1,000 numbers, and fixes a round budget such as 100. Every client starts this round from that exact list, not from last week's private copy.</p>
+<p><strong>Why this part exists:</strong> averaging only means something if the things averaged are comparable; a client starting at round 40 and one starting at round 3 would mix two different models.</p>
 
-<ul>
-  <li><strong>Why weight by n<sub>k</sub></strong>: a client with 700 examples has a less noisy local model than one with 100. Equal weighting biases the global model toward small clients.</li>
-  <li><strong>Rounds replace epochs</strong>: communication is the bottleneck, often by orders of magnitude. FedAvg exists to reduce round count, not local compute.</li>
-  <li><strong>Data locality</strong>: raw data never leaves the device. Weights do — which matters for the privacy claims in topic 35.</li>
-  <li><strong>Partial participation</strong>: only a fraction of clients are available per round (phones charge overnight, hospitals batch nightly).</li>
-</ul>
+<h3>Part 2 — Sample a few clients</h3>
+<p>Of 1,000 registered devices the server contacts a fraction, commonly 10%, so 100 clients work this round. Availability comes in bursts — phones charge overnight, hospital servers batch nightly.</p>
+<p><strong>Why this part exists:</strong> waiting for all 1,000 means the round never closes, and sampling caps the cost at 100 uploads instead of 1,000.</p>
+
+<h3>Part 3 — Send the weights down</h3>
+<p>The server ships <code>w_t</code>, roughly 1 MB per million parameters stored as 4-byte floats, and each client holds it beside its own rows. No row travels now or later.</p>
+<p><strong>Why this part exists:</strong> this download is the whole setting; if the server asked for rows instead, the legal reason for the deployment would vanish in a single request.</p>
+
+<h3>Part 4 — Train locally for E epochs</h3>
+<p>Each client runs <code>E</code> passes of SGD, usually 1 to 5, over its own data and produces <code>w_t^k</code>. With 700 examples and <code>E = 5</code> that is 3,500 example-gradients computed on the device.</p>
+<p><strong>Why this part exists:</strong> without local steps you have federated SGD, which needs hundreds of rounds; local work is the only lever that turns cheap computation into saved bandwidth.</p>
+
+<h3>Part 5 — Upload parameters, never rows</h3>
+<p>Clients return <code>w_t^k</code> or the delta <code>w_t^k − w_t</code>, still about 1 MB. At 1 Mbps one such upload takes 8 seconds, per client, per round.</p>
+<p><strong>Why this part exists:</strong> the server must improve the model from numbers whose size does not grow with the number of rows the client holds.</p>
+
+<h3>Part 6 — Average by share, then repeat</h3>
+<p>The server computes <code>w_{t+1} = Σ_k (n_k/n) w_t^k</code>, where <code>n</code> is the total example count. The shares are non-negative and sum to 1, so the result is a convex combination and cannot leave the range spanned by the clients. It broadcasts the result and the loop restarts.</p>
+<p><strong>Why this part exists:</strong> a 700-example client has a lower-variance gradient than a 100-example one and should count seven times more; equal shares let a tiny client outvote the data.</p>
 
 <h2>Worked example</h2>
 
-<h3>1. One aggregation step</h3>
-<p>Three clients with 100, 200 and 700 examples, one scalar parameter:</p>
+<h3>1. One aggregation round</h3>
+<p>Three clients hold 100, 200 and 700 examples and report one scalar parameter. Compute each share first, then multiply.</p>
 
 <table>
-  <tr><th>Client</th><th class="num">n<sub>k</sub></th><th class="num">Local w</th><th class="num">Weight</th><th class="num">Contribution</th></tr>
-  <tr><td>A</td><td class="num">100</td><td class="num">0.10</td><td class="num">0.10</td><td class="num">0.010</td></tr>
-  <tr><td>B</td><td class="num">200</td><td class="num">0.50</td><td class="num">0.20</td><td class="num">0.100</td></tr>
-  <tr><td>C</td><td class="num">700</td><td class="num">0.90</td><td class="num">0.70</td><td class="num">0.630</td></tr>
-  <tr><td><strong>Global</strong></td><td class="num">1000</td><td></td><td></td><td class="num"><strong>0.740</strong></td></tr>
+  <tr><th>Client</th><th class="num">n<sub>k</sub></th><th class="num">Share n<sub>k</sub>/1000</th><th class="num">Local w</th><th class="num">Share × w</th></tr>
+  <tr><td>A</td><td class="num">100</td><td class="num">100/1000 = 0.10</td><td class="num">0.10</td><td class="num">0.010</td></tr>
+  <tr><td>B</td><td class="num">200</td><td class="num">200/1000 = 0.20</td><td class="num">0.50</td><td class="num">0.100</td></tr>
+  <tr><td>C</td><td class="num">700</td><td class="num">700/1000 = 0.70</td><td class="num">0.90</td><td class="num">0.630</td></tr>
+  <tr><td><strong>Global</strong></td><td class="num">1000</td><td class="num">1.00</td><td></td><td class="num"><strong>0.740</strong></td></tr>
 </table>
 
-<p>Equal weighting would give <code>(0.1+0.5+0.9)/3 = 0.50</code> — a model that ignores that 70% of the data says 0.9.</p>
+<p><strong>What to notice.</strong> The shares sum to exactly 1.00, the check that catches most errors. Client C moves the answer 0.63 of the way by itself, so a mistake in its row is worth ten times a mistake in A's. The result 0.74 lies between 0.10 and 0.90, as any weighted average must.</p>
 
-<h3>2. The cost model</h3>
-<p>100 rounds × 1,000 clients × 1 MB of weights = <strong>100 GB</strong> of transfer, against a centralised training run that moves the dataset once. FedAvg's entire research programme is about cutting that number.</p>
+<h3>2. Weighted versus equal, scored by loss</h3>
+<p>Give each client the bowl-shaped loss <code>(w − o<sub>k</sub>)²</code> and compare the weighted answer 0.74 with the equal-weight answer 0.50.</p>
+
+<table>
+  <tr><th>Client</th><th class="num">Share</th><th class="num">Optimum o<sub>k</sub></th><th class="num">(0.74 − o<sub>k</sub>)²</th><th class="num">Share × loss</th><th class="num">(0.50 − o<sub>k</sub>)²</th><th class="num">Share × loss</th></tr>
+  <tr><td>A</td><td class="num">0.10</td><td class="num">0.20</td><td class="num">0.2916</td><td class="num">0.0292</td><td class="num">0.0900</td><td class="num">0.0090</td></tr>
+  <tr><td>B</td><td class="num">0.20</td><td class="num">0.50</td><td class="num">0.0576</td><td class="num">0.0115</td><td class="num">0.0000</td><td class="num">0.0000</td></tr>
+  <tr><td>C</td><td class="num">0.70</td><td class="num">0.90</td><td class="num">0.0256</td><td class="num">0.0179</td><td class="num">0.1600</td><td class="num">0.1120</td></tr>
+  <tr><td><strong>Pooled</strong></td><td class="num">1.00</td><td></td><td></td><td class="num"><strong>0.0586</strong></td><td></td><td class="num"><strong>0.1210</strong></td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Equal weighting more than doubles the pooled loss, 0.1210 against 0.0586, and all of the damage lands on client C, whose loss rises from 0.0256 to 0.1600. Client A is much happier under equal weights — which is why testing on a small client makes equal weighting look good. The deployed model is judged by the pooled number, and that number prefers 0.74.</p>
+
+<h3>3. The communication bill</h3>
+<p>Cost per round is clients times megabytes; the total is rounds times that.</p>
+
+<table>
+  <tr><th>Quantity</th><th class="num">Arithmetic</th><th class="num">Result</th></tr>
+  <tr><td>One round, 1,000 clients</td><td class="num">1,000 × 1 MB</td><td class="num">1 GB</td></tr>
+  <tr><td>100 rounds</td><td class="num">100 × 1 GB</td><td class="num">100 GB</td></tr>
+  <tr><td>Server at 100 Mbps</td><td class="num">100,000 MB ÷ 12.5 MB/s</td><td class="num">8,000 s ≈ 2.2 h</td></tr>
+  <tr><td>Same run, 10 clients per round</td><td class="num">100 × 10 × 1 MB</td><td class="num">1 GB</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Sampling a tenth of the clients cuts the bill by 90% without changing the algorithm's shape, which is why partial participation is standard rather than an optimisation. Centralised training moves the dataset once; this run moves 100 GB. Every extra local epoch is an attempt to buy back one of those rounds.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"FedAvg is equivalent to training on the pooled data."</strong> It is equivalent only when client distributions are identical and local training is a single step. With heterogeneous data, averaging weights averages <em>different objectives</em>, and the result can be worse than any client's own model.</p>
-  <p><strong>Second trap:</strong> assuming the server sees updates, so privacy is solved. Gradients carry information about the data that produced them (topic 35).</p>
+  <p><strong>"FedAvg is the same as training on the pooled data."</strong> It feels right because the formula is what you would write for one model trained on the union of the datasets, and under identical client distributions with a single local step it is literally equivalent.</p>
+  <p>The equivalence dies twice. Several local steps make each model a function of its own order of data, so averaging models is not averaging gradients. And with heterogeneous data the clients optimise different objectives, so the average can be worse than every client's own model — the drift of topic 34. A second trap hides behind it: assuming a server that sees only updates has solved privacy. An update is a function of the rows that produced it.</p>
+  <p><strong>Correction:</strong> read FedAvg as one approximate step on a reweighted objective, repeated — not as pooled training.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["The server holds global weights and sends them to a sample of clients.", "Each client trains locally on data that never leaves the device.", "Clients return weights, not examples.", "The server averages them, weighted by each client's example count.", "Repeat for many rounds; communication, not compute, is the cost."]</script></div>
+<p><strong>The tell:</strong> a report showing federated accuracy just below centralised accuracy and calling the gap "implementation noise". If the gap widens as you raise <code>E</code> from 1 to 20, it is drift. The second tell is an aggregation line using <code>np.mean</code> while clients have wildly different example counts; check that the shares sum to 1 and ask whether the largest client dominates the result.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

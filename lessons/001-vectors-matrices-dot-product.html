@@ -24,27 +24,28 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Every model in this course is a dot product in disguise: a linear layer, an embedding lookup, an attention score, a Q-value. Make dot products and shape rules automatic, and the notation stops eating your working memory.</p>
+<p class="lede">Every model in this course eventually computes one number from two lists of numbers. A linear layer does it. An embedding lookup does it. An attention score does it. A Q-value does it. The notation changes; the operation does not.</p>
+<p>That matters for two practical reasons. In an exam, a shape question is free marks: <em>"A is 5×3 and x has four entries — what happens?"</em> has one correct answer and no ambiguity. In your project, most failures in the first hour are not conceptual; they are a matrix with the wrong orientation, and Python reports a shape error several lines away from the cause. If you can see the dot product underneath, both problems become mechanical rather than mysterious.</p>
 
 <h2>The one core idea</h2>
-<p>A score is a measurement of <strong>alignment</strong> between two vectors: what the input <em>is</em> (<code>x</code>), and what the model is <em>looking for</em> (<code>w</code>). Training is nothing more than choosing <code>w</code> so that the right inputs align.</p>
+<p>A score measures <strong>alignment</strong> between two vectors: what the input <em>is</em> (<code>x</code>) and what the model is <em>looking for</em> (<code>w</code>). The dot product adds up, feature by feature, how much they agree.</p>
+<p>In one line: <strong>each feature casts a vote, the weight says how much that vote counts, and the dot product adds the votes.</strong> With <code>x = [2, 1]</code> and <code>w = [3, −1]</code>, feature 1 votes <code>+6</code>, feature 2 votes <code>−1</code>, and the total is <code>5</code>.</p>
 
 <h2>How it actually works</h2>
-<ul>
-  <li><strong>Vector</strong> = <em>n</em> numbers treated as one object: one data point with <em>n</em> features, or an arrow from the origin.</li>
-  <li><strong>Dot product</strong> = multiply matching positions, then add.</li>
-</ul>
+<p>Take it in seven parts. Each part is one idea, and each builds on the one before it.</p>
 
+<h3>Part 1 — A vector is a row of features</h3>
+<p>A vector is <em>n</em> numbers kept together as one object. In machine learning it is almost always one data point: a house might be <code>[3 bedrooms, 1.5 bathrooms, 120 m²]</code>. The order is arbitrary but fixed — position 1 always means bedrooms. If you reorder the features, you must reorder the weights identically, or the model silently compares the wrong things.</p>
+
+<h3>Part 2 — The dot product multiplies matching positions, then adds</h3>
 <span class="formula">x · w = x₁w₁ + x₂w₂ + … + xₙwₙ</span>
+<p>Each term is one feature's contribution: <em>how strongly the feature is present</em> (<code>xᵢ</code>) times <em>how much the model cares about it</em> (<code>wᵢ</code>). A large feature with a weight near zero contributes almost nothing; a small feature with a huge weight can dominate. <strong>Why this shape of formula?</strong> Because it is the simplest function that is linear in the input and treats each feature independently — no interaction terms, no thresholds, just weighted agreement.</p>
 
-<p>Three equivalent readings of that number:</p>
+<h3>Part 3 — The sign is a decision, the size is confidence</h3>
+<p>Positive means <code>x</code> lies on <code>w</code>'s side of the boundary. Zero means the two are perpendicular: the input has nothing the model is looking for. Negative means it points the other way. In a classifier, the boundary is exactly <code>w·x + b = 0</code>, so the sign answers "which class?" and the distance from zero answers "how sure?". This is why a score of 0.2 and a score of 20 can give the same label but very different confidence.</p>
 
-<table>
-  <tr><th>Reading</th><th>What it tells you</th></tr>
-  <tr><td>Sum of per-feature agreements</td><td>Feature 1 wants +3, you have +2 → contribution +6</td></tr>
-  <tr><td><code>‖x‖ ‖w‖ cos θ</code></td><td>How parallel the two arrows are, scaled by their lengths</td></tr>
-  <tr><td>Projection × length</td><td>How far <code>x</code>'s shadow reaches along <code>w</code></td></tr>
-</table>
+<h3>Part 4 — Length inflates the score</h3>
+<p>Geometrically, <code>x·w = ‖x‖ ‖w‖ cos θ</code>, where <code>‖·‖</code> is the length of the arrow and <code>θ</code> is the angle between them. Two consequences follow. First, the score grows if you simply make <code>x</code> longer — double every feature and the score doubles, even though the direction, and therefore the meaning, is unchanged. Second, the only part that carries <em>direction</em> is <code>cos θ</code>.</p>
 
 <figure>
   <svg viewBox="0 0 340 150" role="img" aria-label="Vector x projected onto vector w, with angle theta between them">
@@ -59,55 +60,65 @@
     <text x="152" y="36" font-size="13" fill="currentColor">x</text>
     <text x="118" y="146" font-size="11" fill="currentColor" fill-opacity="0.6">shadow of x</text>
   </svg>
-  <figcaption>Alignment is the shadow length, signed. Past 90° the shadow points backwards — a negative score.</figcaption>
+  <figcaption>The dot product is the length of x's shadow on w, times the length of w. Past 90° the shadow points backwards, so the score goes negative.</figcaption>
 </figure>
 
-<ul>
-  <li><strong>Sign is the message.</strong> Positive → same half-space as <code>w</code>. Zero → perpendicular, nothing in common. Negative → pointing away.</li>
-  <li><strong>Cosine similarity</strong> divides the lengths out: <code>cos θ = (x·w) / (‖x‖‖w‖)</code>, range −1 to 1. Use it when magnitude is noise — exactly the case for embeddings (topic 16).</li>
-  <li><strong>Matrix</strong> = <em>m</em> row-vectors stacked; <code>Wx</code> is <em>m</em> dot products at once. Shape rule <code>(m×n)(n×k) → (m×k)</code>: inner dimensions must match.</li>
-  <li><strong>A neuron before its nonlinearity</strong> is <code>w·x + b</code>. The bias shifts the threshold; it does not rotate <code>w</code>.</li>
-</ul>
+<h3>Part 5 — Cosine removes the length</h3>
+<p>Divide the dot product by both lengths: <code>cos θ = (x·w) / (‖x‖ ‖w‖)</code>. The result is between −1 and 1 and depends only on direction. Use it whenever length is noise — a long document, a frequently occurring word, an embedding whose norm drifted during training (topic 16). Use the raw dot product when length is real information: a price, a count, a dose.</p>
+
+<h3>Part 6 — A matrix is a stack of questions</h3>
+<p>A matrix is just several weight vectors stacked as rows. Multiplying <code>W</code> by <code>x</code> runs one dot product per row, so a 2×3 matrix returns two scores. The shape rule is unforgiving: <code>(m×n)(n×k) → (m×k)</code>. The inner dimensions must be equal; nothing else is negotiable. A 5×3 matrix needs a 3-vector and returns 5 numbers.</p>
+
+<h3>Part 7 — A neuron is this plus a threshold</h3>
+<p>A single neuron computes <code>w·x + b</code> and then applies a bend such as ReLU. The bias <code>b</code> shifts <em>when</em> the neuron fires; it does not change what the neuron looks for. That is the whole object you will meet again in topic 8 — the rest of deep learning is stacking it.</p>
+
+<table>
+  <tr><th>Term</th><th>Plain meaning</th></tr>
+  <tr><td><strong>Vector</strong></td><td>An ordered list of numbers: one data point, or one arrow.</td></tr>
+  <tr><td><strong>Dot product</strong></td><td>Multiply matching positions, add the results: one number.</td></tr>
+  <tr><td><strong>Norm ‖x‖</strong></td><td>The length of the arrow: <code>√(x₁² + x₂² + …)</code>.</td></tr>
+  <tr><td><strong>Cosine similarity</strong></td><td>Dot product with both lengths divided out: pure alignment.</td></tr>
+  <tr><td><strong>Bias b</strong></td><td>A constant added after the dot product; moves the threshold.</td></tr>
+</table>
 
 <h2>Worked example</h2>
 
-<h3>1. One score, three features</h3>
-<p><code>x = [2, 1]</code>, <code>w = [3, −1]</code>, <code>b = −1</code>:</p>
+<h3>1. One score, two features</h3>
+<p><code>x = [2, 1]</code>, <code>w = [3, −1]</code>, <code>b = −1</code>. Do every multiplication explicitly; skipping them is how sign errors survive.</p>
 
 <table>
-  <tr><th>Step</th><th class="num">Value</th></tr>
-  <tr><td>Feature 1</td><td class="num">2 × 3 = 6</td></tr>
-  <tr><td>Feature 2</td><td class="num">1 × (−1) = −1</td></tr>
-  <tr><td>Dot product</td><td class="num">5</td></tr>
-  <tr><td>Plus bias</td><td class="num">5 + (−1) = <strong>4</strong></td></tr>
+  <tr><th>Step</th><th>Arithmetic</th><th class="num">Running total</th></tr>
+  <tr><td>Feature 1</td><td class="num">2 × 3</td><td class="num">+6</td></tr>
+  <tr><td>Feature 2</td><td class="num">1 × (−1)</td><td class="num">−1 → total 5</td></tr>
+  <tr><td>Add bias</td><td class="num">5 + (−1)</td><td class="num"><strong>4</strong></td></tr>
 </table>
 
-<p>Positive, so <code>x</code> sits on <code>w</code>'s side. Flip the second weight to <code>w = [3, 1]</code> and the score is <code>6</code>. <code>x</code> never changed; the model changed what it looked for.</p>
+<p><strong>What to notice.</strong> The second feature <em>reduced</em> the score. That is not a bug: the model believes more of feature 2 is evidence <em>against</em>. If the feature were absent (<code>x₂ = 0</code>), it would contribute exactly 0 — absence is neutral, not negative. And if you change only the model, to <code>w = [3, 1]</code>, the score becomes <code>6</code>: same data, different question, different answer.</p>
 
-<h3>2. A matrix, then a batch</h3>
-<p>Two output scores, three features each:</p>
-
-<span class="formula">W = [[1, 0, −1], [0, 2, 1]]  ·  x = [1, 2, 3]</span>
+<h3>2. Two questions at once</h3>
+<p><code>W = [[1, 0, −1], [0, 2, 1]]</code>, <code>x = [1, 2, 3]</code>. Each row is its own weight vector.</p>
 
 <table>
-  <tr><th>Output</th><th>Dot product</th><th class="num">Result</th></tr>
-  <tr><td>Score 1 (row 1)</td><td class="num">1(1) + 0(2) + (−1)(3)</td><td class="num">−2</td></tr>
-  <tr><td>Score 2 (row 2)</td><td class="num">0(1) + 2(2) + 1(3)</td><td class="num">7</td></tr>
+  <tr><th>Row</th><th>Term-by-term</th><th class="num">Score</th></tr>
+  <tr><td>Row 1</td><td class="num">1(1) + 0(2) + (−1)(3) = 1 + 0 − 3</td><td class="num">−2</td></tr>
+  <tr><td>Row 2</td><td class="num">0(1) + 2(2) + 1(3) = 0 + 4 + 3</td><td class="num">7</td></tr>
 </table>
 
-<p>Stack four examples: <code>X</code> is 4×3, and <code>X Wᵀ</code> gives <code>(4×3)(3×2) → (4×2)</code> — four examples, two scores. The transpose is what makes inner dimensions agree; that habit catches most shape bugs.</p>
+<p><strong>What to notice.</strong> The zero weights are not decorative: row 1 ignores feature 2 entirely, so no value of <code>x₂</code> could change its score. Row 2 ignores feature 1. That is how a matrix encodes "different questions for different outputs".</p>
+
+<h3>3. From one example to a batch, and why the transpose appears</h3>
+<p>Put four examples as rows: <code>X</code> is 4×3. To get four examples × two scores you compute <code>X Wᵀ</code>:</p>
+<span class="formula">(4×3) · (3×2) = (4×2)</span>
+<p>The transpose exists for one reason: the inner dimensions must match. <code>X</code> has 3 columns; <code>Wᵀ</code> has 3 rows. The output has one row per example and one column per score, which is exactly the layout every dataset expects. If you write <code>W Xᵀ</code> instead you get <code>(2×3)(3×4) = (2×4)</code> — numerically valid, semantically transposed, and usually the bug behind "my labels and predictions don't line up".</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"A bigger dot product means more similar."</strong> False — it mixes direction with length. With <code>q = [1, 0]</code>, both <code>a = [50, 0]</code> and <code>b = [1, 0.1]</code> point along <code>q</code>, but <code>a</code> scores 50 and <code>b</code> scores 1. The dot product picked the long vector.</p>
-  <p><strong>Correction:</strong> ask what length means. Meaningful length (price, count) → raw dot product. Noise length (document length, embedding norm) → normalize, i.e. cosine.</p>
+  <p><strong>"A bigger dot product means more similar."</strong> It feels right because the dot product <em>is</em> a similarity measure — for vectors of equal length. Once lengths differ, the score mixes two things: direction and magnitude.</p>
+  <p>Concretely: <code>q = [1, 0]</code>. Document <code>a = [50, 0]</code> scores 50 with cosine 1.0. Document <code>b = [1, 0.1]</code> scores 1 with cosine 0.995. Both point almost exactly along the query; the dot product prefers the longer one, which has nothing to do with relevance.</p>
+  <p><strong>Correction:</strong> decide what length means before choosing a metric. Meaningful length (price, count, dose) → raw dot product. Noise length (document length, word frequency, embedding norm) → normalize first, which is cosine.</p>
 </div>
-<p>Related trap, same root: a matrix–vector product is <em>not</em> elementwise — each output cell is one row·column dot product, and <code>Wx</code> ≠ <code>xW</code>. Let the shapes decide which you meant.</p>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Start with two lists of numbers: your data x, and what the model is looking for w.", "Multiply matching positions and add them: 2·3 + 1·(−1) = 5. That is the score.", "The sign tells the side: positive leans toward w, zero means perpendicular, negative means away.", "A matrix is just a stack of w rows, so Wx gives one score per row.", "Before coding, check the inner sizes: a 5×3 matrix needs a 3-vector and returns 5 numbers."]</script></div>
+<p><strong>The tell:</strong> if duplicating a document's text — doubling every number in its vector — makes it rank higher for the same query, you are scoring length, not meaning. The second tell is a shape that <em>runs</em> but produces numbers 10× too large: someone multiplied elementwise when they meant a matrix product. A matrix–vector product is never elementwise; each output cell is one full row·column dot product.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">
@@ -149,10 +160,6 @@ for name, v in [(&quot;A&quot;, np.array([50., 0.])), (&quot;B&quot;, np.array([
     <a href="002-slope-to-gradient.html">Next · 02 · Slope → gradient</a>
   </div>
 </div>
-
-
-
-
 
 <p class="unit-res"><strong>Unit 0 resources:</strong> <a href="../output/cheatsheet-unit-0.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-0.pptx">deck · PPTX</a></p>
 

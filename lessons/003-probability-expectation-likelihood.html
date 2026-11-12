@@ -24,58 +24,84 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">A classifier does not output a label; it outputs a distribution over labels. A loss does not measure "wrongness"; it measures surprise. Without that framing, softmax and cross-entropy are arbitrary formulas to memorise.</p>
+<p class="lede">A classifier does not output a label; it outputs a distribution over labels, and that distribution is what gets scored. Softmax turns scores into probabilities, cross-entropy turns the probability of the true class into a loss, and both are likelihood arithmetic. The same move reappears in a language model (probability of the next token) and in RL (expected return over a policy).</p>
+<p>The failure this prevents is quiet. Compare total NLL on two test sets — 500 rows and 2,000 rows — and the larger set wins by default, because <code>−Σ log p</code> is a sum that grows with the row count. A team reporting the sum can "improve" a model by evaluating it on more data. Dividing by <code>N</code> makes the number per-row and comparable, which is the difference between a metric and a mood.</p>
 
 <h2>The one core idea</h2>
-<p>A model assigns <strong>probability</strong> to what actually happened. The <strong>loss</strong> is how surprised the model was — and surprise is <code>−log p</code>.</p>
+<p>A model is a bookmaker. Before the result is known it quotes a probability for each outcome; afterwards you score the quote by how much probability it gave to what actually happened. A quote of 0.9 on the winner is good, 0.01 is embarrassing, and the score is just <code>−log</code> of the quoted probability. Probability asks what will happen; <strong>likelihood</strong> asks how good this quote was.</p>
+<p>In one line: <strong>loss is surprise, and surprise is <code>−log p</code>.</strong> A model that gave the truth 0.9 pays 0.105; one that gave it 0.1 pays 2.303; one that gave it 0.01 pays 4.605. Being confidently wrong costs about 44 times more than being confidently right, which is why the penalty tracks overconfidence rather than mere error.</p>
 
 <h2>How it actually works</h2>
-<ul>
-  <li><strong>Random variable</strong> = an outcome with a number attached. A <strong>PMF</strong> gives each discrete outcome a probability; it sums to 1. A <strong>PDF</strong> is the continuous version; it integrates to 1.</li>
-  <li><strong>Expectation</strong> <code>E[X] = Σ x·p(x)</code> = the long-run average. <strong>Variance</strong> = <code>E[(X − E[X])²]</code> = spread.</li>
-  <li><strong>Likelihood</strong> <code>L(θ) = p(data | θ)</code> — the probability of the observed data, viewed as a function of the parameters. Data fixed, parameters varying.</li>
-  <li><strong>Independence</strong> multiplies probabilities. Products of many small numbers underflow, so take logs: they turn into sums.</li>
-  <li><strong>Maximum likelihood</strong> = pick <code>θ</code> maximising <code>L</code> = minimising <code>−log L</code> (NLL).</li>
-  <li><strong>Cross-entropy</strong> is exactly NLL for a softmax output. Nothing new is happening.</li>
-</ul>
+<p>Seven parts. Each one closes a gap the previous part leaves open.</p>
+
+<h3>Part 1 — A distribution is a list that sums to 1</h3>
+<p>A distribution gives each outcome a probability: a fair die puts <code>1/6 ≈ 0.167</code> on each of six faces, and the six numbers add to 1. That sum is what makes a probability a share of all outcomes, and it is the only rule a distribution must obey. The continuous version swaps the sum for an integral, which is why a density can exceed 1 at a point. Why this part exists: without normalisation two models cannot be compared — 0.6 means nothing until you know what the rest of the list adds up to.</p>
+
+<h3>Part 2 — Expectation is a weighted average</h3>
+<p>Expectation is <code>E[X] = Σ x·p(x)</code>, the value you would average over many draws. A fair die gives <code>(1+2+3+4+5+6)/6 = 21/6 = 3.5</code>, a number no face ever shows. Over a dataset the same formula with <code>p = 1/N</code> is the mean loss per example. Why this part exists: training needs one number to minimise, and expectation is the honest way to collapse a distribution into one.</p>
+
+<h3>Part 3 — Variance is the spread around that average</h3>
+<p><code>Var(X) = E[(X − E[X])²]</code>. For the die, deviations from 3.5 are −2.5, −1.5, −0.5, 0.5, 1.5, 2.5; their squares average <code>17.5/6 = 2.92</code>, so the standard deviation is <code>√2.92 ≈ 1.71</code>. Two models can share a mean loss and differ here: one uniformly mediocre, one superb on most rows and catastrophic on a few. Why this part exists: a mean hides risk, so an average cannot tell you whether it came from consistency or from compensating extremes.</p>
+
+<h3>Part 4 — Likelihood flips which thing is fixed</h3>
+<p><code>p(data | θ)</code> fixes the parameters and asks about the data. Training fixes the data — you already have it — and varies the parameters; that reversed view is the likelihood <code>L(θ)</code>. Three heads in three tosses gives <code>L(0.7) = 0.7³ = 0.343</code> and <code>L(0.5) = 0.125</code>, with only the hypothesis changing between them. Why this part exists: the forward question is about data you have not collected, so it cannot be evaluated after the fact.</p>
+
+<h3>Part 5 — Independence multiplies, so logs add</h3>
+<p>Independent observations multiply: three heads is <code>0.7 × 0.7 × 0.7</code>. A long sequence gives thousands of factors below 1, and the product underflows to 0.0 near <code>10⁻³⁰⁸</code> in float64. Logs rescue it because <code>log(ab) = log a + log b</code>, turning 0.343 into <code>3 × (−0.357) = −1.070</code>; the maximiser does not move, since log is monotonic. Why this part exists: once the product underflows, the loss becomes <code>−log 0 = inf</code>, and infinity has no gradient to descend.</p>
+
+<h3>Part 6 — Softmax turns scores into probabilities</h3>
+<p>Logits are unbounded scores, one per class. Exponentiate each and divide by the total: <code>z = [2, 1, 0]</code> becomes 7.389, 2.718, 1.000, summing to 11.107, so the probabilities are 0.665, 0.245, 0.090. The exponential does two jobs — it forces positivity and amplifies gaps, so one logit of lead becomes a probability ratio of <code>e ≈ 2.72</code>. Why this part exists: raw scores break the sum-to-1 rule, and a loss built on them would not be a likelihood at all.</p>
+
+<h3>Part 7 — Training minimises the negative log</h3>
+<p>Maximising <code>L</code> and minimising <code>−log L</code> search for the same parameter value, and the second is numerically sane. The objective <code>NLL(θ) = −Σ log p_θ(yᵢ | xᵢ)</code> is a sum of positive terms, differentiated one term at a time. On a softmax output that expression is cross-entropy exactly, with nothing left over: a likelihood of 0.343 becomes a loss of 1.07. Why this part exists: every optimizer minimises, so without the minus sign the entire stack would walk away from the answer.</p>
 
 <span class="formula">NLL(θ) = −Σᵢ log p_θ(yᵢ | xᵢ)</span>
 
 <h2>Worked example</h2>
 
-<h3>1. A biased coin</h3>
-<p>Model says <code>p(heads) = 0.7</code>. You observe 3 heads in 3 tosses.</p>
+<h3>1. Three hypotheses for one coin</h3>
+<p>Three heads in three tosses. Three candidate values of <code>p</code>, each scored against identical data.</p>
 
 <table>
-  <tr><th>Model</th><th class="num">Likelihood</th><th class="num">NLL = −ln L</th></tr>
-  <tr><td>p = 0.7</td><td class="num">0.343</td><td class="num">1.07</td></tr>
-  <tr><td>p = 0.5</td><td class="num">0.125</td><td class="num">2.08</td></tr>
+  <tr><th>Model p</th><th class="num">Likelihood p³</th><th class="num">Per toss −ln p</th><th class="num">Total NLL</th></tr>
+  <tr><td>0.5</td><td class="num">0.125</td><td class="num">0.693</td><td class="num">2.08</td></tr>
+  <tr><td>0.7</td><td class="num">0.343</td><td class="num">0.357</td><td class="num">1.07</td></tr>
+  <tr><td>0.9</td><td class="num">0.729</td><td class="num">0.105</td><td class="num">0.32</td></tr>
 </table>
 
-<p>Lower NLL wins, so the data prefer <code>p = 0.7</code>. With 3 observations the evidence is weak — 3 heads also happens 12.5% of the time under a fair coin.</p>
+<p><strong>What to notice.</strong> The likelihood keeps climbing toward <code>p = 1.0</code>: three heads and no tails make "always heads" the maximum-likelihood answer, which is absurd. Three observations cannot separate 0.9 from 1.0. The objective is doing its job — shrinking surprise — and it will happily accept an overconfident model when the data are thin. That gap is what a prior or more tosses fills.</p>
 
-<h3>2. A classifier</h3>
-<p>Logits <code>z = [2, 1, 0]</code> → softmax:</p>
+<h3>2. A classifier with three classes</h3>
+<p>Logits <code>z = [2, 1, 0]</code>. Exponentiate, normalise, then score each possible truth.</p>
 
 <table>
-  <tr><th>Class</th><th class="num">eᶻ</th><th class="num">p</th><th>Loss if true</th></tr>
-  <tr><td>1</td><td class="num">7.389</td><td class="num">0.665</td><td class="num">0.41</td></tr>
-  <tr><td>2</td><td class="num">2.718</td><td class="num">0.245</td><td class="num">1.41</td></tr>
-  <tr><td>3</td><td class="num">1.000</td><td class="num">0.090</td><td class="num">2.41</td></tr>
+  <tr><th>Class</th><th class="num">z</th><th class="num">eᶻ</th><th class="num">p = eᶻ / 11.107</th><th class="num">Loss if true</th></tr>
+  <tr><td>1</td><td class="num">2</td><td class="num">7.389</td><td class="num">0.665</td><td class="num">0.41</td></tr>
+  <tr><td>2</td><td class="num">1</td><td class="num">2.718</td><td class="num">0.245</td><td class="num">1.41</td></tr>
+  <tr><td>3</td><td class="num">0</td><td class="num">1.000</td><td class="num">0.090</td><td class="num">2.41</td></tr>
 </table>
 
-<p>If the true class is 1, loss is <code>−ln 0.665 = 0.41</code>. If it is 3, loss is <code>2.41</code> — the model was confident and wrong, so it pays more. Confidence is only rewarded when it is correct.</p>
+<p><strong>What to notice.</strong> Every loss equals <code>2.408 − z</code>, because the denominator is shared: falling one logit behind costs exactly 1.0 nats, whatever the class. If the truth is class 1 you pay 0.41; if it is class 3 you pay 2.41, since 0.090 was a confident dismissal. Confidence is rewarded only when it is correct, and that asymmetry is what the gradient reads.</p>
+
+<h3>3. A mini-batch, and the mean</h3>
+<p>Three examples, with predicted probability for the true class of 0.9, 0.5 and 0.1.</p>
+
+<table>
+  <tr><th>Example</th><th class="num">p(true class)</th><th class="num">−ln p</th><th class="num">Running total</th></tr>
+  <tr><td>1</td><td class="num">0.900</td><td class="num">0.105</td><td class="num">0.105</td></tr>
+  <tr><td>2</td><td class="num">0.500</td><td class="num">0.693</td><td class="num">0.798</td></tr>
+  <tr><td>3</td><td class="num">0.100</td><td class="num">2.303</td><td class="num">3.101</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The total 3.101 depends on how many rows you have; the mean, <code>3.101 / 3 = 1.034</code>, does not, and 1.034 is the figure a framework reports. Undo the log and the average probability given to the truth is <code>e^−1.034 ≈ 0.356</code> — not the 0.5 you get by averaging 0.9, 0.5 and 0.1. Averages of probabilities and averages of log-probabilities answer different questions.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"Likelihood is the probability that my model is correct."</strong> It is not. Likelihood is <code>P(data | parameters)</code>. The probability of the model given the data is a different quantity (Bayes), and nobody computes it in training.</p>
-  <p><strong>Second trap:</strong> thinking squared error and cross-entropy are unrelated. Minimising squared error is maximum likelihood under a Gaussian noise assumption. Same principle, different distribution.</p>
+  <p><strong>"Likelihood is the probability that my model is correct."</strong> It feels right because both quantities are numbers between 0 and 1 attached to a model, "maximum likelihood" sounds like "most likely model", and the fitted value does end up high.</p>
+  <p><strong>Correction:</strong> <code>L(θ) = P(data | θ)</code>, with the data fixed. Turning that around to <code>P(θ | data)</code> needs a prior over models and a Bayes step that training never takes. Likelihood ranks hypotheses about parameters for one dataset; it is not a score you can quote as "70% chance this model is right".</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["A classifier never says 'spam'; it says 0.62, a probability.", "Likelihood asks: how much probability did you give the answer that actually happened?", "Probabilities multiply, and many small ones underflow, so take logs — multiplication becomes addition.", "Negate the log so a confident correct answer costs almost nothing and a confident wrong one costs a lot.", "Average that over the batch and you have the loss every trainer minimises."]</script></div>
+<p><strong>The tell:</strong> someone says "the model is 70% likely" when they mean the true class averaged probability 0.7. The second tell is a metrics table where total NLL improves purely because the evaluation set grew — sums scale with row count, means do not.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

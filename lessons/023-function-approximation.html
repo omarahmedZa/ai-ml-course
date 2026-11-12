@@ -25,44 +25,95 @@
 
 <h2>Why this matters</h2>
 <p class="lede">Every deep RL result — Atari, Go, robot locomotion, RLHF — exists because someone replaced a table with a neural network. The price is the guarantee, and the exam will ask what was lost.</p>
+<p>You reach for it the moment a state stops being a small integer: pixels, joint angles, board positions, sentences. It blocks two specific losses. The exam loss: <em>"Tabular Q-learning converges to Q*. You swap the table for a network — does convergence survive?"</em> Two marks for no, four more for naming approximation, bootstrapping and off-policy data together. The project loss: you size a table for a 100×100 grid, see 40,000 entries, call that small, train overnight, and find the agent still walks into walls after filling a fraction of them. Approximation answers for states it never saw; that is the whole trade.</p>
 
 <h2>The one core idea</h2>
-<p>Tabular RL stores one number per state. When states are images, that table cannot exist — so you <strong>approximate</strong> <code>Q(s,a) ≈ Q_θ(s,a)</code>, trading exactness for generalisation, and losing the convergence proof with it.</p>
+<p>A table is a notebook with one printed page per situation — and most pages stay blank forever. A network is a formula fitted to the pages you did fill, so an empty page still receives an answer, guessed from similar pages you did fill. The mental model is interpolation: nearby inputs get nearby outputs, even when only one of them was observed.</p>
+<p>In one line: <strong>stop storing one answer per state, start storing a function that produces answers.</strong> A 100×100 grid with 4 actions needs 40,000 stored numbers; a network with 4,096 weights answers all 40,000 questions and every question in between.</p>
 
 <h2>How it actually works</h2>
-<ul>
-  <li><strong>Table size</strong>: <code>|S| × |A|</code>. A 25-cell grid is trivial. An Atari frame is 210×160 pixels with 256 values each — more states than atoms in the observable universe.</li>
-  <li><strong>Approximation</strong> generalises: updating one state changes predictions for nearby states. That is the point — and the danger.</li>
-  <li><strong>The deadly triad</strong> (Sutton &amp; Barto): <strong>function approximation</strong> + <strong>bootstrapping</strong> + <strong>off-policy</strong> data can diverge. Any two are fine; all three together are not.</li>
-  <li><strong>Why</strong>: the target <code>r + γ max Q_θ(s′)</code> depends on the same weights you are updating. You are chasing a target that moves when you move — and approximation makes the error affect states you never visited.</li>
-  <li><strong>Supervised assumptions break</strong>: samples are correlated in time (not i.i.d.), the distribution shifts as the policy changes, and the label is a guess.</li>
-</ul>
+<p>Seven parts follow. Each one is a mechanism, and each depends on the part above it.</p>
 
-<span class="formula">Q(s,a) → Q_θ(s,a)     loss = ( r + γ max_{a′} Q_θ(s′,a′) − Q_θ(s,a) )²</span>
+<h3>Part 1 — One slot per state–action pair</h3>
+<p>Tabular Q-learning keeps one cell per state–action pair and writes an estimate into it. Learning is a write: compute the target, move that cell a fraction of the way toward it, leave every other cell alone. <strong>Why this part exists:</strong> the fixed address makes an update exact — with no slot per pair, one experience could not be attributed to one cause.</p>
+
+<h3>Part 2 — Count the slots first</h3>
+<p>The cost is <code>|S| × |A|</code> numbers. A 5×5 grid with 4 actions needs 25 × 4 = 100; a 100×100 grid needs 10,000 × 4 = 40,000, which is 320 KB at 8 bytes each. Pixels end the argument: a 210×160 colour frame at 256 levels holds 256<sup>100,800</sup> distinct states, because 210 × 160 × 3 = 100,800. <strong>Why this part exists:</strong> this arithmetic is the whole case for approximation.</p>
+
+<h3>Part 3 — Replace the table with a function</h3>
+<p>Write <code>Q_θ(s,a)</code>: a function with parameters θ that returns a number for any pair you hand it. A linear model is <code>Q(s) = w·s</code>; a network stacks such layers. Nothing is stored per state — the answer is computed on demand from θ. <strong>Why this part exists:</strong> a computed answer exists for unseen states, so one visit informs the neighbours.</p>
+
+<h3>Part 4 — Regress on a target you build</h3>
+<p>Supervised learning needs labels; RL supplies none, so you build one: <code>y = r + γ max Q_θ(s′,a′)</code>, reward plus the discounted best value of the next state. The loss is <code>(y − Q_θ(s,a))²</code>, and one gradient step nudges θ toward y. <strong>Why this part exists:</strong> no target means no error, and no error means nothing to differentiate.</p>
+
+<h3>Part 5 — The target moves with you</h3>
+<p><code>y</code> is made of <code>Q_θ</code> — the very θ the update is about to move. With <code>r = 1</code>, <code>γ = 0.9</code> and <code>max Q(s′) = 2.0</code> the target is 2.8; the step lifts <code>Q(s,a)</code>, and shared weights may lift <code>Q(s′)</code> to 2.2, dragging that target to 2.98. <strong>Why this part exists:</strong> seeing the target move stops you expecting the tidy loss curve of supervised learning.</p>
+
+<h3>Part 6 — Generalisation cuts both ways</h3>
+<p>Because outputs vary smoothly with inputs, one update shifts every nearby state's prediction. Good when neighbours behave alike, bad when they do not: two states with nearly identical features, needing 2 and 8, settle near 5 and never separate. <strong>Why this part exists:</strong> that is catastrophic interference, invisible in a table and easily misread as an optimiser bug.</p>
+
+<h3>Part 7 — The deadly triad</h3>
+<p>Sutton and Barto's triad is function approximation, bootstrapping, and off-policy data. Any two are safe; all three can diverge, because the moving target is steered by data from a policy you no longer follow. <strong>Why this part exists:</strong> it says which two you may keep, and therefore which of the topic 24 fixes you need.</p>
 
 <h2>Worked example</h2>
 
-<h3>1. Counting states</h3>
+<h3>1. Counting what you cannot store</h3>
+<p>Four actions means one Q-value per action per state. Multiply, then multiply by 8 bytes per float.</p>
+
 <table>
-  <tr><th>Environment</th><th class="num">State space</th><th>Table?</th></tr>
-  <tr><td>5×5 grid</td><td class="num">25</td><td>Trivial</td></tr>
-  <tr><td>Chess</td><td class="num">~10⁴⁴</td><td>Impossible</td></tr>
-  <tr><td>Atari frame (210×160×3, 256 levels)</td><td class="num">256¹⁰⁰⁸⁰⁰</td><td>Absurd</td></tr>
+  <tr><th>Environment</th><th class="num">States</th><th class="num">Q-values</th><th class="num">Memory</th></tr>
+  <tr><td>5×5 grid</td><td class="num">25</td><td class="num">25 × 4 = 100</td><td class="num">800 B</td></tr>
+  <tr><td>100×100 grid</td><td class="num">10,000</td><td class="num">10,000 × 4 = 40,000</td><td class="num">320 KB</td></tr>
+  <tr><td>Atari frame, 256 levels</td><td class="num">256<sup>100,800</sup></td><td class="num">× 4</td><td class="num">no machine</td></tr>
 </table>
 
-<h3>2. What generalisation buys — and costs</h3>
-<p>Two grid cells look identical to the network (same input features). Update one, and the other's value changes too. Usually that is helpful: experience transfers. But if the two cells need opposite values, the network averages them and neither is correct. That is <strong>catastrophic interference</strong>, and it is invisible in a table.</p>
+<p><strong>What to notice.</strong> The 100×100 grid is not the problem — 320 KB fits in a phone. Coverage is. At 60 frames per second, one hour of play is only 60 × 3,600 = 216,000 frames, and 90% of a 10,000-state grid needs 9,000 distinct visits before any cell is trained twice. Memory scales with the state space; experience does not, which is why the failure looks like a wall-colliding agent rather than a crash.</p>
+
+<h3>2. One update moves states you never visited</h3>
+<p>Linear value function <code>Q(s) = w·s</code>, one weight <code>w = 0.5</code>, learning rate <code>0.1</code>, discount <code>0.9</code>. The agent takes one transition: state 2, reward 1, next state 3.</p>
+
+<table>
+  <tr><th>Step</th><th>Arithmetic</th><th class="num">Value</th></tr>
+  <tr><td>Predict now</td><td class="num">0.5 × 2</td><td class="num">1.00</td></tr>
+  <tr><td>Value of next state</td><td class="num">0.5 × 3</td><td class="num">1.50</td></tr>
+  <tr><td>Target</td><td class="num">1 + 0.9 × 1.50</td><td class="num">2.35</td></tr>
+  <tr><td>TD error</td><td class="num">2.35 − 1.00</td><td class="num">1.35</td></tr>
+  <tr><td>Gradient of <code>Q</code> in <code>w</code></td><td class="num">s</td><td class="num">2</td></tr>
+  <tr><td>Update</td><td class="num">0.5 + 0.1 × 1.35 × 2</td><td class="num"><strong>0.77</strong></td></tr>
+</table>
+
+<p>Now score every state with the new weight. Only state 2 supplied data.</p>
+
+<table>
+  <tr><th class="num">State</th><th class="num">Before</th><th class="num">After</th><th class="num">Change</th></tr>
+  <tr><td class="num">1</td><td class="num">0.50</td><td class="num">0.77</td><td class="num">+0.27</td></tr>
+  <tr><td class="num">2</td><td class="num">1.00</td><td class="num">1.54</td><td class="num">+0.54</td></tr>
+  <tr><td class="num">3</td><td class="num">1.50</td><td class="num">2.31</td><td class="num">+0.81</td></tr>
+  <tr><td class="num">7</td><td class="num">3.50</td><td class="num">5.39</td><td class="num">+1.89</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> State 7 was never visited and moved further than the state that caused the update — 1.89 against 0.54, because the correction scales with <code>s</code>. Extrapolation is unbounded: it makes learning fast and lets one unlucky transition corrupt a whole region. A table would have changed exactly one of those four numbers.</p>
+
+<h3>3. Two states that collide</h3>
+<p>States A and B produce nearly the same features, so the network emits one value for both. A needs 2, B needs 8. Squared error is the training signal, so try three candidate outputs:</p>
+
+<table>
+  <tr><th class="num">Output</th><th class="num">Error on A (2)</th><th class="num">Error on B (8)</th><th class="num">Squared loss</th></tr>
+  <tr><td class="num">4.0</td><td class="num">2.0</td><td class="num">−4.0</td><td class="num">4 + 16 = 20.0</td></tr>
+  <tr><td class="num">4.5</td><td class="num">2.5</td><td class="num">−3.5</td><td class="num">6.25 + 12.25 = 18.5</td></tr>
+  <tr><td class="num">5.0</td><td class="num">3.0</td><td class="num">−3.0</td><td class="num">9 + 9 = 18.0</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The loss keeps falling to 5.0 — the midpoint — and would rise again in either direction. Training has not failed; it found the exact optimum of an impossible request. Better parameters cannot fix it, because the input holds nothing that separates A from B. Only richer features can, and that is a design decision.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"A neural network is just a big table with better memory."</strong> It is a smooth function over all inputs. That smoothness is an assumption — and if the true value function is discontinuous, approximation will average across the discontinuity and never represent it.</p>
-  <p><strong>Second trap:</strong> assuming RL convergence proofs survive the swap. Tabular Q-learning converges to <code>Q*</code>; with approximation and off-policy bootstrapping, it can oscillate or diverge. DQN's fixes (topic 24) are engineering, not a proof.</p>
+  <p><strong>"A neural network is just a big table with better memory."</strong> It feels right because both map a state to a number, and a network is bigger. But a table claims nothing about unvisited states; a network does, and that claim is an assumption of smoothness built into its architecture.</p>
+  <p>If the true value function jumps — a cliff worth −100 one cell from a corridor worth +1 — the network averages across the jump and represents neither side. You call it underfitting and add layers, which makes the smooth fit smoother still.</p>
+  <p><strong>Correction:</strong> approximation buys coverage of unseen states at the cost of a smoothness assumption and the tabular convergence proof. Neither returns with more training; both return with better features or with the engineering in topic 24.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["A table needs one number per state, and pixels give too many states.", "Replace the table with a function that generalises to unseen states.", "Now updating one state also shifts nearby predictions.", "The target uses the same weights you are updating, so it moves as you move.", "Approximation + bootstrapping + off-policy data can diverge: the deadly triad."]</script></div>
+<p><strong>The tell:</strong> training loss falls on visited states while the policy still fails at one specific pair you can name, and the loss flattens at a nonzero floor that more epochs never cross. The second tell is a reward curve that climbs for two million steps then collapses — divergence, not a plateau, and the signature of the triad rather than of a bad learning rate.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

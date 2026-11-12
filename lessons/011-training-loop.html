@@ -24,10 +24,12 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">This is the loop you will run hundreds of times in your project. Ninety percent of "my model doesn't work" is one of four mistakes inside these five lines, and all four are visible in the loss curve.</p>
+<p class="lede">The training loop is five moves repeated until the loss stops falling, and every model in the rest of this course runs it unchanged. Learn it once and experiments become edits to a single line.</p>
+<p>It is also where most first runs die, for four reasons that are all visible in the curve. The exam version is pure counting: "50,000 examples, batch 250, eight epochs — how many parameter updates?" The project version is a loss flat at <code>0.693</code> on a binary task, because the model outputs <code>0.5</code> for everything and has not moved at all. Neither question needs the architecture; both need the loop.</p>
 
 <h2>The one core idea</h2>
-<p>Training is a fixed cycle: <strong>forward → loss → backward → step → zero the gradients</strong>, repeated over shuffled batches. The learning rate is the only number that reliably decides whether it works.</p>
+<p>The loop is a thermostat with a fixed routine: look at a batch, measure the error, find the slope, nudge every weight a little, clear the slate. Nothing clever happens here — the information is in the gradients, and the loop only decides how far to step.</p>
+<p>In one line: <strong>forward, loss, backward, step, zero.</strong> With <code>η = 0.05</code> and <code>∂L/∂w = −32</code>, the update is <code>w ← w − 0.05(−32) = w + 1.6</code>.</p>
 
 <h2>How it actually works</h2>
 <pre class="formula" style="text-align:left"><code>for x, y in loader:          # one batch
@@ -37,43 +39,87 @@
     opt.step()               # w ← w − η∇w
     opt.zero_grad()          # reset, or gradients add up</code></pre>
 
-<table>
-  <tr><th>Term</th><th>Meaning</th></tr>
-  <tr><td>Batch</td><td>Subset of data in one step. Size trades noise for speed.</td></tr>
-  <tr><td>Step</td><td>One parameter update. <code>steps = epochs × n / batch</code></td></tr>
-  <tr><td>Epoch</td><td>One pass over the whole dataset.</td></tr>
-  <tr><td>Learning rate η</td><td>Step size. Too high → divergence; too low → glacial.</td></tr>
-</table>
+<h3>Part 1 — Shuffle, then slice a batch</h3>
+<p>The loader permutes the dataset and hands you 32 or 100 rows at a time. Shuffling matters because consecutive examples are often correlated — sorted by class or by date — and a batch of one class produces a gradient for that class only. One pass over all 10,000 examples at batch 100 gives 100 slices.
+<strong>Why this part exists:</strong> without the shuffle the model learns the ordering of the file, and the loss oscillates with the sort order rather than with the data.</p>
+
+<h3>Part 2 — Forward: predict for the whole batch</h3>
+<p><code>pred = model(x)</code> runs topic 9's forward pass on all rows at once and returns one prediction per example. For a batch of 100 with 10 classes that is a <code>100 × 10</code> matrix, not 100 separate calls. <strong>Why this part exists:</strong> the batch is where the speed comes from; a Python loop over examples would run the same maths a hundred times slower.</p>
+
+<h3>Part 3 — Loss: collapse the batch to one number</h3>
+<p>The criterion compares the 100 predictions with the 100 labels and averages, so <code>loss</code> is a single scalar with one gradient. Cross-entropy — the standard classification loss — at a predicted probability of <code>0.5</code> gives <code>0.693</code>; at <code>0.9</code> it gives <code>0.105</code>. <strong>Why this part exists:</strong> one number is what backward needs — a vector loss could not be minimised, because "smaller in every coordinate" is not a direction.</p>
+
+<h3>Part 4 — Backward fills a gradient per parameter</h3>
+<p><code>loss.backward()</code> runs topic 10's sweep and writes <code>.grad</code> on every weight and bias. The values are accumulated into those slots rather than replacing them, which is a detail that matters in Part 6. For the single weight above, <code>∂L/∂w = −32</code> arrives in <code>w.grad</code>.
+<strong>Why this part exists:</strong> the gradients are the only thing that says which direction each of a million weights should move.</p>
+
+<h3>Part 5 — Step: move against the slope</h3>
+<p><code>opt.step()</code> applies <code>w ← w − η·∂L/∂w</code> to every parameter, using one shared <code>η</code> — the learning rate, or step size. With <code>η = 0.05</code> and a gradient of <code>−32</code> the weight grows by <code>1.6</code>. Too large an <code>η</code> overshoots the minimum and the loss climbs; too small and the run finishes before anything is learned.
+<strong>Why this part exists:</strong> the gradients give a direction but not a distance, and <code>η</code> is the only knob that supplies the distance.</p>
+
+<h3>Part 6 — Zero the gradients before the next batch</h3>
+<p><code>opt.zero_grad()</code> sets every <code>.grad</code> back to zero so the next <code>backward()</code> starts clean. PyTorch adds by default, so skipping this makes step <em>t</em> use the sum of gradients from steps 1 to <em>t</em>. <strong>Why this part exists:</strong> without the reset the effective step size grows with every batch, and a run that was stable for 50 steps diverges at 200.</p>
+
+<h3>Part 7 — Repeat: epochs become steps</h3>
+<p>One epoch is one pass over the dataset, so <code>steps = epochs × n / batch</code>. Ten thousand examples at batch 100 for 20 epochs is <code>20 × 100 = 2,000</code> updates — and at batch 1,000 the same 20 epochs is only 200 updates. <strong>Why this part exists:</strong> "I trained for 20 epochs" says nothing until you know the batch size, and most "it learned nothing" reports are simply too few updates.</p>
 
 <h2>Worked example</h2>
 
 <h3>1. Sizing a run</h3>
-<p>10,000 training examples, batch 100 → <strong>100 steps per epoch</strong>. Twenty epochs → 2,000 updates. At batch 1,000 you get 10 steps per epoch and 200 total: 10× fewer updates, 10× less noise per step.</p>
+<p>10,000 training examples, 20 epochs, three batch sizes. The update count is the number that actually governs learning.</p>
 
-<h3>2. Reading the curve</h3>
+<table>
+  <tr><th>Batch size</th><th class="num">Steps per epoch</th><th class="num">Updates in 20 epochs</th></tr>
+  <tr><td>1</td><td class="num">10,000 / 1 = 10,000</td><td class="num">200,000</td></tr>
+  <tr><td>100</td><td class="num">10,000 / 100 = 100</td><td class="num">2,000</td></tr>
+  <tr><td>1,000</td><td class="num">10,000 / 1,000 = 10</td><td class="num">200</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The middle row is the usual starting point: 2,000 updates is enough for a small model to converge, and averaging 100 examples keeps each step's gradient quiet. The last row is 10× fewer updates and 10× less noise per step, which is why large batches need more epochs or a higher learning rate to reach the same place.</p>
+
+<h3>2. Three iterations on one weight</h3>
+<p>One weight, one fixed input <code>x = 2</code>, target <code>y = 10</code>, so <code>pred = 2w</code> and <code>L = (2w − 10)²</code>. The gradient is <code>4(2w − 10)</code>. Start at <code>w = 1</code> with <code>η = 0.05</code> and run the loop by hand.</p>
+
+<table>
+  <tr><th>Iteration</th><th class="num">pred = 2w</th><th class="num">L = (pred−10)²</th><th class="num">∂L/∂w</th><th class="num">New w = w − 0.05·grad</th></tr>
+  <tr><td>start</td><td class="num">2</td><td class="num">64</td><td class="num">4(−8) = −32</td><td class="num">1 + 1.6 = 2.6</td></tr>
+  <tr><td>2</td><td class="num">5.2</td><td class="num">23.04</td><td class="num">4(−4.8) = −19.2</td><td class="num">2.6 + 0.96 = 3.56</td></tr>
+  <tr><td>3</td><td class="num">7.12</td><td class="num">8.2944</td><td class="num">4(−2.88) = −11.52</td><td class="num">3.56 + 0.576 = 4.136</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The target weight is <code>5</code>, because <code>2(5) = 10</code>. Each iteration multiplies the error by <code>0.6</code> — <code>8 → 4.8 → 2.88</code> — so the loss falls geometrically and never quite reaches zero. Nothing here "decides" to stop; the loop simply ends when the epoch count runs out, or when the improvement per step drops below what you care about.</p>
+
+<h3>3. Where 0.693 comes from</h3>
+<p>Binary cross-entropy is <code>−ln(p)</code> for a positive example. The loss of a model that predicts the same probability for everything depends only on that probability.</p>
+
+<table>
+  <tr><th>Predicted p</th><th>Computation</th><th class="num">Loss</th></tr>
+  <tr><td>0.5</td><td class="num">−ln 0.5</td><td class="num">0.693</td></tr>
+  <tr><td>0.9</td><td class="num">−ln 0.9</td><td class="num">0.105</td></tr>
+  <tr><td>0.1</td><td class="num">−ln 0.1</td><td class="num">2.303</td></tr>
+</table>
+
+<p>A flat <code>0.693</code> therefore means <code>p = 0.5</code> everywhere: the model outputs the uniform prediction and has learned nothing about the input. Any model that answers 0.5 to every example lands on this number, whatever the true class balance, which is why it is the value to memorise.</p>
+
+<p>The curve's shape is the diagnosis, and each shape has one action:</p>
+
 <table>
   <tr><th>Curve</th><th>Diagnosis</th><th>Action</th></tr>
   <tr><td>Falls, then rises</td><td>Overfitting</td><td>Early stop, regularise</td></tr>
-  <tr><td>Spikes to NaN</td><td>η too high</td><td>÷10, add warmup</td></tr>
-  <tr><td>Dead flat at <code>−ln(1/C)</code></td><td>Uniform output</td><td>Check lr, labels, zero_grad</td></tr>
-  <tr><td>Falls then plateaus high</td><td>Underfit</td><td>Capacity ↑, schedule η ↓</td></tr>
+  <tr><td>Spikes to NaN</td><td><code>η</code> too high</td><td>÷10, add warmup</td></tr>
+  <tr><td>Dead flat at 0.693</td><td>Uniform output</td><td>Check learning rate, labels, <code>zero_grad</code></td></tr>
+  <tr><td>Falls then plateaus high</td><td>Underfit</td><td>More capacity, decay <code>η</code></td></tr>
 </table>
 
-<p>A flat loss of 0.693 on a binary task is <code>−ln 0.5</code>: the model outputs 0.5 for everything. It is not "slow", it is not moving at all.</p>
-
-<h3>3. The learning-rate ladder</h3>
-<p>When nothing works, try <code>η ∈ {1e-2, 1e-3, 1e-4}</code> before changing architecture. A factor-of-10 sweep finds the order of magnitude in three runs; refinement after that is noise-chasing.</p>
+<p><strong>What to notice.</strong> Two rows are learning-rate problems, which is why the first experiment is a ladder — <code>η</code> in <code>{1e-2, 1e-3, 1e-4}</code>. A factor-of-ten sweep finds the order of magnitude in three runs. The flat row is different: a loss that never leaves 0.693 is not slow, it is stationary.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"The optimizer remembers nothing, so zeroing is cosmetic."</strong> PyTorch accumulates gradients by default. Skip <code>zero_grad()</code> and each step uses the sum of all previous batches' gradients — a different, usually worse, algorithm.</p>
-  <p><strong>Second trap:</strong> measuring accuracy in <code>train()</code> mode. Dropout and batch norm behave differently at inference; forgetting <code>model.eval()</code> makes your validation number wrong, not just noisy.</p>
+  <p><strong>"The optimizer resets itself each step, so zeroing is cosmetic."</strong> It feels right because every iteration prints the same loss and the code looks symmetric: one backward, one step.</p>
+  <p><strong>Correction:</strong> <code>.grad</code> is a buffer that <code>backward()</code> adds into, so step <em>t</em> uses the sum of the gradients from steps 1 to <em>t</em>. The algorithm you are running is no longer gradient descent but a running sum, and its effective learning rate grows linearly with the step count.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Shuffle the data and cut it into batches.", "For each batch: forward, loss, backward, step, zero the gradients.", "An epoch is one pass; steps = epochs × examples ÷ batch size.", "Watch the loss: falling means learning, flat means something is disconnected.", "If it rises or hits NaN, divide the learning rate by ten and retry."]</script></div>
+<p><strong>The tell:</strong> the loss falls for a few dozen steps, then gets jumpy or turns to NaN while the data and architecture are unchanged — and the first batch always behaves. Accumulation is also deliberate in gradient accumulation, so check the intent before deleting the line: two micro-batches of 16 with one <code>step()</code> approximates one batch of 32, but only if <code>zero_grad</code> comes after the step.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

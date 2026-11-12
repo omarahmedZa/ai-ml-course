@@ -24,18 +24,36 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Every training loop in this course — backprop, Q-learning, PPO — is the same sentence: measure the slope, step the other way. If the gradient is a mystery, every optimizer you meet is a mystery too.</p>
+<p class="lede">Every training loop in this course — backprop, Q-learning, PPO — is the same sentence: measure the slope, step the other way. PyTorch reduces it to two lines, <code>loss.backward()</code> then <code>p ← p − η · p.grad</code>, and every optimizer you meet is a variation on how far to trust the second one.</p>
+<p>The failure this prevents is a run that looks alive and is not. On <code>f(w) = w²</code> with <code>η = 10</code> instead of <code>0.1</code>, one step takes <code>w = 3</code> to <code>3 − 10(6) = −57</code> and the loss from 9 to 3,249, then keeps multiplying until it overflows; the traceback names a matrix multiply, never the learning rate. The same two lines settle the exam question <em>"<code>f(w) = 3w²</code> at <code>w = 2</code>, one step at <code>η = 0.1</code>"</em>: the slope is <code>6w = 12</code>, so <code>w ← 2 − 1.2 = 0.8</code>.</p>
 
 <h2>The one core idea</h2>
-<p>A <strong>gradient</strong> is the slope of the loss with respect to every parameter at once. It points uphill, so learning means stepping downhill — subtract it.</p>
+<p>Stand on a hillside in fog. You cannot see the valley, but you can feel which way the ground tilts under one boot. A <strong>gradient</strong> is that reading taken at every knob at once: one slope per parameter, each answering "if I turn this alone, how fast does the loss change?" A thousand knobs give a thousand slopes that still describe one direction — the steepest way up.</p>
+<p>In one line: <strong>the gradient is the uphill direction, so learning is a subtraction, repeated.</strong> On <code>f(w) = w²</code> at <code>w = 3</code> the slope is <code>2w = 6</code>; with <code>η = 0.1</code> the step is <code>3 − 0.6 = 2.4</code> and the loss falls 9 → 5.76. At <code>w = 1</code> the slope is only 2, so the same <code>η</code> buys a quarter of the drop.</p>
 
 <h2>How it actually works</h2>
-<ul>
-  <li><strong>Derivative</strong> = local slope of a 1-D function: <code>(f(w+h) − f(w)) / h</code> as <code>h → 0</code>. It answers "if I nudge <code>w</code>, how much does <code>f</code> move?"</li>
-  <li><strong>Partial derivative</strong> = the same question with every other variable frozen.</li>
-  <li><strong>Gradient</strong> <code>∇f</code> = the vector of all partials. Its direction is steepest <em>ascent</em>; its length is how steep.</li>
-  <li><strong>The update:</strong> <code>w ← w − η∇f</code>. <code>η</code> is the <strong>learning rate</strong> — how far you trust the slope.</li>
-</ul>
+<p>Seven parts. Each one fixes a problem the previous part leaves open.</p>
+
+<h3>Part 1 — A slope is a ratio of two changes</h3>
+<p>Slope is rise over run, <code>Δf / Δw</code>. Between <code>w = 1</code> and <code>w = 3</code> on <code>f(w) = w²</code> the output goes 1 → 9, so the average slope is <code>8 / 2 = 4</code>. That describes the interval, not the point where a step begins. Why this part exists: an interval average can carry the wrong sign — fall then rise, and it reads near zero while the ground under your feet is steep.</p>
+
+<h3>Part 2 — Shrink the interval until the ratio settles</h3>
+<p>Pick a small <code>h</code> and compute <code>(f(w+h) − f(w)) / h</code>: at <code>w = 3</code>, <code>h = 0.01</code> gives 6.01 and <code>h = 0.001</code> gives 6.001. The sequence homes in on 6, the <strong>derivative</strong>, and for <code>w²</code> the algebra says the answer is <code>2w</code> at every point. Why this part exists: stopping early ties the answer to an arbitrary <code>h</code> — <code>h = 1</code> gives 7 — and that error would never wash out of the step size.</p>
+
+<h3>Part 3 — Freeze every other knob</h3>
+<p>A <strong>partial derivative</strong> <code>∂f/∂x</code> nudges <code>x</code> with every other variable frozen. On <code>f(x, y) = x² + 3y</code> at <code>(2, 1)</code>, <code>∂f/∂x = 2x = 4</code> and <code>∂f/∂y = 3</code>; the second never shrinks, so no value of <code>y</code> settles there. Why this part exists: turn two knobs at once and the change belongs to neither, so you cannot tell which one to fix.</p>
+
+<h3>Part 4 — Stack the partials into one vector</h3>
+<p>The gradient <code>∇f</code> stacks the partials in a fixed order: <code>∇f(2, 1) = (4, 3)</code>. One entry per parameter, in the same order as the parameter vector — topic 1's shape rule on a new object. Why this part exists: swap the entries and training improves the wrong parameter silently, with no error and no learning.</p>
+
+<h3>Part 5 — The vector points uphill</h3>
+<p>Its direction is the steepest increase available and its length is the rate along it. At <code>(2, 1)</code>, <code>(4, 3)</code> means push <code>x</code> four units of slope for every three of <code>y</code>. Along the level curve <code>f = 7</code> nothing changes, so the gradient is perpendicular to it, aimed straight uphill. Why this part exists: without that guarantee you would probe directions one at a time instead of taking the best one immediately.</p>
+
+<h3>Part 6 — Subtract it, scaled by a learning rate</h3>
+<p>The update is <code>w ← w − η∇f</code>, where the <strong>learning rate</strong> <code>η</code> is how far you trust the slope. For <code>f(x, y) = x² + 3y</code> at <code>(2, 1)</code> with <code>η = 0.1</code>: <code>(2, 1) − 0.1(4, 3) = (1.6, 0.7)</code>. Why this part exists: adding climbs; and a step of 1 here lands symmetrically on the far side of the valley with the loss unchanged.</p>
+
+<h3>Part 7 — Repeat, and watch the slope rather than the loss</h3>
+<p>Training is part 6 in a loop. On <code>w²</code> each step multiplies the distance to zero by <code>1 − 2η</code>; with <code>η = 0.1</code> that is 0.8, giving 3 → 2.4 → 1.92 → 1.536. Convergence is geometric and needs <code>η &lt; 1</code> here. Why this part exists: one step proves nothing — shrinking slopes mean convergence, constant means a runaway direction, growing means divergence, and the loss alone cannot separate "slow" from "no minimum".</p>
 
 <table>
   <tr><th>Rule</th><th>Result</th><th>Example</th></tr>
@@ -44,44 +62,56 @@
   <tr><td>Chain</td><td class="num">d/dw f(g(w)) = f′(g(w))·g′(w)</td><td class="num">d/dw (2w)² = 8w</td></tr>
 </table>
 
-<p>In deep learning <code>f</code> is the loss over millions of parameters. Backprop (topic 10) computes that whole gradient in one backward pass — it is bookkeeping on the chain rule, not a new kind of math.</p>
-
 <h2>Worked example</h2>
 
-<h3>1. One parameter</h3>
-<p><code>f(w) = w²</code>, so <code>f′(w) = 2w</code>. Start at <code>w = 3</code>, <code>η = 0.1</code>:</p>
+<h3>1. One parameter, four steps</h3>
+<p><code>f(w) = w²</code>, so <code>f′(w) = 2w</code>. Start at <code>w = 3</code>, <code>η = 0.1</code>. Every step is written out, so the arithmetic can be checked rather than trusted.</p>
 
 <table>
-  <tr><th>Step</th><th class="num">w</th><th class="num">gradient = 2w</th><th class="num">loss = w²</th></tr>
-  <tr><td>start</td><td class="num">3.00</td><td class="num">6.00</td><td class="num">9.00</td></tr>
-  <tr><td>1</td><td class="num">2.40</td><td class="num">4.80</td><td class="num">5.76</td></tr>
-  <tr><td>2</td><td class="num">1.92</td><td class="num">3.84</td><td class="num">3.69</td></tr>
+  <tr><th>Step</th><th class="num">w</th><th class="num">gradient 2w</th><th class="num">change −0.1·grad</th><th class="num">loss w²</th></tr>
+  <tr><td>start</td><td class="num">3.0000</td><td class="num">6.0000</td><td class="num">—</td><td class="num">9.0000</td></tr>
+  <tr><td>1</td><td class="num">2.4000</td><td class="num">4.8000</td><td class="num">−0.6000</td><td class="num">5.7600</td></tr>
+  <tr><td>2</td><td class="num">1.9200</td><td class="num">3.8400</td><td class="num">−0.4800</td><td class="num">3.6900</td></tr>
+  <tr><td>3</td><td class="num">1.5360</td><td class="num">3.0720</td><td class="num">−0.3072</td><td class="num">2.3593</td></tr>
+  <tr><td>4</td><td class="num">1.2288</td><td class="num">2.4576</td><td class="num">−0.2458</td><td class="num">1.5100</td></tr>
 </table>
 
-<p>The step shrinks as the slope flattens. That is why gradient descent slows near a minimum instead of overshooting it.</p>
+<p><strong>What to notice.</strong> Each change is exactly one tenth of that row's gradient, so the step shrinks as the slope flattens — that is why descent slows near the bottom instead of overshooting. The loss never reverses: 9 → 5.76 → 3.69 → 2.36 → 1.51. After four steps <code>w</code> has covered 59% of the distance to zero while the loss has fallen 83%, because loss scales with the square.</p>
 
-<h3>2. Two parameters</h3>
-<p><code>f(x, y) = x² + 3y</code> at <code>(2, 1)</code>:</p>
+<h3>2. Two parameters, three steps</h3>
+<p><code>f(x, y) = x² + 3y</code> at <code>(2, 1)</code> with <code>η = 0.1</code>. One gradient, two numbers, two separate lines in the update.</p>
 
 <table>
-  <tr><th>Partial</th><th class="num">Value at (2,1)</th></tr>
-  <tr><td>∂f/∂x = 2x</td><td class="num">4</td></tr>
-  <tr><td>∂f/∂y = 3</td><td class="num">3</td></tr>
-  <tr><td>∇f</td><td class="num">(4, 3)</td></tr>
+  <tr><th>Step</th><th class="num">x</th><th class="num">y</th><th class="num">∂f/∂x = 2x</th><th class="num">∂f/∂y = 3</th><th class="num">loss</th></tr>
+  <tr><td>start</td><td class="num">2.000</td><td class="num">1.000</td><td class="num">4.000</td><td class="num">3.000</td><td class="num">4.00 + 3.00 = 7.00</td></tr>
+  <tr><td>1</td><td class="num">1.600</td><td class="num">0.700</td><td class="num">3.200</td><td class="num">3.000</td><td class="num">2.56 + 2.10 = 4.66</td></tr>
+  <tr><td>2</td><td class="num">1.280</td><td class="num">0.400</td><td class="num">2.560</td><td class="num">3.000</td><td class="num">1.64 + 1.20 = 2.84</td></tr>
+  <tr><td>3</td><td class="num">1.024</td><td class="num">0.100</td><td class="num">2.048</td><td class="num">3.000</td><td class="num">1.05 + 0.30 = 1.35</td></tr>
 </table>
 
-<p>With <code>η = 0.1</code>: <code>(2, 1) → (1.6, 0.7)</code>. Loss moves from <code>4 + 3 = 7</code> to <code>2.56 + 2.1 = 4.66</code>. Check the direction: <code>y</code> felt a constant push of 3, so it moves every step until it hits a boundary — <code>f</code> is linear in <code>y</code>, with no minimum there.</p>
+<p><strong>What to notice.</strong> The <code>y</code> column drops by exactly 0.3 every step, forever, because its partial is a constant 3 — <code>f</code> is linear in <code>y</code> and has no minimum there. The <code>x</code> column behaves like example 1 and would settle at 0. Two parameters, two fates, and the gradient column names which is which before either finishes.</p>
+
+<h3>3. The same function with <code>η = 1.1</code></h3>
+<p>Change nothing but the learning rate. <code>w = 3</code>, <code>f(w) = w²</code>.</p>
+
+<table>
+  <tr><th>Step</th><th class="num">gradient 2w</th><th class="num">change −1.1·grad</th><th class="num">new w</th><th class="num">loss w²</th></tr>
+  <tr><td>start</td><td class="num">6.000</td><td class="num">—</td><td class="num">3.000</td><td class="num">9.00</td></tr>
+  <tr><td>1</td><td class="num">6.000</td><td class="num">−6.600</td><td class="num">−3.600</td><td class="num">12.96</td></tr>
+  <tr><td>2</td><td class="num">−7.200</td><td class="num">+7.920</td><td class="num">4.320</td><td class="num">18.66</td></tr>
+  <tr><td>3</td><td class="num">8.640</td><td class="num">−9.504</td><td class="num">−5.184</td><td class="num">26.87</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The step changes sign every row and grows by 1.2 each time, so the loss grows by <code>1.2² = 1.44</code>. No gradient here is wrong; each was measured correctly at the point it was used. The learning rate turned a right direction into a wrong-sized step, and the sign flip is the fingerprint: <code>1 − 2η = −1.2</code> is negative.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"The gradient points downhill."</strong> It points <em>uphill</em> — toward increasing loss. Adding the gradient makes training worse, which is exactly why the update has a minus sign.</p>
-  <p><strong>Second trap: too large a step.</strong> On <code>f(w) = w²</code> with <code>η = 1</code>, <code>w = 3 → 3 − 6 = −3</code>, and the loss returns to 9. Repeat forever: the parameters oscillate and nothing converges.</p>
+  <p><strong>"The gradient points downhill."</strong> It feels right for two reasons: the algorithm is called descent, and the code contains a minus sign, so the minus gets attached to the gradient instead of to the step. The arrow in every diagram points at the valley, and that arrow is <code>−∇f</code>.</p>
+  <p>At <code>w = 3</code> on <code>w²</code> the gradient is <code>+6</code>, and the loss is <em>rising</em> in that direction: add it with <code>η = 0.1</code> and you land at 3.6 with loss 12.96.</p>
+  <p><strong>Correction:</strong> <code>∇f</code> is steepest <em>ascent</em>. The descent direction is <code>−∇f</code>, and the minus lives in the update rule, not in the vector.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["A derivative is a local slope: move w by a tiny amount and the loss moves by (2w) times that amount.", "The gradient collects those slopes for every parameter at once, so it points uphill.", "Subtract a small multiple of it: w ← w − 0.1 × gradient. The loss goes down.", "As the slope flattens near the bottom, the steps shrink on their own.", "If the step is too large it jumps across the valley: watch the loss, not the formula."]</script></div>
+<p><strong>The tell:</strong> the loss climbs from step one while the gradient magnitude <em>shrinks</em> — smooth, monotone, no oscillation, because you are walking uphill and the ground gets gentler. Compare example 3, where a too-large rate also raises the loss but flips the step's sign each row and grows. If flipping one character in the update fixes training, it was never the learning rate.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

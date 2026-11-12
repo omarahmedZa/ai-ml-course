@@ -25,56 +25,86 @@
 
 <h2>Why this matters</h2>
 <p class="lede">PPO is the default algorithm behind robot control, game agents, and the RLHF step that made chat models usable. If you understand three upgrades to REINFORCE, you understand all of it.</p>
+<p>You need this the moment actions are continuous — a torque, a joint angle, a throttle — because "take the max over a discrete table" has nothing to maximise. Policy gradient instead moves the probabilities themselves, which is why it also powers the fine-tuning of language models, where the "action" is a token. Two failures it prevents. The exam failure: <em>"Subtract a baseline from the return. Prove the gradient is still unbiased, then say what did change."</em> The proof is one line of algebra; the answer is variance, and "bias" loses the mark. The project failure: you run REINFORCE on returns spanning 0 to 100, one lucky episode returns 100 instead of 40, and the next update moves the policy so far that it never recovers. The gradient was correct and the step size was not.</p>
 
 <h2>The one core idea</h2>
-<p>REINFORCE is correct but enormously noisy: one rollout estimates the gradient. Each upgrade — <strong>baseline</strong>, <strong>critic</strong>, <strong>clipping</strong> — reduces variance or prevents destructive updates without changing the objective.</p>
+<p>Estimating a gradient from one rollout is an opinion poll of size one. The poll is unbiased — run it a million times and the average is right — but any single result can be wildly off, and you act on that single result. Every upgrade in this lesson leaves the average untouched and shrinks the spread around it.</p>
+<p>In one line: <strong>same expected gradient, smaller variance.</strong> A state where all actions return 100 contributes a weight of 100 and no information; subtract <code>V(s) = 100</code> and it contributes 0, while a state returning 0 or 40 contributes −50 or −10.</p>
 
 <h2>How it actually works</h2>
-<span class="formula">∇J(θ) = E[ ∇_θ log π_θ(a|s) · A(s,a) ]</span>
+<p>Seven parts follow, each one an upgrade stacked on the last.</p>
 
-<table>
-  <tr><th>Stage</th><th>Change</th><th>Fixes</th></tr>
-  <tr><td>REINFORCE</td><td>Weight by return <code>G_t</code></td><td>Nothing — high variance</td></tr>
-  <tr><td>+ baseline</td><td>Weight by <code>G_t − b(s)</code></td><td>Variance; <code>b</code> can be any function of state</td></tr>
-  <tr><td>Actor–critic (A2C)</td><td><code>b = V_φ(s)</code>, learned</td><td>Variance further; adds bias</td></tr>
-  <tr><td>+ GAE</td><td>Blend 1-step and n-step advantages with λ</td><td>Bias–variance tuning</td></tr>
-  <tr><td>PPO</td><td>Clip the probability ratio to <code>[1−ε, 1+ε]</code></td><td>Prevents a big, destructive update</td></tr>
-</table>
+<h3>Part 1 — Parameterise the policy itself</h3>
+<p>The network outputs a probability per action, <code>π_θ(a|s)</code>; for continuous control, the mean and spread of a Gaussian you then sample from. There is no value table to consult — the network's output <em>is</em> the behaviour. <strong>Why this part exists:</strong> a gradient needs something to differentiate, and behaviour is only differentiable once it is written as a function of θ.</p>
 
-<ul>
-  <li><strong>Why a baseline is free</strong>: subtracting a state-dependent constant does not change the expected gradient, because <code>Σ_a π(a|s)∇log π(a|s) = 0</code>. It only removes variance.</li>
-  <li><strong>Advantage</strong> <code>A = Q − V</code>: "how much better than average was this action here".</li>
-  <li><strong>PPO objective</strong>: <code>min(r_t A, clip(r_t, 1−ε, 1+ε) A)</code>, where <code>r_t = π_new/π_old</code>. ε is typically 0.2.</li>
-  <li><strong>On-policy</strong>: after the update, the data is stale. PPO squeezes a few epochs out of it, then throws it away.</li>
-</ul>
+<h3>Part 2 — The score function says "more likely"</h3>
+<p><code>∇_θ log π_θ(a|s)</code> is the direction in weight space that raises the probability of the action just taken, measured at the current weights. It has the same shape as θ, so it can be added to θ directly. <strong>Why this part exists:</strong> it converts "that action was good" into a concrete nudge, and it never needs a derivative of the environment.</p>
+
+<h3>Part 3 — Weight the nudge by the return</h3>
+<p>The estimator is <code>E[∇log π · G_t]</code>: push up actions that returned a lot, push down actions that returned little. This is REINFORCE in full, and it is unbiased. <strong>Why this part exists:</strong> unweighted, every action would be pushed up equally, which changes nothing except the sharpness of the distribution.</p>
+
+<h3>Part 4 — A baseline removes the state's own value</h3>
+<p>Subtract <code>b(s)</code>, any function of state alone: <code>E[∇log π (G − b(s))]</code>. Because <code>Σ_a π(a|s)∇log π(a|s) = 0</code>, the expectation does not move; only the spread around it shrinks. <strong>Why this part exists:</strong> the 100-everywhere state above contributes 100 of weight and zero learning signal.</p>
+
+<h3>Part 5 — A critic learns the baseline</h3>
+<p>Set <code>b = V_φ(s)</code>, a second network trained by regression on observed returns. Then <code>G − V</code> is the advantage: how much better than this state's average the action was. <strong>Why this part exists:</strong> a hand-set baseline cannot follow a policy that improves, and the critic can — paying for it with bias whenever <code>V_φ</code> is wrong.</p>
+
+<h3>Part 6 — GAE blends one step with many</h3>
+<p>A one-step advantage has low variance and high bias; a full-episode return has the reverse. GAE mixes them: <code>A = δ_t + γλδ_{t+1} + (γλ)²δ_{t+2} + …</code>, where δ is a one-step TD error. <strong>Why this part exists:</strong> λ = 0 hands you the critic's guess and λ = 1 the raw return, so one dial replaces an argument about which is right.</p>
+
+<h3>Part 7 — Clip the ratio</h3>
+<p>PPO maximises <code>min(rA, clip(r, 1−ε, 1+ε)A)</code> with <code>r = π_new/π_old</code> and <code>ε = 0.2</code>. Inside the band this is the ordinary policy gradient; outside, the objective goes flat and further movement buys nothing. <strong>Why this part exists:</strong> on-policy data is used once, so a single destructive step wastes the whole rollout that produced it.</p>
 
 <h2>Worked example</h2>
 
-<h3>1. The clip, concretely</h3>
-<p><code>ε = 0.2</code>, advantage positive (the action was good), ratio <code>r = 1.3</code>:</p>
+<h3>1. What a baseline removes, in numbers</h3>
+<p>Two states, two actions each. In the easy state every action returns 100, so there is nothing to learn there. In the hard state the actions return 40 and 0. Use each state's own average as the baseline.</p>
 
 <table>
-  <tr><th>Term</th><th class="num">Value</th></tr>
-  <tr><td>Unclipped</td><td class="num">1.3 × A</td></tr>
-  <tr><td>Clipped</td><td class="num">1.2 × A</td></tr>
-  <tr><td>Objective (min)</td><td class="num">1.2 × A</td></tr>
+  <tr><th>State</th><th>Action</th><th class="num">Return G</th><th class="num">b(s)</th><th class="num">G − b</th><th class="num">(G − b)²</th></tr>
+  <tr><td>easy</td><td>a1</td><td class="num">100</td><td class="num">100</td><td class="num">0</td><td class="num">0</td></tr>
+  <tr><td>easy</td><td>a2</td><td class="num">100</td><td class="num">100</td><td class="num">0</td><td class="num">0</td></tr>
+  <tr><td>hard</td><td>a1</td><td class="num">40</td><td class="num">20</td><td class="num">+20</td><td class="num">400</td></tr>
+  <tr><td>hard</td><td>a2</td><td class="num">0</td><td class="num">20</td><td class="num">−20</td><td class="num">400</td></tr>
+  <tr><td colspan="3"><strong>Totals</strong></td><td class="num">mean 60</td><td class="num">mean 0</td><td class="num">800 vs 7,200</td></tr>
 </table>
 
-<p>The gradient stops rewarding further increases beyond 1.2. If the advantage is negative, the clip works on the other side: <code>r = 0.5</code> → clipped to 0.8, preventing an oversized decrease.</p>
+<p><strong>What to notice.</strong> Raw returns average 60 with a spread of 7,200 in squared deviation; centred returns average 0 with a spread of 800 — nine times smaller. The two easy samples now contribute exactly nothing, which is right: they carry no preference between a1 and a2. Nothing was lost, because the expected gradient is identical either way. The same two hard samples still say "a1 good, a2 bad" at the same ratio, 20 to −20.</p>
 
-<h3>2. Why variance is the enemy</h3>
-<p>Returns in a task range from 0 to 100. Weighting one action's gradient by 100 instead of 40 is not a model error — it is sampling noise, and it moves the policy as if it were signal. A baseline turns "100 versus 40" into "60 versus 0", preserving the ranking while shrinking the magnitude.</p>
+<h3>2. The clip, on both signs of advantage</h3>
+<p><code>ε = 0.2</code>, so the allowed band is 0.8 to 1.2. A good action has <code>A = +2</code>; a bad one has <code>A = −2</code>.</p>
+
+<table>
+  <tr><th class="num">Ratio r</th><th class="num">rA, A = +2</th><th class="num">clip(r)A</th><th class="num">Objective</th><th class="num">rA, A = −2</th><th class="num">clip(r)A</th><th class="num">Objective</th></tr>
+  <tr><td class="num">0.5</td><td class="num">1.0</td><td class="num">1.6</td><td class="num">1.0</td><td class="num">−1.0</td><td class="num">−1.6</td><td class="num">−1.6</td></tr>
+  <tr><td class="num">1.0</td><td class="num">2.0</td><td class="num">2.0</td><td class="num">2.0</td><td class="num">−2.0</td><td class="num">−2.0</td><td class="num">−2.0</td></tr>
+  <tr><td class="num">1.3</td><td class="num">2.6</td><td class="num">2.4</td><td class="num">2.4</td><td class="num">−2.6</td><td class="num">−2.4</td><td class="num">−2.6</td></tr>
+  <tr><td class="num">2.0</td><td class="num">4.0</td><td class="num">2.4</td><td class="num">2.4</td><td class="num">−4.0</td><td class="num">−2.4</td><td class="num">−4.0</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> With <code>A = +2</code> the objective stops at 2.4: whether the ratio is 1.3 or 2.0, the gradient beyond the band is zero, so an already-good action earns nothing more. With <code>A = −2</code> the pattern is asymmetric — at ratio 2.0 the objective keeps falling to −4.0, because making a bad action twice as likely should still be punished. Only the <em>reward</em> side is capped. That asymmetry is what <code>min</code> does.</p>
+
+<h3>3. What λ does to one advantage</h3>
+<p>Two TD errors, <code>δ₀ = 1.0</code> and <code>δ₁ = 2.0</code>, with <code>γ = 0.9</code>. GAE keeps two terms: <code>δ₀ + (γλ)δ₁</code>.</p>
+
+<table>
+  <tr><th class="num">λ</th><th class="num">γλ</th><th>Terms</th><th class="num">A</th></tr>
+  <tr><td class="num">0.0</td><td class="num">0.00</td><td class="num">1.0</td><td class="num">1.00</td></tr>
+  <tr><td class="num">0.5</td><td class="num">0.45</td><td class="num">1.0 + 0.45 × 2.0</td><td class="num">1.90</td></tr>
+  <tr><td class="num">0.9</td><td class="num">0.81</td><td class="num">1.0 + 0.81 × 2.0</td><td class="num">2.62</td></tr>
+  <tr><td class="num">1.0</td><td class="num">0.90</td><td class="num">1.0 + 0.90 × 2.0</td><td class="num">2.80</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> λ = 0 trusts the critic completely and λ = 1 trusts the observed rewards completely, and every setting between is a weighted compromise — 1.90 is 45% of the way from 1.00 to 2.80. λ is not a learning rate and does not shrink the update; it decides how much of the future each advantage is allowed to see. Common values sit near 0.95, where the critic's bias is small next to the variance of a long return.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"PPO's clip guarantees the policy changes by at most ε."</strong> It clips the <em>objective</em>, not the parameter update. Multiple epochs, momentum and shared parameters can still move the policy far. Clipping is a soft penalty, not a trust region.</p>
-  <p><strong>Second trap:</strong> blaming the algorithm when PPO does not learn. Nine times out of ten it is reward scaling, advantage normalisation, or a learning rate that is too high for the batch size.</p>
+  <p><strong>"PPO's clip guarantees the policy moves by at most ε."</strong> It feels right because ε = 0.2 is right there in the formula, and a bound that appears in the objective looks like a bound on the result. But the clip acts on the <em>objective</em>, not on the parameters.</p>
+  <p>Three things escape it. Multiple epochs on the same batch compound small steps; Adam's momentum carries direction across batches; and in a network with shared layers, one clipped ratio for one action still drags every other output. A ratio that should stop at 1.2 can drift to 1.9 over ten epochs while each individual objective term looks clipped.</p>
+  <p><strong>Correction:</strong> clipping is a soft penalty on <em>incentive</em>, not a trust region on <em>distance</em>. Measure the actual change — mean KL between old and new policies — instead of assuming the formula delivered it.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Run the policy, collect returns, and raise the probability of good actions.", "Subtract a baseline so the update measures better-than-average.", "Use a learned critic for that baseline, giving an advantage.", "Clip the probability ratio so one update cannot move the policy too far.", "Discard the data after a few epochs, because the policy has changed."]</script></div>
+<p><strong>The tell:</strong> after an update, the mean ratio on the same batch has drifted well past 1.2, or the KL spikes while every individual loss term looks capped. The second tell is a run that improves for one epoch and then degrades across epochs within a single batch — clipping cannot be the explanation, so look at epochs, learning rate and advantage normalisation before blaming the algorithm.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

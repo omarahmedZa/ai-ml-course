@@ -24,20 +24,36 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Encoder–decoder is the shape of every modern generative model: summarisation, translation, speech-to-text, and the chat model you are talking to. The decoder is the same object in all of them.</p>
+<p class="lede">Encoder–decoder is the shape of every generative system you will use: translation, summarisation, speech-to-text, optical character reading, chat. One half reads, the other half writes, and they meet at a single vector. The decoder in a 2014 translation model and the decoder in a chat model are the same object with different plumbing.</p>
+<p>A summariser is trained on 100-token news snippets and deployed on 600-token reports. The output stays fluent and loses the headline, because the encoder compressed the first paragraph into the same 512 numbers it uses for everything else and the decoder never sees the input again. On an exam the same gap shows up as "what is teacher forcing, and what problem does it create?" — a question you cannot answer if you think generation works the way training does.</p>
 
 <h2>The one core idea</h2>
-<p>Read the input into a state, then generate the output one token at a time conditioned on that state. The weakness is structural: <strong>everything the decoder knows must fit through one fixed vector</strong>.</p>
+<p>A translator reads the whole page, closes the book, and writes the translation from memory. That is the architecture, not a simplification of it: the encoder's last state <em>is</em> the book, and everything written afterwards is reconstructing a page from a summary. A better translator is not allowed to reopen the book — only a longer memory would help.</p>
+<p>In one line: <strong>everything the decoder knows arrives through one vector, so a 40-token sentence gives it 12.8 numbers per token and a 400-token one gives it 1.28.</strong> The second case is not slower or less accurate in some vague sense; it is arithmetically short of room.</p>
 
 <h2>How it actually works</h2>
-<ul>
-  <li><strong>Encoder</strong>: an RNN consumes <code>x₁…x_n</code> and returns a final hidden state <code>h_n</code>. No output, just a summary.</li>
-  <li><strong>Decoder</strong>: initialised with <code>h_n</code>, emits <code>y₁…y_m</code> autoregressively. Each step's output is fed back as the next input.</li>
-  <li><strong>Teacher forcing</strong>: during training, feed the <em>true</em> previous token instead of the model's prediction. Speeds convergence, but creates a train/test mismatch.</li>
-  <li><strong>Exposure bias</strong>: at inference the model consumes its own errors, so one bad token can derail the rest. Mitigations: scheduled sampling, beam search.</li>
-  <li><strong>The bottleneck</strong>: a 30-token sentence and a 3-token sentence both compress to the same 512 numbers. Early words are the first to be overwritten.</li>
-  <li><strong>Attention</strong> (topic 26) removes the bottleneck: the decoder looks back at <em>all</em> encoder states, not just the last one.</li>
-</ul>
+<p>Seven parts: three for reading, three for writing, one for the patch that arrives later.</p>
+
+<h3>Part 1 — Encode without emitting</h3>
+<p>The encoder runs an RNN over <code>x₁ … x_n</code> and throws away every intermediate output, keeping only the final state <code>h_n</code>. For a 40-token sentence that is 40 forward passes and one vector kept. Why this part exists: the input and the output have different lengths and different vocabularies, so the reading half must produce something fixed-size that the writing half can start from.</p>
+
+<h3>Part 2 — Pass one context vector across the gap</h3>
+<p><code>h_n</code> is the entire channel between the two halves — 512 numbers, whatever the input length. The decoder's first hidden state is initialised from it directly. Why this part exists: without a shared starting state the decoder is an unconditioned language model, fluent and irrelevant, writing plausible sentences that have nothing to do with the input.</p>
+
+<h3>Part 3 — Decode one token at a time</h3>
+<p>At step <code>t</code> the decoder consumes the previous token's embedding plus its own state and produces one score per vocabulary entry — 50,000 scores for a 50,000-token vocabulary. The highest score becomes <code>y_t</code>, and <code>y_t</code> becomes the next input. Why this part exists: output length is unknown in advance, so the model must be able to run for as long as it takes to emit a stop symbol.</p>
+
+<h3>Part 4 — Bracket the output with start and stop symbols</h3>
+<p><code>&lt;bos&gt;</code> gives the decoder a legal first input, and <code>&lt;eos&gt;</code> gives it a legal way to finish. Both are ordinary vocabulary entries learned during training. Why this part exists: without a learned stop condition the decoder either runs to a hardcoded maximum or halts on a punctuation heuristic.</p>
+
+<h3>Part 5 — Train with the true previous token</h3>
+<p>Teacher forcing feeds the ground-truth <code>y_{t−1}</code> instead of the model's own guess, so all <code>m</code> positions can be scored in one pass: 30 predictions at once for a 30-token target. Why this part exists: sequential training would make a 30-step decoder cost 30 forward passes per example, and early in training the model's own guesses are noise, so it would learn from garbage.</p>
+
+<h3>Part 6 — Generate from your own output, and watch it drift</h3>
+<p>At inference the true token does not exist, so the model consumes its own prediction; greedy decoding takes the top score, beam search keeps the best 5 partial sequences. At 95% per-token accuracy, a 30-token output is fully correct with probability 0.95³⁰ = 0.215. Why this part exists: the mismatch is unavoidable, and knowing its size is what tells you whether to widen the beam or shorten the output.</p>
+
+<h3>Part 7 — Let the decoder look back</h3>
+<p>Attention scores every encoder state against the current decoder state, softmaxes the <code>n</code> scores, and uses the weighted sum as extra input. For a 600-token source that is 600 weights per output step instead of one fixed vector. Why this part exists: alignment. A German verb at the end of the clause must attach to an English verb near the start, and no single summary vector knows which input position the current output word needs.</p>
 
 <span class="formula">encoder: (x₁…x_n) → h_n     decoder: (h_n, y₁…y_{t−1}) → y_t</span>
 
@@ -45,27 +61,46 @@
 
 <h3>1. The compression problem, by volume</h3>
 <table>
-  <tr><th>Input</th><th class="num">Tokens</th><th class="num">State size</th><th class="num">Floats per token</th></tr>
-  <tr><td>Short sentence</td><td class="num">8</td><td class="num">512</td><td class="num">64</td></tr>
-  <tr><td>Paragraph</td><td class="num">120</td><td class="num">512</td><td class="num">4.3</td></tr>
+  <tr><th>Input</th><th class="num">Tokens</th><th class="num">State size</th><th class="num">Numbers per token</th></tr>
+  <tr><td>Short sentence</td><td class="num">8</td><td class="num">512</td><td class="num">64.0</td></tr>
+  <tr><td>Paragraph</td><td class="num">120</td><td class="num">512</td><td class="num">4.27</td></tr>
   <tr><td>Page</td><td class="num">600</td><td class="num">512</td><td class="num">0.85</td></tr>
 </table>
 
-<p>By the third row, the model has less than one number per input token. Nothing about the architecture is broken; the information simply is not there.</p>
+<p><strong>What to notice.</strong> Each row is 512 divided by the token count: 512 ÷ 120 = 4.27, and 512 ÷ 600 = 0.85. Going from the first row to the third is a 75-fold increase in input over a state that never grew, so the model is asked to store less than one number per token. Nothing is broken in the code at that point — the information was discarded at the entrance, and no amount of decoder capacity can recover it.</p>
 
-<h3>2. Why the decoder is slow</h3>
-<p>Generating <code>m</code> tokens requires <code>m</code> sequential forward passes: step <code>t</code> needs <code>y_{t−1}</code>. Training is parallel (teacher forcing supplies all previous tokens at once); inference is not. This asymmetry is why generation latency scales with output length.</p>
+<h3>2. Why an error is not a small error</h3>
+<p>Assume the model is right about each token with probability 0.95, and one wrong token becomes the next input.</p>
+
+<table>
+  <tr><th class="num">Output length</th><th class="num">0.95ᵐ</th><th class="num">Sequences fully correct</th></tr>
+  <tr><td class="num">10</td><td class="num">0.599</td><td class="num">60%</td></tr>
+  <tr><td class="num">20</td><td class="num">0.358</td><td class="num">36%</td></tr>
+  <tr><td class="num">30</td><td class="num">0.215</td><td class="num">21%</td></tr>
+  <tr><td class="num">50</td><td class="num">0.077</td><td class="num">8%</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> A per-token accuracy of 95% sounds like a solved problem and produces a fully correct 50-token answer only 7.7% of the time. The drop from 60% to 8% is not caused by the model getting worse; it is compounding, because every error changes the input for the next step. This is why metrics that score whole sequences are harsh, and why a model can look excellent per token and unusable per sentence.</p>
+
+<h3>3. Why generation latency scales with output length</h3>
+<p>Assume one decoder pass takes 20 ms and steps cannot overlap.</p>
+
+<table>
+  <tr><th class="num">Output tokens</th><th class="num">Sequential passes</th><th class="num">Time</th></tr>
+  <tr><td class="num">10</td><td class="num">10</td><td class="num">200 ms</td></tr>
+  <tr><td class="num">50</td><td class="num">50</td><td class="num">1,000 ms</td></tr>
+  <tr><td class="num">200</td><td class="num">200</td><td class="num">4,000 ms</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Training and inference have different shapes: teacher forcing scores all 200 positions in one pass, while generation needs 200 passes because step 201 needs token 200. The 200-token job takes twenty times the 10-token job for the same reason a loop does, and adding GPUs does not shorten a loop whose iterations depend on each other.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"Seq2seq means transformer."</strong> The original 2014 seq2seq was two LSTMs. The transformer is a different <em>implementation</em> of the same encoder–decoder contract, with attention replacing recurrence.</p>
-  <p><strong>Second trap:</strong> assuming teacher forcing is also used at inference. It cannot be — the true next token does not exist yet. That gap between training and deployment is a real source of degradation.</p>
+  <p><strong>"The decoder can look at the input while it writes."</strong> It feels right because the name says encoder–decoder, as if two halves share a workspace, and because attention in a modern transformer does exactly that.</p>
+  <p>The correction: in the 2014 architecture the decoder holds <code>h_n</code> and nothing else. Attention is the later patch that reopens the channel, which is why a model with attention translates long sentences better while using the same decoder. And a transformer is a different implementation of this same contract — attention replacing recurrence — not a different idea, so "seq2seq means transformer" is backwards.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["An encoder reads the input and returns one summary vector.", "A decoder starts from that vector and emits tokens one at a time.", "In training it is fed the true previous token: teacher forcing.", "At test time it is fed its own output, so errors compound.", "Everything must fit in that summary — which is why attention was invented."]</script></div>
+<p><strong>The tell:</strong> change only the beginning of the input and watch the first few output tokens. If they barely move, the model is writing from a summary that has already averaged the start away. A second tell is a summary that is fluent and vague in equal measure — correct grammar, no names, no numbers — which is what reconstruction from 512 numbers looks like when the source was 600 tokens. If your training loss is fine and your generations degrade after the first wrong word, the gap is exposure bias, not capacity.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

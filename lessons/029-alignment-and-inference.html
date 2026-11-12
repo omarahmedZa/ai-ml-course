@@ -24,54 +24,82 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Pretraining teaches the model to continue text — including text that argues, lies, or refuses. Alignment is the stage that makes it useful, and it is where most "the model is weird" behaviour originates.</p>
+<p class="lede">A pretrained model completes text, including text that argues, lies or refuses. Alignment is the stage that turns it into something that answers requests, and inference settings decide what you get out of it at the moment you ask.</p>
+<p>Three stages do the work: supervised fine-tuning on demonstrations, preference optimisation against a learned judge, and then the decoding choices — context window, temperature, cache. Most "the model is being weird" complaints trace to one of them. In an exam, "what does the KL term prevent?" has a one-line answer: drift into regions where the reward model is wrong. In a project, the bug is usually the context window: a 6,000-token prompt sent to a model with a 4,000-token limit, where the oldest part — often the instruction itself — is silently dropped and the model answers a question you did not ask. The second is temperature: setting it to 0 expecting determinism, then failing a test that passed an hour ago on a different machine.</p>
 
 <h2>The one core idea</h2>
-<p>Alignment optimises a <strong>proxy for human preference</strong> on top of a fixed base model. Every method differs only in how that preference signal is collected and optimised.</p>
+<p>Alignment trains a stand-in judge and then optimises the model against it. The judge is a reward model: a network that reads a prompt and an answer and outputs one number saying how good a human would find it. Training against a stand-in is cheap and scales; it is also the source of every failure in this lesson, because the model will find the gap between the judge and what you actually wanted.</p>
+<p>In one line: <strong>copy good answers, learn to score answers, then push the score up without drifting too far from the copy.</strong> With logits <code>[2, 1, 0]</code>, temperature 1 gives probabilities <code>[0.665, 0.245, 0.090]</code>; temperature 0.5 gives <code>[0.867, 0.117, 0.016]</code> — same ranking, far sharper.</p>
 
 <h2>How it actually works</h2>
-<table>
-  <tr><th>Stage</th><th>Data</th><th>Objective</th></tr>
-  <tr><td><strong>SFT</strong></td><td>Demonstrations: prompt → ideal answer</td><td>Cross-entropy on the answer tokens</td></tr>
-  <tr><td><strong>Reward model</strong></td><td>Pairs: A is better than B</td><td>Bradley–Terry: <code>−log σ(r(A) − r(B))</code></td></tr>
-  <tr><td><strong>RLHF</strong></td><td>Prompts sampled fresh</td><td>PPO maximising <code>r(x,y) − β·KL(π‖π_SFT)</code></td></tr>
-  <tr><td><strong>DPO</strong></td><td>The same preference pairs</td><td>Closed-form loss; no reward model, no RL loop</td></tr>
-</table>
+<p>Seven parts, from a base model to the token you see on screen.</p>
 
-<ul>
-  <li><strong>KL penalty</strong> keeps the policy near the SFT model, preventing it from drifting into reward-model exploits.</li>
-  <li><strong>DPO</strong> skips the RL machinery: it reparameterises the reward so the optimum of the preference objective can be written as a classification loss on the policy's own log-probabilities.</li>
-  <li><strong>Context window</strong>: fixed maximum tokens; everything beyond is truncated, and attention cost grows quadratically.</li>
-  <li><strong>Sampling</strong>: logits → divide by temperature <code>T</code> → softmax → sample. <code>T → 0</code> is greedy; <code>T = 1</code> is the model's native distribution.</li>
-  <li><strong>KV cache</strong>: stored keys/values for past tokens make generation linear per new token instead of quadratic over the whole prefix.</li>
-</ul>
+<h3>Part 1 — Supervised fine-tuning on demonstrations</h3>
+<p>Humans write prompt–answer pairs, typically a few thousand to a few hundred thousand, and the model is trained with cross-entropy on the answer tokens only; the prompt is masked out of the loss. Format matters as much as content: the model learns where an answer starts and when to stop. <strong>Why this part exists:</strong> a base model has no idea that a question deserves a reply, so without this stage a prompt is just text to continue.</p>
+
+<h3>Part 2 — Train a reward model on comparisons</h3>
+<p>Annotators see two answers to the same prompt and pick the better one. The reward model learns to give the preferred answer a higher score, using the Bradley–Terry loss <code>−log σ(r(A) − r(B))</code>, where σ is the logistic function. <strong>Why this part exists:</strong> people are unreliable at absolute ratings but consistent at pairwise choices, and a single number is what an optimiser can climb.</p>
+
+<h3>Part 3 — Optimise the policy with a leash</h3>
+<p>PPO, a reinforcement-learning loop, samples answers, scores them with the reward model, and updates the model to raise that score. The objective subtracts <code>β · KL(π ‖ π_SFT)</code>, a penalty on drifting away from the fine-tuned model. <strong>Why this part exists:</strong> the reward model is a rough approximation, so an unconstrained optimiser finds its errors — repetitive, flattering, or confidently wrong text that scores highly.</p>
+
+<h3>Part 4 — Or skip the reward model with DPO</h3>
+<p>Direct preference optimisation uses the same pairs but writes the loss directly on the model's own log-probabilities, so the reward network and the sampling loop disappear. It needs one forward pass per answer instead of an RL rollout. <strong>Why this part exists:</strong> PPO is expensive and unstable; DPO reaches the same optimum with a classification-style loss.</p>
+
+<h3>Part 5 — Respect the context window</h3>
+<p>The context window is the maximum number of tokens the model can see at once — 4,000 in older models, 128,000 in current ones. Anything beyond it is truncated, and attention cost grows with the square of the length. <strong>Why this part exists:</strong> without a hard limit, memory would grow without bound; with it, something must be dropped, and the drop is silent.</p>
+
+<h3>Part 6 — Turn logits into a token</h3>
+<p>The model outputs one raw score, called a logit, per vocabulary entry. Divide every logit by the temperature <code>T</code>, apply softmax, then sample from the resulting distribution. <code>T = 1</code> is the model's native distribution; <code>T → 0</code> is greedy. <strong>Why this part exists:</strong> sampling is what makes one prompt produce different text, and the divisor is the only knob that changes the shape without retraining.</p>
+
+<h3>Part 7 — Cache the keys and values</h3>
+<p>Generation is one token at a time. Without a cache, each new token would recompute attention over the whole prefix; with a <strong>KV cache</strong>, the keys and values of past tokens are stored and only the new row is computed. <strong>Why this part exists:</strong> generation cost per token drops from growing with the prefix to constant, which is the difference between a usable chat model and an unusable one.</p>
 
 <h2>Worked example</h2>
 
 <h3>1. Temperature, numerically</h3>
-<p>Logits <code>[2, 1, 0]</code>:</p>
+<p>Logits <code>[2, 1, 0]</code>, three settings. Each row divides the logits, exponentiates, and divides by the sum.</p>
 
 <table>
-  <tr><th>Temperature</th><th>Adjusted logits</th><th class="num">Probabilities</th></tr>
-  <tr><td class="num">1.0</td><td class="num">[2, 1, 0]</td><td class="num">[0.665, 0.245, 0.090]</td></tr>
-  <tr><td class="num">0.5</td><td class="num">[4, 2, 0]</td><td class="num">[0.867, 0.117, 0.016]</td></tr>
+  <tr><th class="num">T</th><th>Adjusted logits</th><th>Arithmetic</th><th class="num">Probabilities</th></tr>
+  <tr><td class="num">0.5</td><td class="num">[4, 2, 0]</td><td class="num">e⁴ = 54.6; e² = 7.39; sum 62.99</td><td class="num">[0.867, 0.117, 0.016]</td></tr>
+  <tr><td class="num">1.0</td><td class="num">[2, 1, 0]</td><td class="num">e² = 7.39; e¹ = 2.72; sum 11.11</td><td class="num">[0.665, 0.245, 0.090]</td></tr>
+  <tr><td class="num">2.0</td><td class="num">[1, 0.5, 0]</td><td class="num">e¹ = 2.72; e⁰·⁵ = 1.65; sum 5.37</td><td class="num">[0.506, 0.307, 0.186]</td></tr>
 </table>
 
-<p>Low temperature sharpens; it does not add knowledge. At <code>T = 0.5</code> the top token is 87% likely — fluency rises and diversity collapses. Turning temperature up does not make the model "more creative"; it makes rare tokens more likely, including wrong ones.</p>
+<p><strong>What to notice.</strong> The ranking never changes — the top token is the top token at every temperature, because dividing by a positive number preserves order. What changes is how much of the mass it holds: 87% at 0.5, 51% at 2.0. Low temperature sharpens fluency and collapses diversity; high temperature makes rare tokens likely, including the wrong ones. It cannot add knowledge, because the ranking it samples from is fixed.</p>
 
-<h3>2. Two ways to hack the reward</h3>
-<p>The reward model was trained on comparisons, not on truth. A policy that produces confident, long, agreeable answers scores well even when wrong. That is <strong>reward hacking</strong>, and it is why the KL penalty and periodic human evaluation exist.</p>
+<h3>2. The reward model's loss on one pair</h3>
+<p>Two answers, scores <code>r(A)</code> and <code>r(B)</code>. Loss is <code>−ln σ(r(A) − r(B))</code>, and the logistic function <code>σ(z) = 1 / (1 + e^−z)</code>.</p>
+
+<table>
+  <tr><th class="num">r(A)</th><th class="num">r(B)</th><th class="num">Difference</th><th class="num">σ(diff)</th><th class="num">Loss</th></tr>
+  <tr><td class="num">2.0</td><td class="num">1.0</td><td class="num">1.0</td><td class="num">0.731</td><td class="num">0.313</td></tr>
+  <tr><td class="num">1.2</td><td class="num">1.0</td><td class="num">0.2</td><td class="num">0.550</td><td class="num">0.598</td></tr>
+  <tr><td class="num">0.8</td><td class="num">1.0</td><td class="num">−0.2</td><td class="num">0.450</td><td class="num">0.798</td></tr>
+  <tr><td class="num">5.0</td><td class="num">4.0</td><td class="num">1.0</td><td class="num">0.731</td><td class="num">0.313</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Only the difference matters: rows 1 and 4 have identical loss even though every score moved by 3. That is why a reward model's absolute numbers are meaningless and only its ordering is trained. A reversed pair (row 3) costs 0.798 — more than a correct-but-unsure one — and no finite score difference ever reaches zero loss, so the loss keeps pushing the gap wider indefinitely.</p>
+
+<h3>3. What the KV cache saves</h3>
+<p>Attention entries computed per generated token, with and without a cache, for a prefix of <code>n</code> tokens.</p>
+
+<table>
+  <tr><th class="num">Prefix n</th><th class="num">No cache (n²)</th><th class="num">With cache (n)</th><th class="num">Ratio</th></tr>
+  <tr><td class="num">1,000</td><td class="num">1,000,000</td><td class="num">1,001</td><td class="num">999×</td></tr>
+  <tr><td class="num">4,000</td><td class="num">16,000,000</td><td class="num">4,001</td><td class="num">3,999×</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The saving grows with the prefix, so caching matters most exactly where it is hardest — long conversations. The cache costs memory instead: keys and values for every layer and every past token must be stored, which is why a long chat can exhaust GPU memory even though the model itself fits comfortably.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"RLHF makes the model more truthful."</strong> It makes the model better at satisfying the reward model. If the reward model prefers confidence, you get confidence — including confident errors. Truthfulness requires verification, not preference optimisation.</p>
-  <p><strong>Second trap:</strong> expecting <code>T = 0</code> to be deterministic. Batching, floating-point non-associativity and hardware scheduling all change results slightly; greedy decoding is reproducible on one machine, not across machines.</p>
+  <p><strong>"RLHF makes the model more truthful."</strong> It feels right because the training signal comes from humans, and humans were asked to prefer accurate answers.</p>
+  <p>The correction is that RLHF makes the model better at satisfying the reward model, which is a compressed approximation of human judgement. If that approximation rewards confidence, length or agreement, you get more of those — including confident errors. Truthfulness needs verification against something outside the model, not preference optimisation. A second trap is expecting <code>T = 0</code> to be deterministic: batching, float non-associativity and hardware scheduling change results slightly, so greedy decoding is reproducible on one machine, not across machines.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Start from the pretrained model, which only continues text.", "Fine-tune on demonstrations of good answers: SFT.", "Collect human preferences between two answers and fit a reward model.", "Optimise against that reward with a KL leash to the SFT model.", "At inference, sample from temperature-scaled logits; T → 0 is greedy."]</script></div>
+<p><strong>The tell:</strong> the model gets more confident but not more correct — wrong answers arrive in the same fluent, well-formatted shape as right ones, and asking for a source produces a plausible citation rather than a checkable one. The other tell is length inflation: if answers grow steadily longer while accuracy stays flat, the reward model is scoring form rather than content.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

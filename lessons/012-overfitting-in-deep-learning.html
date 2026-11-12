@@ -24,49 +24,79 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Networks have enough parameters to memorise any dataset you can afford to label. The difference between a demo and a shipped model is usually one of these four levers, applied for the right reason.</p>
+<p class="lede">Regularisation is the set of techniques that stop a network from memorising its training set. You reach for it on every real project, because the moment your labelled data is finite — which is always — the model has more adjustable knobs than it has constraints.</p>
+<p>Concretely: a model scoring 0.99 on 8,000 training images and 0.71 on held-out images is not unlucky. It has learned those exact images rather than the pattern behind them. Without a lever to pull you would ship it, because the training number looks excellent, and the failure surfaces in production where every input is new. The exam version is the same question in disguise: <em>"training loss keeps falling while validation loss rises — name the problem and one fix."</em></p>
 
 <h2>The one core idea</h2>
-<p>Every regulariser works by <strong>making the model's job harder during training</strong> so it cannot rely on memorisable, brittle cues — and each one attacks a different kind of brittleness.</p>
+<p>Picture a student who has memorised last year's exam paper. Their score on that paper is perfect and their score on this year's paper is not. Regularisation is the teacher rephrasing the questions slightly every week, so only actual understanding survives the change.</p>
+<p>In one line: <strong>make training harder than deployment, so the only way to succeed is to learn something that transfers.</strong> With 8,000 images and 30% of activations dropped at each step, the network sees a slightly different architecture every time, and no single fragile weight combination can be counted on.</p>
 
 <h2>How it actually works</h2>
-<table>
-  <tr><th>Lever</th><th>Mechanism</th><th>Use when</th></tr>
-  <tr><td><strong>Dropout</strong></td><td>Zero each activation with probability <code>p</code> during training; rescale by <code>1/(1−p)</code>; identity at inference</td><td>Large fully-connected layers, small data</td></tr>
-  <tr><td><strong>Weight decay</strong></td><td>Add <code>λ‖w‖²</code> to the loss; pulls weights toward 0</td><td>Weights growing large; always a sane default</td></tr>
-  <tr><td><strong>Augmentation</strong></td><td>Random crops, flips, colour jitter, mixup — label-preserving transforms</td><td>Images, audio, text; the cheapest data you will ever get</td></tr>
-  <tr><td><strong>Early stopping</strong></td><td>Keep the checkpoint with best validation loss</td><td>Always. Costs nothing but bookkeeping</td></tr>
-</table>
+<p>Four levers share one logic: restrict what the model may rely on during training. Take them in the order you would apply them on a real project.</p>
 
-<p>Dropout works because no unit can rely on a specific neighbour being present — it must be useful on its own. Weight decay works because large weights produce sharp, high-curvature functions that fit noise. Augmentation works because it teaches invariance directly instead of hoping the data implies it.</p>
+<h3>Part 1 — Hold out data before you touch anything</h3>
+<p>Split into a training set and a validation set, the second being data the optimiser never sees. With 8,000 images, a 20% hold-out gives 6,400 training and 1,600 validation examples. Both splits must come from the same distribution, or the gap measures your split rather than your model.</p>
+<p><strong>Why this part exists:</strong> without a held-out set there is no measurement of generalisation at all. Every number you print is a training number, and a training number can always be driven to zero simply by adding parameters.</p>
+
+<h3>Part 2 — Read two curves, not one</h3>
+<p>Plot training loss and validation loss on the same axes. Overfitting has a specific shape: training loss keeps falling, validation loss falls and then turns upward. The turning point is the step where the model stopped learning the pattern and started storing exceptions.</p>
+<p><strong>Why this part exists:</strong> a single curve cannot separate "still improving" from "memorising faster". Only the distance between the two curves tells you which one is happening.</p>
+
+<h3>Part 3 — Dropout removes neighbours</h3>
+<p>During training each activation is set to zero with probability <code>p</code>, commonly 0.3 in wide fully-connected layers. The survivors are divided by <code>1 − p</code> so the expected sum is unchanged: with <code>p = 0.3</code> a unit of 2.0 survives as <code>2.0 / 0.7 ≈ 2.86</code>. At inference dropout is switched off and no rescaling happens.</p>
+<p><strong>Why this part exists:</strong> a unit can normally protect itself by co-adapting with one specific neighbour. Removing neighbours at random forces every unit to carry useful signal on its own.</p>
+
+<h3>Part 4 — Weight decay charges rent on large weights</h3>
+<p>Add <code>λ‖w‖²</code> to the loss, where <code>‖w‖²</code> is the sum of squared weights. With <code>λ = 10⁻⁴</code> and a squared weight sum of 2,500, the penalty contributes 0.25 on top of a data loss of 0.84, giving 1.09. Its gradient is <code>2λw</code>, so each weight is pulled toward zero in proportion to its own size.</p>
+<p><strong>Why this part exists:</strong> large weights produce sharp, high-curvature functions that can bend to hit a single noisy point. The penalty makes a big weight cost more than the noise it explains is worth.</p>
+
+<h3>Part 5 — Augmentation manufactures new examples</h3>
+<p>Apply label-preserving transforms: crops, flips, small rotations, colour jitter. A crop of a cat is still a cat, so the label survives while the input changes. This is the only lever here that adds information instead of restricting the model, which is why it goes first when you have images.</p>
+<p><strong>Why this part exists:</strong> dropout and decay only reduce what the model may use. If the model is short of data, restriction alone leaves it guessing; augmentation changes the data itself.</p>
+
+<h3>Part 6 — Early stopping keeps the best checkpoint</h3>
+<p>Measure validation loss every epoch and keep the weights that scored lowest, not the weights you finished with. Typical patience is 5 to 10 epochs with no improvement before you stop the run. The cost is disk space and bookkeeping; the benefit is that you never ship the epoch where memorisation took over.</p>
+<p><strong>Why this part exists:</strong> training loss falls monotonically by construction, so "train longer" always flatters the training number and eventually damages the only number you care about.</p>
+
+<h3>Part 7 — Do not regularise an underfit model</h3>
+<p>If training and validation loss are both 1.4 and flat, the model is underfitting, and all four levers make it worse by adding bias. The gap, not the absolute loss, tells you which regime you are in: a wide gap means variance, equal-and-high means bias.</p>
+<p><strong>Why this part exists:</strong> the levers trade training fit for generalisation. Applied to a model that has not fit anything yet, they trade away the only signal it had.</p>
 
 <h2>Worked example</h2>
 
-<h3>1. A 28-point gap</h3>
-<p>Train accuracy 0.99, validation 0.71, 8,000 images.</p>
+<h3>1. A 28-point gap, closed in two steps</h3>
+<p>Baseline: 8,000 images, train accuracy 0.99, validation 0.71. Each row adds one lever and keeps the previous ones in place.</p>
 
 <table>
-  <tr><th>Intervention</th><th class="num">Train</th><th class="num">Val</th></tr>
-  <tr><td>Baseline</td><td class="num">0.99</td><td class="num">0.71</td></tr>
-  <tr><td>+ dropout 0.3 on FC layers</td><td class="num">0.88</td><td class="num">0.82</td></tr>
-  <tr><td>+ flip/crop augmentation</td><td class="num">0.86</td><td class="num">0.91</td></tr>
+  <tr><th>Intervention</th><th class="num">Train</th><th class="num">Val</th><th class="num">Gap</th></tr>
+  <tr><td>Baseline</td><td class="num">0.99</td><td class="num">0.71</td><td class="num">0.28</td></tr>
+  <tr><td>+ dropout 0.3 on FC layers</td><td class="num">0.88</td><td class="num">0.82</td><td class="num">0.06</td></tr>
+  <tr><td>+ flip/crop augmentation</td><td class="num">0.86</td><td class="num">0.91</td><td class="num">−0.05</td></tr>
 </table>
 
-<p>Training accuracy <em>fell</em> and the model got better. That is the signature of a regulariser working: you are trading memorisation for generalisation.</p>
+<p><strong>What to notice.</strong> Training accuracy fell 13 points (0.99 → 0.86) while validation rose 20 points (0.71 → 0.91). A regulariser that improves the training number is not doing its job. The last row has validation above training, which is normal: dropout is active during training and off at evaluation, so the training figure is measured under a handicap.</p>
 
-<h3>2. Picking the lever</h3>
-<p>Symptom drives choice. Huge gap with plenty of data → augmentation first (it adds information). Huge gap with 500 rows → dropout and weight decay. Gap that appears only late in training → early stopping. No gap but bad performance → you are not overfitting; regularising will make it worse.</p>
+<h3>2. The dropout rescale, in numbers</h3>
+<p>Take <code>p = 0.3</code> and a layer whose activations are <code>[2.0, 1.0, 0.5, 4.0]</code>. The mask is redrawn every step; this is one draw.</p>
+
+<table>
+  <tr><th>Unit</th><th class="num">Activation</th><th>Mask</th><th class="num">After mask</th><th class="num">÷ 0.7</th></tr>
+  <tr><td>1</td><td class="num">2.0</td><td>keep</td><td class="num">2.0</td><td class="num">2.86</td></tr>
+  <tr><td>2</td><td class="num">1.0</td><td>drop</td><td class="num">0.0</td><td class="num">0.00</td></tr>
+  <tr><td>3</td><td class="num">0.5</td><td>keep</td><td class="num">0.5</td><td class="num">0.71</td></tr>
+  <tr><td>4</td><td class="num">4.0</td><td>keep</td><td class="num">4.0</td><td class="num">5.71</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The sum before dropout is <code>7.5</code>. After masking and rescaling it is <code>2.86 + 0 + 0.71 + 5.71 = 9.28</code>. Averaged over many masks it comes back to about 7.5, because each surviving unit is inflated by exactly the inverse of its survival chance — 0.7 × (7.5 / 0.7) = 7.5. That is also why inference needs no rescale: the correction has already been paid during training. Leave dropout on at evaluation and every forward pass uses a different mask, so predictions jitter for no reason.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"Dropout improves the model."</strong> It does nothing at inference — it is identity. Its only effect is on the <em>training</em> dynamics. Leaving it on at evaluation produces random, noisy predictions and a mysteriously bad validation score.</p>
-  <p><strong>Second trap:</strong> augmentation that changes the label. Horizontal flips of digits turn 6 into 9; vertical flips of text destroy meaning. Every transform must preserve what you are asking the model to predict.</p>
+  <p><strong>"Dropout improves the model."</strong> It feels right because validation accuracy climbs the moment you add it. But dropout does nothing at inference — there it is the identity function. Everything it buys is bought during training, by preventing one unit from depending on another.</p>
+  <p><strong>Correction:</strong> dropout is a training-time mask plus a matching rescale, and an evaluation-time no-op. Two modes, one switch. Evaluate with it still on and the same image returns a different answer on every call.</p>
+  <p><strong>Second trap:</strong> augmentation that quietly changes the label. A horizontal flip turns a handwritten 6 into a 9; a vertical flip destroys text. Every transform must preserve the thing you are asking the model to predict.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["A large train/validation gap is memorisation, not progress.", "Dropout hides units at random during training so none relies on a neighbour.", "Weight decay keeps weights small, which keeps the function smooth.", "Augmentation teaches invariances with shifted or flipped copies.", "Early stopping keeps the checkpoint from before validation turned upward."]</script></div>
+<p><strong>The tell:</strong> validation accuracy that moves by several points when you evaluate the same checkpoint twice means a training-only layer is still live — check <code>model.eval()</code> before you blame the data. For augmentation, the tell is a model that is confidently wrong on exactly the class your transform confuses: 6s predicted as 9s after flip augmentation is the transform's signature, not a mystery.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

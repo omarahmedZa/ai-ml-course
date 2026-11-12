@@ -24,25 +24,49 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">A 40-layer network that trains like a 2-layer one is not magic; it is four specific engineering fixes. Without them, depth actively hurts, and the failure looks like "my model just doesn't learn".</p>
+<p class="lede">A gradient is a message travelling backwards from the loss to the first layer. Every hop multiplies it by one more factor, so a 40-layer network asks that message to survive 40 multiplications. When it does not arrive, the early layers never change and the model looks broken rather than badly tuned.</p>
+<p>This is the difference between a deep network that trains like a shallow one and a deep network that simply sits there. Without these fixes, adding layers makes results worse and you conclude that depth does not work — when in fact depth works only when the signal reaches it. The exam form is a diagnosis question: <em>"a 20-layer network's first five layers have gradients near 10⁻⁹; name the cause and the single most effective change."</em></p>
 
 <h2>The one core idea</h2>
-<p>Backprop multiplies Jacobians layer by layer. Products of numbers below 1 <strong>vanish</strong>; above 1 they <strong>explode</strong>. Every fix either keeps those factors near 1 or shortens the path the gradient travels.</p>
+<p>Imagine a rumour passed along a line of ten people, each repeating it at 60% of the volume they heard. By the tenth person it is inaudible. Now imagine each of them repeats it at 150% volume: by the tenth it is a shout, and by the fiftieth it is a physical event. Backpropagation is that line of people.</p>
+<p>In one line: <strong>a gradient's size is a product, so factors below 1 collapse and factors above 1 detonate.</strong> Ten layers at 0.25 leave <code>9.5 × 10⁻⁷</code> of the original signal — below float32 resolution. Ten layers at 1.5 give <code>58×</code>, and the loss becomes NaN shortly after.</p>
 
 <h2>How it actually works</h2>
-<ul>
-  <li><strong>Vanishing</strong>: sigmoid's derivative peaks at 0.25. Ten layers → <code>0.25¹⁰ ≈ 9.5 × 10⁻⁷</code>. Early layers receive nothing and stop learning.</li>
-  <li><strong>Exploding</strong>: weights with gain 1.5 over ten layers → <code>1.5¹⁰ ≈ 58</code>; over fifty layers → <code>6 × 10⁸</code>. Loss becomes NaN.</li>
-  <li><strong>Initialisation</strong>: Xavier/Glorot for tanh, He for ReLU — scale initial weights so variance is preserved through the layer.</li>
-  <li><strong>Normalisation</strong>: BatchNorm/LayerNorm re-centre and re-scale activations, keeping the operating point in the responsive range.</li>
-  <li><strong>Residual connections</strong>: <code>y = x + f(x)</code> gives gradients an identity path straight to the input. This single idea is what made 100+ layer networks trainable.</li>
-  <li><strong>Gradient clipping</strong>: rescale the gradient when its norm exceeds a threshold. The standard fix for exploding gradients in RNNs and RL.</li>
-  <li><strong>Warmup</strong>: start with a tiny learning rate, ramp up. Prevents early divergence when initial gradients are large.</li>
-</ul>
+<p>Every fix below does one of two things: it keeps the per-layer factor near 1, or it gives the gradient a shortcut that skips the multiplication altogether.</p>
+
+<h3>Part 1 — The chain rule multiplies one factor per layer</h3>
+<p>The gradient of the loss with respect to an early layer is the product of every later layer's local derivative. Ten layers give ten factors; fifty give fifty. Nothing in that path is added, so the result is only as healthy as the smallest factor in the chain.</p>
+<p><strong>Why this part exists:</strong> calling a gradient "a number the framework computes" hides the fact that doubling depth squares the problem rather than merely lengthening it.</p>
+
+<h3>Part 2 — Each activation caps its own factor</h3>
+<p>Sigmoid's derivative peaks at 0.25 and is far smaller near saturation. Ten sigmoid layers therefore multiply the signal by at most <code>0.25¹⁰ ≈ 9.5 × 10⁻⁷</code>. ReLU has derivative exactly 1 for any positive input, so it shrinks nothing at all.</p>
+<p><strong>Why this part exists:</strong> that one number, 0.25, is why "switch to ReLU" answers almost every vanishing-gradient question.</p>
+
+<h3>Part 3 — Initialisation holds the variance steady</h3>
+<p>He initialisation draws weights with standard deviation <code>√(2 / fan_in)</code>; for 512 inputs that is <code>√(2/512) = 0.0625</code>. Xavier uses <code>√(1 / fan_in)</code> and suits tanh, which is centred at zero. The scale is chosen so activation variance stays roughly constant through the layer.</p>
+<p><strong>Why this part exists:</strong> a bad init sets the product at the wrong scale before training begins, and no number of steps reliably recovers from it.</p>
+
+<h3>Part 4 — Normalisation re-centres the operating point</h3>
+<p>BatchNorm and LayerNorm subtract the mean and divide by the standard deviation of the activations, then apply a learned scale and shift. Every layer's output therefore arrives with mean 0 and variance 1. During training those statistics come from the batch; at inference, from stored running averages.</p>
+<p><strong>Why this part exists:</strong> saturation only hurts when the input has drifted into the flat region; re-centring keeps the derivative large.</p>
+
+<h3>Part 5 — Residual connections add an identity path</h3>
+<p>A residual block computes <code>y = x + f(x)</code>, so its Jacobian is <code>∂y/∂x = I + ∂f/∂x</code>. If the block's own derivative is 0.25, the total is 1.25, and ten blocks deliver <code>1.25¹⁰ ≈ 9.3</code> where a plain stack delivers 9.5 × 10⁻⁷. This is the idea that made 100-plus-layer networks trainable.</p>
+<p><strong>Why this part exists:</strong> it is the only fix here that changes the arithmetic of the product rather than the size of each factor.</p>
+
+<h3>Part 6 — Clipping bounds the step</h3>
+<p>Measure the gradient's norm and, if it exceeds a threshold such as 1.0, rescale the whole vector down to that threshold while keeping its direction. A gradient of <code>[3, 4]</code> has norm 5, so multiplying by <code>1/5</code> gives <code>[0.6, 0.8]</code>, norm exactly 1.0.</p>
+<p><strong>Why this part exists:</strong> one outlier batch can otherwise throw the weights into a region where every activation saturates and no gradient ever returns.</p>
+
+<h3>Part 7 — Warmup ramps the learning rate</h3>
+<p>Start at a small learning rate, often 1/100 of the target, and raise it linearly over the first few hundred steps. Early gradients are large and the weights are still random, which makes step 1 the most dangerous step of the run.</p>
+<p><strong>Why this part exists:</strong> clipping bounds the gradient but not gradient times learning rate; warmup bounds the distance the weights actually travel.</p>
 
 <h2>Worked example</h2>
 
 <h3>1. How fast the signal dies</h3>
+<p>Take one factor per layer and multiply it through. The table is just repeated multiplication; the point is how fast the two columns separate.</p>
+
 <table>
   <tr><th>Layers</th><th class="num">Gain 0.25</th><th class="num">Gain 1.5</th></tr>
   <tr><td>5</td><td class="num">9.8 × 10⁻⁴</td><td class="num">7.6</td></tr>
@@ -50,27 +74,29 @@
   <tr><td>50</td><td class="num">8 × 10⁻³¹</td><td class="num">6.4 × 10⁸</td></tr>
 </table>
 
-<p>The first column is below float32 precision by layer 30 — the gradient is literally zero. The second overflows. There is no learning rate that fixes either.</p>
+<p><strong>What to notice.</strong> At layer 5 the shrinking column is already below 0.001, and by layer 30 it stands at 8.7 × 10⁻¹⁹ — far under the 10⁻⁷ relative precision of a float32 weight, so the update rounds to nothing. The right-hand column does the opposite: 1.5⁵ is a harmless 7.6, but fifty layers of it is 640 million, and the next step moves every weight by more than the weights themselves. No learning rate rescues both columns at once, because the problem is the exponent, not the step size.</p>
 
-<h3>2. Diagnosis from symptoms</h3>
+<h3>2. What clipping does to one gradient</h3>
+<p>A gradient vector <code>g = [3, 4]</code> with threshold 1.0. The direction must survive; only the length changes.</p>
+
 <table>
-  <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
-  <tr><td>Loss flat, early layers unchanged</td><td>Vanishing</td><td>ReLU/GELU, He init, residuals, norm</td></tr>
-  <tr><td>Loss NaN after a few steps</td><td>Exploding</td><td>Clip gradients, lower η, warmup</td></tr>
-  <tr><td>Loss explodes only in one batch</td><td>Outlier / bad sample</td><td>Clip, check labels</td></tr>
-  <tr><td>Unit output always 0</td><td>Dying ReLU</td><td>Lower η, LeakyReLU</td></tr>
+  <tr><th>Step</th><th class="num">Arithmetic</th><th class="num">Result</th></tr>
+  <tr><td>Norm</td><td class="num">√(3² + 4²) = √25</td><td class="num">5.0</td></tr>
+  <tr><td>Scale factor</td><td class="num">1.0 / 5.0</td><td class="num">0.2</td></tr>
+  <tr><td>Clipped gradient</td><td class="num">0.2 × [3, 4]</td><td class="num">[0.6, 0.8]</td></tr>
+  <tr><td>Check the norm</td><td class="num">√(0.36 + 0.64)</td><td class="num">1.0</td></tr>
 </table>
+
+<p><strong>What to notice.</strong> The ratio of the two components is unchanged — 3:4 before, 0.6:0.8 after — so clipping preserves the direction the gradient asked for and only caps how far it can travel. A gradient of norm 0.7 would pass through untouched, which is why clipping is safe to leave on permanently. What it cannot fix is a gradient that is consistently huge: that is an initialisation or learning-rate problem, and clipping only hides it.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"More depth is more power, so just add layers."</strong> Beyond a point, depth without residual connections and normalisation <em>reduces</em> trainability. The optimisation problem gets harder faster than the representation gets richer.</p>
-  <p><strong>Second trap:</strong> assuming BatchNorm behaves the same in training and inference. At inference it uses stored running statistics, not batch statistics. Forget <code>model.eval()</code> and a batch of one produces nonsense.</p>
+  <p><strong>"More depth is more power, so just add layers."</strong> It feels right because depth does buy representational power, and every headline model is deep. But the optimisation problem grows faster than the representation does, so an unassisted 50-layer network is usually worse than a 10-layer one — not because it cannot express the answer, but because it cannot find it.</p>
+  <p><strong>Correction:</strong> depth is a claim you have to earn with He initialisation, normalisation and residual paths. Given those, 100 layers train. Without them, 20 layers can already be untrainable, and the failure looks identical to a learning rate that is too small.</p>
+  <p><strong>Second trap:</strong> assuming BatchNorm behaves the same in training and inference. At inference it uses stored running statistics, not the statistics of the batch in front of it. Forget <code>model.eval()</code> and a single-image batch produces nonsense.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Backprop multiplies one derivative per layer.", "At 0.25 per layer, ten layers leave 0.25¹⁰ ≈ 10⁻⁶ of the signal.", "At 1.5 per layer, fifty layers produce 10⁸ and the loss becomes NaN.", "Initialise so variance survives, and normalise activations between layers.", "Residual connections add an identity path; clipping caps the exploding case."]</script></div>
+<p><strong>The tell:</strong> print the mean gradient norm of each layer, first to last, on one batch. If it falls by an order of magnitude per layer you have vanishing; if it doubles per layer you have exploding; if it is healthy but loss is flat, you have a different problem entirely. The second tell is a loss curve that is not smooth but stair-stepped upward in the first hundred steps — that is a warmup or clipping problem, not a data problem.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

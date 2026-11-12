@@ -24,50 +24,81 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">The LSTM is the last honest attempt to give a network memory without attention — and its failure is precisely the reason transformers exist. Exam questions love "why does the RNN forget?"</p>
+<p class="lede">An RNN is the smallest machine that turns a sequence of vectors into one vector. Every pre-2017 translation system used one, and small models on cheap hardware still do — time series, on-device keyword spotting, sensor logs. The LSTM is the version that made the idea survive contact with long inputs.</p>
+<p>Consider a review classifier that scores 92% in testing and 61% in production. Training reviews were short; real ones run to 300 tokens, and the model's decision tracks the last clause only, because the gradient carrying the opening verdict never reached the weights. On an exam the same misunderstanding costs marks in a single sentence: "explain why a vanilla RNN forgets" is answerable in one line about repeated multiplication, and unanswerable if you believe the state simply runs out of room.</p>
 
 <h2>The one core idea</h2>
-<p>A vanilla RNN compresses everything seen so far into one fixed-size vector, updated every step. Gradients must travel back through every step, so long-range signal decays — <strong>gates</strong> give that signal a near-identity path.</p>
+<p>A reader holds one small notepad. After each word, the reader crosses out the whole page and rewrites it from the page plus the new word. The notepad is 512 numbers wide on word 1 and still 512 on word 1,000, so nothing is ever added to it — only overwritten. That single constraint explains both the memory limit and the training difficulty.</p>
+<p>In one line: <strong>the past is carried by repeated multiplication, so a factor of 0.9 per step leaves 0.9¹⁰⁰ ≈ 0.000027 after a hundred steps.</strong> Nothing vanished at any one step; the loss is compounding, which is why it is invisible in a print statement and obvious in a gradient norm.</p>
 
 <h2>How it actually works</h2>
-<span class="formula">h_t = tanh(W_h h_{t−1} + W_x x_t + b)</span>
+<p>Seven parts. The first four describe plain recurrence and why it fails; the last three describe the repair.</p>
 
-<ul>
-  <li>The hidden state <code>h_t</code> is the <em>entire</em> memory. Same size at step 1 and step 1,000 — that is the <strong>fixed-vector bottleneck</strong>.</li>
-  <li><strong>BPTT</strong> (backprop through time) unrolls the sequence and multiplies a Jacobian per step. Repeated multiplication is the whole problem.</li>
-  <li><strong>LSTM gates</strong>: <code>f</code> forget, <code>i</code> input, <code>o</code> output, each a sigmoid in [0,1].<br>
-  <code>c_t = f ⊙ c_{t−1} + i ⊙ g</code> — the cell state is updated <em>additively</em>.</li>
-  <li>Because <code>f ≈ 1</code> is learnable, the cell state can carry information across many steps with gradient flowing undiminished. That is the trick: an additive, gated highway.</li>
-  <li><strong>GRU</strong> is the cheaper cousin: two gates, no separate cell state.</li>
-</ul>
+<h3>Part 1 — Fold the old state and the new token into one vector</h3>
+<p>At each step the model computes <code>h_t = tanh(W_h h_{t−1} + W_x x_t + b)</code>. With 300-dimensional embeddings and 512 hidden units, <code>W_x</code> holds 300 × 512 = 153,600 weights and <code>W_h</code> holds 512 × 512 = 262,144. Why this part exists: without the <code>W_h h_{t−1}</code> term the model would be a feed-forward network looking at one token, with no sequence at all.</p>
+
+<h3>Part 2 — Reuse the same weights at every step</h3>
+<p>Step 1 and step 1,000 share one set of weights; that sharing is what lets a model trained on 40-token sentences accept 400-token ones. A separate weight matrix per position would need 1,000 × 416,256 weights for a 1,000-step sequence. Why this part exists: parameter sharing is the only reason sequence length is not a hyperparameter baked into the architecture.</p>
+
+<h3>Part 3 — Unroll the loop to train it</h3>
+<p>Backpropagation through time draws the 200 steps as 200 layers with tied weights, then applies the chain rule across all of them. The gradient reaching step 1 is a product of 200 Jacobians, one per hop. Why this part exists: there is no other way to credit an early token for a late error, so training must walk the whole chain.</p>
+
+<h3>Part 4 — Watch the product shrink</h3>
+<p>Each Jacobian has a typical magnitude, and for a plain RNN it usually sits below 1. At 0.9 per hop, 50 hops leave 0.005 of the signal and 100 hops leave 0.0000266. Why this part exists: once the factor is below 1 the product approaches zero, so early tokens stop influencing the loss and their weights stop learning.</p>
+
+<h3>Part 5 — Watch it explode instead</h3>
+<p>The identical arithmetic with a factor of 1.1 gives 117 after 50 hops and 13,780 after 100. The model is the same shape; only the typical size of the Jacobian differs. Why this part exists: exploding gradients produce <code>inf</code> and then <code>NaN</code> in one step, and clipping the gradient norm to 5 is the standard guard against it.</p>
+
+<h3>Part 6 — Add a cell state and gates that scale it</h3>
+<p>An LSTM keeps a second vector <code>c</code> and computes <code>c_t = f ⊙ c_{t−1} + i ⊙ g</code>, where <code>f</code>, <code>i</code> and <code>o</code> are sigmoids in (0, 1). Because <code>f</code> multiplies the old state directly, the gradient path is a product of forget gates rather than of full Jacobians. Why this part exists: a learnable <code>f = 0.99</code> keeps most of the signal for a hundred steps, which no fixed architecture can promise.</p>
+
+<h3>Part 7 — Count what the GRU saves</h3>
+<p>A GRU drops the separate cell state and keeps two gates, so it needs three weight matrices where the LSTM needs four. At 300 inputs and 512 hidden that is 1,248,768 parameters against 1,665,024 — exactly 25% fewer. Why this part exists: on small datasets the smaller model often wins, and the saving is free at inference as well.</p>
+
+<span class="formula">h_t = tanh(W_h h_{t−1} + W_x x_t + b)</span>
 
 <h2>Worked example</h2>
 
-<h3>1. Decay per step</h3>
-<p>Suppose each step's Jacobian has magnitude 0.9 (a healthy value):</p>
-
+<h3>1. Decay and blow-up in one table</h3>
 <table>
-  <tr><th>Steps back</th><th class="num">0.9ⁿ</th><th class="num">1.1ⁿ</th></tr>
-  <tr><td>5</td><td class="num">0.59</td><td class="num">1.61</td></tr>
-  <tr><td>20</td><td class="num">0.12</td><td class="num">6.73</td></tr>
-  <tr><td>50</td><td class="num">0.005</td><td class="num">117</td></tr>
+  <tr><th class="num">Steps back</th><th class="num">0.9ⁿ</th><th class="num">Signal lost</th><th class="num">1.1ⁿ</th></tr>
+  <tr><td class="num">5</td><td class="num">0.590</td><td class="num">41%</td><td class="num">1.611</td></tr>
+  <tr><td class="num">20</td><td class="num">0.122</td><td class="num">88%</td><td class="num">6.728</td></tr>
+  <tr><td class="num">50</td><td class="num">0.005</td><td class="num">99.5%</td><td class="num">117.4</td></tr>
 </table>
 
-<p>Even a well-behaved RNN has lost 99.5% of its gradient by 50 steps. Word 1 of a paragraph contributes nothing to the loss at word 60.</p>
+<p><strong>What to notice.</strong> Both columns are the same operation with a different constant, and both are catastrophic. The 0.9 column loses 99.5% of the gradient in 50 steps, so word 1 of a paragraph contributes nothing to a loss computed at word 60. The 1.1 column does not compensate: it is the same failure at the other end, where the update is enormous and the weights jump somewhere useless.</p>
 
-<h3>2. What the forget gate buys</h3>
-<p>With <code>f = 0.99</code> held constant, after 100 steps the cell retains <code>0.99¹⁰⁰ ≈ 0.37</code> of the original signal — a 74× improvement over the 0.9 case above, and, importantly, <em>learnable</em> rather than architectural luck.</p>
+<h3>2. What the forget gate buys, at 100 steps</h3>
+<table>
+  <tr><th class="num">Forget gate f</th><th class="num">f⁵⁰</th><th class="num">f¹⁰⁰</th></tr>
+  <tr><td class="num">0.9</td><td class="num">0.005</td><td class="num">0.0000266</td></tr>
+  <tr><td class="num">0.99</td><td class="num">0.605</td><td class="num">0.366</td></tr>
+  <tr><td class="num">0.999</td><td class="num">0.951</td><td class="num">0.905</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Between the first and second rows the retention at 100 steps changes by a factor of about 13,800 — 0.366 ÷ 0.0000266. That is not a tuning improvement; it is the difference between a signal and a rounding error. The third row also shows the cost: <code>f = 0.999</code> forgets so little that the state fills with stale content, and the network has to spend capacity learning when to write instead of what to write.</p>
+
+<h3>3. Four matrices against three</h3>
+<table>
+  <tr><th>Component</th><th class="num">Shape</th><th class="num">Weights</th></tr>
+  <tr><td>Input matrix <code>W_x</code></td><td class="num">300 × 512</td><td class="num">153,600</td></tr>
+  <tr><td>Recurrent matrix <code>W_h</code></td><td class="num">512 × 512</td><td class="num">262,144</td></tr>
+  <tr><td>Bias</td><td class="num">512</td><td class="num">512</td></tr>
+  <tr><td>One gate set</td><td class="num">sum</td><td class="num">416,256</td></tr>
+  <tr><td>LSTM, four sets</td><td class="num">4 ×</td><td class="num">1,665,024</td></tr>
+  <tr><td>GRU, three sets</td><td class="num">3 ×</td><td class="num">1,248,768</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The 416,256 difference is larger than the entire input matrix, which is why "just use an LSTM" is not free advice on a small dataset. It also shows where the gate cost comes from: every gate is a full copy of the same two matrices, so a fourth gate is a 25% tax on the layer, paid once and then multiplied by depth and by every layer you stack.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"LSTM solves long-term memory."</strong> It mitigates decay on <em>synthetic</em> tasks with clear signals. On real language, performance still degrades with distance, and the fixed-size state is still a bottleneck: 500 tokens must fit in 512 numbers.</p>
-  <p><strong>Second trap:</strong> forgetting the sequence is sequential. Training cannot parallelise over time, which is why RNNs lost to transformers on long sequences — not because attention is more expressive per se.</p>
+  <p><strong>"The LSTM solves long-term memory."</strong> It feels right because the paper's headline experiment — remember one bit for a hundred steps — works, and because the forgetting curve visibly flattens once gates are added.</p>
+  <p>The correction: gates remove the <em>gradient</em> obstacle on a clean synthetic task, not the <em>capacity</em> obstacle on real language. Five hundred tokens still have to fit in 512 numbers, performance still falls as the dependency lengthens, and the computation is still sequential. The state is a summary, and a summary of a page is lossy no matter how well it is trained.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Read the sequence one token at a time, updating a hidden state.", "The state has fixed size, so it must summarise everything seen so far.", "Backprop through time multiplies a derivative per step, so the past fades.", "LSTM adds gates — forget, input, output — around a separate cell state.", "The cell updates additively, giving gradients a path that does not shrink."]</script></div>
+<p><strong>The tell:</strong> hold the sequence length fixed and move the cue earlier. If accuracy is stable at 20 tokens of distance and near chance at 200 while total length never changes, you are watching the state lose information, not the model run out of context. A second tell is a training loop whose step time grows linearly with sequence length while the GPU sits mostly idle — that is the sequential dependency, and more hardware will not shorten it.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

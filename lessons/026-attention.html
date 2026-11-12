@@ -24,12 +24,18 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Attention is the single mechanism behind every LLM you have used. It is also, underneath, topic 1: dot products, normalised, used as weights.</p>
+<p class="lede">Attention lets a language model treat a sentence as a web of related positions rather than a fixed row of slots. Each token writes a question, compares that question against every token's advertisement, and copies a blend of what the best matches offer.</p>
+<p>It is the only place in a Transformer where information moves sideways between positions; the feed-forward layer, the normalisation and the output head all work on one token at a time. That is why "it" can take its meaning from a noun eight tokens back. In an exam, "compute attention for these two tokens" is four mechanical steps, and the marks sit in the arithmetic. In a project, the same four steps host the quiet bugs: a softmax computed down the columns instead of across the rows, so each key sums to 1 while each query sums to 1.7 and the output arrives 70% too long; or a scale factor left out because the code "looked fine". Both run without error and train badly.</p>
 
 <h2>The one core idea</h2>
-<p>Each token asks a <strong>question</strong> (query), every token advertises what it <strong>offers</strong> (key), and the best matches donate their <strong>content</strong> (value). Matching is a dot product; donation is a weighted average.</p>
+<p>Picture a library desk. You arrive with a question (the <strong>query</strong>). Every book has a label on its spine (the <strong>key</strong>) saying what it covers, and pages inside (the <strong>value</strong>) holding the actual content. You do not pick one book and ignore the rest; you score every label against your question and photocopy a fraction of each book, in proportion to how well its label matched.</p>
+<p>In one line: <strong>attention is a soft lookup — score everything, then take a weighted average.</strong> With <code>q = [1, 0]</code>, <code>k₁ = [1, 0]</code>, <code>k₂ = [0, 1]</code>, the two scores are 1 and 0; after dividing by <code>√2</code> and exponentiating they become weights 0.670 and 0.330, so the output is <code>0.670 × v₁ + 0.330 × v₂</code>.</p>
 
 <h2>How it actually works</h2>
+<p>Seven parts. Each one is a line of the formula below, in the order the numbers travel.</p>
+
+<span class="formula">Attention(Q,K,V) = softmax( QKᵀ / √d_k ) V</span>
+
 <table>
   <tr><th>Vector</th><th>Role</th><th>Analogy</th></tr>
   <tr><td><strong>Q</strong> (query)</td><td>What this position is looking for</td><td>Search query</td></tr>
@@ -37,45 +43,77 @@
   <tr><td><strong>V</strong> (value)</td><td>What this position passes on</td><td>Document body</td></tr>
 </table>
 
-<span class="formula">Attention(Q,K,V) = softmax( QKᵀ / √d_k ) V</span>
+<h3>Part 1 — Make three vectors per token</h3>
+<p>A token arrives as a list of 512 numbers. Three learned matrices multiply that list and produce three new lists: a query, a key and a value, each 512 numbers wide. <strong>Why this part exists:</strong> a single vector cannot be both the question and the answer — if it were, every token would match itself most strongly and learn nothing about its neighbours.</p>
 
-<ul>
-  <li><strong>Scores</strong>: <code>QKᵀ</code> gives every query–key dot product. That is a similarity matrix of shape <code>n × n</code>.</li>
-  <li><strong>Scaling by √d_k</strong>: dot products of <code>d</code>-dimensional vectors grow like <code>√d</code>. Without scaling, softmax saturates and gradients vanish.</li>
-  <li><strong>Softmax</strong> turns each row into a distribution summing to 1 — competitive attention, not independent gates.</li>
-  <li><strong>Weighted sum</strong>: each output is a blend of all values, weighted by relevance.</li>
-  <li><strong>Self-attention</strong>: Q, K, V all come from the same sequence. <strong>Cross-attention</strong>: Q from the decoder, K and V from the encoder.</li>
-  <li><strong>Cost</strong>: <code>O(n²d)</code> — doubling the context quadruples the score matrix. That is why long context is expensive.</li>
-</ul>
+<h3>Part 2 — Score every pair with a dot product</h3>
+<p>Every query is dotted with every key: multiply matching positions and add. For unit-length vectors the score is 1 when the two point the same way, 0 when they are perpendicular, and negative when they disagree. A 12-token sequence therefore produces a 12×12 score matrix — 144 numbers — and each row belongs to one query. <strong>Why this part exists:</strong> this matrix is the only quantity that decides who listens to whom; every later step merely smooths and applies it.</p>
+
+<h3>Part 3 — Divide by √d_k</h3>
+<p>With head width <code>d_k = 64</code>, the raw scores of random unit vectors have a standard deviation of about 8, so ordinary entries sit near ±8. Dividing by <code>√64 = 8</code> pulls the spread back to roughly 1. <strong>Why this part exists:</strong> softmax over scores of size 8 puts 0.9997 of the mass on one token, and the gradient through a vector with all its mass on one entry is almost exactly zero, so the layer stops learning.</p>
+
+<h3>Part 4 — Softmax each row</h3>
+<p>Per row: subtract the row maximum, exponentiate every entry, then divide by the row sum. Scores 0.707 and 0 become <code>e⁰·⁷⁰⁷ = 2.028</code> and <code>e⁰ = 1</code>; the total is 3.028, so the weights are 0.670 and 0.330. <strong>Why this part exists:</strong> weights must be positive and add to 1, otherwise the output is a sum that grows with sequence length instead of an average that stays in the values' own range.</p>
+
+<h3>Part 5 — Blend the values</h3>
+<p>The output for that query is <code>0.670 × [10, 0] + 0.330 × [0, 10] = [6.70, 3.30]</code>, still two numbers wide. Every query repeats this independently, so the layer returns one vector per token, shape <code>n × d</code>. <strong>Why this part exists:</strong> the next layer needs an input of the same width, and mixing values rather than scores is what lets one position carry content from several neighbours at once.</p>
+
+<h3>Part 6 — Run several heads</h3>
+<p>Rather than one 512-wide attention, the block runs 8 heads of 64 dimensions each, concatenates the eight outputs back to 512, and multiplies by an output matrix. The multiply count is the same as a single wide head. <strong>Why this part exists:</strong> one softmax per layer can express only one averaging pattern, so a head tracking syntax would have to share weights with one tracking coreference.</p>
+
+<h3>Part 7 — Pay for the square</h3>
+<p>The score matrix costs <code>n²</code> entries per head. At <code>n = 1,000</code> that is 1,000,000 numbers per head, or 8,000,000 across 8 heads; at <code>n = 2,000</code> it is 4,000,000 per head. <strong>Why this part exists:</strong> this quadratic term, not the parameter count, sets the price of long context.</p>
 
 <h2>Worked example</h2>
 
 <h3>1. Two tokens, by hand</h3>
-<p>Query <code>q = [1, 0]</code>; keys <code>k₁ = [1, 0]</code>, <code>k₂ = [0, 1]</code>; values <code>v₁ = [10, 0]</code>, <code>v₂ = [0, 10]</code>; <code>d_k = 2</code>.</p>
+<p>Query <code>q = [1, 0]</code>; keys <code>k₁ = [1, 0]</code>, <code>k₂ = [0, 1]</code>; values <code>v₁ = [10, 0]</code>, <code>v₂ = [0, 10]</code>; <code>d_k = 2</code>. Every multiplication is written out.</p>
 
 <table>
   <tr><th>Step</th><th>Computation</th><th class="num">Result</th></tr>
-  <tr><td>Raw scores</td><td class="num">q·k₁ = 1, q·k₂ = 0</td><td class="num">[1, 0]</td></tr>
-  <tr><td>Scaled</td><td class="num">÷ √2</td><td class="num">[0.707, 0]</td></tr>
-  <tr><td>Softmax</td><td class="num">e⁰·⁷⁰⁷ = 2.028, e⁰ = 1</td><td class="num">[0.670, 0.330]</td></tr>
-  <tr><td>Output</td><td class="num">0.67(10,0) + 0.33(0,10)</td><td class="num">[6.70, 3.30]</td></tr>
+  <tr><td>Raw scores</td><td class="num">q·k₁ = 1(1) + 0(0) = 1; q·k₂ = 1(0) + 0(1) = 0</td><td class="num">[1, 0]</td></tr>
+  <tr><td>Scale by √2</td><td class="num">1 ÷ 1.414 = 0.707; 0 ÷ 1.414 = 0</td><td class="num">[0.707, 0]</td></tr>
+  <tr><td>Exponentiate</td><td class="num">e⁰·⁷⁰⁷ = 2.028; e⁰ = 1</td><td class="num">[2.028, 1]</td></tr>
+  <tr><td>Normalise</td><td class="num">2.028 ÷ 3.028 = 0.670; 1 ÷ 3.028 = 0.330</td><td class="num">[0.670, 0.330]</td></tr>
+  <tr><td>Weight v₁</td><td class="num">0.670 × [10, 0]</td><td class="num">[6.70, 0]</td></tr>
+  <tr><td>Weight v₂</td><td class="num">0.330 × [0, 10]</td><td class="num">[0, 3.30]</td></tr>
+  <tr><td>Sum</td><td class="num">[6.70 + 0, 0 + 3.30]</td><td class="num">[6.70, 3.30]</td></tr>
 </table>
 
-<p>Token 1 matched perfectly, so it dominates — but token 2 still contributes 33%, because softmax never assigns exactly zero. Attention is graded, not discrete.</p>
+<p><strong>What to notice.</strong> Token 1 matched perfectly, yet it takes only 67% of the output, because a softmax of two scores can never reach 100%. That split comes from the score gap after scaling, not from the data. Remove the <code>√2</code> and the gap stays 1, giving <code>e¹ = 2.718</code> against <code>1</code>, weights 0.731 and 0.269 — a different output from the same inputs.</p>
 
-<h3>2. Why scale?</h3>
-<p>With <code>d = 64</code> and random unit vectors, scores have standard deviation ≈ 8. After softmax, the largest score can reach 0.999 and the rest are ~0: the gradient through softmax collapses. Dividing by <code>√64 = 8</code> restores unit-scale logits.</p>
+<h3>2. Why the divisor is √d_k and not d_k</h3>
+<p>Take one score gap of 8, which is one standard deviation at <code>d = 64</code>, and compare the two candidate divisors.</p>
+
+<table>
+  <tr><th>Version</th><th>Arithmetic</th><th class="num">Weights</th></tr>
+  <tr><td>No scaling, scores [8, 0]</td><td class="num">e⁸ = 2,981; e⁰ = 1; sum 2,982</td><td class="num">[0.99966, 0.00034]</td></tr>
+  <tr><td>Scaled by √64 = 8</td><td class="num">8 ÷ 8 = 1; 0 ÷ 8 = 0 → [1, 0]</td><td class="num">[0.731, 0.269]</td></tr>
+  <tr><td>After softmax on [1, 0]</td><td class="num">e¹ = 2.718; e⁰ = 1; sum 3.718</td><td class="num">[0.731, 0.269]</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Scaling changes confidence but never the ranking: the winner is the same in both rows. The unscaled version has already decided: a slightly larger gap rounds to exactly 1.0 and 0.0 in 32-bit floats, and the gradient, proportional to <code>p(1 − p)</code>, rounds to zero. Dividing by <code>d_k</code> instead would over-correct: a gap of 8 becomes 0.125, the weights become 0.531 and 0.469, and every head averages almost everything.</p>
+
+<h3>3. What the square costs</h3>
+<p>Score entries per head, and across 8 heads, as the sequence grows.</p>
+
+<table>
+  <tr><th class="num">Tokens n</th><th class="num">Entries per head (n²)</th><th class="num">Across 8 heads</th></tr>
+  <tr><td class="num">500</td><td class="num">250,000</td><td class="num">2,000,000</td></tr>
+  <tr><td class="num">1,000</td><td class="num">1,000,000</td><td class="num">8,000,000</td></tr>
+  <tr><td class="num">2,000</td><td class="num">4,000,000</td><td class="num">32,000,000</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Doubling the sequence multiplies the work by four, not two. Each entry is also kept in memory for the backward pass, so the same factor applies to activations: a context that fits in 8 GB at 1,000 tokens needs roughly 32 GB at 2,000.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"Attention weights explain the model's decision."</strong> They redistribute information for the <em>next</em> layer; a high weight does not mean causal importance. Topic 32 shows why this claim fails empirically.</p>
-  <p><strong>Second trap:</strong> thinking attention has memory or recurrence. It has neither — position must be injected explicitly (topic 27), and every token is processed independently per layer.</p>
+  <p><strong>"The attention weights show why the model gave that answer."</strong> It feels right because weights are the one set of numbers in the block that sum to 1 and read like percentages.</p>
+  <p>The correction is that a weight is a routing decision for the <em>next</em> layer, not a causal contribution to the output. A token can receive a weight of 0.8 and add nothing, because its value vector is close to zero; and the feed-forward layer that follows can ignore whatever arrived. Attention heads are also redundant: ablating a single head often leaves the prediction unchanged. Topic 32 shows this empirically.</p>
+  <p>A related error is expecting memory or recurrence. Attention has neither — it re-reads the whole prefix on every pass, and order has to be injected explicitly (topic 27).</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Each token produces a query, a key and a value.", "Score the query against every key with a dot product.", "Divide by √d, then softmax the scores into weights.", "Blend the values with those weights: that is this token's output.", "Mask future positions when generating, so nothing reads ahead."]</script></div>
+<p><strong>The tell:</strong> replace the highest-weighted token's value with zeros and rerun. If the output barely moves, the weight was routing, not explaining. The second tell is instability: two seeds trained on the same data give different attention maps with the same accuracy — a real explanation would not move.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

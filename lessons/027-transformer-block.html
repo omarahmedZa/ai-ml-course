@@ -24,56 +24,92 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">"Transformer" is not one clever idea; it is four ordinary ideas stacked in a specific order. Knowing the order lets you read any architecture diagram and any config file without guessing.</p>
+<p class="lede">A Transformer block is the repeating unit inside every large language model. A config file names 96 layers, a width of 12,288 and 96 heads; this lesson is the map from those three numbers to the four sub-layers that do the work.</p>
+<p>Once you can name the parts, an architecture diagram stops being decoration. Reading "pre-LN, 96 layers, 96 heads, d_model 12,288" tells you each head is 128 numbers wide, the feed-forward layer is 49,152 wide inside, and the residual stream carries 12,288 numbers per token from the first block to the last. In an exam, "why does a block need a residual connection?" is a two-mark question with a mechanical answer about gradient paths. In a project, the missing part is usually the causal mask: training loss drops to 0.02 within an hour, the samples are fluent nonsense, and the logs show nothing unusual. The other common failure is a shape that broadcasts — adding a 512-number vector to a whole sequence without noticing — which produces plausible numbers and a model that never converges.</p>
 
 <h2>The one core idea</h2>
-<p>A block is <strong>attention (mix information across tokens)</strong> plus <strong>FFN (process each token)</strong>, each wrapped in a residual connection and normalisation. Stack 96 of them and you have GPT-3's body.</p>
+<p>A block is a meeting followed by a memo. Attention is the meeting: every token talks to the others and leaves with a blend of what it heard. The feed-forward network is the memo: each token, alone, rewrites its own notes. The residual connection keeps the original notes on the desk so nothing is lost, and LayerNorm keeps the volume steady so no sub-layer shouts.</p>
+<p>In one line: <strong>mix across tokens, then process each token, add both results back, normalise on the way in.</strong> At width 512 with 8 heads, each head is 64 numbers; one block holds about 3.15M parameters, and 12 of them hold about 37.8M.</p>
 
 <h2>How it actually works</h2>
+<p>Seven parts, in the order the numbers flow.</p>
+
 <span class="formula">x → x + MHA(LN(x)) → x + FFN(LN(x))     (pre-LN form)</span>
 
-<table>
-  <tr><th>Sub-layer</th><th>Job</th><th>Shape</th></tr>
-  <tr><td>Multi-head attention</td><td>Each head learns a different relation; outputs concatenated and projected</td><td class="num">n×d → n×d</td></tr>
-  <tr><td>Feed-forward (FFN)</td><td>Per-token nonlinear transform; where most parameters live</td><td class="num">d → 4d → d</td></tr>
-  <tr><td>Residual</td><td><code>x + f(x)</code>: gradient highway, preserves information</td><td class="num">n×d</td></tr>
-  <tr><td>LayerNorm</td><td>Normalises each token across its features; stabilises scale</td><td class="num">n×d</td></tr>
-  <tr><td>Positional encoding</td><td>Injects order — attention itself is permutation-invariant</td><td class="num">n×d</td></tr>
-</table>
+<h3>Part 1 — Keep a residual stream</h3>
+<p>The input <code>x</code> is a table of shape <code>n × d</code>: one row per token, 512 numbers per row, with a positional encoding added once at the bottom to record where each row sits. No sub-layer ever replaces that table; each one computes a change and adds it back, so the stream is the same shape at the top of the stack as at the bottom. <strong>Why this part exists:</strong> a chain of 96 matrix multiplies with a gain of 0.9 per layer shrinks the signal to 0.00004 of its starting size, and a gain of 1.1 blows it up 9,000-fold; the addition gives every layer a copy of the original to work from.</p>
 
-<ul>
-  <li><strong>Multi-head</strong>: <code>d_model = 512</code>, 8 heads → each head works in 64 dimensions. Splitting lets one head track syntax and another track coreference, without increasing total cost.</li>
-  <li><strong>FFN</strong>: <code>Linear(d, 4d) → GELU → Linear(4d, d)</code>. At <code>d = 512</code> that is ~2.1M parameters per block — two-thirds of the block.</li>
-  <li><strong>Causal mask</strong>: a lower-triangular mask sets future scores to −∞ before softmax, so token <code>t</code> cannot see <code>t+1</code>. Without it, next-token prediction is trivial and useless.</li>
-  <li><strong>Pre-LN vs post-LN</strong>: pre-LN (norm inside the residual branch) trains more stably at depth and is the modern default.</li>
-</ul>
+<h3>Part 2 — Normalise each token before its sub-layer</h3>
+<p>LayerNorm takes one token's 512 numbers, subtracts their mean, divides by their standard deviation, then multiplies by a learned scale and adds a learned shift — 512 numbers each, so 1,024 parameters per LayerNorm. It works across features inside a single token, never across the batch. <strong>Why this part exists:</strong> without it, each sub-layer shifts the typical activation size, and after a few dozen blocks the numbers entering softmax are either tiny or enormous.</p>
+
+<h3>Part 3 — Mix across tokens with attention</h3>
+<p>Multi-head attention is topic 26, run 8 times in parallel: 8 heads of 64 dimensions rebuild the 512-wide stream, and an output matrix mixes the heads back together. Each token's row is rewritten as a weighted blend of every token's value. <strong>Why this part exists:</strong> without this sub-layer, positions could never exchange information, and the model would score each token as if it stood alone.</p>
+
+<h3>Part 4 — Mask the future</h3>
+<p>The score matrix is <code>n × n</code>. For a 5-token sequence that is 25 cells, and the causal mask keeps the 15 on and below the diagonal, setting the other 10 to −∞ before softmax. <strong>Why this part exists:</strong> the training target for position 3 is the token at position 4, so an unmasked model can read the answer off its own input, drive the loss to near zero, and then fail completely at generation time when no future exists.</p>
+
+<h3>Part 5 — Process each token with the FFN</h3>
+<p>A feed-forward network expands 512 numbers to 2,048, applies GELU (a smooth nonlinearity), and projects back to 512. Its two matrices hold <code>2 × 512 × 2,048 = 2,097,152</code> parameters, which is two-thirds of the block. <strong>Why this part exists:</strong> attention only averages vectors that already exist, so without a nonlinear per-token step the whole stack could be collapsed into one weighted average.</p>
+
+<h3>Part 6 — Add, and stack the block</h3>
+<p>Each of the two sub-layers ends with an addition, then the next block repeats the pattern with its own weights. Twelve blocks at width 512 give roughly 37.8M parameters; GPT-3 stacks 96 blocks. <strong>Why this part exists:</strong> one block can only combine what its heads happen to notice, and depth is what lets a later block build on a relation an earlier block discovered.</p>
+
+<h3>Part 7 — Choose where the norm goes</h3>
+<p>Pre-LN normalises the input to each sub-layer, inside the branch: <code>x + MHA(LN(x))</code>. Post-LN normalises after the addition instead. Modern models use pre-LN because the residual path stays a clean chain of additions from the loss back to the first block. <strong>Why this part exists:</strong> post-LN puts a normalisation on that path at every block, so very deep post-LN models need a long learning-rate warmup.</p>
 
 <h2>Worked example</h2>
 
 <h3>1. Parameter count for one block</h3>
-<p><code>d = 512</code>, 8 heads:</p>
+<p><code>d = 512</code>, 8 heads, expansion factor 4. Only matrix weights are counted; biases and embeddings are left out.</p>
 
 <table>
   <tr><th>Component</th><th>Formula</th><th class="num">Parameters</th></tr>
   <tr><td>Q, K, V, O projections</td><td class="num">4 × 512 × 512</td><td class="num">1,048,576</td></tr>
-  <tr><td>FFN</td><td class="num">2 × 512 × 2048</td><td class="num">2,097,152</td></tr>
-  <tr><td>LayerNorms</td><td class="num">2 × 2 × 512</td><td class="num">2,048</td></tr>
-  <tr><td><strong>Total</strong></td><td></td><td class="num">≈ 3.15M</td></tr>
+  <tr><td>FFN up-projection</td><td class="num">512 × 2,048</td><td class="num">1,048,576</td></tr>
+  <tr><td>FFN down-projection</td><td class="num">2,048 × 512</td><td class="num">1,048,576</td></tr>
+  <tr><td>LayerNorms</td><td class="num">2 × (512 + 512)</td><td class="num">2,048</td></tr>
+  <tr><td><strong>Total</strong></td><td class="num">1,048,576 + 2,097,152 + 2,048</td><td class="num">≈ 3.15M</td></tr>
 </table>
 
+<p><strong>What to notice.</strong> Attention looks like the star of the block, yet it holds one-third of the parameters and the FFN holds two-thirds: <code>2,097,152 ÷ 3,147,776 = 0.666</code>. The four attention matrices are all square, which is why they add up to exactly <code>4d²</code>. Scaling width from 512 to 1,024 multiplies every entry by four.</p>
+
 <h3>2. The mask, in one row</h3>
-<p>Token 3 attends to scores <code>[s₁, s₂, s₃, −∞, −∞]</code>. After softmax, tokens 4 and 5 receive exactly 0 probability. Remove the mask and the model can copy the answer from the future — training loss collapses to ~0 and generation produces gibberish.</p>
+<p>Token 3 of a 5-token sequence, with raw scores <code>[2.0, 1.0, 0.5, 1.5, 1.5]</code> before masking.</p>
+
+<table>
+  <tr><th>Position</th><th>Score after mask</th><th class="num">Exponentiated</th><th class="num">Weight</th></tr>
+  <tr><td>1</td><td class="num">2.0</td><td class="num">7.389</td><td class="num">0.628</td></tr>
+  <tr><td>2</td><td class="num">1.0</td><td class="num">2.718</td><td class="num">0.231</td></tr>
+  <tr><td>3</td><td class="num">0.5</td><td class="num">1.649</td><td class="num">0.140</td></tr>
+  <tr><td>4</td><td class="num">−∞</td><td class="num">0</td><td class="num">0</td></tr>
+  <tr><td>5</td><td class="num">−∞</td><td class="num">0</td><td class="num">0</td></tr>
+  <tr><td colspan="2">Sum</td><td class="num">11.756</td><td class="num">1.000</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The two future cells do not become small — they become exactly zero, and the visible three are renormalised to fill the gap: <code>7.389 ÷ 11.756 = 0.628</code>. Remove the mask and all five cells share a total of 20.72, with position 4 taking <code>4.482 ÷ 20.72 = 0.216</code> — the token position 3 is being trained to predict.</p>
+
+<h3>3. What LayerNorm does to one token</h3>
+<p>One token <code>[2, 4, 6, 8]</code>, with <code>ε</code> ignored because it is <code>10⁻⁵</code>.</p>
+
+<table>
+  <tr><th>Step</th><th>Arithmetic</th><th class="num">Result</th></tr>
+  <tr><td>Mean</td><td class="num">(2 + 4 + 6 + 8) ÷ 4</td><td class="num">5</td></tr>
+  <tr><td>Deviations</td><td class="num">2−5, 4−5, 6−5, 8−5</td><td class="num">[−3, −1, 1, 3]</td></tr>
+  <tr><td>Squares</td><td class="num">9 + 1 + 1 + 9</td><td class="num">20</td></tr>
+  <tr><td>Variance</td><td class="num">20 ÷ 4</td><td class="num">5</td></tr>
+  <tr><td>Std deviation</td><td class="num">√5</td><td class="num">2.236</td></tr>
+  <tr><td>Divide</td><td class="num">[−3, −1, 1, 3] ÷ 2.236</td><td class="num">[−1.342, −0.447, 0.447, 1.342]</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The output has mean 0 and variance 1, and the gaps between neighbours have changed from 2 to 0.894: information about the original size is gone. That is the point — the next matrix multiply cares about direction, not magnitude — and it is also why the residual matters, since <code>x</code> itself still holds <code>[2, 4, 6, 8]</code> for the addition that follows.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"Attention makes the model order-aware."</strong> It is permutation-invariant by construction: shuffle the tokens and the outputs shuffle with them. Order comes only from positional encodings, which is why they are not an optional extra.</p>
-  <p><strong>Second trap:</strong> assuming LayerNorm and BatchNorm are interchangeable. LayerNorm normalises across features <em>within one token</em>, so it works identically for a batch of 1 and a batch of 1,000 — essential for variable-length generation.</p>
+  <p><strong>"Attention makes the model order-aware."</strong> It feels right because word order obviously changes meaning, and attention weights do change when you reorder a sentence.</p>
+  <p>The correction is that attention is permutation-equivariant: shuffle the input tokens and the outputs shuffle with them, unchanged in value. Order enters only through positional encodings added to the token vectors, which is why they are not an optional extra. A second trap is treating LayerNorm and BatchNorm as interchangeable. LayerNorm normalises across features within one token, so it behaves identically for a batch of 1 and a batch of 1,000 — essential when generating one token at a time.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Normalise the token vectors, then run multi-head attention.", "Add the attention output back to the input: a residual.", "Normalise again, then pass each token through a small feed-forward network.", "Add that back too, and stack the block many times.", "Add positional information, or the block cannot tell order."]</script></div>
+<p><strong>The tell:</strong> delete the positional encodings and retrain. Accuracy on order-sensitive tasks collapses to roughly what a bag of words would score, while the code still runs and the loss still falls. If someone claims a block "understands sequence" from attention alone, ask them where the position information enters — there is exactly one answer.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

@@ -24,24 +24,47 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Shape errors cause more failed training runs than bad ideas. If you can walk a batch through a network on paper, you can read a stack trace and know which matrix is wrong before running anything.</p>
+<p class="lede">A forward pass is the whole journey from input to loss: every matrix multiply, every bias, every bend, in order. Trace one on paper and debugging stops being guesswork.</p>
+<p>Shape mistakes are the most common failure in a first network, and they are cheap to prevent. An exam question — "layer 1 has 10 units, layer 2 has 5, batch of 32: what shape is <code>W²</code>?" — takes ten seconds with the rule and cannot be guessed without it. In a project the same gap appears as <code>mat1 and mat2 shapes cannot be multiplied</code>, reported on a line far from the cause, after a twenty-minute run has already died.</p>
 
 <h2>The one core idea</h2>
-<p>A forward pass is a sequence of <strong>affine maps</strong> (<code>Wx + b</code>) separated by <strong>elementwise nonlinearities</strong>. Each layer changes the shape in a predictable way; nothing else happens.</p>
+<p>A forward pass is a relay of two moves, repeated: a layer rotates and stretches its input, then a bend curves each number separately. The rotation is learned; the bend is fixed. That is the entire architecture.</p>
+<p>In one line: <strong>affine (matrix plus bias), bend, affine, bend.</strong> On one example, 2 → 2 → 1 runs <code>(2×2)(2×1) → (2×1)</code> then <code>(1×2)(2×1) → (1×1)</code>. On a batch of 32 the same steps run as <code>(32×2)(2×2) → (32×2)</code> then <code>(32×2)(2×1) → (32×1)</code>, and the 32 is never touched.</p>
 
 <h2>How it actually works</h2>
-<ul>
-  <li><strong>Layer ℓ</strong>: <code>zˡ = Wˡaˡ⁻¹ + bˡ</code>, then <code>aˡ = φ(zˡ)</code>. <code>z</code> is pre-activation, <code>a</code> is activation.</li>
-  <li><strong>Shape rules</strong>: if layer ℓ has <code>nˡ</code> units and the previous has <code>nˡ⁻¹</code>, then <code>Wˡ</code> is <code>nˡ × nˡ⁻¹</code> and <code>bˡ</code> is <code>nˡ</code>. Outputs are column vectors.</li>
-  <li><strong>Batching</strong>: stack examples as rows, <code>X</code> is <code>B × n⁰</code>. Then <code>Zˡ = Aˡ⁻¹(Wˡ)ᵀ + bˡ</code> and shapes become <code>B × nˡ</code>. The batch dimension is never mixed.</li>
-  <li><strong>The bias broadcasts</strong> across the batch: one vector added to every row.</li>
-  <li><strong>Depth</strong> = number of weight matrices. Width = units per layer. Capacity grows with both, but depth composes features (edges → shapes → objects).</li>
-</ul>
+
+<h3>Part 1 — One layer is one affine map</h3>
+<p>Each layer computes <code>z = Wa + b</code>: a matrix product with the previous layer's output, then a bias added. <code>W</code> holds the weights and <code>a</code> is the incoming activations. For a 3-unit layer reading 4 numbers, <code>W</code> is <code>3×4</code>, and the product mixes all four inputs into each of the three outputs.
+<strong>Why this part exists:</strong> the mixing is where learning happens; without a matrix, each output could only ever see one input.</p>
+
+<h3>Part 2 — Two names, one vector</h3>
+<p>The linear step produces <code>z</code>, the <strong>pre-activation</strong>, and the bend produces <code>a = φ(z)</code>, the <strong>activation</strong>. Same shape, different stage: <code>z</code> is what the weights computed, <code>a</code> is what the next layer receives. With ReLU, <code>z = [−0.4, 2.1]</code> becomes <code>a = [0, 2.1]</code>.
+<strong>Why this part exists:</strong> every bug report about a "dead layer" is a claim about <code>z</code>, so keeping the two names apart keeps the diagnosis honest.</p>
+
+<h3>Part 3 — The shape rule</h3>
+<p>A layer with <code>n_in</code> inputs and <code>n_out</code> units has <code>W</code> of shape <code>n_out × n_in</code> and <code>b</code> of length <code>n_out</code>. The rule is forced by the multiplication — inner dimensions must match — so a 10 → 5 layer maps <code>(5×10)(10×1) → (5×1)</code>.
+<strong>Why this part exists:</strong> writing those two numbers down turns a stack trace into a one-line fix before the code ever runs.</p>
+
+<h3>Part 4 — Batching stacks examples as rows</h3>
+<p>A batch of 32 examples is a <code>32 × n</code> matrix, one example per row, where <code>n</code> is the number of inputs. The layer is applied as <code>A = XWᵀ + b</code>, which for 10 → 5 reads <code>(32×10)(10×5) → (32×5)</code>; the transpose exists only so the inner dimensions meet. Each row is computed independently of every other row.
+<strong>Why this part exists:</strong> row-per-example is what lets one matrix multiply serve 32 examples, and a wrong transpose is the classic silent bug.</p>
+
+<h3>Part 5 — The bias broadcasts down the batch</h3>
+<p><code>b</code> has length <code>n_out</code>, but <code>XWᵀ</code> has 32 rows. The addition repeats the same vector on every row, so row 7 receives <code>b</code> exactly as row 1 does. This is broadcasting, and it is the one place where mismatched shapes are intended.
+<strong>Why this part exists:</strong> without a shared bias every example would need its own offset, and the batch would stop being 32 copies of one model.</p>
+
+<h3>Part 6 — Depth composes, width widens</h3>
+<p>Depth is the number of weight matrices; width is the number of units inside a layer. Width lets one layer ask more questions in parallel; depth lets later layers read combinations of earlier answers, so an edge detector feeds a shape detector feeds an object detector. Two layers of 64 units cost <code>4,160</code> parameters each, and the second can only build combinations of the first layer's 64 signals.
+<strong>Why this part exists:</strong> the two are separate budgets, and knowing which one you are buying stops you from adding layers when you only needed a wider one.</p>
+
+<h3>Part 7 — Parameter counts come from shapes alone</h3>
+<p>Each layer owns <code>n_in·n_out</code> weights plus <code>n_out</code> biases. A 784 → 128 → 10 network costs <code>784·128 + 128 = 100,480</code> in the first layer and <code>128·10 + 10 = 1,290</code> in the second.
+<strong>Why this part exists:</strong> the total predicts memory and overfitting risk before training, and a mismatch with the printed count locates a wiring error in seconds.</p>
 
 <h2>Worked example</h2>
 
-<h3>1. Two inputs, one example</h3>
-<p><code>x = [1, −1]</code>, <code>W¹ = [[1, 2], [−1, 0]]</code>, <code>b¹ = [0, 1]</code>, ReLU, then <code>W² = [1, 1]</code>, <code>b² = −0.5</code>.</p>
+<h3>1. One example, two layers</h3>
+<p><code>x = [1, −1]</code>, <code>W¹ = [[1, 2], [−1, 0]]</code>, <code>b¹ = [0, 1]</code>, ReLU, then <code>W² = [1, 1]</code> and <code>b² = −0.5</code> with a sigmoid on the output. Take it in five rows.</p>
 
 <table>
   <tr><th>Step</th><th>Computation</th><th class="num">Result</th></tr>
@@ -52,25 +75,41 @@
   <tr><td>a² = σ(z²)</td><td class="num">1/(1+e⁰·⁵)</td><td class="num">0.378</td></tr>
 </table>
 
-<p>Note what the ReLU destroyed: both hidden units were at or below zero, so the entire input information vanished. This example is one dead network away from "why is my loss stuck at 0.69?"</p>
+<p><strong>What to notice.</strong> The ReLU destroyed everything: both hidden units sat at or below zero, so <code>a¹ = [0, 0]</code> and the output depended only on <code>b²</code>. The number 0.378 is what a network says when it has forgotten the input. Change <code>x</code> to anything at all and the answer stays 0.378 until at least one hidden unit crosses zero.</p>
 
-<h3>2. The same pass as a batch</h3>
-<p>Four examples: <code>X</code> is <code>4 × 2</code>. <code>W¹</code> is <code>2 × 2</code>, so <code>A¹ = ReLU(X(W¹)ᵀ + b¹)</code> is <code>4 × 2</code>. Then <code>W²</code> is <code>1 × 2</code>: output <code>4 × 1</code>.</p>
+<h3>2. The same weights on a batch of three</h3>
+<p>Stack three examples as rows: <code>X = [[1, −1], [0, 1], [2, 0]]</code>. Every row is pushed through the same <code>W¹</code>, <code>b¹</code>, then the same <code>W²</code>, <code>b²</code>.</p>
 
-<span class="formula">(4×2)(2×2) → (4×2) → (4×2)(2×1) → (4×1)</span>
+<table>
+  <tr><th>Row</th><th>z¹</th><th>a¹ = ReLU</th><th>z²</th><th class="num">a² = σ</th></tr>
+  <tr><td>[1, −1]</td><td class="num">[−1, 0]</td><td class="num">[0, 0]</td><td class="num">−0.5</td><td class="num">0.378</td></tr>
+  <tr><td>[0, 1]</td><td class="num">[2, 1]</td><td class="num">[2, 1]</td><td class="num">2.5</td><td class="num">0.924</td></tr>
+  <tr><td>[2, 0]</td><td class="num">[2, −1]</td><td class="num">[2, 0]</td><td class="num">1.5</td><td class="num">0.818</td></tr>
+</table>
 
-<p>Every row is independent. That independence is exactly what mini-batch training exploits: one matrix multiply processes 256 examples at once.</p>
+<p><strong>What to notice.</strong> Row 1 is the degenerate case from before; rows 2 and 3 are alive, and they differ even though their <code>z¹₁</code> values are both 2. The difference lives in the second unit, where <code>[0, 1]</code> keeps a 1 and <code>[2, 0]</code> loses its negative. That is the batch doing its job: three examples, one set of weights, three separate verdicts.</p>
+
+<h3>3. Counting a real network</h3>
+<p>784 inputs (a 28×28 image), one hidden layer of 128, ten output classes. Add the two layers' parts.</p>
+
+<table>
+  <tr><th>Layer</th><th>Arithmetic</th><th class="num">Parameters</th></tr>
+  <tr><td>W¹</td><td class="num">784 · 128</td><td class="num">100,352</td></tr>
+  <tr><td>b¹</td><td class="num">128</td><td class="num">128</td></tr>
+  <tr><td>W²</td><td class="num">128 · 10</td><td class="num">1,280</td></tr>
+  <tr><td>b²</td><td class="num">10</td><td class="num">10</td></tr>
+  <tr><td>Total</td><td class="num">100,352 + 128 + 1,280 + 10</td><td class="num"><strong>101,770</strong></td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Almost every parameter sits in the first layer, because 784 inputs is a wide door. The hidden layer is only 128 units, so the second layer is 78 times smaller. If a model with this shape runs out of memory, the fix is a smaller first layer — not a smaller batch of classes.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"The nonlinearity is optional detail."</strong> Drop it between two layers and topic 8's proof applies: the stack collapses. A suspiciously linear loss curve often means a missing activation.</p>
-  <p><strong>Second trap:</strong> mixing up <code>Wx</code> and <code>xWᵀ</code> when batching. Both can be "right" numerically for square matrices and silently wrong otherwise. Write the shapes down before the code.</p>
+  <p><strong>"If the shapes work out, the layer is correct."</strong> It feels right because nothing errors: a square matrix makes <code>Wx</code> and <code>xW</code> identical in shape, and broadcasting silently stretches a length-5 bias across 32 rows — which is exactly what you wanted that one time.</p>
+  <p><strong>Correction:</strong> only the bias is allowed to broadcast. For everything else, compare the pair of numbers before multiplying: <code>(32×10)</code> against <code>(5×10)</code> does not work in that order and needs <code>Wᵀ</code>. A run that produces a shape has not proved it produced the right one.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Lay one example out as a column of numbers.", "Multiply by the first weight matrix and add its bias: that is z¹.", "Apply the activation elementwise: that is a¹.", "Feed a¹ into the next layer and repeat; the last layer is the prediction.", "For a batch, stack examples as rows; the weights never touch that first dimension."]</script></div>
+<p><strong>The tell:</strong> loss falls, validation accuracy sits at chance, and two very different inputs return nearly the same prediction — the network is averaging across examples instead of separating them. Print <code>W.shape</code>, <code>X.shape</code> and the output shape once per layer; if the input's last number is not <code>W</code>'s last number when you write <code>XWᵀ</code>, stop.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

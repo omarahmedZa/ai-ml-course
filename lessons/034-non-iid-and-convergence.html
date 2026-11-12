@@ -24,50 +24,87 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Every FL tutorial uses MNIST split evenly across clients. Real deployments never look like that — one phone belongs to a teenager, another to a radiologist. This gap is where federated models quietly underperform.</p>
+<p class="lede">Non-IID data is the normal condition of every real deployment: one phone belongs to a teenager who types in Portuguese, the next to a radiologist who types in English. Papers usually demonstrate on an evenly split dataset where every client sees the same ten classes; that split is the one thing a real fleet never gives you.</p>
+<p>In an exam the question is sharp: <em>"does raising the number of local epochs improve communication efficiency?"</em> The answer is no in general — it cuts rounds but grows drift — and answering "yes, fewer rounds" is the standard half-mark answer. In a project the failure is quieter: you raise <code>E</code> from 1 to 50 to cut the bandwidth bill, total accuracy falls two points, you blame the learning rate, and the drop sits in the three clients with the least data. Nothing in the code is wrong; the assumption was.</p>
 
 <h2>The one core idea</h2>
-<p>When clients' data distributions differ, local training pulls each client's weights toward its <strong>own</strong> optimum. Averaging those divergent models gives a point that is optimal for nobody — <strong>client drift</strong>.</p>
+<p>Two hikers are roped together but walking to different villages. Each step takes a hiker toward their own village, the rope pulls both back toward the middle, and after enough steps they are standing in a field that is neither village. Neither has arrived, and the rope is doing exactly what it was designed to do.</p>
+<p>In one line: <strong>local training moves each client toward its own optimum, and the average of several different optima is a point that is optimal for nobody.</strong> Client A's optimum is −1 and client B's is +1; after 10 local epochs they sit at −0.9 and +0.9, and the server averages them to 0.0.</p>
 
 <h2>How it actually works</h2>
-<ul>
-  <li><strong>Label skew</strong>: client A only sees digit 3, client B only digit 7. Each local model becomes confidently wrong about the other 8 classes.</li>
-  <li><strong>Feature skew</strong>: same task, different sensors — different scales, noise, or lighting.</li>
-  <li><strong>Quantity skew</strong>: 10 examples versus 100,000, which also tilts the weighted average.</li>
-  <li><strong>Drift grows with E</strong>: more local epochs means each client travels further toward its private optimum before the average.</li>
-  <li><strong>FedProx</strong>: add a proximal term <code>(μ/2)‖w − w_t‖²</code> to each local objective, anchoring clients near the global model. μ controls the leash.</li>
-  <li><strong>Personalisation</strong>: accept that one global model is the wrong goal — train a shared representation and fine-tune per client, or keep some layers local (FedBN).</li>
-  <li><strong>Fairness</strong>: the global model can be accurate on average and terrible for small clients. Report per-client accuracy, not just the mean.</li>
-</ul>
+<p>Six mechanisms turn that picture into a failure you can measure. IID means independent and identically distributed: every client's rows drawn from the same underlying mix.</p>
 
-<span class="formula">local objective:  F_k(w) + (μ/2)‖w − w_t‖²</span>
+<h3>Part 1 — IID is the assumption being broken</h3>
+<p>Under IID, each client's 1,000 examples are a fair sample of the same ten-class mix, so its local gradient is an unbiased estimate of the global one, and averaging those is safe. Non-IID means that guarantee has lapsed.</p>
+<p><strong>Why this part exists:</strong> without naming the assumption you cannot say what drift is a violation of, and every fix — reweighting, proximal terms, personalisation — is a repair to this one line.</p>
+
+<h3>Part 2 — Label skew is the common case</h3>
+<p>Client A has only digit 3, client B only digit 7. Each local model becomes extremely confident on one of ten classes and has effectively never seen the other eight. The local optimum is not a mild bias; it is a model that has been trained to answer a different question.</p>
+<p><strong>Why this part exists:</strong> averaging two models that are confidently wrong in opposite directions gives a model that is uncertain everywhere, so global accuracy can fall while every client improved locally.</p>
+
+<h3>Part 3 — Quantity skew bends the average</h3>
+<p>One client holds 10 examples and another 100,000, so their shares are 0.0001 and 0.9999. The large client's optimum effectively <em>is</em> the global model; the small one is a rounding error in its own training run.</p>
+<p><strong>Why this part exists:</strong> a model can be accurate on average and useless for the client the deployment was built for, and the averaging rule cannot distinguish "small because rare" from "small because unimportant".</p>
+
+<h3>Part 4 — Local steps amplify the divergence</h3>
+<p>Each local epoch moves a client further toward its private optimum before the server sees anything: <code>E = 1</code> to <code>E = 10</code> takes the distance travelled from 0.2 to 0.9 below. The average is taken after that divergence, never before.</p>
+<p><strong>Why this part exists:</strong> this is the topic's core trade-off: local steps save rounds and cost agreement, and the bill arrives in a currency the loss curve never shows.</p>
+
+<h3>Part 5 — FedProx puts a leash on each step</h3>
+<p>FedProx adds <code>(μ/2)‖w − w_t‖²</code> to each local objective, so the local gradient becomes <code>∇F_k(w) + μ(w − w_t)</code>. That term is zero at the global model and grows with distance: a spring tied to <code>w_t</code>. μ is the stiffness — 0 removes the leash, large μ approaches no local steps at all.</p>
+<p><strong>Why this part exists:</strong> without a leash, more local work is unbounded drift; with one, a client can take many steps without the server losing control of where it ends up.</p>
+
+<h3>Part 6 — Personalisation and fairness</h3>
+<p>Sometimes the honest response is to stop chasing one global model: share a representation, then fine-tune the last layers per client, or keep batch-norm statistics local (FedBN). Report accuracy per client as well as the mean; a mean of 95% across 1,000 clients is compatible with 40% on the smallest.</p>
+<p><strong>Why this part exists:</strong> a single aggregate number hides exactly the clients that non-IID data hurts, and those are usually the users the system was deployed to serve.</p>
 
 <h2>Worked example</h2>
 
-<h3>1. The local-steps trade-off</h3>
-<p>Two clients, one parameter, global start 0.0. Client A's optimum is −1, client B's is +1.</p>
+<h3>1. Drift grows with local epochs</h3>
+<p>Two clients, one parameter, global start 0.0. Client A's optimum is −1 and client B's is +1; the table adds the FedProx row using the fixed point derived below.</p>
 
 <table>
-  <tr><th>Local epochs E</th><th class="num">A ends at</th><th class="num">B ends at</th><th class="num">Average</th><th>Verdict</th></tr>
-  <tr><td class="num">1</td><td class="num">−0.2</td><td class="num">+0.2</td><td class="num">0.0</td><td>Stable, slow</td></tr>
-  <tr><td class="num">10</td><td class="num">−0.9</td><td class="num">+0.9</td><td class="num">0.0</td><td>Still 0, but each model is extreme</td></tr>
+  <tr><th class="num">E</th><th class="num">A ends at</th><th class="num">B ends at</th><th class="num">Drift |w − 0|</th><th class="num">Average</th><th>Verdict</th></tr>
+  <tr><td class="num">1</td><td class="num">−0.2</td><td class="num">+0.2</td><td class="num">0.2</td><td class="num">0.0</td><td>Stable, slow</td></tr>
+  <tr><td class="num">10</td><td class="num">−0.9</td><td class="num">+0.9</td><td class="num">0.9</td><td class="num">0.0</td><td>Each model extreme</td></tr>
+  <tr><td class="num">10, μ = 1</td><td class="num">−0.5</td><td class="num">+0.5</td><td class="num">0.5</td><td class="num">0.0</td><td>Leash halves it</td></tr>
 </table>
 
-<p>The average is unchanged, but the clients have each become specialists. On a third client with mixed data, the averaged model is worse than either specialist — this is drift, not convergence.</p>
+<p><strong>What to notice.</strong> The average is 0.0 in every row because these two bowls are mirror images — a toy deliberately too kind to drift. What changes is the round trip: at <code>E = 10</code> each client's loss at the global point is <code>(−0.9)² = 0.81</code> against <code>(−0.2)² = 0.04</code>, twenty times worse. The shipped model suits a hypothetical average client and no real one.</p>
 
-<h3>2. Why "more local work" is not free</h3>
-<p>Local epochs reduce communication rounds (good) while increasing drift (bad). FedProx makes the trade explicit: with <code>μ &gt; 0</code>, clients can take more steps without wandering, because every step pays a penalty for leaving <code>w_t</code>.</p>
+<h3>2. Why the average can miss the pooled optimum</h3>
+<p>Give the two clients bowls of different widths: <code>F(w) = ½[4(w + 1)² + (w − 1)²]</code>. The local optima are still −1 and +1, so plain averaging still produces 0.0. Differentiate to find the pooled optimum:</p>
+
+<table>
+  <tr><th>Step</th><th class="num">Arithmetic</th><th class="num">Result</th></tr>
+  <tr><td>Gradient</td><td class="num">4(w + 1) + (w − 1)</td><td class="num">5w + 3</td></tr>
+  <tr><td>Set to zero</td><td class="num">5w + 3 = 0</td><td class="num">w* = −0.6</td></tr>
+  <tr><td>Loss at the average 0.0</td><td class="num">½[4(1)² + (−1)²]</td><td class="num">2.5</td></tr>
+  <tr><td>Loss at w* = −0.6</td><td class="num">½[4(0.4)² + (−1.6)²] = ½[0.64 + 2.56]</td><td class="num"><strong>1.6</strong></td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Averaging local optima costs 56% more pooled loss, 2.5 against 1.6, with no warning: both clients converged and the average is arithmetically correct. The gap is zero when the bowls share a width, which is why the evenly-split benchmark hides it.</p>
+
+<h3>3. How hard the leash pulls</h3>
+<p>One client with loss <code>½(w + 1)²</code>, starting from <code>w_t = 0</code>. Setting <code>(w + 1) + μw = 0</code> gives the fixed point <code>w = −1/(1 + μ)</code>.</p>
+
+<table>
+  <tr><th class="num">μ</th><th class="num">Fixed point −1/(1 + μ)</th><th class="num">Distance from 0</th><th>Behaviour</th></tr>
+  <tr><td class="num">0</td><td class="num">−1.000</td><td class="num">1.000</td><td>No leash: full local optimum</td></tr>
+  <tr><td class="num">1</td><td class="num">−0.500</td><td class="num">0.500</td><td>Halfway to the local optimum</td></tr>
+  <tr><td class="num">4</td><td class="num">−0.200</td><td class="num">0.200</td><td>Strong leash, close to global</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The leash changes how far the client gets, not which way it wants to go, and it moves on a smooth curve rather than a switch. That is what lets you raise <code>E</code> without raising drift by the same factor: at <code>μ = 4</code> the client travels 0.2 instead of 1.0.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"More local epochs always improve communication efficiency."</strong> They reduce rounds but increase client drift, and beyond a small E the global model degrades. The optimum is empirical, not monotone.</p>
-  <p><strong>Second trap:</strong> evaluating on a pooled test set only. A model can be excellent in aggregate and useless for the smallest client — exactly the user the deployment was meant to serve.</p>
+  <p><strong>"More local epochs always improve communication efficiency."</strong> It feels right because local epochs do reduce round count, and round count is the number everyone plots on the x-axis, usually stopping at <code>E = 10</code> where the curve still looks flat.</p>
+  <p>Two quantities move in opposite directions: rounds fall roughly as <code>1/E</code>, while drift grows with <code>E</code> until the average stops being useful. Past a small value the accuracy falls faster than the saving grows, so the cost to reach a target accuracy rises. The optimum is empirical, never monotone.</p>
+  <p><strong>Correction:</strong> tune <code>E</code> and <code>μ</code> together against a target accuracy, and always report the number of rounds needed to reach it — not rounds per unit of local work. A second trap: evaluating only on a pooled test set, where the average client dominates and the smallest client disappears.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Different clients see different distributions.", "Local training pulls each model toward its own optimum.", "Averaging those divergent models lands somewhere good for nobody.", "More local epochs cut rounds but increase that drift.", "Anchor clients to the global weights (FedProx), or personalise the last layers."]</script></div>
+<p><strong>The tell:</strong> accuracy that drops as you increase <code>E</code> while training loss on the pooled set keeps falling — that combination means each client is fitting its own corner of the data. The second tell is a single global accuracy number in a report that never breaks results down by client; if the smallest client is not shown, its 40% is inside the 95%.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

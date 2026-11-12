@@ -24,52 +24,84 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">On tabular data — spreadsheets, medical records, sensor tables — gradient-boosted trees are still the strongest default. Your project may well beat a neural network with 200 lines of XGBoost, and the exam will ask why.</p>
+<p class="lede">On tabular data — spreadsheets, medical records, sensor tables — gradient-boosted trees are still the strongest default. Your project may well beat a neural network with 200 lines of XGBoost, and the exam will ask why. Trees win on tables because they ask questions instead of drawing lines: is income below 40k, is the account older than six months. Categories, missing values and wildly different scales all survive that treatment, which is why credit scoring and fraud review still run on boosted trees.</p>
+<p><strong>The failure it prevents.</strong> An exam question gives two candidate splits and asks which one the tree takes. Students compare the two children's impurity directly, pick the smaller, and lose the marks — the comparison has to be weighted by how many rows land on each side. In a project the same lesson arrives as a forest that memorises 500 noisy rows, because nobody capped depth and validation loss turned upward after the fourth tree.</p>
 
 <h2>The one core idea</h2>
-<p>A tree partitions feature space with <strong>axis-aligned cuts</strong>, choosing each cut that most reduces impurity. An <strong>ensemble</strong> is many trees combined — bagging averages away variance, boosting builds a sequence that removes bias.</p>
+<p>A tree is a questionnaire. Each node asks one yes/no question about one feature, the answer routes the row left or right, and the leaf at the end hands back a single number — the average target of the training rows that landed there. Nothing is fitted globally: each question is chosen to make the two resulting groups as pure as possible, one question at a time.</p>
+<p>In one line: <strong>a tree cuts the feature space into boxes, then predicts one number per box.</strong> Start with 100 rows split 50 positive and 50 negative: impurity is <code>1 − (0.5² + 0.5²) = 0.5</code>. A cut producing 45/5 and 5/45 lowers it to 0.18, a drop of 0.32, so that is the cut taken.</p>
 
 <h2>How it actually works</h2>
-<ul>
-  <li><strong>Split selection</strong> is greedy: try every feature and threshold, keep the cut with the largest impurity drop. No global optimisation — a known weakness.</li>
-  <li><strong>Impurity</strong>: Gini <code>1 − Σ pₖ²</code> or entropy <code>−Σ pₖ log pₖ</code> for classification; variance/MSE for regression.</li>
-  <li><strong>Stopping</strong>: max depth, min samples per leaf, or validation-based pruning. Unconstrained trees memorise.</li>
-  <li><strong>Bagging</strong> (random forest): train many deep trees on bootstrap samples, average. Each tree has low bias, high variance; averaging cuts variance.</li>
-  <li><strong>Boosting</strong> (GBM, XGBoost, LightGBM): train shallow trees sequentially, each fitting the previous ensemble's residual. Low bias grows slowly; variance is controlled by shrinkage and depth.</li>
-</ul>
+<p>Six parts: three build one tree, three explain how many trees are combined.</p>
+
+<h3>Part 1 — Score purity with Gini or entropy</h3>
+<p><strong>Impurity</strong> measures how mixed a node's labels are. Gini is <code>1 − Σ pₖ²</code>, so 50 positives and 50 negatives give <code>1 − (0.25 + 0.25) = 0.5</code> while a pure node gives 0. Regression swaps Gini for variance, playing the same role.</p>
+<p>Why this part exists: without a number, "best split" is an opinion, and the greedy search has nothing to maximise.</p>
+
+<h3>Part 2 — Try every cut, score by weighted drop</h3>
+<p>For each feature, sort the values and test a threshold between each adjacent pair — 99 candidate cuts for 100 distinct values. Score a cut by the children's impurity weighted by their sizes, and keep the largest drop: <code>Δ = I(parent) − (n_L/n)I(L) − (n_R/n)I(R)</code>.</p>
+<p>Why this part exists: unweighted child impurity lets a cut that isolates a single row look perfect while the other 99 rows stay mixed.</p>
+
+<h3>Part 3 — Recurse, then stop</h3>
+<p>The winning cut splits the data and the same search runs inside each child. Stop on maximum depth, minimum samples per leaf, or a validation check. Left alone a tree grows until every leaf holds one row, with impurity 0 and no predictive value.</p>
+<p>Why this part exists: an unconstrained tree has a leaf per training row, so training error is 0 by construction while test error climbs.</p>
+
+<h3>Part 4 — Bagging averages variance away</h3>
+<p>Bagging trains many deep trees, each on a bootstrap sample — 100 rows drawn with replacement from 100, which leaves roughly 37% of rows out of each tree. Predictions are then averaged or voted. Each tree is low bias and high variance; averaging attacks the variance without touching the bias.</p>
+<p>Why this part exists: one deep tree memorises its sample's noise, and a different sample produces a wildly different tree, so a single tree's answer is unstable.</p>
+
+<h3>Part 5 — Boosting removes bias in small steps</h3>
+<p>Boosting builds shallow trees in sequence, each fitted to the current ensemble's residual, meaning the part of the target still unexplained. Each tree is scaled by a learning rate, the size of each step, usually 0.05 to 0.1, and depth is held at 3 to 8 because each tree only needs to fix a small error pattern.</p>
+<p>Why this part exists: a full-depth tree would fit its residual completely and reintroduce exactly the variance boosting is trying to keep down.</p>
+
+<h3>Part 6 — Choose the family before tuning it</h3>
+<p>Reach for a random forest when rows are few — under a few thousand — or the target is noisy: it resists overfitting and needs almost no tuning. Reach for boosted trees when accuracy matters and you can afford a validation loop for early stopping. Both usually beat a neural network on tables under 100,000 rows.</p>
+<p>Why this part exists: the wrong family costs either accuracy you could have had or a week of tuning.</p>
 
 <h2>Worked example</h2>
 
 <h3>1. Which split is better?</h3>
-<p>100 samples, 50 positive / 50 negative. Parent Gini = <code>1 − (0.5² + 0.5²) = 0.5</code>.</p>
+<p>100 rows, 50 positive and 50 negative, so parent impurity is <code>1 − (0.5² + 0.5²) = 0.5</code>. Two candidate cuts are scored, each with 50 rows per side.</p>
 
 <table>
-  <tr><th>Split</th><th>Left child</th><th>Right child</th><th class="num">Weighted Gini</th></tr>
-  <tr><td>A (good)</td><td>50: 45+/5− → 0.18</td><td>50: 5+/45− → 0.18</td><td class="num">0.18</td></tr>
-  <tr><td>B (useless)</td><td>50: 25+/25− → 0.50</td><td>50: 25+/25− → 0.50</td><td class="num">0.50</td></tr>
+  <tr><th>Split</th><th>Left child</th><th>Right child</th><th class="num">Weighted Gini</th><th class="num">Drop</th></tr>
+  <tr><td>A (useful)</td><td class="num">45+/5−: 1 − (0.81 + 0.01) = 0.18</td><td class="num">5+/45−: 0.18</td><td class="num">0.5(0.18) + 0.5(0.18) = 0.18</td><td class="num">0.32</td></tr>
+  <tr><td>B (useless)</td><td class="num">25+/25−: 1 − (0.0625 + 0.0625) = 0.50</td><td class="num">25+/25−: 0.50</td><td class="num">0.5(0.50) + 0.5(0.50) = 0.50</td><td class="num">0</td></tr>
 </table>
 
-<p>Split A drops impurity by 0.32; split B by 0. The tree takes A and recurses into each child.</p>
+<p><strong>What to notice.</strong> Split B leaves both children as mixed as the parent, so the drop is 0: the tree found a cut, not a signal. Split A's 0.32 drop repeats inside each child, which is why impurity falls fast then crawls. If the two sides had held 90 and 10 rows, the weights 0.9 and 0.1 would matter more than the children's own scores.</p>
 
-<h3>2. Bagging vs boosting, same data</h3>
+<h3>2. Boosting, three rows at a time</h3>
+<p>Targets <code>y = [10, 12, 14]</code>. The ensemble starts at the mean, then adds one shallow tree per round with learning rate 0.5, so each tree's output is halved.</p>
+
 <table>
-  <tr><th></th><th>Bagging (RF)</th><th>Boosting (GBM)</th></tr>
-  <tr><td>Trees built</td><td>In parallel, deep</td><td>Sequentially, shallow</td></tr>
-  <tr><td>Attacks</td><td>Variance</td><td>Bias</td></tr>
-  <tr><td>Overfit risk</td><td>Low, saturates with more trees</td><td>Real — needs early stopping</td></tr>
-  <tr><td>Typical win</td><td>Noisy, small data</td><td>Tight accuracy on tabular</td></tr>
+  <tr><th>Round</th><th class="num">Predictions</th><th class="num">Errors (y − pred)</th><th class="num">MSE</th></tr>
+  <tr><td>F₀ = mean</td><td class="num">12, 12, 12</td><td class="num">−2, 0, 2</td><td class="num">(4 + 0 + 4) / 3 = 2.667</td></tr>
+  <tr><td>F₁ = F₀ + 0.5·h₁</td><td class="num">11, 12, 13</td><td class="num">−1, 0, 1</td><td class="num">(1 + 0 + 1) / 3 = 0.667</td></tr>
+  <tr><td>F₂ = F₁ + 0.5·h₂</td><td class="num">10.5, 12, 13.5</td><td class="num">−0.5, 0, 0.5</td><td class="num">(0.25 + 0 + 0.25) / 3 = 0.167</td></tr>
 </table>
+
+<p><strong>What to notice.</strong> Each tree is fitted to the previous errors, not to <code>y</code>: −2, 0, 2 in round one, then −1, 0, 1. The 0.5 learning rate means no round can overshoot, and error falls 2.667 → 0.667 → 0.167 with no clever single tree. Set the rate to 1.0 and the first round lands exactly on the targets, fitting all the noise in one step — that is the overfitting path.</p>
+
+<h3>3. Why a tree cannot exceed what it has seen</h3>
+<p>Four houses in one leaf sold for 300k, 340k, 360k and 400k. A fifth house with a floor area beyond every training value is routed by the same questions into that same leaf.</p>
+
+<table>
+  <tr><th>Step</th><th>Arithmetic</th><th class="num">Result</th></tr>
+  <tr><td>Leaf average</td><td class="num">(300 + 340 + 360 + 400) / 4 = 1,400 / 4</td><td class="num">350k</td></tr>
+  <tr><td>Prediction for the huge house</td><td class="num">same leaf, same average</td><td class="num">350k</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The output is a mean of observed targets, so it can never pass the largest value in the leaf, 400k. Beyond the training range the model is flat by construction, not by choice — no amount of depth changes it, because there are no rows out there to average. A linear model would keep climbing instead.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"Trees can learn any pattern, including trends."</strong> They cannot extrapolate. A tree predicts the average of the training targets in a leaf, so it can never output a value outside the range it has seen. Ask it to forecast next year's growth and it flatlines.</p>
-  <p><strong>Second trap:</strong> reading built-in feature importance as truth. Impurity-based importance is biased toward high-cardinality and continuous features. Use permutation importance on held-out data instead (topic 31).</p>
+  <p><strong>"Trees can learn any pattern, including trends."</strong> They cannot extrapolate: beyond the observed range the model repeats its edge value, however strong the trend looks. Ask it to forecast next year's growth and it flatlines.</p>
+  <p>It feels right because a tree has no formula to constrain it: it splits on any feature at any threshold and fits training data better than almost anything else. That flexibility is real, but it stops at the edge of the observed range.</p>
+  <p><strong>Correction:</strong> match the model to the shape of the question. For interpolation inside the observed range, a tree is excellent. For trends, ratios or anything expected to continue past the data, use a model with a slope. A second correction: impurity-based feature importance is not truth — it favours high-cardinality and continuous columns, so use permutation importance on held-out rows instead.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["A tree asks one yes/no question at a time: is x₁ below 0.3?", "It tries every cut and keeps the one that makes the children purest.", "Repeat inside each child until a stopping rule says stop.", "One deep tree is unstable; average many on resampled data to cut variance.", "Boosting instead fits each new shallow tree to the previous ensemble's error."]</script></div>
+<p><strong>The tell:</strong> plot predictions against the feature and the far left and right come out as flat shelves while the middle wiggles. A second tell is a model that never predicts above the training maximum: if those two numbers are equal, it has hit its ceiling.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

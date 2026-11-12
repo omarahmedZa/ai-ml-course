@@ -24,54 +24,86 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Your project will make a prediction somebody has to act on. "The model said so" is not an answer to a rejected loan applicant, a clinician, or an auditor — and in some jurisdictions it is not a legal answer either.</p>
+<p class="lede">A model that outputs <code>0.31</code> has not given anyone a reason. Explainability is the practice of producing one: which inputs drove this output, how much each contributed, and what the model would have said without them. You need it whenever a number turns into a decision a human must defend — a loan declined, a scan flagged, a claim denied. It is also the fastest way to debug a model that scores well and behaves absurdly.</p>
+<p>A pneumonia classifier reached AUC 0.96 (area under the ROC curve; 1.0 is perfect) at its training hospital and 0.61 at the next one. One local explanation showed why: the five highest-contributing pixels sat in the burned-in scanner label in the corner. Accuracy could never surface that, because on the training site the label correlated perfectly with pneumonia — the shortcut looked exactly like skill. One attribution map found it in ten seconds.</p>
 
 <h2>The one core idea</h2>
-<p>An explanation is an <strong>argument about why an output occurred</strong>, addressed to a specific stakeholder. Different stakeholders need different arguments — and most XAI failures are a mismatch between the method and the audience.</p>
+<p>An explanation is an <strong>argument about why an output occurred</strong>, and every argument has an audience. The applicant wants the two facts they can change. The officer wants contributions plus a comparable case. The regulator wants error rates by group plus the rule itself. Same prediction, three arguments — and most explainable-AI failures are one audience being handed another audience's argument.</p>
+<p>In one line: <strong>an explanation is a claim about which inputs the model used, phrased for whoever has to act on it.</strong> For an applicant at <code>p = 0.31</code> against a <code>0.25</code> threshold, the applicant's version is four words — "two missed payments" — while the model's own version is six numbers that add to <code>−0.80</code> in log-odds.</p>
 
 <h2>How it actually works</h2>
-<table>
-  <tr><th>Axis</th><th>Option A</th><th>Option B</th></tr>
-  <tr><td>When</td><td><strong>Intrinsic</strong>: the model is interpretable by design (linear, small tree)</td><td><strong>Post-hoc</strong>: explain a trained black box afterwards</td></tr>
-  <tr><td>Scope</td><td><strong>Global</strong>: how the model behaves overall</td><td><strong>Local</strong>: why this one prediction</td></tr>
-  <tr><td>Form</td><td><strong>Feature attribution</strong>: which inputs mattered</td><td><strong>Example / counterfactual</strong>: nearest case, minimal change</td></tr>
-</table>
+<p>Six parts: three of vocabulary, three of decisions.</p>
 
-<ul>
-  <li><strong>Debugging</strong>: a surgeon's model keys on the hospital's scanner ID, not the lesion. Attribution finds it; accuracy never would.</li>
-  <li><strong>Accountability</strong>: the applicant is owed the <em>actual</em> reason, not a plausible-sounding one. GDPR Art. 22 constrains purely automated decisions with significant effects.</li>
-  <li><strong>Trust and adoption</strong>: a clinician will not act on a score they cannot sanity-check.</li>
-  <li><strong>Safety</strong>: explanations expose spurious shortcuts before deployment, when they are cheap to fix.</li>
-</ul>
+<h3>Part 1 — Importance is always relative</h3>
+<p>Nothing is important on its own; importance is a difference, so it needs a baseline. A contribution of <code>+0.70</code> means nothing until you say it is measured against an average applicant, or against this applicant with one field blanked out.</p>
+<p><strong>Why this part exists:</strong> without a stated baseline, two analysts produce two correct explanations that disagree and neither can be checked.</p>
+
+<h3>Part 2 — Intrinsic means the model is the explanation</h3>
+<p>An <strong>intrinsic</strong> model is readable by design: linear, shallow tree, short rule list. No second method is needed, because the parameters are the reason — a coefficient of <code>+0.8</code> on debt-to-income, or a depth-4 tree with at most <code>2⁴ = 16</code> readable leaves. The price is capacity: readable models usually predict less well.</p>
+<p><strong>Why this part exists:</strong> skip intrinsic and you pay for a black box, then pay again to explain it — when a model three AUC points behind might satisfy both auditor and engineer.</p>
+
+<h3>Part 3 — Post-hoc means a second method reads the first</h3>
+<p><strong>Post-hoc</strong> means after training: keep the boosted model and run an explainer over it — SHAP, LIME, gradients (topic 31). You keep the accuracy and buy an estimate about a function you cannot read, so the explanation can be wrong in ways the model is not. It also adds a second artefact to monitor, at 40 ms per decision where the intrinsic model costs zero.</p>
+<p><strong>Why this part exists:</strong> a post-hoc number is a measurement of the model, not a fact about it, and topic 32 exists because measurements need testing.</p>
+
+<h3>Part 4 — Global is the model, local is one row</h3>
+<p><strong>Global</strong> describes behaviour across a dataset: debt-to-income carries 28% of average attribution over 5,000 applications. <strong>Local</strong> describes one row: for applicant 4,182, missed payments added <code>0.70</code>. Global answers what the model keys on; local answers why it said no to me. They disagree routinely: a feature ranked 4th overall can be 2nd here.</p>
+<p><strong>Why this part exists:</strong> the commonest wrong deliverable is a global chart handed to someone asking a local question. It is not false, just an answer to a different question.</p>
+
+<h3>Part 5 — Timing, scope and form are separate axes</h3>
+<p>Intrinsic versus post-hoc is <em>when</em>. Global versus local is <em>scope</em>. Attribution versus example-based is <em>form</em> — "income mattered" against "here are three approved applicants like you". Independent axes give <code>2 × 2 × 2 = 8</code> positions, and one project can hold several: an intrinsic tree, read globally for the audit and locally for the letter.</p>
+<p><strong>Why this part exists:</strong> people collapse the axes and argue about whether a model is "interpretable", as if that were one property. Naming the axis turns a debate into a priced choice.</p>
+
+<h3>Part 6 — The use case picks the argument</h3>
+<p>Four uses pull differently. <em>Debugging</em> wants cheap local attribution across many rows, because you are hunting a shortcut. <em>Accountability</em> wants the actual reason for one decision, contestable — GDPR Art. 22 constrains purely automated decisions with significant effects. <em>Trust</em> wants a check a clinician can run in seconds. <em>Safety</em> wants the shortcut found before deployment, when the fix costs days rather than a recall.</p>
+<p><strong>Why this part exists:</strong> "we need explainability" is not a requirement you can build against; without a use case you cannot tell whether the deliverable is 5,000 rows or one paragraph.</p>
 
 <h2>Worked example</h2>
 
-<h3>1. The same model, three audiences</h3>
-<p>A loan model rejects an application with <code>p(default) = 0.31</code> against a 0.25 threshold.</p>
+<h3>1. One rejection, three audiences</h3>
+<p>Applicant 4,182 is rejected at <code>p = 0.31</code> against a <code>0.25</code> threshold. The terms are log-odds (log of the odds), so they add like ordinary numbers.</p>
 
 <table>
-  <tr><th>Audience</th><th>Useful explanation</th></tr>
-  <tr><td>Applicant</td><td>"Debt-to-income and two recent missed payments" — actionable, specific</td></tr>
-  <tr><td>Loan officer</td><td>Feature contributions plus comparable approved cases</td></tr>
-  <tr><td>Regulator</td><td>Global validation: error rates by protected group, plus the decision rule</td></tr>
+  <tr><th>Step</th><th>Arithmetic</th><th class="num">Running log-odds</th></tr>
+  <tr><td>Bias (average applicant)</td><td class="num">—</td><td class="num">−2.10</td></tr>
+  <tr><td>Debt-to-income 0.62</td><td class="num">−2.10 + 0.95</td><td class="num">−1.15</td></tr>
+  <tr><td>Two missed payments</td><td class="num">−1.15 + 0.70</td><td class="num">−0.45</td></tr>
+  <tr><td>Income £41k</td><td class="num">−0.45 − 0.35</td><td class="num">−0.80</td></tr>
+  <tr><td>Convert to probability</td><td class="num">1 / (1 + e<sup>0.80</sup>) = 1 / 3.2255</td><td class="num"><strong>0.31</strong></td></tr>
 </table>
 
-<p>One explanation cannot serve all three. Shipping SHAP values to the applicant answers a question they did not ask.</p>
+<table>
+  <tr><th>Audience</th><th>What they get</th><th>Why</th></tr>
+  <tr><td>Applicant</td><td><code>+0.95</code> debt, <code>+0.70</code> missed payments</td><td>Actionable</td></tr>
+  <tr><td>Officer</td><td>All six terms, three similar approvals</td><td>Check against policy</td></tr>
+  <tr><td>Regulator</td><td>Error rates by group, rule, threshold</td><td>Test the rule</td></tr>
+</table>
 
-<h3>2. Intrinsic vs post-hoc trade-off</h3>
-<p>A logistic regression is fully interpretable and may lose 3 AUC points to a gradient-boosted model. That trade is sometimes correct (regulated lending) and sometimes not (ad ranking). The mistake is refusing to make the trade explicitly.</p>
+<p><strong>What to notice.</strong> The threshold is <code>ln(0.25 / 0.75) = −1.0986</code> in log-odds, so <code>−0.80</code> clears it by <code>0.2986</code>, or <code>0.06</code> in probability. The applicant's version is not a simplification but a selection, and selection is a judgement: the <code>−0.35</code> income term is dropped because a rejected applicant cannot act on "your income helped".</p>
+
+<h3>2. Global rank against local rank</h3>
+<p>The same model over 5,000 applications, each feature's mean absolute contribution as a share of the average total:</p>
+
+<table>
+  <tr><th>Feature</th><th class="num">Global</th><th class="num">Rank</th><th class="num">Applicant</th><th class="num">Rank</th></tr>
+  <tr><td>Income</td><td class="num">0.31</td><td class="num">1</td><td class="num">−0.35</td><td class="num">3</td></tr>
+  <tr><td>Debt-to-income</td><td class="num">0.28</td><td class="num">2</td><td class="num">+0.95</td><td class="num">1</td></tr>
+  <tr><td>Missed payments</td><td class="num">0.09</td><td class="num">4</td><td class="num">+0.70</td><td class="num">2</td></tr>
+  <tr><td>Account age</td><td class="num">0.12</td><td class="num">3</td><td class="num">0.00</td><td class="num">—</td></tr>
+  <tr><td>Two others</td><td class="num">0.20</td><td class="num">5–6</td><td class="num">0.00</td><td class="num">—</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The global shares sum to <code>1.00</code>, so the column is a complete budget of attention. Missed payments holds 9% globally and <code>0.70 / 2.00 = 35%</code> of this applicant's total feature magnitude — nearly four times its portfolio weight. Income, first overall, pushes this decision down. Neither ranking is wrong; they answer different questions.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"An explanation tells you the cause."</strong> Post-hoc methods describe the model's <em>function</em>, not the world's causal structure. "Income contributed 0.2" means the model's output would change if income changed — not that income causes repayment.</p>
-  <p><strong>Second trap:</strong> explainability theatre — producing a heatmap because it looks rigorous. An explanation nobody can act on, or that is never validated (topic 32), is decoration with a compliance cost.</p>
+  <p><strong>"An explanation tells you the cause."</strong> It feels right because the output moves when the feature moves, and that is what a cause does. But post-hoc methods describe the model's <em>function</em>, never the world's causal structure.</p>
+  <p>Concretely: "income contributed <code>−0.35</code>" means lowering income in the input lowers the score. It does not mean raising a real applicant's income by £10k would lower their risk: the model saw only 5,000 rows, where income also stood in for job stability.</p>
+  <p><strong>Correction:</strong> read every attribution as a claim about the function, with an implicit "holding the rest of the input fixed". Causal claims need an experiment or a causal graph; no explainer produces either.</p>
+  <p><strong>Second trap:</strong> explainability theatre, a heatmap shipped because it looks rigorous. An explanation nobody can act on, or never validated (topic 32), is decoration with a compliance cost.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["A prediction feeds a decision that affects a person.", "Ask who needs the reason: applicant, operator, auditor.", "Intrinsic models explain themselves; post-hoc methods explain afterwards.", "Global explains average behaviour; local explains one output.", "State the use case first, then pick the method that serves it."]</script></div>
-
+<p><strong>The tell:</strong> ask for one counterfactual with a number in it — "what would this applicant have had to change to score below 0.25?" If nobody can answer, you have a picture, not a reason. The second tell is a top feature no domain expert has mentioned; when the model's first reason surprises the people who know the problem, you have found a bug or the project's best insight, and only a check tells them apart.</p>
 <h2>Retrieval check</h2>
 <ol class="quiz">
   <li>A decision tree of depth 4 is used for credit scoring. Is it intrinsic or post-hoc, and local or global?

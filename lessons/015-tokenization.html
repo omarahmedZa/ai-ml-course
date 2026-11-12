@@ -24,48 +24,80 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Context windows, API bills, and truncation bugs are all counted in tokens, not words. Every number you read about an LLM — 128k context, $3 per million — is in this unit.</p>
+<p class="lede">A tokenizer is the first component to touch text in any language model, and the last one most people check. It maps a string to a list of integers drawn from a fixed table. Everything downstream — the embedding lookup in topic 16, the attention window, the price on an API bill — is measured in those integers, so a tokenizer error surfaces as a modelling error three layers away.</p>
+<p>Here is the exam version of that failure. A corpus of 900,000 English words must fit a 1,000,000-token budget. Words are fewer than tokens, so the naive answer is yes, with room to spare. The real count is 900,000 × 1.3 = 1,170,000 tokens, and the last 130,000 words never reach the model. In a project the same arithmetic appears as a loader that chunks by character count and cuts a JSON object in half.</p>
 
 <h2>The one core idea</h2>
-<p>A model needs integers, so text is split into <strong>tokens</strong> from a fixed vocabulary. Splitting on words fails on the long tail; splitting on characters loses meaning. <strong>Subword</strong> tokenisation splits the difference.</p>
+<p>Picture a shelf of 50,257 pre-printed labels. The tokenizer invents nothing: it chops text into pieces that already sit on the shelf, then hands back the label numbers. A shelf of whole words would need millions of slots and would still miss tomorrow's product name. A shelf of single letters is tiny, but each label says almost nothing on its own. Subwords are the compromise — common words get one label, rare words get assembled from two or three familiar ones.</p>
+<p>In one line: <strong>the vocabulary is frozen before training, and unseen text is decomposed rather than rejected.</strong> The word <code>playgrounds</code> can arrive as three pieces — <code>play</code>, <code>ground</code>, <code>s</code> — which is three integers out of a shelf of 50,257, and the model keeps a usable vector for each piece.</p>
 
 <h2>How it actually works</h2>
-<ul>
-  <li><strong>Vocabulary</strong> = fixed list of tokens, each mapped to an integer ID. Typical sizes: 32k–100k for modern LLMs.</li>
-  <li><strong>Word-level</strong>: clean, but any unseen word becomes <code>&lt;UNK&gt;</code> — the <strong>out-of-vocabulary</strong> problem. Rare names, typos, and morphology all break.</li>
-  <li><strong>Character-level</strong>: no OOV ever, but sequences get 4–5× longer and each token carries little meaning.</li>
-  <li><strong>BPE / WordPiece</strong>: start from characters, repeatedly merge the most frequent adjacent pair. Frequent words become one token; rare words become a few meaningful pieces.</li>
-  <li><strong>Special tokens</strong>: <code>&lt;bos&gt;</code>, <code>&lt;eos&gt;</code>, <code>&lt;pad&gt;</code>, <code>&lt;mask&gt;</code> — structural signals, not content.</li>
-  <li><strong>Context window</strong> is measured in tokens, and so is cost. A token is roughly 4 characters of English (~0.75 words).</li>
-</ul>
+<p>Seven parts, in the order they were invented. Each one plugs a hole that the previous one leaves open.</p>
+
+<h3>Part 1 — Fix a vocabulary, then freeze it</h3>
+<p>A vocabulary is a list of token strings, each with a permanent integer ID; the tokenizer is the function from text to those IDs. Modern models use 32,000 to 100,000 entries, and GPT-2 used 50,257. The list is built once from a sample corpus and never edited afterwards. Why this part exists: if the table changed between training and serving, ID 371 would point at a different piece, and every weight learned for it would be applied to the wrong thing.</p>
+
+<h3>Part 2 — Start from characters, not words</h3>
+<p>Training begins with a tiny alphabet: 256 byte values for byte-level BPE, or roughly 100 characters if you stay inside one writing system. Vowels, punctuation and accented letters each get an ID at this stage. English has more than 500,000 distinct word forms once names and typos are counted, which is why a character start is affordable and a word start is not. Why this part exists: with a character alphabet no input is ever unrepresentable, so the out-of-vocabulary failure cannot occur.</p>
+
+<h3>Part 3 — Merge the most frequent adjacent pair</h3>
+<p>Count every adjacent pair of symbols across the corpus, take the pair that occurs most often, and replace it with one new symbol. Repeat. The early merges are dull — <code>t</code>+<code>h</code>, then <code>e</code>+<code>s</code> — and by merge 32,000 the winners are whole words. Why this part exists: every merge shortens the encoded sequence, and that is what takes a 1,000-word document from about 5,700 characters down to 1,300 integers.</p>
+
+<h3>Part 4 — Encode by replaying the merge list</h3>
+<p>Encoding new text means applying the same merges in the same order, greedily, left to right. Nothing is counted at inference time; the ordered merge list is the entire algorithm. A 12-character word such as <code>unbelievable</code> lands in 3 pieces, and English averages about 4 characters per token. Why this part exists: a deterministic order guarantees that one sentence always produces one sequence of IDs, so caching, batching and replay stay consistent.</p>
+
+<h3>Part 5 — Reserve special tokens</h3>
+<p>Four structural symbols live in the vocabulary and never come from raw text: <code>&lt;bos&gt;</code> opens a sequence, <code>&lt;eos&gt;</code> closes it, <code>&lt;pad&gt;</code> fills short rows in a batch, <code>&lt;mask&gt;</code> hides a position during training. To the model they are ordinary IDs. Why this part exists: batching requires equal-length rows, and without a dedicated filler the model would treat padding characters as content and learn from them.</p>
+
+<h3>Part 6 — Budget in tokens, not words</h3>
+<p>Context limits and cost are both counted in tokens: 1,000 English words is about 1,300 tokens, the same 1,000 words of source code about 1,700, and 1,000 words of base64 or file hashes about 4,000. The rule of thumb is 4 characters per token, so 1 token is roughly 0.75 words. Why this part exists: a 4,000-token window holds 3,077 words of prose but only 1,000 words of a hash dump, and mixing the two units truncates the second without any error message.</p>
+
+<h3>Part 7 — Ship the tokenizer file with the model</h3>
+<p>The merge list, the vocabulary and the normalisation rules are saved as a configuration of a few megabytes and loaded at inference. Fine-tuning on text tokenized by a different release silently renumbers every input. Why this part exists: two tokenizers with identical vocabulary sizes can still split the same word differently, and a mismatched split is invisible to code that only checks tensor shapes.</p>
 
 <span class="formula">"unbelievable" → ["un", "believ", "able"] → [371, 7892, 531]</span>
 
 <h2>Worked example</h2>
 
-<h3>1. Why 1,000 words is not 1,000 tokens</h3>
+<h3>1. Three files with the same word count</h3>
+<p>Each file is 1,000 words. Only the token count changes, and the window is 4,000 tokens.</p>
+
 <table>
-  <tr><th>Text</th><th class="num">Words</th><th class="num">Tokens (approx.)</th></tr>
-  <tr><td>Plain English prose</td><td class="num">1,000</td><td class="num">1,300</td></tr>
-  <tr><td>Code</td><td class="num">1,000</td><td class="num">1,700</td></tr>
-  <tr><td>Base64 blob / hashes</td><td class="num">1,000</td><td class="num">4,000+</td></tr>
+  <tr><th>Content</th><th class="num">Words</th><th class="num">Tokens per word</th><th class="num">Tokens</th><th class="num">Share of window</th></tr>
+  <tr><td>English prose</td><td class="num">1,000</td><td class="num">1.3</td><td class="num">1,300</td><td class="num">32.5%</td></tr>
+  <tr><td>Source code</td><td class="num">1,000</td><td class="num">1.7</td><td class="num">1,700</td><td class="num">42.5%</td></tr>
+  <tr><td>Base64 blob</td><td class="num">1,000</td><td class="num">4.0</td><td class="num">4,000</td><td class="num">100%</td></tr>
 </table>
 
-<p>Punctuation, indentation and rare identifiers fragment into many tokens. A 4,000-token budget that fits your prose will silently truncate a code file.</p>
+<p><strong>What to notice.</strong> The arithmetic is one multiplication per row: 1,000 × 1.7 = 1,700. So a word-count estimate is never off by a rounding error, only by a factor — and the factor is not knowable from the word count alone. The base64 row consumes the window exactly, so a single extra token truncates the file. Same length, three different bills.</p>
 
 <h3>2. Where the boundary falls</h3>
-<p>Byte-pair merges are frequency-driven, so common words are single tokens and rare ones fragment: <code>"the"</code> → 1 token; <code>"antidisestablishmentarianism"</code> → 7. The same word with a leading space (<code>"the"</code> vs <code>" the"</code>) can be a <em>different</em> token, because spacing is part of the merge history.</p>
+<table>
+  <tr><th>String</th><th class="num">Characters</th><th class="num">Tokens</th><th class="num">Characters per token</th></tr>
+  <tr><td><code>the</code></td><td class="num">3</td><td class="num">1</td><td class="num">3.0</td></tr>
+  <tr><td><code>unbelievable</code></td><td class="num">12</td><td class="num">3</td><td class="num">4.0</td></tr>
+  <tr><td><code>antidisestablishmentarianism</code></td><td class="num">28</td><td class="num">7</td><td class="num">4.0</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The average of 4 characters per token is not a law; it is a consequence of which strings won their merges. The 3-character word beats the average because it is common enough to own a merge, and the 28-character word sits exactly on it. Those 7 pieces become 7 separate vectors of 512 numbers each (topic 16): 7 × 512 = 3,584 numbers for one word.</p>
+
+<h3>3. The same 250,000-word log file, three ways</h3>
+<table>
+  <tr><th>Form</th><th class="num">Tokens</th><th class="num">Requests at 128k</th><th class="num">Cost at $3 per million</th></tr>
+  <tr><td>Prose</td><td class="num">325,000</td><td class="num">3</td><td class="num">$0.98</td></tr>
+  <tr><td>Code</td><td class="num">425,000</td><td class="num">4</td><td class="num">$1.28</td></tr>
+  <tr><td>Base64</td><td class="num">1,000,000</td><td class="num">8</td><td class="num">$3.00</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Check the request count by multiplication rather than trust: 128,000 × 2 = 256,000, which is below 325,000, so three requests are the minimum for the prose row. The identical file costs three times more as base64, and nothing about the model changed — only the tokenizer did.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"Tokens are words."</strong> They are not. Counting words to check a context limit under-counts by 30% on prose and far more on code. Truncating by characters can slice a token in half, producing a different token than either half.</p>
-  <p><strong>Second trap:</strong> assuming a model can count letters or reverse words reliably. It never sees characters — it sees IDs. Asking "how many r's in strawberry" is a question about a representation the model does not have.</p>
+  <p><strong>"A token is a word."</strong> It feels right because for short, ordinary sentences it nearly holds: 1,000 words of prose is 1,300 tokens, and 0.75 words per token looks like rounding rather than a ratio.</p>
+  <p>The correction is that the ratio is not a constant. It moves from 1.3 on prose to 4.0 on hashes, so any estimate built on <code>len(text.split())</code> is wrong by a factor, never by a percentage. The same misconception has a second face: expecting the model to see letters. It receives IDs, so "how many r's in strawberry" asks about a representation that does not exist inside the model.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["The model reads integers, so text must become IDs.", "Splitting on words fails on rare names and typos.", "BPE starts from characters and merges frequent pairs into subwords.", "Each token maps to an ID, and the ID indexes an embedding table.", "Count tokens, not words: 1,000 English words is about 1,300 tokens."]</script></div>
+<p><strong>The tell:</strong> a chunker whose cut points drift as documents change, or a token budget that is fine in testing and 30% over in production once users paste code. The sharpest tell is behavioural: the model discusses a word fluently but cannot say how it is spelled, because the letters were never available to it. If two runs of the same prompt bill different token counts, the tokenizer configuration changed between them.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

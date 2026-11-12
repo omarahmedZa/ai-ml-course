@@ -24,55 +24,74 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">This is the single most examined idea in Unit 1, and the first thing that will go wrong in your project. A model that scores 99% on data it has seen is a memory; a model that scores 85% on data it has not seen is a product.</p>
+<p class="lede">This is the single most examined idea in Unit 1, and the first thing that will go wrong in your project. A model that scores 99% on data it has seen is a memory; a model that scores 85% on data it has not seen is a product. Every shipping decision is a bet about rows nobody has collected yet: does this hold up next month, in another hospital, on another customer? Generalization is the word for that bet, and the train/validation/test split is the only honest way to price it. When a paper claims "state of the art", this is the machinery the claim rests on.</p>
+<p><strong>The failure it prevents.</strong> An exam question shows two curves, one flat and high, one diving on train while rising on validation, and asks which model to ship. Without the vocabulary you describe the shapes; with it you write "underfit at 0.95/0.94, so raise capacity" and collect the marks. In a project the same blind spot costs a release: tune 40 hyperparameter settings against the test set, report the best of 40, and the 91% you announce is really a 74% model that was measured until it flattered you.</p>
 
 <h2>The one core idea</h2>
-<p><strong>Generalization</strong> is performance on unseen data. It is a property of the <em>procedure</em> (data + model class + training), not of the fitted model — and it is measured by holding data back.</p>
+<p>Think of two students preparing for an exam. One memorises the answers to last year's paper; the other learns the method. On the practice paper they tie. On the real paper the memoriser collapses, because the questions are new. A model is the memoriser unless you check: with enough parameters it reproduces every training label exactly, and that tells you nothing about the next row.</p>
+<p>In one line: <strong>generalization is the size of the gap between error on rows the model fit and error on rows it never saw.</strong> Numbers make it concrete: train error 0.02 and test error 0.34 give a gap of 0.32, while train 0.90 and test 0.95 give a gap of only 0.05 — and the second model, with the smaller gap, is the worse product.</p>
 
 <h2>How it actually works</h2>
-<ul>
-  <li><strong>Split</strong>: train (fit θ), validation (choose hyperparameters), test (report once, at the end). 60/20/20 is a sane default.</li>
-  <li><strong>Underfitting</strong>: train loss high, val loss high → the model is too simple or undertrained. Fix: bigger model, better features, longer training.</li>
-  <li><strong>Overfitting</strong>: train loss low, val loss high → the model learned noise. Fix: more data, regularization, simpler model, early stopping.</li>
-  <li><strong>Bias–variance</strong>: expected error = bias² + variance + irreducible noise. Simple models are biased; complex ones are variance-heavy. The sweet spot is the model just complex enough for the signal.</li>
-</ul>
+<p>Six parts. The first three protect the measurement; the last three use it.</p>
 
-<table>
-  <tr><th>Symptom</th><th>Diagnosis</th><th>Lever</th></tr>
-  <tr><td>Train 0.95 / Val 0.94, both bad</td><td>Underfit</td><td>Capacity ↑, features, epochs ↑</td></tr>
-  <tr><td>Train 0.99 / Val 0.71</td><td>Overfit</td><td>Data ↑, regularization, capacity ↓</td></tr>
-  <tr><td>Train 0.60 / Val 0.58, both terrible</td><td>Wrong hypothesis class</td><td>Change the model family</td></tr>
-</table>
+<h3>Part 1 — Split before you touch anything</h3>
+<p>Shuffle the rows once, then cut three slices: train fits the parameters, validation chooses settings, test is reported once. A 60/20/20 default turns 2,000 rows into 1,200, 400 and 400. The cut happens before scaling, imputing or feature selection.</p>
+<p>Why this part exists: a scaler fitted on all 2,000 rows has already shown the model the 400 it will be judged on.</p>
+
+<h3>Part 2 — Fit the parameters on train only</h3>
+<p>Training sees the 1,200 training rows and nothing else, and the optimiser will happily fit their noise. That is expected — it is exactly why a held-out set exists.</p>
+<p>Why this part exists: with no untouched row left, the only error you can report is measured on data the model already optimised against.</p>
+
+<h3>Part 3 — Choose settings on validation, not test</h3>
+<p>Every knob that is not a parameter — degree, depth, regularisation strength, epochs — is chosen by comparing validation loss. With 40 candidates the winner is the best of 40 noisy estimates, so treat it as slightly optimistic. Test opens once, after the choice is frozen.</p>
+<p>Why this part exists: each peek at test performance moves information into your decisions, and ten peeks make it a validation set in disguise.</p>
+
+<h3>Part 4 — Compare the two losses before choosing a fix</h3>
+<p>Diagnosis needs both numbers. High train and high validation means <strong>underfitting</strong>, too simple or undertrained; low train and high validation means <strong>overfitting</strong>, the noise got learned; both low is the goal; high train with low validation usually means a broken split.</p>
+<p>Why this part exists: the two diseases want opposite medicine, so a fix applied without a diagnosis moves you in a random direction.</p>
+
+<h3>Part 5 — Decompose the error into bias, variance and noise</h3>
+<p>Expected error splits three ways: <strong>bias</strong> from a model too rigid to represent the truth, <strong>variance</strong> from a model that would change if the data were resampled, and noise that no model can remove.</p>
+<span class="formula">expected error = bias² + variance + noise</span>
+<p>Why this part exists: the split says which lever can work — more data shrinks variance and does nothing for bias, so 10× the rows cannot fix a straight-line model.</p>
+
+<h3>Part 6 — Change one lever, then re-measure</h3>
+<p>Treat overfitting in order of cost: more data, regularisation — a penalty on large weights — early stopping when validation loss turns upward, then a smaller model. Underfitting goes the other way: more capacity, better features, longer training. Change one thing per run.</p>
+<p>Why this part exists: levers interact, and a run that changes depth and learning rate together cannot say which one closed the 3.38 gap.</p>
 
 <h2>Worked example</h2>
 
 <h3>1. The same 20 points, two models</h3>
+<p>One dataset, 20 noisy points from a smooth curve. Two polynomial degrees are fitted to the same 16 training points and scored on the same 4 held-out points.</p>
+
 <table>
-  <tr><th>Model</th><th class="num">Train MSE</th><th class="num">Test MSE</th><th>Verdict</th></tr>
-  <tr><td>Degree 1 (line)</td><td class="num">0.90</td><td class="num">0.95</td><td>Underfit — both high</td></tr>
-  <tr><td>Degree 9 (wiggle)</td><td class="num">0.02</td><td class="num">3.40</td><td>Overfit — gap explodes</td></tr>
+  <tr><th>Model</th><th class="num">Train MSE</th><th class="num">Test MSE</th><th class="num">Gap (test − train)</th><th>Verdict</th></tr>
+  <tr><td>Degree 1 (line)</td><td class="num">0.90</td><td class="num">0.95</td><td class="num">0.95 − 0.90 = 0.05</td><td>Underfit — both high</td></tr>
+  <tr><td>Degree 9 (wiggle)</td><td class="num">0.02</td><td class="num">3.40</td><td class="num">3.40 − 0.02 = 3.38</td><td>Overfit — gap explodes</td></tr>
 </table>
 
-<p>The degree-9 curve threads every training point by swinging wildly between them. Those swings are the model fitting noise, and they cost 3.4 MSE where it counts.</p>
+<p><strong>What to notice.</strong> The line has the smaller gap, 0.05 against 3.38, and is still the model you would not ship at 0.95 test error. The degree-9 curve threads every training point by swinging violently between them, and those swings cost 3.40 where it counts. Read the gap and the absolute level together: the gap tells you which disease, the level tells you whether the patient is well.</p>
 
-<h3>2. The fix, in order of cost</h3>
-<ol>
-  <li>More data — reduces variance, never fixes bias.</li>
-  <li>Regularization — penalise large weights (weight decay, topic 12).</li>
-  <li>Early stopping — halt when validation loss turns upward.</li>
-  <li>Simpler model — the last resort, because it raises bias.</li>
-</ol>
+<h3>2. Where the error actually comes from</h3>
+<p>Three candidate models on the same task. Bias and variance are measured by averaging over repeated datasets; noise is a property of the data and stays at 0.20 for all three.</p>
+
+<table>
+  <tr><th>Model</th><th class="num">Bias</th><th class="num">Bias²</th><th class="num">Variance</th><th class="num">Noise</th><th class="num">Total</th></tr>
+  <tr><td>A: rigid line</td><td class="num">1.00</td><td class="num">1.00</td><td class="num">0.05</td><td class="num">0.20</td><td class="num">1.00 + 0.05 + 0.20 = 1.25</td></tr>
+  <tr><td>B: cubic</td><td class="num">0.20</td><td class="num">0.04</td><td class="num">0.60</td><td class="num">0.20</td><td class="num">0.04 + 0.60 + 0.20 = 0.84</td></tr>
+  <tr><td>C: degree 9</td><td class="num">0.05</td><td class="num">0.0025</td><td class="num">2.00</td><td class="num">0.20</td><td class="num">0.0025 + 2.00 + 0.20 = 2.20</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Model C has almost no bias, 0.05, and loses badly — its variance of 2.00 is over three times B's 0.60. Model A has low variance and still loses, because bias of 1.00 is squared into a full point. B wins at 0.84, and 0.20 of that is noise no model can touch, so the real headroom is 0.64. Adding rows attacks variance only: it would help C a lot, B a little, and A not at all.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"I'll tune until the test score is good."</strong> Do that and the test set has become a validation set. Your reported number is then optimistic, and the gap reappears in production where you cannot measure it.</p>
-  <p><strong>Leakage</strong> is the same disease in disguise: scaling or imputing before the split lets test statistics into training. Fit the scaler on train only, then apply it to test.</p>
+  <p><strong>"I'll tune until the test score is good."</strong> Do that and the test set has quietly become a validation set. Every configuration you reject because of its test score has taught you something about the test rows, so the number you finally publish describes a model selected <em>using</em> the very data it is reported on.</p>
+  <p>It feels right because the score does rise as you iterate, and rising scores feel like progress. But the rise is partly the measurement bending toward your choices, not the model improving — the same reason a best-of-40 maximum is larger than the true mean of those 40.</p>
+  <p><strong>Correction:</strong> keep three roles separate. Validation absorbs all the looking; test is opened once and then frozen; if you must look again, the old test set becomes validation and you need a new, untouched holdout. Leakage is the same disease in disguise: fitting a scaler or an imputer on the full dataset before splitting lets test statistics into training, so fit on train and apply the result to test.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Split the data three ways: train to fit, validation to choose, test to report once.", "Compare train and validation loss. A large gap means memorisation.", "Both high means too simple: add capacity, not regularisation.", "Low train and high validation means variance: add data or constrain the model.", "Never tune on the test set, or the reported number becomes fiction."]</script></div>
+<p><strong>The tell:</strong> your test score improves in step with the number of experiments you run, and drops the day a genuinely fresh holdout arrives. A second tell is a test score reported to three decimal places from a set of 200 rows, where a single flipped label moves it half a point.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

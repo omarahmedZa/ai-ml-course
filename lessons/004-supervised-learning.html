@@ -24,56 +24,77 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Every model in this course — a spam filter, a translation system, a Q-network — is this same four-part object. Name the four parts and you can read a paper's method section instead of guessing at it.</p>
+<p class="lede">Every model in this course — a spam filter, a translation system, a Q-network — is the same four-part object. Name the four parts and you can read a paper's method section instead of guessing at it. Supervised learning is the pattern behind them all: a bank scores loan applications, a hospital flags scans, a phone predicts the next word. In each case somebody collected examples where the right answer was known, and the work is to find a rule that reproduces those answers and keeps holding on new ones. The vocabulary changes by field — "regression", "classification", "fine-tuning" — while the structure underneath stays put.</p>
+<p><strong>The failure it prevents.</strong> An exam question hands you "predict next month's sales from 14 store features, using three years of records" and asks for the four objects with shapes. An answer saying "the model learns the pattern" scores nothing, because no object is named. In code the same gap shows up as a model that trains happily and predicts the wrong column: the loss was computed against a misaligned <code>y</code>, or a target leaked into <code>X</code>. Writing four lines before any code catches both.</p>
 
 <h2>The one core idea</h2>
-<p>Supervised learning chooses <strong>parameters θ</strong> so that <strong>f_θ</strong> maps inputs <strong>X</strong> to targets <strong>y</strong> with minimum average <strong>loss L</strong> — on data you have, hoping it holds on data you don't.</p>
+<p>A supervised model is a guess-machine with adjustable dials. You show it an input, it produces an output, and a loss function scores how far that output sits from the recorded answer. Training turns the dials — the <strong>parameters θ</strong>, the numbers the model actually stores — in whichever direction lowers the average score. There is no lookup table and no understanding, only a fixed shape of function whose dials are tuned until its mistakes are small.</p>
+<p>In one line: <strong>pick θ so that <code>f_θ</code> turns <code>X</code> into something close to <code>y</code>, judged by <code>L</code>.</strong> With 10,000 emails, 2 features and 3 dials, training squeezes those rows into 3 numbers, so the model's whole memory is <code>w = [2, −0.01]</code> and <code>b = −1</code>.</p>
 
 <h2>How it actually works</h2>
-<table>
-  <tr><th>Object</th><th>Shape / type</th><th>Spam example</th></tr>
-  <tr><td><strong>X</strong> — inputs</td><td class="num">n × d matrix</td><td>10,000 emails × 2 features</td></tr>
-  <tr><td><strong>y</strong> — targets</td><td class="num">n × 1 vector</td><td>1 = spam, 0 = ham</td></tr>
-  <tr><td><strong>f_θ</strong> — model</td><td class="num">d → 1</td><td><code>σ(w·x + b)</code></td></tr>
-  <tr><td><strong>L</strong> — loss</td><td class="num">scalar</td><td>binary cross-entropy</td></tr>
-</table>
+<p>Take it in six parts: the four objects on the line <code>(X, y, f_θ, L)</code>, then the two steps that connect them.</p>
 
-<ul>
-  <li><strong>Hypothesis class</strong> = the set of functions <code>f_θ</code> you allow. Linear models can only draw straight boundaries; a 3-layer net can draw curved ones. Choosing the class is choosing what is learnable.</li>
-  <li><strong>Empirical risk</strong> = average loss on the training set. Training minimises it.</li>
-  <li><strong>What is learned is θ</strong>, not the data. With 10,000 emails and 3 parameters, the model compresses 10,000 rows into 3 numbers.</li>
-</ul>
+<h3>Part 1 — Collect inputs as a matrix X</h3>
+<p><code>X</code> holds one row per example and one column per feature, so 10,000 emails with 2 features give a 10,000 × 2 matrix. Features must be numbers, so text and categories are encoded first, and that encoding decides what the model can notice. Rows can be shuffled freely; columns must keep one fixed order.</p>
+<p>Why this part exists: every later shape is checked against these two numbers, and a transposed <code>X</code> of 2 × 10,000 would train without error while pairing emails with the wrong feature.</p>
 
+<h3>Part 2 — Record targets as a vector y</h3>
+<p><code>y</code> is one value per row of <code>X</code>, so 10,000 labels: 1 for spam, 0 for ham. The type of <code>y</code> fixes the task — continuous values mean regression, a small label set means classification — and the loss must match that type.</p>
+<p>Why this part exists: shift <code>y</code> by one row and every email is trained against its neighbour's label, so the loss plateaus near a coin flip and extra training cannot rescue it.</p>
+
+<h3>Part 3 — Choose a hypothesis class for f_θ</h3>
+<p>The <strong>hypothesis class</strong> is the set of functions you allow the model to be. A linear model draws straight boundaries, a 3-layer network draws curved ones, a tree draws staircase ones. Choosing the class is a promise about what is representable, made before data arrives.</p>
+<p>Why this part exists: no amount of training lets a straight line separate two interleaved spirals, so a mismatch here surfaces much later as a loss that refuses to fall.</p>
+
+<h3>Part 4 — Define the loss L that scores mistakes</h3>
+<p><code>L</code> takes one prediction and one target and returns 0 when they agree, more as they diverge. Squared error suits continuous targets; cross-entropy suits probabilities. Averaging <code>L</code> over all <code>n</code> rows gives the <strong>empirical risk</strong>, the single number training minimises:</p>
 <span class="formula">θ* = argmin_θ  (1/n) Σᵢ L(f_θ(xᵢ), yᵢ)</span>
+<p>Why this part exists: the loss is the only definition of "better", so a mismatch optimises the wrong thing — squared error on a yes/no task rewards confident wrong answers while the gradient fades.</p>
+
+<h3>Part 5 — Search over θ by gradient descent</h3>
+<p>Start with random dials, measure how the average loss responds to each parameter, and step downhill: <code>θ ← θ − η∇L</code>, where <code>η</code> is the learning rate. Repeat for a set number of epochs, one pass over the 10,000 rows each.</p>
+<p>Why this part exists: 3 dials could be found by grid search, but 300 million cannot; the gradient is the only affordable direction finder, and a learning rate of 10 instead of 0.1 sends the loss upward.</p>
+
+<h3>Part 6 — Report on data the search never touched</h3>
+<p>Split before training: roughly 60% train, 20% validation for choosing settings, 20% test for one final number. Training loss says whether the search worked; test loss says whether it mattered.</p>
+<p>Why this part exists: parameters were chosen to fit the training rows, so their error there is biased low — with 3 dials that gap is a fraction of a point, but with 10 million dials it can be 30 points wide.</p>
 
 <h2>Worked example</h2>
 
 <h3>1. One email, end to end</h3>
-<p>Features: <code>x = [1, 50]</code> = "contains 'free'" (1), "length in words" (50). Parameters <code>w = [2, −0.01]</code>, <code>b = −1</code>.</p>
+<p>Features <code>x = [1, 50]</code>: "contains 'free'" (1) and "length in words" (50). Parameters <code>w = [2, −0.01]</code>, <code>b = −1</code>. Multiply out every term; that is where sign errors hide.</p>
 
 <table>
-  <tr><th>Step</th><th class="num">Value</th></tr>
-  <tr><td>z = w·x + b</td><td class="num">2(1) + (−0.01)(50) − 1 = 0.5</td></tr>
-  <tr><td>p = σ(z)</td><td class="num">0.622</td></tr>
-  <tr><td>Loss if y = 1</td><td class="num">−ln 0.622 = 0.475</td></tr>
-  <tr><td>Loss if y = 0</td><td class="num">−ln 0.378 = 0.973</td></tr>
+  <tr><th>Step</th><th>Arithmetic</th><th class="num">Value</th></tr>
+  <tr><td>Weighted sum z</td><td class="num">2(1) + (−0.01)(50) + (−1) = 2 − 0.5 − 1</td><td class="num">0.5</td></tr>
+  <tr><td>Probability p = σ(z)</td><td class="num">1 / (1 + e<sup>−0.5</sup>) = 1 / (1 + 0.607)</td><td class="num">0.622</td></tr>
+  <tr><td>Loss if y = 1</td><td class="num">−ln(0.622)</td><td class="num">0.475</td></tr>
+  <tr><td>Loss if y = 0</td><td class="num">−ln(0.378)</td><td class="num">0.973</td></tr>
 </table>
 
-<p>The prediction is "62% spam". Training's job is to nudge <code>w</code> and <code>b</code> until spam-like emails get high <code>p</code> and ham-like ones get low <code>p</code>.</p>
+<p><strong>What to notice.</strong> One prediction, two possible losses, and the label decides which counts — the model is never scored in the abstract. The length feature, weighted at −0.01, subtracted 0.5 from the score, so this model reads long emails as slightly less spammy. Being wrong about a ham email costs 0.973 while being wrong about spam costs 0.475, which is why training drifts borderline emails toward "ham".</p>
 
-<h3>2. Reading a new paper</h3>
-<p>Given "we fine-tune a transformer with cross-entropy on 1M labelled pairs", the four objects are immediate: <code>X</code> = token IDs, <code>y</code> = next token, <code>f_θ</code> = transformer, <code>L</code> = cross-entropy. If you cannot fill a cell, that is the question to ask about the paper.</p>
+<h3>2. Three emails, one number</h3>
+<p>Targets <code>y = [1, 0, 1]</code>, predictions <code>p = [0.9, 0.2, 0.6]</code>. Cross-entropy uses <code>−ln p</code> when the label is 1 and <code>−ln(1 − p)</code> when it is 0.</p>
+
+<table>
+  <tr><th>Email</th><th class="num">y</th><th class="num">p</th><th>Loss term</th><th class="num">Loss</th></tr>
+  <tr><td>1</td><td class="num">1</td><td class="num">0.9</td><td class="num">−ln(0.9)</td><td class="num">0.105</td></tr>
+  <tr><td>2</td><td class="num">0</td><td class="num">0.2</td><td class="num">−ln(0.8)</td><td class="num">0.223</td></tr>
+  <tr><td>3</td><td class="num">1</td><td class="num">0.6</td><td class="num">−ln(0.6)</td><td class="num">0.511</td></tr>
+  <tr><td>Average</td><td class="num">—</td><td class="num">—</td><td class="num">0.839 / 3</td><td class="num"><strong>0.280</strong></td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Three predictions collapse to 0.280 — the empirical risk θ is optimised against. Email 3 contributes almost half the total despite being "right" — confidence is graded, not pass/fail. A model that always says 0.5 scores <code>−ln 0.5 = 0.693</code>, so 0.693 is the real floor to beat, not 0.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"The model learned the data."</strong> It learned parameters. A model with more parameters than data points can score perfectly and still be useless — it memorised <code>X</code> without learning the mapping from <code>X</code> to <code>y</code>.</p>
-  <p><strong>The hidden assumption:</strong> future data comes from the same distribution as training data (i.i.d.). Break that — a new hospital, a new year, a shifted user base — and a perfect training score means nothing. Topic 5 is entirely about this gap.</p>
+  <p><strong>"The model learned the data."</strong> It learned parameters. A model with more parameters than data points can score perfectly and still be useless: it memorised <code>X</code> without learning the mapping from <code>X</code> to <code>y</code>.</p>
+  <p>It feels right because a falling training loss is visible evidence of progress, and a model that reproduces every label looks like it has understood the pattern. But the only thing stored is θ — 3 numbers here, 10 million in a large network — chosen against rows that will never be seen again.</p>
+  <p><strong>Correction:</strong> separate the two claims. "Training loss is low" is a statement about the search; "the mapping generalises" is a statement about new rows, and only a held-out set supports it. Underneath sits a hidden assumption — future data comes from the same distribution as training data, called i.i.d. — and breaking it makes a perfect training score worth nothing.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Write the task as four parts: inputs X, targets y, a model f, and a loss L.", "The model has knobs θ; the loss reports how wrong the current knobs are.", "Training nudges θ to make the average loss smaller on the data you have.", "Keep a held-out slice untouched to see whether the knobs generalise.", "If it only scores well on the training slice, it memorised rows, not the pattern."]</script></div>
+<p><strong>The tell:</strong> training accuracy 100% with test accuracy 71% is the signature, and the 29-point gap is the measurement, not rounding. A second tell is a test score that moves each time you retrain on a new seed while training loss barely moves — variance from a model with too much freedom for the number of rows.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

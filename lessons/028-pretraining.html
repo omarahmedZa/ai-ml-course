@@ -24,54 +24,90 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Pretraining is why an LLM needs no labels: every document is its own answer key. It also explains why the model is a probability distribution over text, not a database of facts.</p>
+<p class="lede">Pretraining is the stage where a model reads text at scale and learns one skill: predict the next token. No human labels are needed, because every document carries its own answer key, and the result is a probability distribution over text rather than a store of facts.</p>
+<p>That single sentence explains most of what a base model can and cannot do. It can continue a sentence in a style it has seen thousands of times; it cannot look anything up, and it has no notion of being right. In an exam, "a model reports loss 3.0 nats — what is its perplexity?" separates people who know the definition from people who compute <code>3^e</code> or <code>10³</code>; the answer is <code>e³ ≈ 20</code>, and the unit is "equally likely tokens". In a project, the classic evaluation bug is comparing perplexity between two models that use different tokenizers: 50,000-token and 100,000-token vocabularies score different units, so the smaller number may belong to the worse model. The second classic is averaging loss per batch rather than per token, which lets short sequences dominate.</p>
 
 <h2>The one core idea</h2>
-<p><strong>Self-supervision</strong>: hide part of the text, predict it, and the gradient teaches everything needed to predict it. No human labels; the loss is just cross-entropy on tokens.</p>
+<p>Imagine a fill-in-the-blank worksheet where the answer key is printed on the same page, under a flap. You read the sentence so far, guess the next word, lift the flap, and adjust. Nobody has to write the answers, because the text already contains them — that is what <strong>self-supervision</strong> means: the labels come from the data itself.</p>
+<p>In one line: <strong>hide the next token, measure how much probability the model gave it, and push that probability up.</strong> With a 50,000-token vocabulary, a model that guesses uniformly has loss <code>ln(50,000) = 10.82</code> nats; a trained model at loss 3.0 has perplexity <code>e³ ≈ 20</code>, i.e. it is as unsure as a choice among 20 tokens.</p>
 
 <h2>How it actually works</h2>
-<table>
-  <tr><th></th><th>GPT-style (causal)</th><th>BERT-style (masked)</th></tr>
-  <tr><td>Predicts</td><td>Next token, left to right</td><td>Masked tokens from both sides</td></tr>
-  <tr><td>Sees</td><td>Only the past</td><td>The whole context</td></tr>
-  <tr><td>Good at</td><td>Generation</td><td>Classification, extraction</td></tr>
-  <tr><td>Trained on</td><td>Every position in the document</td><td>~15% of positions</td></tr>
-</table>
-
-<ul>
-  <li><strong>Loss</strong>: mean negative log-likelihood of the true next token. Same object as topic 3.</li>
-  <li><strong>Perplexity</strong> <code>= exp(loss)</code> — "effectively choosing between this many equally likely tokens". Lower is better.</li>
-  <li><strong>Scale</strong>: loss falls as a power law in parameters, data, and compute. Capability improvements are mostly predicted by that curve, not by architecture tweaks.</li>
-  <li><strong>What is learned</strong>: a compressed model of text statistics — syntax, facts, style, some reasoning procedures. Not a lookup table, and not verified truth.</li>
-</ul>
+<p>Seven parts, following one document through one training step.</p>
 
 <span class="formula">perplexity = exp( −(1/N) Σ log p(token_t | token_&lt;t) )</span>
+
+<h3>Part 1 — Turn text into token IDs</h3>
+<p>A tokenizer splits text into pieces and maps each piece to an integer, so a sentence becomes a list such as <code>[464, 3797, 3332]</code>. A typical vocabulary holds 50,000 entries, which fixes the size of the model's output. <strong>Why this part exists:</strong> a network can only emit numbers from a finite set, and 50,000 is small enough to compute a full distribution over at every position.</p>
+
+<h3>Part 2 — Make every position a training pair</h3>
+<p>Slide a window along the document: the input is tokens 1 to <code>t</code>, the target is token <code>t+1</code>. A 1,024-token window yields 1,024 separate predictions from a single pass, one per position. <strong>Why this part exists:</strong> without the one-token shift, the model would be asked to reproduce its own input, which is a copy task and teaches nothing about what comes next.</p>
+
+<h3>Part 3 — Produce a probability for every token</h3>
+<p>The final layer outputs one score, called a <strong>logit</strong>, for each vocabulary entry. Softmax turns those 50,000 scores into positive numbers that sum to 1, one distribution per position. <strong>Why this part exists:</strong> the loss needs the probability assigned to the correct token, and a raw score has no meaningful scale on its own.</p>
+
+<h3>Part 4 — Score the answer with cross-entropy</h3>
+<p>The loss at one position is <code>−ln p(correct token)</code>. A probability of 0.5 costs 0.693 nats, 0.1 costs 2.303, and 0.01 costs 4.605 — the penalty grows without limit as confidence in the wrong answer grows. <strong>Why this part exists:</strong> a loss that merely counted mistakes would treat "almost right" and "certainly wrong" the same.</p>
+
+<h3>Part 5 — Average, backpropagate, repeat</h3>
+<p>The 1,024 per-position losses are averaged into one number for the step, gradients flow back through the whole block stack, and the optimiser nudges every weight. Reporting <code>exp(loss)</code> gives perplexity. <strong>Why this part exists:</strong> training needs a single scalar per step; a vector of 1,024 losses cannot be compared across batches or runs.</p>
+
+<h3>Part 6 — The masked variant</h3>
+<p>A masked model hides about 15% of positions and predicts them from both sides at once, which is how BERT is trained. It sees the whole context, so it is a strong encoder, but it never learns <code>p(next | past)</code>. <strong>Why this part exists:</strong> tasks such as classification or extraction need the right-hand context, while generation needs the left; one objective cannot supply both.</p>
+
+<h3>Part 7 — Buy capability with scale</h3>
+<p>Loss falls as a power law in parameters, data and compute: a straight line on a log-log plot, with no cliff. Capability improvements follow that curve far more reliably than they follow architecture tweaks. <strong>Why this part exists:</strong> it tells you where the next unit of effort pays — more unique tokens, not a cleverer block.</p>
 
 <h2>Worked example</h2>
 
 <h3>1. Reading a loss number</h3>
+<p>Perplexity is <code>e</code> raised to the loss, so a loss of <code>L</code> nats means the model is about as uncertain as a uniform choice among <code>e^L</code> tokens.</p>
+
 <table>
-  <tr><th class="num">Loss (nats)</th><th class="num">Perplexity</th><th>Plain reading</th></tr>
-  <tr><td class="num">5.0</td><td class="num">148</td><td>Barely better than random over a 50k vocab</td></tr>
-  <tr><td class="num">3.0</td><td class="num">20</td><td>Roughly "one of 20 plausible next tokens"</td></tr>
-  <tr><td class="num">2.0</td><td class="num">7.4</td><td>Strong local fluency</td></tr>
+  <tr><th class="num">Loss (nats)</th><th>Arithmetic</th><th class="num">Perplexity</th><th>Plain reading</th></tr>
+  <tr><td class="num">10.82</td><td class="num">e¹⁰·⁸²</td><td class="num">50,000</td><td>No learning: uniform over the vocabulary</td></tr>
+  <tr><td class="num">5.0</td><td class="num">e⁵ = 148.4</td><td class="num">148</td><td>Barely better than random</td></tr>
+  <tr><td class="num">3.0</td><td class="num">e³ = 20.09</td><td class="num">20</td><td>Roughly "one of 20 plausible next tokens"</td></tr>
+  <tr><td class="num">2.0</td><td class="num">e² = 7.39</td><td class="num">7.4</td><td>Strong local fluency</td></tr>
 </table>
 
-<p><code>e³ ≈ 20.1</code>. A drop of one nat is a 2.7× reduction in effective uncertainty — which is why leaderboard differences of 0.05 nats are meaningful, not noise.</p>
+<p><strong>What to notice.</strong> A drop of one nat divides perplexity by <code>e = 2.718</code>, which is why leaderboard gaps of 0.05 nats are real differences and not noise. The scale is multiplicative: going from 5.0 to 3.0 is not "40% better", it is a 7.4-fold reduction in uncertainty.</p>
 
-<h3>2. Why masking differs from causal</h3>
-<p>Causal training gives a gradient at every position; masked training gives one at 15% of positions but with bidirectional context. That is why BERT is a stronger encoder and a useless generator: it never learned <code>p(next | past)</code>.</p>
+<h3>2. Averaging three positions</h3>
+<p>One sequence, three predictions, three different probabilities assigned to the true token.</p>
+
+<table>
+  <tr><th>Position</th><th class="num">p(true token)</th><th>Arithmetic</th><th class="num">Loss</th></tr>
+  <tr><td>1</td><td class="num">0.50</td><td class="num">−ln 0.50</td><td class="num">0.693</td></tr>
+  <tr><td>2</td><td class="num">0.25</td><td class="num">−ln 0.25</td><td class="num">1.386</td></tr>
+  <tr><td>3</td><td class="num">0.10</td><td class="num">−ln 0.10</td><td class="num">2.303</td></tr>
+  <tr><td>Mean</td><td class="num"></td><td class="num">4.382 ÷ 3</td><td class="num">1.461</td></tr>
+  <tr><td>Perplexity</td><td class="num"></td><td class="num">e¹·⁴⁶¹</td><td class="num">4.31</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The mean of the losses is not the loss of the average probability: <code>4.382 ÷ 3 = 1.461</code> nats, not <code>−ln(0.283)</code>. Exponentiating gives 4.31, which is exactly the geometric mean of 2, 4 and 10 — the reciprocal probabilities. That is why perplexity is described as an effective number of choices, and why one very confident miss moves it more than three mild ones.</p>
+
+<h3>3. A bigram model on eight words of context</h3>
+<p>Count what follows in <em>"the cat sat on the mat . the cat ate the fish . the dog sat on the mat . the dog ate the bone ."</em> "The" occurs 8 times and "sat" twice; each probability below is a count divided by those totals.</p>
+
+<table>
+  <tr><th>Context</th><th>Next</th><th class="num">Count</th><th class="num">p</th><th class="num">Loss</th></tr>
+  <tr><td>the</td><td>cat</td><td class="num">2 of 8</td><td class="num">0.250</td><td class="num">1.386</td></tr>
+  <tr><td>the</td><td>mat</td><td class="num">2 of 8</td><td class="num">0.250</td><td class="num">1.386</td></tr>
+  <tr><td>the</td><td>dog</td><td class="num">2 of 8</td><td class="num">0.250</td><td class="num">1.386</td></tr>
+  <tr><td>the</td><td>fish</td><td class="num">1 of 8</td><td class="num">0.125</td><td class="num">2.079</td></tr>
+  <tr><td>the</td><td>bone</td><td class="num">1 of 8</td><td class="num">0.125</td><td class="num">2.079</td></tr>
+  <tr><td>sat</td><td>on</td><td class="num">2 of 2</td><td class="num">1.000</td><td class="num">0.000</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Over the eight "the" predictions the average loss is <code>(6 × 1.386 + 2 × 2.079) ÷ 8 = 12.474 ÷ 8 = 1.559</code> nats, so perplexity is <code>e¹·⁵⁵⁹ ≈ 4.75</code>. The zero for "sat → on" is not a triumph: with two observations the model assigns probability 1, and a third continuation would be punished without limit. Counting is all a bigram can do.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"A lower perplexity means a better assistant."</strong> Perplexity measures fit to the pretraining distribution. It says nothing about instruction following, factuality, or safety — those come from post-training (topic 29).</p>
-  <p><strong>Second trap:</strong> treating benchmark scores as independent evidence. Public test sets leak into pretraining corpora; a score can reflect memorisation of the benchmark rather than the skill.</p>
+  <p><strong>"Lower perplexity means a better assistant."</strong> It feels right because perplexity is the number printed on the training curve, it always goes down, and smaller feels like an objective improvement.</p>
+  <p>The correction is that perplexity measures fit to the pretraining distribution — mostly web text, code and books — and nothing else. It says nothing about instruction following, factuality or safety, all of which arrive in post-training (topic 29). A model can be superb at predicting the next token of a forum argument and useless when asked to summarise a contract. A second trap is treating benchmark scores as independent evidence: public test sets leak into pretraining corpora, so a high score can reflect memorisation rather than skill.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Take raw text and predict the next token at every position.", "The true next token is the label, so no human annotation is needed.", "Loss is average negative log-probability; perplexity is its exponential.", "Scale parameters, data and compute: loss falls as a power law.", "Masked objectives (BERT) fill gaps; causal ones (GPT) predict forward."]</script></div>
+<p><strong>The tell:</strong> the same model with a better perplexity score fails a two-line instruction test, or answers a riddle by reciting the dataset version of it. The other tell is a perplexity comparison across tokenizers or across languages — if the vocabulary or the token count per sentence changed, the number changed unit, and the comparison is meaningless.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

@@ -24,55 +24,83 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Every RL algorithm you will read about is one of two things, or a hybrid. Knowing which is which tells you immediately whether it can reuse old data and whether it can handle continuous actions.</p>
+<p class="lede">Every algorithm you will read about for the rest of this course is one of two things, or a hybrid of both. That single fact tells you, before any tuning, whether the method can reuse yesterday's data and whether it can cope with a wheel that turns by degrees rather than clicks.</p>
+<p>The distinction is also the first thing a reviewer will ask about: "is this off-policy?" is a question about data budget, not fashion. Pick badly and the symptom is concrete. A Q-learning agent on a seven-joint robot arm must solve an optimisation over a continuous action space at every single step, just to pick its move, which makes the control loop orders of magnitude slower than the policy it replaced. Pick the other way and a replay buffer of stale actions quietly biases a policy-gradient update. In an exam, one table with five rows answers half the questions on this topic.</p>
 
 <h2>The one core idea</h2>
-<p><strong>Value-based</strong> methods learn <code>Q(s,a)</code> and act greedily. <strong>Policy-based</strong> methods learn <code>π(a|s)</code> directly by gradient ascent on expected return. Actor–critic learns both.</p>
+<p>There are two routes to good behaviour. <strong>Price every move</strong> and always take the cheapest-looking one: that is value-based learning, and the thing learned is a map of payoffs. Or <strong>adjust the habit directly</strong>, making whatever worked more likely next time: that is policy-based learning, and the thing learned is a reflex.</p>
+<p>In one line: <strong>learn the scoreboard, or learn the reflex — and actor–critic learns both at once.</strong> With <code>Q = 0.5</code>, <code>r = 1</code>, <code>γ = 0.9</code>, next-state <code>Q′ = 0.8</code> and <code>α = 0.1</code>, the target is <code>1.72</code>, the error <code>1.22</code>, and the new <code>Q</code> is <code>0.622</code>.</p>
 
 <h2>How it actually works</h2>
-<table>
-  <tr><th></th><th>Value-based (Q-learning)</th><th>Policy gradient (REINFORCE)</th></tr>
-  <tr><td>Learns</td><td><code>Q(s,a)</code></td><td><code>π_θ(a|s)</code></td></tr>
-  <tr><td>Policy</td><td>Implicit: <code>argmax</code></td><td>Explicit, stochastic</td></tr>
-  <tr><td>Data</td><td>Off-policy — replay any transition</td><td>On-policy — must use current policy</td></tr>
-  <tr><td>Continuous actions</td><td>Needs an optimiser inside <code>argmax</code></td><td>Natural fit</td></tr>
-  <tr><td>Failure mode</td><td>Instability with function approximation</td><td>High variance</td></tr>
-</table>
+<p>Seven parts, moving from what both families share to the update rule each one uses.</p>
 
-<span class="formula">Q-learning:  Q(s,a) ← Q(s,a) + α[ r + γ max_{a′} Q(s′,a′) − Q(s,a) ]</span>
-<span class="formula">REINFORCE:   θ ← θ + α ∇_θ log π_θ(a|s) · G_t</span>
+<h3>Part 1 — Both maximise expected return</h3>
+<p>Expected return is the probability-weighted total of discounted future rewards. Every method in this unit is an estimator for it, and every loss function you meet is a proxy for it. Why this part exists: without one shared objective there is no way to compare the families at all. They disagree about representation, not about what counts as success.</p>
 
-<ul>
-  <li><code>max</code> inside Q-learning makes it <strong>off-policy</strong>: it learns about the best action regardless of what the agent did. That is why replay buffers work (topic 24).</li>
-  <li>REINFORCE weights the log-probability gradient by the realised return. Actions followed by good returns become more likely. Unbiased, but the return is a single noisy sample.</li>
-  <li><strong>Actor–critic</strong> replaces <code>G_t</code> with <code>Q(s,a) − V(s)</code>, the advantage: how much better this action was than average. Lower variance, some bias.</li>
-</ul>
+<h3>Part 2 — Value-based methods learn a scoreboard</h3>
+<p>A value-based agent stores <code>Q(s,a)</code> for each pair and acts by <code>argmax</code>, the action with the largest estimate. Tabulated on a 5×5 grid with four moves, that is 25 × 4 = 100 numbers. Why this part exists: if <code>Q</code> were exact, greed on it would be optimal, so learning <code>Q</code> is sufficient — the policy, the rule that picks actions, is a by-product that needs no representation of its own.</p>
+
+<h3>Part 3 — The max in the target makes it off-policy</h3>
+<span class="formula">Q(s,a) ← Q(s,a) + α[ r + γ max_{a′} Q(s′,a′) − Q(s,a) ]</span>
+<p>The bracket holds the target minus the current estimate; the difference is the TD error, meaning the surprise between prediction and outcome. The <code>max</code> asks what the best next action would give, regardless of what the agent actually did. Why this part exists: that independence is what lets the update learn from actions nobody would choose again, including random ones from an untrained policy.</p>
+
+<h3>Part 4 — Off-policy means data keeps its value</h3>
+<p>Because the target ignores the behaviour policy, one stored transition can be replayed many times — 10 updates from one sample instead of one. Why this part exists: samples are the scarce resource. A robot arm costs seconds per transition and a simulator costs money, so reusing each one tenfold is the difference between a project that finishes and one that does not.</p>
+
+<h3>Part 5 — Policy-based methods learn the reflex</h3>
+<p>Here the policy is a parameterised function <code>π_θ(a|s)</code>, often a neural network that outputs action probabilities or a mean action, and training nudges <code>θ</code> so that high-return behaviour becomes more probable. Why this part exists: no <code>argmax</code> is ever taken, so a continuous action needs no search. The network emits the action in one forward pass, however many dimensions it has.</p>
+
+<h3>Part 6 — The estimator is log-probability times return</h3>
+<span class="formula">θ ← θ + α ∇_θ log π_θ(a|s) · G_t</span>
+<p>With <code>π(left) = 0.7</code> and a return of 5 after choosing left, the log-probability gradient is scaled by 5 and left becomes more likely; a return of −5 pushes it back down. Why this part exists: the return is only a number, and <code>∇ log π</code> is the one route from a scalar score to a change in a probability. It also means the reward never has to be differentiable.</p>
+
+<h3>Part 7 — Actor–critic swaps the return for an advantage</h3>
+<p>Replace <code>G_t</code> with <code>Q(s,a) − V(s)</code>, the advantage: how much better this action was than the state's average. With <code>Q = 2.8</code> and <code>V = 2.41</code>, the advantage is 0.39. Why this part exists: a raw return mixes "this state is good" with "this action was good", so every action in a lucky episode gets pushed up. Subtracting the baseline isolates the action and removes most of the noise.</p>
 
 <h2>Worked example</h2>
 
-<h3>1. One Q-learning update</h3>
-<p><code>Q = 0.5</code>, reward 1, <code>γ = 0.9</code>, next-state max <code>Q′ = 0.8</code>, <code>α = 0.1</code>:</p>
+<h3>1. Two Q-learning updates on the same transition</h3>
+<p><code>Q = 0.5</code>, <code>r = 1</code>, <code>γ = 0.9</code>, <code>max Q′ = 0.8</code>, <code>α = 0.1</code>. Apply the update twice.</p>
 
 <table>
-  <tr><th>Quantity</th><th class="num">Value</th></tr>
-  <tr><td>Target</td><td class="num">1 + 0.9(0.8) = 1.72</td></tr>
-  <tr><td>TD error</td><td class="num">1.72 − 0.5 = 1.22</td></tr>
-  <tr><td>New Q</td><td class="num">0.5 + 0.1(1.22) = 0.622</td></tr>
+  <tr><th>Update</th><th class="num">Target</th><th class="num">TD error</th><th class="num">New Q</th></tr>
+  <tr><td>1</td><td class="num">1 + 0.9(0.8) = 1.72</td><td class="num">1.72 − 0.5 = 1.22</td><td class="num">0.5 + 0.1(1.22) = 0.622</td></tr>
+  <tr><td>2</td><td class="num">1 + 0.9(0.8) = 1.72</td><td class="num">1.72 − 0.622 = 1.098</td><td class="num">0.622 + 0.1(1.098) = 0.732</td></tr>
 </table>
 
-<h3>2. One policy-gradient update</h3>
-<p>Policy says <code>P(left) = 0.7</code>, <code>P(right) = 0.3</code>. You took left and got return 5. The gradient pushes <code>log π(left)</code> up, increasing <code>P(left)</code>. If the return had been −5, it would push it down. The magnitude scales with how surprising the action was — a 0.7-probability action gets a smaller push than a 0.05 one.</p>
+<p><strong>What to notice.</strong> The target stayed at 1.72 because the next state's values were held fixed, so each update closes 10% of the remaining gap and the sequence approaches the target geometrically: 0.5, 0.622, 0.732. It never overshoots, and with <code>α = 1</code> it would arrive in a single jump. Off-policy here is not a slogan: update 2 learned from a transition the agent did not take again.</p>
+
+<h3>2. One policy-gradient step, both directions</h3>
+<p><code>π(left) = 0.7</code>, so the logit is <code>ln(0.7/0.3) = 0.847</code>. For a two-action softmax, the gradient of <code>log π(left)</code> with respect to the logit is <code>1 − p = 0.3</code>. Take <code>α = 0.1</code>.</p>
+
+<table>
+  <tr><th>Return after left</th><th class="num">Gradient 0.3 × G</th><th class="num">New logit</th><th class="num">New P(left)</th></tr>
+  <tr><td class="num">+5</td><td class="num">1.5</td><td class="num">0.847 + 0.15 = 0.997</td><td class="num">0.731</td></tr>
+  <tr><td class="num">−5</td><td class="num">−1.5</td><td class="num">0.847 − 0.15 = 0.697</td><td class="num">0.668</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The size of the push depends on how surprising the action was: at <code>p = 0.7</code> the factor is 0.3, but for a rare action at <code>p = 0.05</code> it would be 0.95, more than three times larger. A habit barely moves; a surprise moves a lot. The same action with the opposite return moves the probability the other way, which is what makes the estimator unbiased rather than merely optimistic.</p>
+
+<h3>3. The advantage as a within-state comparison</h3>
+<p>Same state, <code>V = 0.7 × 2.8 + 0.3 × 1.5 = 2.41</code>, with two actions available.</p>
+
+<table>
+  <tr><th>Action</th><th class="num">Q</th><th class="num">Q − V</th><th class="num">π × advantage</th></tr>
+  <tr><td>Left</td><td class="num">2.80</td><td class="num">+0.39</td><td class="num">0.7 × 0.39 = 0.273</td></tr>
+  <tr><td>Right</td><td class="num">1.50</td><td class="num">−0.91</td><td class="num">0.3 × (−0.91) = −0.273</td></tr>
+  <tr><td>Sum</td><td class="num">—</td><td class="num">—</td><td class="num"><strong>0.000</strong></td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The policy-weighted advantages sum to exactly zero, which is the proof that subtracting <code>V</code> changes nothing in expectation — it only rescales what each action contributes. That is why the baseline is free variance reduction. It is also why the advantage cannot be gamed by a state simply being good: it is measured against that state's own average.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"Q-learning is strictly better because it reuses data."</strong> Off-policy reuse is exactly what destabilises value-based methods once you add a neural network: the deadly triad (topic 23). PPO dominates real-world continuous control for the opposite reason.</p>
-  <p><strong>Second trap:</strong> assuming a policy gradient needs a differentiable reward. It does not — the gradient flows through <code>log π</code>, so the reward can be a black box (a win/loss, a human rating).</p>
+  <p><strong>"Q-learning is strictly better because it reuses data."</strong> It feels right: reuse is free efficiency, and tabular Q-learning comes with a convergence proof, so more reuse looks like strictly more of a good thing.</p>
+  <p><strong>Correction:</strong> the proof covers tables, not networks. Combine off-policy data, bootstrapping and function approximation and you get the deadly triad of topic 23 — divergence, not convergence. Policy-gradient methods give up reuse and buy stability; PPO dominates real-world continuous control for that reason, not because it is more sample-efficient.</p>
+  <p><strong>Second trap:</strong> assuming a policy gradient needs a differentiable reward. The gradient flows through <code>log π</code>, so a win, a loss, or a human rating is enough.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Value-based methods learn Q and act greedily.", "Policy-based methods adjust action probabilities directly.", "Q-learning's target uses the max, so it can learn from old data.", "REINFORCE weights the log-probability of the action taken by the return.", "Continuous actions suit policies; discrete actions suit Q-learning and DQN."]</script></div>
+<p><strong>The tell:</strong> check the age of the actions in your buffer. If the policy producing them is dozens of versions old while the loss falls smoothly and episode return stays flat, you are optimising against a policy that no longer exists. The other tell is a continuous-action project where the wall clock is dominated by an inner optimiser: that is a <code>max</code> being solved numerically, and a policy network would have emitted the action directly.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

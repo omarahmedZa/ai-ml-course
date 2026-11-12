@@ -24,47 +24,80 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Embeddings are the interface between language and every model in this course. Retrieval, clustering, recommendation, and the first layer of every transformer all reduce to "compare two vectors".</p>
+<p class="lede">An embedding is a lookup table from token ID to a vector of learned numbers, and it sits between tokenization and every neural layer above it. Semantic search, duplicate detection, clustering, recommendation and the first layer of a transformer all run on it. One number per dimension, one row per token, and the table carries no interpretation beyond geometry.</p>
+<p>A support team builds "find similar tickets" with a raw dot product and cannot explain the results. The 900-word onboarding ticket comes back as similar to every query, because a long vector accumulates a big score no matter what it says; the actual duplicate, a 30-word ticket, ranks twentieth. Switching the scoring line to cosine similarity puts the duplicate first, and no model was retrained. In an exam the same confusion appears as "cosine is 0 — are the words opposites?", a question that already assumes the wrong thing about what zero means.</p>
 
 <h2>The one core idea</h2>
-<p>Words that appear in similar contexts get similar vectors. Meaning becomes <strong>geometry</strong>: direction encodes what a word is like, and cosine similarity measures how alike two words are.</p>
+<p>Place every word at a point in space so that words used in similar company land near each other. Nothing about the coordinates is meaningful on its own; only the arrangement is. A word's position is its meaning, direction from the origin is what kind of word it is, and distance to another point is how interchangeable the two are. The map is learned from text, not drawn by hand.</p>
+<p>In one line: <strong>similarity is the angle between two arrows, not the distance between two points.</strong> With <code>cat = [0.8, 0.6]</code> and <code>car = [0.6, −0.8]</code>, the dot product is 0.48 − 0.48 = 0, so the cosine is 0.00: the arrows are perpendicular and share no direction at all.</p>
 
 <h2>How it actually works</h2>
-<ul>
-  <li><strong>Distributional hypothesis</strong> (Firth, 1957): "you shall know a word by the company it keeps." Context is the supervision signal.</li>
-  <li><strong>Embedding matrix</strong> <code>E</code> of shape <code>V × d</code>. Token ID <code>i</code> → row <code>E[i]</code>. A lookup, not a computation.</li>
-  <li><strong>Training</strong>: Word2Vec predicts a word from its neighbours (skip-gram) or neighbours from a word (CBOW). Gradient descent moves vectors that help prediction closer together.</li>
-  <li><strong>Similarity</strong>: cosine <code>(a·b)/(‖a‖‖b‖)</code>. Length is arbitrary, direction is meaning — exactly the case from topic 1.</li>
-  <li><strong>Static vs contextual</strong>: Word2Vec gives one vector per word. Transformers give one vector per <em>occurrence</em>, so "bank" differs in "river bank" and "bank loan".</li>
-</ul>
+<p>Six parts, from raw counts to a usable geometry. The first two build the table; the rest decide how to read it.</p>
+
+<h3>Part 1 — Define context as a window of neighbours</h3>
+<p>Slide a window of five words to each side over a corpus and record which words appear near which. Each token in a sentence of length 20 contributes 10 neighbour events, so a 1-billion-word corpus yields roughly 10 billion of them. Why this part exists: nothing else in the pipeline knows what a word means, so co-occurrence is the only supervision signal available.</p>
+
+<h3>Part 2 — Turn counts into a prediction task</h3>
+<p>Skip-gram takes a centre word and predicts one neighbour from it; each correct prediction nudges the two vectors closer. Scoring every word in a 50,000-entry vocabulary is expensive, so negative sampling compares the true neighbour against about 5 random ones instead of all 50,000. Why this part exists: raw counts are sparse and huge, while a prediction loss gives a gradient for every example, including the rare ones.</p>
+
+<h3>Part 3 — Store the result as one matrix</h3>
+<p>The outcome is a matrix <code>E</code> of shape <code>V × d</code>: 50,000 rows for the vocabulary, 300 columns for the dimensions. That is 50,000 × 300 = 15,000,000 numbers, or 60 MB in 32-bit floats. Why this part exists: an overgrown table would dominate the parameter count of a small model, which is why dimensions are usually 100 to 300 rather than 3,000.</p>
+
+<h3>Part 4 — Look up a row, do not compute one</h3>
+<p>Token ID 4,712 maps to row 4,712 of <code>E</code>; the layer is an array index, not a matrix multiplication. In training, only the rows named in the batch receive gradient, so 1,024 pairs update about 2% of the table per step. Why this part exists: a full matrix multiply against a 50,000-row table would cost the same as a real layer and would move every vector on every example, destroying the rare words.</p>
+
+<h3>Part 5 — Compare with cosine, not raw dot product</h3>
+<p>Divide the dot product by both lengths and the result lies in −1 to 1, depending only on direction. Two vectors can point the same way while one is five times longer, and the raw score then reports 5 where the cosine reports 1.00. Why this part exists: norm grows with word frequency during training for reasons unrelated to meaning, so an unnormalised score measures popularity as much as similarity.</p>
+
+<h3>Part 6 — Use contextual vectors where the word is ambiguous</h3>
+<p>A static table gives "bank" one row, so it must average the river sense and the money sense into a single blurry direction. A transformer computes a fresh vector for each occurrence, so "river bank" and "bank loan" diverge after the first layer and separate further by layer 12. Why this part exists: a single row cannot represent a word whose meaning depends on the sentence, and the average of two meanings often points at neither.</p>
 
 <span class="formula">a = [0.8, 0.6], b = [0.6, 0.8]  →  cos = 0.96 / (1 · 1) = 0.96</span>
 
 <h2>Worked example</h2>
 
-<h3>1. Three words, one space</h3>
+<h3>1. Four pairs, every term written out</h3>
 <table>
-  <tr><th>Word</th><th>Vector</th><th class="num">cos vs "cat"</th></tr>
-  <tr><td>cat</td><td class="num">[0.8, 0.6]</td><td class="num">1.00</td></tr>
-  <tr><td>kitten</td><td class="num">[0.6, 0.8]</td><td class="num">0.96</td></tr>
-  <tr><td>car</td><td class="num">[0.6, −0.8]</td><td class="num">0.00</td></tr>
+  <tr><th>Pair</th><th class="num">Dot product</th><th class="num">‖a‖</th><th class="num">‖b‖</th><th class="num">Cosine</th></tr>
+  <tr><td>cat · cat</td><td class="num">0.64 + 0.36 = 1.00</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+  <tr><td>cat · kitten</td><td class="num">0.48 + 0.48 = 0.96</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">0.960</td></tr>
+  <tr><td>cat · car</td><td class="num">0.48 − 0.48 = 0.00</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">0.000</td></tr>
+  <tr><td>cat · dog</td><td class="num">0.72 + 0.42 = 1.14</td><td class="num">1.000</td><td class="num">1.140</td><td class="num">1.000</td></tr>
 </table>
 
-<p><code>cat</code> and <code>kitten</code> point almost the same way; <code>car</code> is perpendicular — no shared direction, no semantic overlap in this toy space. The absolute magnitudes are meaningless; only angles are.</p>
+<p><strong>What to notice.</strong> The cat–dog dot product is 1.14, larger than the 1.00 that cat scores against itself. A model that ranked by raw dot product would consider dog more "cat-like" than cat, which is nonsense; the norm of dog is 1.140, and dividing it out gives 1.14 ÷ 1.140 = 1.000. Every row has a story like this once you write the norms down, which is why the table has a column for them.</p>
 
-<h3>2. Where analogy arithmetic comes from</h3>
-<p><code>king − man + woman ≈ queen</code> works because the offset "male → female" is roughly a constant direction across many word pairs. It is a property of the geometry, not a reasoning step — and it fails for most pairs, especially rare ones.</p>
+<h3>2. One ranking reversal</h3>
+<p>Query <code>q = [1, 0]</code>. Document A is long and partly on-topic; document B is short and precise.</p>
+
+<table>
+  <tr><th>Doc</th><th class="num">Vector</th><th class="num">q · v</th><th class="num">‖v‖</th><th class="num">Cosine</th><th class="num">Angle</th></tr>
+  <tr><td>A</td><td class="num">[5, 5]</td><td class="num">5.00</td><td class="num">7.071</td><td class="num">0.707</td><td class="num">45.0°</td></tr>
+  <tr><td>B</td><td class="num">[1, 0.1]</td><td class="num">1.00</td><td class="num">1.005</td><td class="num">0.995</td><td class="num">5.7°</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Raw dot product prefers A by five to one, and every one of those five units comes from length rather than relevance. Cosine prefers B, which sits 5.7° off the query against A's 45°. The two metrics disagree because they measure different things, and only one of them answers "what is this about?". If your product decision is "longer documents are worth more", the dot product is the right choice — but then say so out loud and stop calling it similarity.</p>
+
+<h3>3. Where analogy arithmetic comes from</h3>
+<p>Take <code>king = [0.9, 0.1]</code>, <code>man = [1, 0]</code>, <code>woman = [0, 1]</code>, and ask whether <code>queen = [0.1, 0.9]</code> is the answer.</p>
+
+<table>
+  <tr><th>Step</th><th class="num">Arithmetic</th><th class="num">Result</th></tr>
+  <tr><td>Subtract man</td><td class="num">(0.9 − 1, 0.1 − 0)</td><td class="num">(−0.1, 0.1)</td></tr>
+  <tr><td>Add woman</td><td class="num">(−0.1 + 0, 0.1 + 1)</td><td class="num">(−0.1, 1.1)</td></tr>
+  <tr><td>Dot with queen</td><td class="num">(−0.1)(0.1) + (1.1)(0.9)</td><td class="num">0.98</td></tr>
+  <tr><td>Divide by norms</td><td class="num">0.98 / (1.105 × 0.906)</td><td class="num">0.98</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The answer is not queen; it is a point 11.5° away from queen, close enough to rank first and wrong enough to prove the mechanism is arithmetic rather than reasoning. The offset "man → woman" only exists as a direction because thousands of pairs share it. Ask the same question about a rare name pair and there is no shared direction to add, which is why the famous examples are always common nouns.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"Each dimension has a meaning."</strong> It does not. Dimension 37 is not "royalty"; meaning is distributed across all dimensions, and individual axes are usually uninterpretable.</p>
-  <p><strong>Second trap:</strong> comparing raw dot products instead of cosine. A frequent word can have a larger norm purely because it appeared more often in training, and it will then win every similarity query. Normalise.</p>
+  <p><strong>"Each dimension means something."</strong> It feels right because the vectors are numbered, the table is 300 columns wide, and it is tempting to read column 37 as the "royalty" axis and column 12 as "animal".</p>
+  <p>The correction: a word's meaning is spread across all 300 dimensions, and rotating the whole space by any angle leaves every cosine unchanged. The axes are an arbitrary basis, not a list of properties. Probe dimension 37 and the top-scoring words will be a mix of countries, verbs and surnames with nothing in common — and that is a property of the training objective, not a bug in your inspection code.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Give every token a vector of a few hundred numbers.", "Train so words in similar contexts get similar vectors.", "Similarity is the angle between vectors: cosine, not raw dot product.", "Length varies for irrelevant reasons, so normalise before comparing.", "A transformer gives a different vector for each occurrence of a word."]</script></div>
+<p><strong>The tell:</strong> a slide deck with a single axis labelled "gender" and three points on it. The test is to zero out one dimension and see what breaks: if removing axis 37 damages twenty unrelated words at once, the axis was not a concept. A second tell is a ranking dominated by one long vector — a frequent word with norm 8 beating a precise word with norm 0.9 — because that is the dot product reporting popularity, and the fix is a division by both norms.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

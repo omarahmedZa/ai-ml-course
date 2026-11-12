@@ -24,51 +24,91 @@
 </header>
 
 <h2>Why this matters</h2>
-<p class="lede">Choosing an architecture is choosing which invariances you get for free. Get it right and the model needs less data; get it wrong and it fights the problem — a CNN on tabular data, an MLP on images.</p>
+<p class="lede">Choosing an architecture is the first decision of any project, and it is a decision about your data rather than about fashion. Each family bakes in an assumption: that nearby pixels belong together, that the same pattern can appear anywhere, that step 5 depends on step 4.</p>
+<p>Get the assumption wrong and the model fights the problem instead of solving it. Convolve 40 survey columns and the filter slides across "neighbouring" columns that were never neighbours, so it learns nothing stable; shuffle the column order and accuracy can move by 20 points. The exam version asks you to justify the choice rather than name it: <em>"30 numeric columns, no ordering — which family first, and why not a CNN?"</em></p>
 
 <h2>The one core idea</h2>
-<p>An architecture is a <strong>prior</strong>: a statement about which transformations should not change the answer. CNNs assume locality and translation; RNNs assume order and shared dynamics; MLPs assume nothing.</p>
+<p>Picture two kinds of form. One has a separate question for every position in the input, so moving the input moves every question. The other has a single question asked at every position — "is there an edge here?" — and the answer means the same wherever it lands. An architecture is that choice, made once.</p>
+<p>In one line: <strong>an architecture is a promise about which changes leave the answer alone, and that promise is what saves you parameters.</strong> A 3×3 filter from 64 channels to 64 outputs needs 36,864 weights and works at any image size; the dense layer on the same 224×224×64 input needs 205,520,896.</p>
 
 <h2>How it actually works</h2>
-<table>
-  <tr><th></th><th>MLP</th><th>CNN</th><th>RNN</th></tr>
-  <tr><td>Assumes</td><td>Features independent, no spatial/order structure</td><td>Local patterns, same pattern anywhere</td><td>Sequence order matters; same rule each step</td></tr>
-  <tr><td>Weight sharing</td><td>No</td><td>Yes — one filter slides everywhere</td><td>Yes — one cell reused per timestep</td></tr>
-  <tr><td>Parallel over input</td><td>Yes</td><td>Yes</td><td>No — strictly sequential</td></tr>
-  <tr><td>Best for</td><td>Tabular, small fixed vectors</td><td>Images, audio spectrograms, 1-D signals</td><td>Time series, text (historically)</td></tr>
-</table>
+<p>Four families, one question each: what structure does your data actually have?</p>
 
-<ul>
-  <li><strong>MLP</strong>: <code>y = W₂φ(W₁x)</code>. Permuting input features changes the function completely — it has no idea that feature 3 sits next to feature 4.</li>
-  <li><strong>CNN</strong>: a filter of shape <code>k×k×C_in</code> is applied at every position. A 3×3 filter over 64 channels to 64 outputs has <code>3·3·64·64 = 36,864</code> weights and works on any image size.</li>
-  <li><strong>RNN</strong>: <code>h_t = φ(W_h h_{t−1} + W_x x_t)</code>. The same weights at every step, so the model generalises across sequence lengths.</li>
-  <li><strong>Transformers</strong> (Unit 7) drop the sequence assumption and use attention — parallel, but with <code>O(n²)</code> cost.</li>
-</ul>
+<h3>Part 1 — An architecture is a prior</h3>
+<p>A prior is a statement you make before seeing any data. "Shifting this image by two pixels does not change what it is" is a prior; so is "these 40 columns are unrelated". Every weight you avoid is a weight you no longer have to learn from examples, so a true prior is worth more than extra rows.</p>
+<p><strong>Why this part exists:</strong> without naming the assumption you cannot tell whether a family fits the problem, and the choice collapses into picking whatever is fashionable.</p>
+
+<h3>Part 2 — The MLP assumes nothing</h3>
+<p>A multilayer perceptron is <code>y = W₂φ(W₁x)</code>, and every input connects to every output. A layer from 40 inputs to 64 has <code>40 × 64 = 2,560</code> weights, each learned independently. Permuting the input features changes the function completely: the network has no idea that column 3 sits beside column 4.</p>
+<p><strong>Why this part exists:</strong> it is the honest baseline. When features genuinely have no order, assuming nothing is the correct prior, and a tree ensemble or an MLP is hard to beat.</p>
+
+<h3>Part 3 — The CNN shares one filter everywhere</h3>
+<p>A convolutional filter of shape <code>k × k × C_in</code> is applied at every spatial position. A 3×3 filter from 64 channels to 64 outputs has <code>3 × 3 × 64 × 64 = 36,864</code> weights, and that one filter is reused at all 50,176 positions of a 224×224 map. Locality comes from the filter's small size; translation comes from reusing it.</p>
+<p><strong>Why this part exists:</strong> without sharing you would need a separate edge detector for every pixel, which is both enormous and untrainable.</p>
+
+<h3>Part 4 — Stride and pooling shrink the map</h3>
+<p>A 3×3 convolution with stride 1 and no padding turns a 224×224 map into 222×222. Stride 2 with padding 1 halves it to 112×112, and every later filter then covers twice as much of the original image.</p>
+<p><strong>Why this part exists:</strong> without downsampling each layer costs as much as the first, and the region any single unit can see never grows enough to contain a whole object.</p>
+
+<h3>Part 5 — The RNN reuses one cell per step</h3>
+<p>A recurrent network computes <code>h_t = φ(W_h h_{t−1} + W_x x_t)</code> with the same two matrices at every timestep. A hidden size of 128 with 64 inputs costs 24,704 parameters whether the sequence runs for 10 steps or 10,000. The price is that step 20 cannot start until step 19 has finished.</p>
+<p><strong>Why this part exists:</strong> sharing across time is what lets the model handle sequence lengths it never saw in training; the sequential dependency is what that sharing costs.</p>
+
+<h3>Part 6 — Attention treats the sequence as a set</h3>
+<p>Attention lets every position read every other position directly, so all of them compute in parallel. Position information must then be added explicitly, because a set has no order. The cost is quadratic in length: doubling from 1,000 to 2,000 tokens takes the attention matrix from one million entries to four million.</p>
+<p><strong>Why this part exists:</strong> an RNN's fixed-size state squeezes everything it has seen into one vector, so detail from 200 steps back is mostly gone; attention keeps every position addressable.</p>
+
+<h3>Part 7 — Choose by structure, then measure</h3>
+<p>Ask what stays true when the input changes. Shift an image and it is the same object, so convolve. Shuffle the columns of a table and each row still means the same thing, so do not. Then count parameters and run the cheapest baseline before committing.</p>
+<p><strong>Why this part exists:</strong> a mismatched prior does not fail loudly; it quietly loses to a simpler model you could have trained in an afternoon.</p>
 
 <h2>Worked example</h2>
 
-<h3>1. The parameter argument for convolutions</h3>
-<p>One 3×3 conv layer, 64 in, 64 out: <strong>36,864</strong> weights. The dense layer on the same 224×224×64 input (3,211,264 values) to 64 outputs needs <code>3,211,264 × 64 ≈ 205 million</code> — 5,500× more, and it would have to relearn an edge detector at every pixel.</p>
+<h3>1. The parameter argument for convolution</h3>
+<p>Both rows below produce 64 output channels from the same 224×224×64 input.</p>
 
-<h3>2. Choosing under constraint</h3>
 <table>
-  <tr><th>Task</th><th>Pick</th><th>Reason</th></tr>
-  <tr><td>Churn prediction, 40 columns</td><td>GBM (or MLP)</td><td>No spatial structure; trees handle mixed scales</td></tr>
-  <tr><td>X-ray classification, 5k images</td><td>CNN (pretrained)</td><td>Locality + transfer beats training from zero</td></tr>
-  <tr><td>Sensor stream, 10 Hz</td><td>1-D CNN or GRU</td><td>Local temporal patterns; short memory</td></tr>
-  <tr><td>Machine translation</td><td>Transformer</td><td>Long-range dependencies, parallel training</td></tr>
+  <tr><th>Layer</th><th class="num">Arithmetic</th><th class="num">Weights</th></tr>
+  <tr><td>3×3 conv, 64 → 64</td><td class="num">3 × 3 × 64 × 64</td><td class="num">36,864</td></tr>
+  <tr><td>Dense, 3,211,264 → 64</td><td class="num">3,211,264 × 64</td><td class="num">205,520,896</td></tr>
+  <tr><td>Ratio</td><td class="num">205,520,896 ÷ 36,864</td><td class="num">≈ 5,575×</td></tr>
 </table>
+
+<p><strong>What to notice.</strong> The dense layer is about 5,500 times larger, and it still has to relearn an edge detector separately at each of the 3,211,264 positions. Double the image side to 448 and the convolution stays at 36,864 weights while the dense layer becomes <code>12,845,056 × 64 = 822,083,584</code> — a ratio of about 22,300×. That is the concrete meaning of a prior: the conv layer already knows the answer does not depend on where it looks.</p>
+
+<h3>2. What stride and padding do to the shape</h3>
+<p>One formula covers all three rows: <code>out = (W − k + 2p) / s + 1</code>, rounded down.</p>
+
+<table>
+  <tr><th class="num">Input</th><th class="num">Filter</th><th class="num">Stride</th><th class="num">Padding</th><th class="num">Output</th></tr>
+  <tr><td class="num">224</td><td class="num">3</td><td class="num">1</td><td class="num">0</td><td class="num">222</td></tr>
+  <tr><td class="num">224</td><td class="num">3</td><td class="num">1</td><td class="num">1</td><td class="num">224</td></tr>
+  <tr><td class="num">224</td><td class="num">3</td><td class="num">2</td><td class="num">1</td><td class="num">112</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Padding 1 exactly cancels the shrink from a 3×3 filter, which is why it is the default: the map keeps its size and only the channel count changes. Stride 2 does the opposite job deliberately — <code>(224 − 3 + 2)/2 + 1 = 112</code>, a quarter of the values, since <code>112 × 112 × 64 = 802,816</code> against <code>3,211,264</code>.</p>
+
+<h3>3. Why recurrence is cheap</h3>
+<p>A GRU-style cell with 64 inputs and a hidden size of 128.</p>
+
+<table>
+  <tr><th>Component</th><th class="num">Shape</th><th class="num">Parameters</th></tr>
+  <tr><td>Input weights <code>W_x</code></td><td class="num">64 × 128</td><td class="num">8,192</td></tr>
+  <tr><td>Hidden weights <code>W_h</code></td><td class="num">128 × 128</td><td class="num">16,384</td></tr>
+  <tr><td>Bias</td><td class="num">128</td><td class="num">128</td></tr>
+  <tr><td>Total, used at every step</td><td class="num">—</td><td class="num">24,704</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Unrolled over 200 timesteps, a network with separate weights per step would need <code>200 × 24,704 = 4,940,800</code> parameters and could never generalise to step 201. Sharing keeps the count at 24,704 for any length. What you pay instead is time: 200 steps means 200 sequential passes, which is exactly the cost attention removes.</p>
 
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
-  <p><strong>"Deeper/newer is better."</strong> Architecture must match the data's structure. A transformer on 800 tabular rows will lose to logistic regression, and a CNN on shuffled columns is strictly worse than an MLP.</p>
-  <p><strong>Second trap:</strong> assuming an RNN "remembers" because it is recurrent. Its state is a fixed-size vector; information from 200 steps ago is mostly gone (topic 17).</p>
+  <p><strong>"Deeper and newer is better."</strong> It feels right because every result you read about uses the newest block. But an architecture is only as good as the match between its prior and your data's structure.</p>
+  <p><strong>Correction:</strong> a transformer on 800 tabular rows loses to logistic regression, and a CNN on shuffled columns is strictly worse than an MLP of the same width. Start with the simplest family whose assumptions are true, then spend the complexity budget only where the baseline is clearly short.</p>
+  <p><strong>Second trap:</strong> assuming an RNN "remembers" because it is recurrent. Its state is a fixed-size vector, so information from 200 steps ago is mostly overwritten — attention was invented to fix that.</p>
 </div>
-
-<h2>Step by step</h2>
-<p class="steps-note">If the mechanism above went past you, walk it one click at a time. Each step is one sentence and one idea.</p>
-<div class="steps"><script type="application/json" class="steps-data">["Ask what should not change the answer: a shifted cat is still a cat.", "A CNN bakes that in by sliding one small filter over the image.", "An MLP has no such assumption, so it must learn position from scratch.", "An RNN shares one cell across time, assuming the same rule at each step.", "Match the architecture to the structure you have, not to fashion."]</script></div>
+<p><strong>The tell:</strong> shuffle your input columns and retrain. If accuracy moves by double digits, the architecture is assuming an adjacency the data does not have, and that one test tells you more than any benchmark table. The second tell is a first convolutional layer whose learned filters look like television static after training — filters that never specialised are filters that had nothing local to find.</p>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">
