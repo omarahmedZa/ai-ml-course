@@ -123,6 +123,7 @@
       var g = gradeOf(earned, total);
       chip.querySelector("[data-score]").textContent = g.pct + "%";
       chip.querySelector("[data-grade]").textContent = "";
+      chip.querySelector("[data-grade]").style.display = "none";
       chip.querySelector("[data-count]").textContent = earned + "/" + total;
       st.ts = Date.now();
       persist();
