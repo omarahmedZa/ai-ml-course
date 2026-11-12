@@ -96,13 +96,23 @@ y = X @ true + 1 + rng.normal(0, .1, 50)
 A = np.c_[X, np.ones(50)]
 coef, *_ = np.linalg.lstsq(A, y, rcond=None)</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "A logistic decision boundary is…", "o": ["A hyperplane", "A circle", "Dependent on σ", "A quadratic"], "a": 0, "why": "The boundary is w·x+b=0, always linear in x."}, {"q": "Correct loss for classification?", "o": ["Binary cross-entropy", "Squared error", "Absolute error", "Euclidean norm"], "a": 0, "why": "BCE is the likelihood; MSE saturates and is non-convex here."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 7: Trees &amp; ensembles.</strong> Linear models cannot bend. Trees can — and on tabular data they will beat your neural network more often than you expect.</p>
   <div class="pager">
-    <a href="005-generalization.html">← 05 · Generalization</a>
-    <a href="007-trees-and-ensembles.html">07 · Trees →</a>
+    <a href="005-generalization.html">← 05 · Generalization: overfitting, underfitting, and the gap</a>
+    <a href="007-trees-and-ensembles.html">Next · 07 · Trees & ensembles</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 1 resources:</strong> <a href="../output/cheatsheet-unit-1.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-1.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: <a href="https://scikit-learn.org/stable/modules/linear_model.html">scikit-learn — Generalized linear models</a>.<br>
@@ -110,6 +120,6 @@ coef, *_ = np.linalg.lstsq(A, y, rcond=None)</code></pre>
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

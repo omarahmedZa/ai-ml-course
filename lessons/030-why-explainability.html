@@ -94,13 +94,23 @@ debt = rng.normal(0.3, 0.15, n)
 y = ((income - 60 * debt) &gt; 20).astype(int)
 A = np.c_[income, debt, np.ones(n)]</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "An intrinsic explanation means…", "o": ["The model is interpretable by design", "It is computed after training", "It is global only", "It is causal"], "a": 0, "why": "No post-hoc step is needed."}, {"q": "GDPR Art. 22 concerns…", "o": ["Automated decisions with significant effects", "Cookie banners", "Copyright", "Advertising"], "a": 0, "why": "It constrains purely automated decision-making."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 31: Attribution methods.</strong> You know which argument you need. Topic 31 covers the four methods that produce it — and what each one actually computes.</p>
   <div class="pager">
-    <a href="029-alignment-and-inference.html">← 29 · Alignment</a>
-    <a href="031-attribution-methods.html">31 · Attribution →</a>
+    <a href="029-alignment-and-inference.html">← 29 · Alignment & inference</a>
+    <a href="031-attribution-methods.html">Next · 31 · Attribution methods: what each one computes</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 8 resources:</strong> <a href="../output/cheatsheet-unit-8.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-8.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: Molnar, <a href="https://christophm.github.io/interpretable-ml-book/">Interpretable Machine Learning</a>, ch. 1–2.<br>
@@ -108,6 +118,6 @@ A = np.c_[income, debt, np.ones(n)]</code></pre>
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

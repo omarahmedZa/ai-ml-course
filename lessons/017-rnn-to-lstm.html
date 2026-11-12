@@ -91,13 +91,23 @@ traj = []
 for t in range(20):
     h = np.tanh(W @ h + x)</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "LSTM cell update is…", "o": ["c = f·c + i·g", "c = tanh(Wc+b)", "c = c + g", "c = f+i+o"], "a": 0, "why": "Additive and gated — that is why it trains."}, {"q": "0.9²⁰ is about…", "o": ["0.12", "0.90", "0.50", "0.01"], "a": 0, "why": "The gradient has lost 88% after 20 steps."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 18: Seq2seq.</strong> Put an RNN in front of the input and another behind the output, and you can translate. The bottleneck you just met becomes impossible to ignore.</p>
   <div class="pager">
-    <a href="016-embeddings.html">← 16 · Embeddings</a>
-    <a href="018-seq2seq.html">18 · Seq2seq →</a>
+    <a href="016-embeddings.html">← 16 · Embeddings: meaning as a vector</a>
+    <a href="018-seq2seq.html">Next · 18 · Seq2seq & encoder–decoder</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 4 resources:</strong> <a href="../output/cheatsheet-unit-4.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-4.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: Goodfellow, Bengio &amp; Courville, <a href="https://www.deeplearningbook.org">Deep Learning</a>, ch. 10.<br>
@@ -105,6 +115,6 @@ for t in range(20):
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

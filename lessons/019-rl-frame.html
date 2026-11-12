@@ -98,13 +98,23 @@ for gamma in (0.0, 0.9, 0.99):
     print(f&quot;           a reward of 11 at step 100 is worth {11 * gamma**100:.6f}&quot;)
 print(&quot;effective horizon 1/(1-gamma):&quot;, [round(1/(1-g), 1) for g in (0.9, 0.99, 0.999)])</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "γ=0.9, ten unit rewards. Return?", "o": ["6.51", "10.0", "9.0", "5.00"], "a": 0, "why": "(1−0.9¹⁰)/0.1."}, {"q": "γ=0 makes an agent…", "o": ["Myopic", "Random", "Optimal", "Curious"], "a": 0, "why": "Only the next reward counts."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 20: Value functions.</strong> Return depends on a whole future trajectory. Value functions collapse that into one number per state — the central trick of RL.</p>
   <div class="pager">
-    <a href="018-seq2seq.html">← 18 · Seq2seq</a>
-    <a href="020-value-functions-bellman.html">20 · Value functions →</a>
+    <a href="018-seq2seq.html">← 18 · Seq2seq & encoder–decoder</a>
+    <a href="020-value-functions-bellman.html">Next · 20 · Value functions & the Bellman equation</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 5 resources:</strong> <a href="../output/cheatsheet-unit-5.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-5.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: Sutton &amp; Barto, <a href="http://incompleteideas.net/book/the-book-2nd.html">Reinforcement Learning: An Introduction</a>, ch. 3.<br>
@@ -112,6 +122,6 @@ print(&quot;effective horizon 1/(1-gamma):&quot;, [round(1/(1-g), 1) for g in (0
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

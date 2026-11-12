@@ -99,13 +99,23 @@ z = np.array([2., 1., 0.])
 probs = np.exp(z) / np.exp(z).sum()
 print(&quot;softmax:&quot;, probs.round(3))</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Fair coin, two heads. NLL?", "o": ["1.386", "0.693", "2.079", "0.250"], "a": 0, "why": "L=0.25, −ln 0.25 = 1.386."}, {"q": "Softmax of [2,1,0] gives p₁ about?", "o": ["0.665", "0.500", "0.245", "0.090"], "a": 0, "why": "7.389/11.107 ≈ 0.665."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 4: Supervised learning.</strong> You now have a loss. Unit 1 supplies the other three objects — data, function, and parameters — and the whole of ML falls out of arranging them.</p>
   <div class="pager">
-    <a href="002-slope-to-gradient.html">← 02 · Gradient</a>
-    <a href="004-supervised-learning.html">04 · Supervised learning →</a>
+    <a href="002-slope-to-gradient.html">← 02 · Slope → gradient</a>
+    <a href="004-supervised-learning.html">Next · 04 · Supervised learning as function fitting</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 0 resources:</strong> <a href="../output/cheatsheet-unit-0.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-0.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: <a href="https://www.khanacademy.org/math/statistics-probability">Khan Academy — Statistics and probability</a> (expectation, distributions, likelihood).<br>
@@ -113,6 +123,6 @@ print(&quot;softmax:&quot;, probs.round(3))</code></pre>
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

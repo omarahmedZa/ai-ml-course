@@ -86,13 +86,23 @@ w = np.array([0.0])
 lr, gamma = 0.1, 0.9
 for s, a, r, s_next in [(1.0, 0, 1.0, 2.0), (2.0, 0, 1.0, 3.0)]:</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "The deadly triad is…", "o": ["Approximation + bootstrapping + off-policy", "Replay + target + clip", "State + action + reward", "Bias + variance + noise"], "a": 0, "why": "Any two are safe; all three can diverge."}, {"q": "Tables die because…", "o": ["The state space is too large", "They are slow", "They leak memory", "They overfit"], "a": 0, "why": "One entry per state cannot exist for pixels."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 24: DQN.</strong> The deadly triad is not a death sentence. DQN is two specific engineering fixes that made value-based deep RL actually work.</p>
   <div class="pager">
-    <a href="022-two-solution-families.html">← 22 · Solution families</a>
-    <a href="024-dqn.html">24 · DQN →</a>
+    <a href="022-two-solution-families.html">← 22 · Two solution families: value vs policy</a>
+    <a href="024-dqn.html">Next · 24 · DQN: two fixes that made it work</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 6 resources:</strong> <a href="../output/cheatsheet-unit-6.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-6.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: Sutton &amp; Barto, <a href="http://incompleteideas.net/book/the-book-2nd.html">Reinforcement Learning: An Introduction</a>, ch. 9 &amp; 11.<br>
@@ -100,6 +110,6 @@ for s, a, r, s_next in [(1.0, 0, 1.0, 2.0), (2.0, 0, 1.0, 3.0)]:</code></pre>
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

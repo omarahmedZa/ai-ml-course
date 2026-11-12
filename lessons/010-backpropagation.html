@@ -91,13 +91,23 @@ d_pred = 2 * (pred - y)
 d_w, d_b = d_pred * x, d_pred
 print(f&quot;pred={pred} loss={loss} dL/dw={d_w} dL/db={d_b}&quot;)</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "L=(3w)². dL/dw at w=2?", "o": ["36", "12", "18", "72"], "a": 0, "why": "L=9w², so 18w = 36."}, {"q": "Gradients from two branches combine by…", "o": ["Adding", "Multiplying", "Taking the max", "Averaging"], "a": 0, "why": "Total derivative is the sum over paths."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 11: The training loop.</strong> You have a gradient. Wrap it in five lines, add a learning rate, and you have the loop that trains every model in the rest of this course.</p>
   <div class="pager">
-    <a href="009-layers-and-forward-pass.html">← 09 · Forward pass</a>
-    <a href="011-training-loop.html">11 · Training loop →</a>
+    <a href="009-layers-and-forward-pass.html">← 09 · Layers and the forward pass</a>
+    <a href="011-training-loop.html">Next · 11 · The training loop</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 2 resources:</strong> <a href="../output/cheatsheet-unit-2.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-2.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: Karpathy, <a href="https://karpathy.ai/zero-to-hero.html">Neural Networks: Zero to Hero</a>, episode 1 (backprop from scratch).<br>
@@ -105,6 +115,6 @@ print(f&quot;pred={pred} loss={loss} dL/dw={d_w} dL/db={d_b}&quot;)</code></pre>
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

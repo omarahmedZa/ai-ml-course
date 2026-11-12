@@ -91,13 +91,23 @@ for rnd in range(4):
     locals_ = []
     for data in (A, B):</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Client drift is caused by…", "o": ["Non-IID local training", "IID data", "A high lr", "Small batches"], "a": 0, "why": "Local optima pull apart before averaging."}, {"q": "FedProx adds…", "o": ["A proximal term", "Dropout", "A replay buffer", "A mask"], "a": 0, "why": "It anchors clients to the global weights."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 35: Privacy and threat model.</strong> You can now train without centralising data. Topic 35 asks the harder question: what does the server still learn?</p>
   <div class="pager">
-    <a href="033-federated-setting-fedavg.html">← 33 · FedAvg</a>
-    <a href="035-privacy-and-threat-model.html">35 · Privacy →</a>
+    <a href="033-federated-setting-fedavg.html">← 33 · Federated learning & FedAvg</a>
+    <a href="035-privacy-and-threat-model.html">Next · 35 · Privacy & threat model</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 9 resources:</strong> <a href="../output/cheatsheet-unit-9.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-9.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: Li et al., <a href="https://arxiv.org/abs/1812.06127">Federated Optimization in Heterogeneous Networks</a> (2018).<br>
@@ -105,6 +115,6 @@ for rnd in range(4):
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

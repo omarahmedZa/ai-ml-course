@@ -93,13 +93,23 @@ def gini(labels):
     if len(labels) == 0:
         return 0.0</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Bagging mainly reduces…", "o": ["Variance", "Bias", "Noise", "Parameters"], "a": 0, "why": "Averaging many high-variance trees cuts variance."}, {"q": "A tree asked to price a house above all training prices will…", "o": ["Predict the largest seen value", "Extrapolate linearly", "Raise an error", "Fit a line"], "a": 0, "why": "Leaves average training targets, so the output cannot exceed them."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 8: The neuron.</strong> Unit 1 is done. Unit 2 asks what happens when you stack 10,000 of these weighted sums and insert a bend between them.</p>
   <div class="pager">
-    <a href="006-linear-and-logistic-regression.html">← 06 · Linear &amp; logistic</a>
-    <a href="008-the-neuron.html">08 · The neuron →</a>
+    <a href="006-linear-and-logistic-regression.html">← 06 · Linear & logistic regression</a>
+    <a href="008-the-neuron.html">Next · 08 · The neuron: weighted sum plus one bend</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 1 resources:</strong> <a href="../output/cheatsheet-unit-1.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-1.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: <a href="https://scikit-learn.org/stable/modules/ensemble.html">scikit-learn — Ensembles</a>.<br>
@@ -107,6 +117,6 @@ def gini(labels):
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

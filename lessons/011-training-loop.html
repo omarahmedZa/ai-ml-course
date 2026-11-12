@@ -97,13 +97,23 @@ w, b, lr = np.zeros(2), 0., 0.05
 for epoch in range(60):
     for i in rng.permutation(len(X)):</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "50,000 examples, batch 250, 8 epochs. Updates?", "o": ["1,600", "200", "400", "8"], "a": 0, "why": "200 steps/epoch × 8."}, {"q": "Loss flat at 0.693 on binary CE means the model outputs…", "o": ["0.5", "1.0", "0.0", "NaN"], "a": 0, "why": "−ln 0.5 = 0.693 is the uniform binary model."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 12: Overfitting in deep learning.</strong> Your loop now runs. Next: the four levers that stop a high-capacity network from memorising its way to a great training score.</p>
   <div class="pager">
-    <a href="010-backpropagation.html">← 10 · Backprop</a>
-    <a href="012-overfitting-in-deep-learning.html">12 · Overfitting in DL →</a>
+    <a href="010-backpropagation.html">← 10 · Backpropagation</a>
+    <a href="012-overfitting-in-deep-learning.html">Next · 12 · Overfitting in deep learning</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 2 resources:</strong> <a href="../output/cheatsheet-unit-2.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-2.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: <a href="https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html">PyTorch — Optimizing Model Parameters</a>.<br>
@@ -111,6 +121,6 @@ for epoch in range(60):
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

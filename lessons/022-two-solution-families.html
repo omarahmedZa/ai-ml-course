@@ -96,13 +96,23 @@ print(&quot;Q-learning: target&quot;, target, &quot;TD error&quot;, round(target
 # policy gradient on a two-action bandit
 probs = np.array([0.7, 0.3])</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Which method is off-policy?", "o": ["Q-learning", "REINFORCE", "A2C", "PPO"], "a": 0, "why": "Its max target does not depend on the behaviour policy."}, {"q": "A 7-DOF continuous arm: which family?", "o": ["Policy gradient", "Tabular Q", "DQN", "Random search"], "a": 0, "why": "argmax over continuous actions needs an inner optimisation."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 23: Function approximation.</strong> Tables worked for 25 grid cells. Topic 23 asks what happens when the state is a screen of pixels — and why the guarantees disappear.</p>
   <div class="pager">
-    <a href="021-exploration-vs-exploitation.html">← 21 · Exploration</a>
-    <a href="023-function-approximation.html">23 · Function approximation →</a>
+    <a href="021-exploration-vs-exploitation.html">← 21 · Exploration vs exploitation</a>
+    <a href="023-function-approximation.html">Next · 23 · Function approximation: why tables die</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 5 resources:</strong> <a href="../output/cheatsheet-unit-5.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-5.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: Sutton &amp; Barto, <a href="http://incompleteideas.net/book/the-book-2nd.html">Reinforcement Learning: An Introduction</a>, ch. 6 &amp; 13.<br>
@@ -110,6 +120,6 @@ probs = np.array([0.7, 0.3])</code></pre>
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

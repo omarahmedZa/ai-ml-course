@@ -92,13 +92,23 @@ print(f&quot;3x3 conv: {conv:,}   dense equivalent: {dense:,}   ratio {dense//co
 # one tiny convolution, stride 1, no padding
 img = np.arange(16.).reshape(4, 4)</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "CNN weight sharing buys…", "o": ["Translation equivariance", "Permutation invariance", "Smaller depth", "More parameters"], "a": 0, "why": "One filter slides everywhere."}, {"q": "40 numeric tabular columns. First choice?", "o": ["Gradient boosting", "CNN", "RNN", "Transformer"], "a": 0, "why": "No spatial adjacency, so the CNN prior is false."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 15: Tokenization.</strong> Unit 4 starts where every language model starts: turning text into integers, and losing information in ways that show up as bugs later.</p>
   <div class="pager">
-    <a href="013-optimization-failure-modes.html">← 13 · Optimization failures</a>
-    <a href="015-tokenization.html">15 · Tokenization →</a>
+    <a href="013-optimization-failure-modes.html">← 13 · Optimization failure modes</a>
+    <a href="015-tokenization.html">Next · 15 · Tokenization: text → integers</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 3 resources:</strong> <a href="../output/cheatsheet-unit-3.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-3.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: <a href="https://www.deeplearningbook.org">Deep Learning</a>, ch. 9 (convolutional networks) and ch. 10 (sequence modelling).<br>
@@ -106,6 +116,6 @@ img = np.arange(16.).reshape(4, 4)</code></pre>
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

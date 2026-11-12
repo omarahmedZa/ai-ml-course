@@ -23,6 +23,7 @@
     if (!store.lessons[id]) store.lessons[id] = { sections: {}, quiz: {}, ts: 0 };
     if (!store.lessons[id].sections) store.lessons[id].sections = {};
     if (!store.lessons[id].quiz) store.lessons[id].quiz = {};
+    if (!store.lessons[id].practice) store.lessons[id].practice = {};
     return store.lessons[id];
   }
 
@@ -212,6 +213,115 @@
       });
     });
 
+    /* extra practice: three attempts, then reveal */
+    var boxes = [].slice.call(document.querySelectorAll(".practice"));
+    boxes.forEach(function (box, bi) {
+      var raw = box.querySelector(".practice-data");
+      if (!raw) return;
+      var items;
+      try { items = JSON.parse(raw.textContent); } catch (e) { return; }
+      raw.style.display = "none";
+
+      items.forEach(function (item, qi) {
+        totalItems++;
+        var key = bi + "-" + qi;
+        var rec = st.practice[key];
+        if (!rec) {
+          rec = { tries: 0, pts: null, solved: false, revealed: false };
+          st.practice[key] = rec;
+        }
+        if (rec.pts) earned += rec.pts;
+
+        var card = document.createElement("div");
+        card.className = "pcard";
+        var q = document.createElement("p");
+        q.className = "pq";
+        q.textContent = (qi + 1) + ". " + item.q;
+        card.appendChild(q);
+
+        var opts = document.createElement("div");
+        opts.className = "poptions";
+        card.appendChild(opts);
+
+        var status = document.createElement("p");
+        status.className = "pstatus";
+        card.appendChild(status);
+
+        var revealBox = document.createElement("div");
+        revealBox.className = "panswer";
+        revealBox.hidden = true;
+        revealBox.innerHTML = "<strong>Answer:</strong> " + item.o[item.a] +
+          "<br><span class='why'>" + item.why + "</span>";
+        card.appendChild(revealBox);
+
+        var revealBtn = document.createElement("button");
+        revealBtn.type = "button";
+        revealBtn.className = "reveal";
+        revealBtn.textContent = "Show the answer";
+        revealBtn.hidden = true;
+        card.appendChild(revealBtn);
+
+        function paint() {
+          [].forEach.call(opts.children, function (b) {
+            b.disabled = rec.solved || rec.revealed;
+            b.classList.toggle("right", (rec.solved || rec.revealed) && Number(b.dataset.i) === item.a);
+          });
+          if (rec.solved) {
+            status.textContent = rec.pts === 2 ? "Correct, first try." : "Correct.";
+            status.className = "pstatus good";
+            revealBox.hidden = false;
+          } else if (rec.revealed) {
+            status.textContent = "Answer revealed.";
+            status.className = "pstatus bad";
+            revealBox.hidden = false;
+            revealBtn.hidden = true;
+          } else if (rec.tries >= 3) {
+            status.textContent = "Three attempts used.";
+            status.className = "pstatus bad";
+            revealBtn.hidden = false;
+          } else {
+            status.textContent = "Attempt " + (rec.tries + 1) + " of 3";
+            status.className = "pstatus";
+          }
+        }
+
+        item.o.forEach(function (text, i) {
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "opt";
+          b.dataset.i = String(i);
+          b.textContent = String.fromCharCode(65 + i) + ". " + text;
+          b.addEventListener("click", function () {
+            if (rec.solved || rec.revealed) return;
+            if (i === item.a) {
+              rec.solved = true;
+              rec.pts = rec.tries === 0 ? 2 : 1;
+              earned += rec.pts;
+              paint();
+              refresh();
+            } else {
+              b.classList.add("wrong");
+              rec.tries += 1;
+              if (rec.tries >= 3) rec.pts = 0;
+              paint();
+              persist();
+            }
+          });
+          opts.appendChild(b);
+        });
+
+        revealBtn.addEventListener("click", function () {
+          rec.revealed = true;
+          rec.pts = 0;
+          paint();
+          persist();
+        });
+
+        box.appendChild(card);
+        paint();
+      });
+    });
+
     refresh();
 
     /* remember last visited for the dashboard */
@@ -249,15 +359,18 @@
     rows.forEach(function (row) {
       var id = row.getAttribute("data-lesson");
       var unit = row.getAttribute("data-unit");
-      var st = store.lessons[id] || { sections: {}, quiz: {} };
+      var st = store.lessons[id] || { sections: {}, quiz: {}, practice: {} };
       var secVals = Object.keys(st.sections || {}).map(function (k) { return st.sections[k]; });
       var quizVals = Object.keys(st.quiz || {}).map(function (k) { return st.quiz[k]; });
+      var pracVals = Object.keys(st.practice || {})
+        .map(function (k) { return st.practice[k].pts; })
+        .filter(function (v) { return v != null; });
 
-      var items = secVals.length + quizVals.length;
-      var pts = secVals.concat(quizVals).reduce(function (a, b) { return a + b; }, 0);
-      var expected = 16; /* 5 section checks + 3 questions, each 0–2 */
+      var items = secVals.length + quizVals.length + pracVals.length;
+      var pts = secVals.concat(quizVals, pracVals).reduce(function (a, b) { return a + b; }, 0);
+      var expected = 20; /* 5 section checks + 3 questions + 2 practice, each 0–2 */
       total++;
-      if (items >= 8) {
+      if (items >= 10) {
         done++;
         row.querySelector(".dot").className = "dot done";
       } else if (items > 0) {
@@ -332,15 +445,19 @@
       var st = store.lessons[id];
       var title = row.querySelector(".topic-link, .topic-title").textContent.trim();
       if (!st) {
-        lines.push("| " + id + " | " + title + " | 0/16 | 0% | – | not started |");
+        lines.push("| " + id + " | " + title + " | 0/20 | 0% | – | not started |");
         return;
       }
       var secVals = Object.keys(st.sections || {}).map(function (k) { return st.sections[k]; });
       var quizVals = Object.keys(st.quiz || {}).map(function (k) { return st.quiz[k]; });
-      var pts = secVals.concat(quizVals).reduce(function (a, b) { return a + b; }, 0);
-      var g = gradeOf(pts, 16);
-      var status = secVals.length + quizVals.length >= 8 ? "complete" : secVals.length + quizVals.length > 0 ? "in progress" : "not started";
-      lines.push("| " + id + " | " + title + " | " + pts + "/16 | " + g.pct + "% | " + g.letter + " | " + status + " |");
+      var pracVals = Object.keys(st.practice || {})
+        .map(function (k) { return st.practice[k].pts; })
+        .filter(function (v) { return v != null; });
+      var all = secVals.concat(quizVals, pracVals);
+      var pts = all.reduce(function (a, b) { return a + b; }, 0);
+      var g = gradeOf(pts, 20);
+      var status = all.length >= 10 ? "complete" : all.length > 0 ? "in progress" : "not started";
+      lines.push("| " + id + " | " + title + " | " + pts + "/20 | " + g.pct + "% | " + g.letter + " | " + status + " |");
     });
 
     var weak = rows.filter(function (row) {

@@ -96,13 +96,23 @@ xt = np.linspace(0, 1, 200)
 yt = np.sin(2 * np.pi * xt)
 for d in (1, 3, 9):</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Train and validation both high and flat. First move?", "o": ["More capacity", "More data", "Regularise", "Early stop"], "a": 0, "why": "Equal bad losses are bias, not variance; regularising makes it worse."}, {"q": "Scaling features before the split causes?", "o": ["Leakage", "Underfitting", "Bias", "Nothing"], "a": 0, "why": "Test statistics enter training through the scaler."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 6: Linear and logistic regression.</strong> The two baselines that every project should beat before anything deep is justified — and the exact model that sits inside every neural network's last layer.</p>
   <div class="pager">
-    <a href="004-supervised-learning.html">← 04 · Supervised learning</a>
-    <a href="006-linear-and-logistic-regression.html">06 · Linear &amp; logistic →</a>
+    <a href="004-supervised-learning.html">← 04 · Supervised learning as function fitting</a>
+    <a href="006-linear-and-logistic-regression.html">Next · 06 · Linear & logistic regression</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 1 resources:</strong> <a href="../output/cheatsheet-unit-1.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-1.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: Scott Fortmann-Roe, <a href="http://scott.fortmann-roe.com/docs/BiasVariance.html">Understanding the Bias-Variance Tradeoff</a>.<br>
@@ -110,6 +120,6 @@ for d in (1, 3, 9):</code></pre>
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

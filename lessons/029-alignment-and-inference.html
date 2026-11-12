@@ -95,13 +95,23 @@ for T in (0.5, 1.0, 2.0):
     print(f&quot;T={T}: {softmax(logits / T).round(3)}&quot;)
 # DPO-style preference loss on two completions</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "T=0.5 does what to the distribution?", "o": ["Sharpens it", "Flattens it", "Adds knowledge", "Masks tokens"], "a": 0, "why": "Lower temperature raises the top probability."}, {"q": "The KL term in RLHF prevents…", "o": ["Reward hacking", "Overfitting", "OOV", "Slow inference"], "a": 0, "why": "It keeps the policy near the SFT model."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 30: Why explainability.</strong> Unit 8 asks a different question: not "what does it predict" but "why should anyone believe it".</p>
   <div class="pager">
-    <a href="028-pretraining.html">← 28 · Pretraining</a>
-    <a href="030-why-explainability.html">30 · Why XAI →</a>
+    <a href="028-pretraining.html">← 28 · Pretraining: prediction as supervision</a>
+    <a href="030-why-explainability.html">Next · 30 · Why explainability exists</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 7 resources:</strong> <a href="../output/cheatsheet-unit-7.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-7.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: Ouyang et al., <a href="https://arxiv.org/abs/2203.02155">Training language models to follow instructions with human feedback</a> (2022).<br>
@@ -109,6 +119,6 @@ for T in (0.5, 1.0, 2.0):
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

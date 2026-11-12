@@ -90,13 +90,23 @@ xt, yt = np.linspace(0, 1, 200), np.sin(2 * np.pi * np.linspace(0, 1, 200))
 x = np.linspace(0, 1, 12)
 y = np.sin(2 * np.pi * x) + rng.normal(0, .3, 12)</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Dropout at inference is…", "o": ["The identity", "A 0.5 scale", "Random", "A p scale"], "a": 0, "why": "It is only active during training; survivors are rescaled then."}, {"q": "Train 0.99, validation 0.71. First lever?", "o": ["Regularise", "Add capacity", "Train longer", "Remove features"], "a": 0, "why": "The gap is variance; dropout, decay or augmentation."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 13: Optimization failure modes.</strong> Regularisation stops the model memorising. Topic 13 covers the opposite failure: a model that cannot learn at all because its gradients never arrive.</p>
   <div class="pager">
-    <a href="011-training-loop.html">← 11 · Training loop</a>
-    <a href="013-optimization-failure-modes.html">13 · Optimization failures →</a>
+    <a href="011-training-loop.html">← 11 · The training loop</a>
+    <a href="013-optimization-failure-modes.html">Next · 13 · Optimization failure modes</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 3 resources:</strong> <a href="../output/cheatsheet-unit-3.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-3.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: Goodfellow, Bengio &amp; Courville, <a href="https://www.deeplearningbook.org">Deep Learning</a>, ch. 7.<br>
@@ -104,6 +114,6 @@ y = np.sin(2 * np.pi * x) + rng.normal(0, .3, 12)</code></pre>
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

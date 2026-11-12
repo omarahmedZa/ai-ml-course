@@ -94,13 +94,23 @@ a1 = np.maximum(0, z1)
 W2, b2 = np.array([1., 1.]), -.5
 z2 = W2 @ a1 + b2</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "A 10→5 layer has W of shape…", "o": ["5×10", "10×5", "5×5", "10×10"], "a": 0, "why": "Output units × input units."}, {"q": "A batch of 32 through 5 outputs gives…", "o": ["32×5", "5×32", "32×10", "5"], "a": 0, "why": "The batch dimension stays first."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 10: Backpropagation.</strong> The forward pass computes a number. Backprop asks how that number would change if every one of those parameters moved — in one sweep.</p>
   <div class="pager">
-    <a href="008-the-neuron.html">← 08 · The neuron</a>
-    <a href="010-backpropagation.html">10 · Backprop →</a>
+    <a href="008-the-neuron.html">← 08 · The neuron: weighted sum plus one bend</a>
+    <a href="010-backpropagation.html">Next · 10 · Backpropagation</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 2 resources:</strong> <a href="../output/cheatsheet-unit-2.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-2.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: 3Blue1Brown, <a href="https://www.3blue1brown.com/topics/neural-networks">Neural Networks, part 2 — gradient descent</a>.<br>
@@ -108,6 +118,6 @@ z2 = W2 @ a1 + b2</code></pre>
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

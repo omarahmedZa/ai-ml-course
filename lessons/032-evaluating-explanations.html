@@ -87,13 +87,23 @@ true_importance[:3] = [3., 2., 1.]
 X = rng.normal(size=(500, n_features))
 y = (X @ true_importance &gt; 0).astype(int)</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Faithfulness means…", "o": ["It reflects the actual computation", "A human finds it plausible", "It is stable", "It is sparse"], "a": 0, "why": "Testable by perturbation, not by opinion."}, {"q": "The randomisation test catches…", "o": ["Saliency that is just an edge detector", "Overfitting", "Data drift", "OOV"], "a": 0, "why": "If random weights leave the map unchanged, it never described the model."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 33: Federated learning.</strong> Unit 9 changes the constraint: the data cannot leave the device. Everything you know about training now has to work without ever seeing the dataset.</p>
   <div class="pager">
-    <a href="031-attribution-methods.html">← 31 · Attribution</a>
-    <a href="033-federated-setting-fedavg.html">33 · FedAvg →</a>
+    <a href="031-attribution-methods.html">← 31 · Attribution methods: what each one computes</a>
+    <a href="033-federated-setting-fedavg.html">Next · 33 · Federated learning & FedAvg</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 8 resources:</strong> <a href="../output/cheatsheet-unit-8.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-8.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: Adebayo et al., <a href="https://arxiv.org/abs/1810.03292">Sanity Checks for Saliency Maps</a> (2018).<br>
@@ -101,6 +111,6 @@ y = (X @ true_importance &gt; 0).astype(int)</code></pre>
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

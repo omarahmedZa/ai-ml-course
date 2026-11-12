@@ -393,3 +393,60 @@ ol.topics > li.topic {
   table { min-width: 0; }
   a { color: #000; text-decoration: underline; }
 }
+
+/* ---------- Extra practice ---------- */
+.practice-note {
+  font-size: .82rem; color: var(--ink-faint);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  letter-spacing: .04em; line-height: 1.6;
+}
+.pcard {
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: .95rem 1rem; margin: 1rem 0; background: var(--card);
+}
+.pq { font-weight: 600; margin: 0 0 .75rem; }
+.poptions { display: grid; gap: .45rem; margin-bottom: .65rem; }
+.opt {
+  text-align: left; font: inherit; font-size: .9rem; line-height: 1.45;
+  padding: .55rem .7rem; border: 1px solid var(--rule); border-radius: 6px;
+  background: var(--paper); color: var(--ink); cursor: pointer;
+  transition: border-color .15s, transform .06s;
+}
+.opt:hover:not(:disabled) { border-color: var(--accent); transform: translateX(2px); }
+.opt:disabled { cursor: default; opacity: .7; }
+.opt.wrong { border-color: var(--bad); color: var(--bad); text-decoration: line-through; }
+.opt.right {
+  border-color: var(--ok); color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 10%, transparent);
+}
+.pstatus {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-faint); margin: 0;
+}
+.pstatus.good { color: var(--ok); }
+.pstatus.bad { color: var(--bad); }
+.reveal {
+  margin-top: .65rem;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .68rem; letter-spacing: .08em; text-transform: uppercase;
+  padding: .4rem .75rem; border-radius: 999px;
+  border: 1px solid var(--accent); background: none; color: var(--accent); cursor: pointer;
+}
+.reveal:hover { background: var(--accent); color: #fff; }
+.panswer {
+  margin-top: .7rem; padding: .6rem .75rem;
+  border-left: 3px solid var(--ok); border-radius: 0 6px 6px 0;
+  background: color-mix(in srgb, var(--ok) 9%, transparent);
+  font-size: .9rem;
+}
+.panswer .why { color: var(--ink-soft); font-size: .84rem; }
+.unit-res {
+  margin-top: 2.2rem; padding-top: 1rem; border-top: 1px solid var(--rule);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .72rem; letter-spacing: .04em; color: var(--ink-soft);
+}
+@media print {
+  .opt, .reveal, .pstatus { display: none; }
+  .panswer { display: block !important; }
+}

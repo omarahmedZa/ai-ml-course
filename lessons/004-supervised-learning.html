@@ -97,13 +97,23 @@ p = 1 / (1 + np.exp(-z))
 print(f&quot;z={z:.2f}  p(spam)={p:.3f}&quot;)
 for y in (1, 0):</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Which is not one of the four objects?", "o": ["Optimizer", "Inputs X", "Loss L", "Parameters θ"], "a": 0, "why": "X, y, f_θ, L define the task; the optimizer is a solution method."}, {"q": "Train 100%, test 71%. Diagnosis?", "o": ["Overfitting", "Underfitting", "Leakage", "Good model"], "a": 0, "why": "A 29-point gap is memorisation, not generalisation."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 5: Generalization.</strong> You just saw a 100%/71% split. Topic 5 explains where that gap comes from, how to read it, and which lever fixes it.</p>
   <div class="pager">
-    <a href="003-probability-expectation-likelihood.html">← 03 · Probability</a>
-    <a href="005-generalization.html">05 · Generalization →</a>
+    <a href="003-probability-expectation-likelihood.html">← 03 · Probability, expectation, likelihood</a>
+    <a href="005-generalization.html">Next · 05 · Generalization: overfitting, underfitting, and the gap</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 1 resources:</strong> <a href="../output/cheatsheet-unit-1.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-1.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: <a href="https://scikit-learn.org/stable/supervised_learning.html">scikit-learn — Supervised learning</a> (the taxonomy, with runnable examples).<br>
@@ -111,6 +121,6 @@ for y in (1, 0):</code></pre>
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

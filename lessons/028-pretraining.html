@@ -95,13 +95,23 @@ bigram = defaultdict(Counter)
 for a, b in zip(text, text[1:]):
     bigram[a][b] += 1</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Loss 3.0 nats → perplexity…", "o": ["20", "3", "10", "1,000"], "a": 0, "why": "e³ ≈ 20.1."}, {"q": "BERT's objective is…", "o": ["Masked language modelling", "Next-token prediction", "RLHF", "DPO"], "a": 0, "why": "It fills gaps using both sides."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 29: Alignment and inference.</strong> A pretrained model completes text; it does not follow instructions. Topic 29 covers the three stages that turn one into the other.</p>
   <div class="pager">
-    <a href="027-transformer-block.html">← 27 · Transformer</a>
-    <a href="029-alignment-and-inference.html">29 · Alignment →</a>
+    <a href="027-transformer-block.html">← 27 · The Transformer block</a>
+    <a href="029-alignment-and-inference.html">Next · 29 · Alignment & inference</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 7 resources:</strong> <a href="../output/cheatsheet-unit-7.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-7.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: <a href="https://huggingface.co/learn/nlp-course">Hugging Face NLP Course</a>, ch. 1 (pretraining objectives).<br>
@@ -109,6 +119,6 @@ for a, b in zip(text, text[1:]):
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

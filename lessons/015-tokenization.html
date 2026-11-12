@@ -89,13 +89,23 @@ vocab = Counter()
 for w in words:
     vocab.update(w.split())</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "1,000 English words ≈ how many tokens?", "o": ["1,300", "1,000", "750", "4,000"], "a": 0, "why": "About 1.3 tokens per word."}, {"q": "BPE exists to fix…", "o": ["Out-of-vocabulary words", "Long context", "Attention cost", "Class imbalance"], "a": 0, "why": "Rare words decompose into known subwords."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 16: Embeddings.</strong> An ID is a meaningless integer. Topic 16 turns each ID into a vector whose geometry encodes meaning.</p>
   <div class="pager">
-    <a href="014-architecture-families.html">← 14 · Architectures</a>
-    <a href="016-embeddings.html">16 · Embeddings →</a>
+    <a href="014-architecture-families.html">← 14 · Architecture families: what each one assumes</a>
+    <a href="016-embeddings.html">Next · 16 · Embeddings: meaning as a vector</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 4 resources:</strong> <a href="../output/cheatsheet-unit-4.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-4.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: <a href="https://huggingface.co/learn/nlp-course/chapter2/4">Hugging Face NLP Course — Tokenizers</a>.<br>
@@ -103,6 +113,6 @@ for w in words:
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

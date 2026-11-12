@@ -93,13 +93,23 @@ norm = np.linalg.norm(grad)
 clipped = grad * min(1.0, C / norm)
 print(f&quot;norm {norm:.2f} -&gt; clipped norm {np.linalg.norm(clipped):.2f}&quot;)</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "DP-SGD clips…", "o": ["Each per-example gradient", "The weights", "The loss", "The batch"], "a": 0, "why": "Clipping bounds sensitivity before noise."}, {"q": "Federated learning guarantees…", "o": ["Data locality", "Secrecy", "Anonymity", "Integrity"], "a": 0, "why": "Updates still leak; privacy needs DP."}]</script></div>
+
 <div class="next">
   <p><strong>Course complete.</strong> You have the full stack: math → ML → DL → NLP → RL → DRL → attention → XAI → FL. Next: the Unit 0–2 cheat sheet, then answer the retrieval checks you skipped.</p>
   <div class="pager">
-    <a href="034-non-iid-and-convergence.html">← 34 · Non-IID</a>
-    <a href="../index.html">Course map</a>
+    <a href="034-non-iid-and-convergence.html">← 34 · Non-IID data & client drift</a>
+    <a href="../index.html">Course map →</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 9 resources:</strong> <a href="../output/cheatsheet-unit-9.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-9.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: Kairouz et al., <a href="https://arxiv.org/abs/1912.04977">Advances and Open Problems in Federated Learning</a> (2019), §3–4.<br>
@@ -107,6 +117,6 @@ print(f&quot;norm {norm:.2f} -&gt; clipped norm {np.linalg.norm(clipped):.2f}&qu
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>

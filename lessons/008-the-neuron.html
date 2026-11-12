@@ -81,13 +81,23 @@ for W2 in (np.array([[1., -1.]]), np.array([[1., 1.]])):
     collapsed = (W2 @ W1) @ x
     relu = W2 @ np.maximum(0, W1 @ x)</code></pre>
 
+<h2>Extra practice</h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Linear layers without activations compose into…", "o": ["One linear layer", "A quadratic", "A deeper net", "Nothing"], "a": 0, "why": "W₂W₁ is a matrix, so depth adds parameters but no power."}, {"q": "Parameters in 3→4→2 with biases?", "o": ["26", "24", "20", "14"], "a": 0, "why": "(3·4+4) + (4·2+2) = 16 + 10."}]</script></div>
+
 <div class="next">
   <p><strong>Next → Topic 9: Layers and the forward pass.</strong> One neuron is a scoring function. Stack them into matrices and you can trace any network on paper — which is the only way to debug one.</p>
   <div class="pager">
-    <a href="007-trees-and-ensembles.html">← 07 · Trees</a>
-    <a href="009-layers-and-forward-pass.html">09 · Forward pass →</a>
+    <a href="007-trees-and-ensembles.html">← 07 · Trees & ensembles</a>
+    <a href="009-layers-and-forward-pass.html">Next · 09 · Layers and the forward pass</a>
   </div>
 </div>
+
+
+
+
+
+<p class="unit-res"><strong>Unit 2 resources:</strong> <a href="../output/cheatsheet-unit-2.pdf">cheat sheet · PDF</a> · <a href="../decks/unit-2.pptx">deck · PPTX</a></p>
 
 <p class="footer-meta">
   Primary source: 3Blue1Brown, <a href="https://www.3blue1brown.com/topics/neural-networks">Neural Networks, part 1</a>.<br>
@@ -95,6 +105,6 @@ for W2 in (np.array([[1., -1.]]), np.array([[1., 1.]])):
 </p>
 
 </main>
-  <script src="../assets/course.js?v=3" defer></script>
+  <script src="../assets/course.js?v=4" defer></script>
 </body>
 </html>
