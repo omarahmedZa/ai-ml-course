@@ -174,3 +174,18 @@ html[data-theme="dark"] {
 
 /* anchor jumps must clear the sticky bar */
 #labs, .lab-callout { scroll-margin-top: 4.75rem; }
+
+/* ---------- inline lab reference ---------- */
+.lab-ref { margin: .55rem 0 0; }
+.lab-ref a {
+  display: inline-flex; align-items: center; gap: .45rem;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .66rem; letter-spacing: .07em; text-transform: uppercase;
+  text-decoration: none; color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--rule));
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  padding: .35rem .65rem; border-radius: 999px;
+  transition: background .15s, color .15s, transform .06s;
+}
+.lab-ref a:hover { background: var(--accent); color: var(--on-accent); transform: translateX(2px); }
+.lab-ref .k { opacity: .65; font-size: .6rem; }

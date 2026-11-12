@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>004 — Supervised learning</title>
 <link rel="stylesheet" href="../assets/lesson.css?v=2">
-<link rel="stylesheet" href="../assets/figures.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can write down (X, y, f_θ, L) for any supervised task and say what is being learned.">
@@ -51,6 +51,7 @@
 <p><code>L</code> takes one prediction and one target and returns 0 when they agree, more as they diverge. Squared error suits continuous targets; cross-entropy suits probabilities. Averaging <code>L</code> over all <code>n</code> rows gives the <strong>empirical risk</strong>, the single number training minimises:</p>
 <span class="formula">θ* = argmin_θ  (1/n) Σᵢ L(f_θ(xᵢ), yᵢ)</span>
 <p>Why this part exists: the loss is the only definition of "better", so a mismatch optimises the wrong thing — squared error on a yes/no task rewards confident wrong answers while the gradient fades.</p>
+<p class="lab-ref"><a href="004c-loss.html"><span class="k">Lab 03</span> L(·,·) — what the square buys you →</a></p>
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 9 of 9 · about 3 minutes each</p>
   <h3 class="lab-title">Take this formula apart, one symbol at a time</h3>
@@ -73,6 +74,7 @@
 <h3>Part 5 — Search over θ by gradient descent</h3>
 <p>Start with random dials, measure how the average loss responds to each parameter, and step downhill: <code>θ ← θ − η∇L</code>, where <code>η</code> is the learning rate. Repeat for a set number of epochs, one pass over the 10,000 rows each.</p>
 <p>Why this part exists: 3 dials could be found by grid search, but 300 million cannot; the gradient is the only affordable direction finder, and a learning rate of 10 instead of 0.1 sends the loss upward.</p>
+<p class="lab-ref"><a href="004g-argmin.html"><span class="k">Lab 07</span> watch the search step downhill →</a></p>
 
 <h3>Part 6 — Report on data the search never touched</h3>
 <p>Split before training: roughly 60% train, 20% validation for choosing settings, 20% test for one final number. Training loss says whether the search worked; test loss says whether it mattered.</p>
@@ -165,6 +167,6 @@ for y in (1, 0):</code></pre>
 <p class="source">Primary source: <a href="https://scikit-learn.org/stable/supervised_learning.html">scikit-learn — Supervised learning</a> (the taxonomy, with runnable examples).</p>
 
 </main>
-  <script src="../assets/course.js?v=8" defer></script>
+  <script src="../assets/course.js?v=10" defer></script>
 </body>
 </html>

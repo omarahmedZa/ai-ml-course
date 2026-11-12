@@ -103,6 +103,61 @@
   function initLab() {
     readbar();
     bindTheme(document.querySelector("[data-theme-toggle]"));
+
+    var id = document.body.getAttribute("data-lesson");
+    if (!id) return;
+    var st = lessonState(id);
+
+    var quiz = [].slice.call(document.querySelectorAll("ol.quiz > li"));
+    if (!quiz.length) return;
+
+    var chip = document.createElement("div");
+    chip.className = "scorechip";
+    chip.innerHTML = '<span>lab</span><strong data-score>0%</strong><span class="grade" data-grade>–</span><span data-count>0/0</span>';
+    document.body.appendChild(chip);
+
+    var total = quiz.length * 2;
+    var earned = 0;
+
+    function refresh() {
+      var g = gradeOf(earned, total);
+      chip.querySelector("[data-score]").textContent = g.pct + "%";
+      chip.querySelector("[data-grade]").textContent = "";
+      chip.querySelector("[data-count]").textContent = earned + "/" + total;
+      st.ts = Date.now();
+      persist();
+    }
+
+    quiz.forEach(function (li, i) {
+      var row = document.createElement("div");
+      row.className = "grade-row";
+      var lab = document.createElement("span");
+      lab.className = "q";
+      lab.textContent = "your call";
+      row.appendChild(lab);
+      li.appendChild(row);
+
+      var cur = st.quiz[i];
+      if (cur != null) earned += cur;
+
+      buttons(row, cur, function (v) {
+        var prev = st.quiz[i];
+        if (prev === v) {
+          delete st.quiz[i];
+          earned -= prev;
+          btnReset(row);
+        } else {
+          if (prev != null) earned -= prev;
+          st.quiz[i] = v;
+          earned += v;
+          var d = li.querySelector("details");
+          if (d && !d.open) d.open = true;
+        }
+        refresh();
+      });
+    });
+
+    refresh();
   }
 
   /* ---------- lesson page ---------- */
@@ -478,6 +533,26 @@
         meta.innerHTML = '<span class="badge ready">' + g.letter + " · " + g.pct + "%</span><br>" + mins;
       }
     });
+
+    var labRows = [].slice.call(document.querySelectorAll("li.topic[data-lab]"));
+    var labsDone = 0, labPts = 0, labMax = labRows.length * 4;
+    labRows.forEach(function (row) {
+      var id = row.getAttribute("data-lab");
+      var st = store.lessons[id];
+      var vals = st ? Object.keys(st.quiz || {}).map(function (k) { return st.quiz[k]; }) : [];
+      var pts = vals.reduce(function (a, b) { return a + b; }, 0);
+      var meta = row.querySelector(".topic-meta");
+      if (vals.length) {
+        meta.innerHTML = '<span class="badge ready">' + pts + " / 4 pts</span>";
+        row.querySelector(".dot").className = "dot " + (vals.length >= 2 ? "done" : "part");
+        if (vals.length >= 2) labsDone++;
+      }
+      labPts += pts;
+    });
+    var labCnt = document.querySelector("[data-labs-count]");
+    if (labCnt) labCnt.textContent = labsDone + " / " + labRows.length;
+    var labBar = document.querySelector("[data-labs-bar]");
+    if (labBar && labMax) labBar.style.width = Math.round((labPts / labMax) * 100) + "%";
 
     var pct = possible ? Math.round((points / possible) * 100) : 0;
     var ring = document.querySelector(".ring");
