@@ -115,6 +115,23 @@
   </ul>
 </aside>
 
+
+<figure class="fig" data-anim="flow">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-rnn-t f-rnn-d">
+    <title id="f-rnn-t">One step at a time, the state is rewritten</title>
+    <desc id="f-rnn-d">Five stages in a row. A highlight moves through them one at a time.</desc>
+    <g data-layer></g>
+  </svg>
+  <script type="application/json" class="flow-data">{"steps": ["x₁", "h₁", "h₂", "h₃", "h₄"], "note": "hidden state"}</script>
+  <div class="fig-controls">
+    <button type="button" data-play data-playing="false">Play</button>
+    <label>stage <input type="range" data-scrub min="0" max="100" value="0"></label>
+    <output data-out="step" aria-live="polite">stage 1 / 5 · hidden state</output>
+    <button type="button" data-reset>Restart</button>
+  </div>
+  <figcaption><strong>Each box overwrites the last. Nothing is stored except h, which is why long gaps fade.</strong></figcaption>
+</figure>
+
 <h2>Worked example</h2>
 
 <h3>1. Decay and blow-up in one table</h3>
@@ -208,6 +225,8 @@ for t in range(20):
 <p class="source">Primary source: Goodfellow, Bengio &amp; Courville, <a href="https://www.deeplearningbook.org">Deep Learning</a>, ch. 10.</p>
 
 </main>
+  <script src="../assets/graph.js?v=4" defer></script>
+  <script src="../assets/anim.js?v=3" defer></script>
   <script src="../assets/course.js?v=11" defer></script>
 </body>
 </html>

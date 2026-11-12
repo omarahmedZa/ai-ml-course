@@ -104,6 +104,23 @@
   </ul>
 </aside>
 
+
+<figure class="fig" data-anim="flow">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-fed-t f-fed-d">
+    <title id="f-fed-t">One round of FedAvg</title>
+    <desc id="f-fed-d">Five stages in a row. A highlight moves through them one at a time.</desc>
+    <g data-layer></g>
+  </svg>
+  <script type="application/json" class="flow-data">{"steps": ["θ_t", "local training", "updates", "weighted mean", "θ_{t+1}"], "note": "one round"}</script>
+  <div class="fig-controls">
+    <button type="button" data-play data-playing="false">Play</button>
+    <label>stage <input type="range" data-scrub min="0" max="100" value="0"></label>
+    <output data-out="step" aria-live="polite">stage 1 / 5 · one round</output>
+    <button type="button" data-reset>Restart</button>
+  </div>
+  <figcaption><strong>The server never sees a row of data, only the averaged weights that come back.</strong></figcaption>
+</figure>
+
 <h2>Worked example</h2>
 
 <h3>1. One aggregation round</h3>
@@ -204,6 +221,8 @@ print(f&quot;weighted FedAvg: {weighted:.3f}  (equal weighting: {equal:.3f})&quo
 <p class="source">Primary source: McMahan et al., <a href="https://arxiv.org/abs/1602.05629">Communication-Efficient Learning of Deep Networks from Decentralized Data</a> (2017).</p>
 
 </main>
+  <script src="../assets/graph.js?v=4" defer></script>
+  <script src="../assets/anim.js?v=3" defer></script>
   <script src="../assets/course.js?v=11" defer></script>
 </body>
 </html>
