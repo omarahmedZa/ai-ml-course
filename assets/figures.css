@@ -113,3 +113,61 @@ html[data-theme="dark"] {
   .fig-controls { display: none; }
   .fig svg { border: 1px solid #bbb; background: #fff; }
 }
+
+/* ---------- lab callout, placed where the equation lives ---------- */
+.crumbs {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .68rem; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-faint); margin: 0 0 .9rem;
+}
+.crumbs a { color: var(--accent); text-decoration: none; }
+.crumbs a:hover { text-decoration: underline; }
+
+.lab-callout {
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  background: var(--card);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 1rem 1.1rem 1.05rem;
+  margin: 1.5rem 0 1.7rem;
+}
+.lab-eyebrow {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .62rem; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--accent); margin: 0 0 .35rem;
+}
+.lab-title { font-size: 1.05rem; margin: 0 0 .25rem; font-weight: 600; }
+.lab-sub { font-size: .86rem; color: var(--ink-soft); margin: 0 0 .85rem; }
+.lab-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
+.lab-list li { margin: 0; }
+.lab-list a {
+  display: grid; grid-template-columns: 2.1rem 1fr auto; gap: .7rem;
+  align-items: center; padding: .6rem .75rem;
+  border: 1px solid var(--rule); border-radius: 8px;
+  text-decoration: none; color: inherit;
+  transition: border-color .15s, background .15s, transform .06s;
+}
+.lab-list a:hover {
+  border-color: var(--accent); background: var(--accent-soft); transform: translateX(2px);
+}
+.lab-num {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .72rem; color: var(--accent);
+}
+.lab-body strong { display: block; font-size: .93rem; }
+.lab-body span { display: block; font-size: .79rem; color: var(--ink-soft); line-height: 1.45; }
+.lab-go {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .64rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--accent); white-space: nowrap;
+}
+.lab-rest { font-size: .76rem; color: var(--ink-faint); margin: .75rem 0 0; }
+
+@media (max-width: 700px) {
+  .lab-list a { grid-template-columns: 1.8rem 1fr; }
+  .lab-go { grid-column: 2; justify-self: start; margin-top: .2rem; }
+}
+@media print {
+  .lab-callout { break-inside: avoid; }
+  .lab-go { display: none; }
+}

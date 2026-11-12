@@ -24,8 +24,6 @@
   <p class="objective">You can write down <code>(X, y, f_θ, L)</code> for any supervised task and say what is being learned.</p>
 </header>
 
-<p class="eqn-note" style="margin:.2rem 0 1.6rem">Equation labs: <a href="004.3-loss.html">L(·,·) — the price of being wrong</a> · <a href="004.7-argmin.html">argmin vs min</a></p>
-
 <h2>Why this matters</h2>
 <p class="lede">Every model in this course — a spam filter, a translation system, a Q-network — is the same four-part object. Name the four parts and you can read a paper's method section instead of guessing at it. Supervised learning is the pattern behind them all: a bank scores loan applications, a hospital flags scans, a phone predicts the next word. In each case somebody collected examples where the right answer was known, and the work is to find a rule that reproduces those answers and keeps holding on new ones. The vocabulary changes by field — "regression", "classification", "fine-tuning" — while the structure underneath stays put.</p>
 <p><strong>The failure it prevents.</strong> An exam question hands you "predict next month's sales from 14 store features, using three years of records" and asks for the four objects with shapes. An answer saying "the model learns the pattern" scores nothing, because no object is named. In code the same gap shows up as a model that trains happily and predicts the wrong column: the loss was computed against a misaligned <code>y</code>, or a target leaked into <code>X</code>. Writing four lines before any code catches both.</p>
@@ -53,6 +51,25 @@
 <p><code>L</code> takes one prediction and one target and returns 0 when they agree, more as they diverge. Squared error suits continuous targets; cross-entropy suits probabilities. Averaging <code>L</code> over all <code>n</code> rows gives the <strong>empirical risk</strong>, the single number training minimises:</p>
 <span class="formula">θ* = argmin_θ  (1/n) Σᵢ L(f_θ(xᵢ), yᵢ)</span>
 <p>Why this part exists: the loss is the only definition of "better", so a mismatch optimises the wrong thing — squared error on a yes/no task rewards confident wrong answers while the gradient fades.</p>
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 2 of 9 published</p>
+  <h3 class="lab-title">Take this formula apart, one symbol at a time</h3>
+  <p class="lab-sub">Each lab is 3 minutes, covers one symbol, and gives you a figure you can drag. Start with the loss; it is the piece everything else counts.</p>
+  <ul class="lab-list">
+    <li><a href="004.3-loss.html">
+      <span class="lab-num">03</span>
+      <span class="lab-body"><strong>L(·,·) — the price of being wrong</strong><span>Compute squared error for one prediction, and see what the square buys you.</span></span>
+      <span class="lab-go">Open lab →</span>
+    </a></li>
+    <li><a href="004.7-argmin.html">
+      <span class="lab-num">07</span>
+      <span class="lab-body"><strong>argmin vs min — position or height?</strong><span>Training returns a θ, not a loss. Watch a search land on it.</span></span>
+      <span class="lab-go">Open lab →</span>
+    </a></li>
+  </ul>
+  <p class="lab-rest">Still to come: θ · f<sub>θ</sub>(x<sub>i</sub>) · Σ<sub>i</sub> · 1/n · θ* · the full objective.</p>
+</aside>
+
 
 <h3>Part 5 — Search over θ by gradient descent</h3>
 <p>Start with random dials, measure how the average loss responds to each parameter, and step downhill: <code>θ ← θ − η∇L</code>, where <code>η</code> is the learning rate. Repeat for a set number of epochs, one pass over the 10,000 rows each.</p>
