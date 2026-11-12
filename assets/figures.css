@@ -171,3 +171,6 @@ html[data-theme="dark"] {
   .lab-callout { break-inside: avoid; }
   .lab-go { display: none; }
 }
+
+/* anchor jumps must clear the sticky bar */
+#labs, .lab-callout { scroll-margin-top: 4.75rem; }
