@@ -55,6 +55,59 @@
 <h3>Part 6 — Add, and stack the block</h3>
 <p>Each of the two sub-layers ends with an addition, then the next block repeats the pattern with its own weights. Twelve blocks at width 512 give roughly 37.8M parameters; GPT-3 stacks 96 blocks. <strong>Why this part exists:</strong> one block can only combine what its heads happen to notice, and depth is what lets a later block build on a relation an earlier block discovered.</p>
 
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-blk-t f-blk-d">
+    <title id="f-blk-t">One transformer block with a residual around each sub-layer</title>
+    <desc id="f-blk-d">The input enters top left, passes through LayerNorm and multi-head attention, and the result is added to a residual copy of the input. That sum crosses to a second LayerNorm and a feed-forward network, is added to its own residual, and leaves as the block output.</desc>
+    <defs>
+      <marker id="f-blk-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--ink-faint)"/>
+      </marker>
+      <marker id="f-blk-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/>
+      </marker>
+    </defs>
+
+    <path d="M140 84 H40 V304 H70" fill="none" stroke="var(--accent)" stroke-width="1.6" marker-end="url(#f-blk-r)"/>
+    <path d="M390 92 V30 H592 V268 H560" fill="none" stroke="var(--accent)" stroke-width="1.6" marker-end="url(#f-blk-r)"/>
+    <text transform="rotate(-90 27 200)" x="27" y="200" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--accent)">residual</text>
+    <text transform="rotate(-90 610 190)" x="610" y="190" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--accent)">residual</text>
+
+    <path d="M140 72 V96" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-blk-m)"/>
+    <path d="M140 160 V184" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-blk-m)"/>
+    <path d="M140 248 V272" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-blk-m)"/>
+    <path d="M210 304 H350 V92 H420" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-blk-m)"/>
+    <path d="M490 124 V148" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-blk-m)"/>
+    <path d="M490 212 V236" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-blk-m)"/>
+    <path d="M490 300 V330" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-blk-m)"/>
+
+    <rect x="70" y="8" width="140" height="64" rx="8" fill="var(--card)" stroke="var(--rule)" stroke-width="1.6"/>
+    <text x="140" y="45" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">input x</text>
+
+    <rect x="70" y="96" width="140" height="64" rx="8" fill="var(--card)" stroke="var(--rule)" stroke-width="1.6"/>
+    <text x="140" y="133" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">LayerNorm</text>
+
+    <rect x="70" y="184" width="140" height="64" rx="8" fill="var(--card)" stroke="var(--rule)" stroke-width="1.6"/>
+    <text x="140" y="207" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">Multi-head</text>
+    <text x="140" y="227" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">attention</text>
+
+    <rect x="70" y="272" width="140" height="64" rx="8" fill="var(--card)" stroke="var(--rule)" stroke-width="1.6"/>
+    <text x="140" y="309" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">add ⊕</text>
+
+    <rect x="420" y="60" width="140" height="64" rx="8" fill="var(--card)" stroke="var(--rule)" stroke-width="1.6"/>
+    <text x="490" y="97" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">LayerNorm</text>
+
+    <rect x="420" y="148" width="140" height="64" rx="8" fill="var(--card)" stroke="var(--rule)" stroke-width="1.6"/>
+    <text x="490" y="185" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">FFN</text>
+
+    <rect x="420" y="236" width="140" height="64" rx="8" fill="var(--card)" stroke="var(--rule)" stroke-width="1.6"/>
+    <text x="490" y="273" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">add ⊕</text>
+
+    <text x="490" y="348" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--ink-soft)">to next block</text>
+  </svg>
+  <figcaption><strong>Two sub-layers, two residual paths.</strong> Each residual carries the sub-layer's input around it and adds it back, so the block never replaces x — it only adds a correction. That unbroken line of additions is also the path gradients take through a deep stack.</figcaption>
+</figure>
+
 <h3>Part 7 — Choose where the norm goes</h3>
 <p>Pre-LN normalises the input to each sub-layer, inside the branch: <code>x + MHA(LN(x))</code>. Post-LN normalises after the addition instead. Modern models use pre-LN because the residual path stays a clean chain of additions from the loss back to the first block. <strong>Why this part exists:</strong> post-LN puts a normalisation on that path at every block, so very deep post-LN models need a long learning-rate warmup.</p>
 

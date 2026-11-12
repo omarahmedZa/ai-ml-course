@@ -37,6 +37,63 @@
 
 <span class="formula">Attention(Q,K,V) = softmax( QKᵀ / √d_k ) V</span>
 
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-attn-t f-attn-d">
+    <title id="f-attn-t">Attention weights as a four by four heatmap</title>
+    <desc id="f-attn-d">Rows are queries and columns are keys. Each cell is shaded by its softmax weight and prints that value. The diagonal is darkest, so every query puts most of its weight on its own key, and each row of four numbers adds to one.</desc>
+    <text x="396" y="38" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--ink-soft)">softmax output · one head</text>
+
+    <text x="324" y="68" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">key 1</text>
+    <text x="372" y="68" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">key 2</text>
+    <text x="420" y="68" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">key 3</text>
+    <text x="468" y="68" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">key 4</text>
+
+    <text x="288" y="104" text-anchor="end" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">query 1</text>
+    <text x="288" y="152" text-anchor="end" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">query 2</text>
+    <text x="288" y="200" text-anchor="end" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">query 3</text>
+    <text x="288" y="248" text-anchor="end" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">query 4</text>
+
+    <rect x="300" y="80" width="48" height="48" fill="var(--accent)" fill-opacity="0.7" stroke="var(--rule)"/>
+    <rect x="348" y="80" width="48" height="48" fill="var(--accent)" fill-opacity="0.1" stroke="var(--rule)"/>
+    <rect x="396" y="80" width="48" height="48" fill="var(--accent)" fill-opacity="0.1" stroke="var(--rule)"/>
+    <rect x="444" y="80" width="48" height="48" fill="var(--accent)" fill-opacity="0.1" stroke="var(--rule)"/>
+    <text x="324" y="104" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.70</text>
+    <text x="372" y="104" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.10</text>
+    <text x="420" y="104" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.10</text>
+    <text x="468" y="104" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.10</text>
+
+    <rect x="300" y="128" width="48" height="48" fill="var(--accent)" fill-opacity="0.2" stroke="var(--rule)"/>
+    <rect x="348" y="128" width="48" height="48" fill="var(--accent)" fill-opacity="0.6" stroke="var(--rule)"/>
+    <rect x="396" y="128" width="48" height="48" fill="var(--accent)" fill-opacity="0.1" stroke="var(--rule)"/>
+    <rect x="444" y="128" width="48" height="48" fill="var(--accent)" fill-opacity="0.1" stroke="var(--rule)"/>
+    <text x="324" y="152" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.20</text>
+    <text x="372" y="152" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.60</text>
+    <text x="420" y="152" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.10</text>
+    <text x="468" y="152" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.10</text>
+
+    <rect x="300" y="176" width="48" height="48" fill="var(--accent)" fill-opacity="0.1" stroke="var(--rule)"/>
+    <rect x="348" y="176" width="48" height="48" fill="var(--accent)" fill-opacity="0.2" stroke="var(--rule)"/>
+    <rect x="396" y="176" width="48" height="48" fill="var(--accent)" fill-opacity="0.6" stroke="var(--rule)"/>
+    <rect x="444" y="176" width="48" height="48" fill="var(--accent)" fill-opacity="0.1" stroke="var(--rule)"/>
+    <text x="324" y="200" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.10</text>
+    <text x="372" y="200" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.20</text>
+    <text x="420" y="200" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.60</text>
+    <text x="468" y="200" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.10</text>
+
+    <rect x="300" y="224" width="48" height="48" fill="var(--accent)" fill-opacity="0.1" stroke="var(--rule)"/>
+    <rect x="348" y="224" width="48" height="48" fill="var(--accent)" fill-opacity="0.1" stroke="var(--rule)"/>
+    <rect x="396" y="224" width="48" height="48" fill="var(--accent)" fill-opacity="0.2" stroke="var(--rule)"/>
+    <rect x="444" y="224" width="48" height="48" fill="var(--accent)" fill-opacity="0.6" stroke="var(--rule)"/>
+    <text x="324" y="248" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.10</text>
+    <text x="372" y="248" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.10</text>
+    <text x="420" y="248" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.20</text>
+    <text x="468" y="248" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="ui-monospace, monospace" fill="currentColor">.60</text>
+
+    <text x="396" y="310" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--ink-soft)">shading = weight · every row sums to 1.0</text>
+  </svg>
+  <figcaption><strong>Each row is a probability distribution, not a similarity score.</strong> Every query spreads its weight across all four keys, and the four values in a row add to 1.0 — so raising one weight must lower the others. The dark diagonal only says each token matches its own key best.</figcaption>
+</figure>
+
 <table>
   <tr><th>Vector</th><th>Role</th><th>Analogy</th></tr>
   <tr><td><strong>Q</strong> (query)</td><td>What this position is looking for</td><td>Search query</td></tr>

@@ -51,6 +51,26 @@
 <p>Diagnosis needs both numbers. High train and high validation means <strong>underfitting</strong>, too simple or undertrained; low train and high validation means <strong>overfitting</strong>, the noise got learned; both low is the goal; high train with low validation usually means a broken split.</p>
 <p>Why this part exists: the two diseases want opposite medicine, so a fix applied without a diagnosis moves you in a random direction.</p>
 
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="f-gen-t f-gen-d">
+    <title id="f-gen-t">Train accuracy against test accuracy for the same model</title>
+    <desc id="f-gen-d">Two bars. Training accuracy is 0.99 and test accuracy is 0.71, a gap of 0.28 that measures how much the model memorised instead of learned.</desc>
+    <g data-layer>
+      <line x1="64" y1="290" x2="700" y2="290" stroke="var(--ink-faint)"/>
+      <rect x="223" y="54.3" width="80" height="235.7" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="541" y="121" width="80" height="169" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <text x="263" y="46" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.99</text>
+      <text x="581" y="113" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.71</text>
+      <text x="263" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">train</text>
+      <text x="581" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">test</text>
+      <text x="54" y="34" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">accuracy</text>
+    </g>
+  </svg>
+  <script type="application/json" class="bars-data">{"values":[0.99,0.71],"labels":["train","test"],"max":1.05,"ylabel":"accuracy"}</script>
+  <div class="fig-controls"></div>
+  <figcaption><strong>The gap, not the score, is the result.</strong> 0.99 on rows it fitted against and 0.71 on rows it never saw means 0.28 of that accuracy was memory; the test bar is the number that ships.</figcaption>
+</figure>
+
 <h3>Part 5 — Decompose the error into bias, variance and noise</h3>
 <p>Expected error splits three ways: <strong>bias</strong> from a model too rigid to represent the truth, <strong>variance</strong> from a model that would change if the data were resampled, and noise that no model can remove.</p>
 <span class="formula">expected error = bias² + variance + noise</span>
@@ -153,6 +173,7 @@ for d in (1, 3, 9):</code></pre>
 <p class="source">Primary source: Scott Fortmann-Roe, <a href="http://scott.fortmann-roe.com/docs/BiasVariance.html">Understanding the Bias-Variance Tradeoff</a>.</p>
 
 </main>
+  <script src="../assets/graph.js?v=4" defer></script>
   <script src="../assets/course.js?v=11" defer></script>
 </body>
 </html>

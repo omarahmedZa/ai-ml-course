@@ -38,6 +38,53 @@
 <h3>Part 1 — Fold the old state and the new token into one vector</h3>
 <p>At each step the model computes <code>h_t = tanh(W_h h_{t−1} + W_x x_t + b)</code>. With 300-dimensional embeddings and 512 hidden units, <code>W_x</code> holds 300 × 512 = 153,600 weights and <code>W_h</code> holds 512 × 512 = 262,144. Why this part exists: without the <code>W_h h_{t−1}</code> term the model would be a feed-forward network looking at one token, with no sequence at all.</p>
 
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-rnn-t f-rnn-d">
+    <title id="f-rnn-t">One RNN cell unrolled over four time steps</title>
+    <desc id="f-rnn-d">Four state boxes h-one to h-four run left to right with arrows between them. Below each state sits an input box x-one to x-four, with an arrow pointing up into the state. One note marks that the same weights are reused at every step.</desc>
+    <g font-family="ui-monospace, monospace">
+      <text x="360" y="72" text-anchor="middle" font-size="12" fill="var(--ink-faint)">same W_h and W_x at every step</text>
+
+      <rect x="40" y="112" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+      <rect x="213" y="112" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+      <rect x="387" y="112" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+      <rect x="560" y="112" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+
+      <text x="100" y="152" text-anchor="middle" font-size="14" fill="var(--sym-pred)">h₁</text>
+      <text x="273" y="152" text-anchor="middle" font-size="14" fill="var(--sym-pred)">h₂</text>
+      <text x="447" y="152" text-anchor="middle" font-size="14" fill="var(--sym-pred)">h₃</text>
+      <text x="620" y="152" text-anchor="middle" font-size="14" fill="var(--sym-pred)">h₄</text>
+
+      <line x1="164" y1="144" x2="202" y2="144" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="213,144 201,138 201,150" fill="var(--ink-faint)"/>
+      <line x1="337" y1="144" x2="376" y2="144" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="387,144 375,138 375,150" fill="var(--ink-faint)"/>
+      <line x1="511" y1="144" x2="549" y2="144" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="560,144 548,138 548,150" fill="var(--ink-faint)"/>
+
+      <rect x="40" y="248" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+      <rect x="213" y="248" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+      <rect x="387" y="248" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+      <rect x="560" y="248" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+
+      <text x="100" y="288" text-anchor="middle" font-size="14" fill="var(--sym-data)">x₁</text>
+      <text x="273" y="288" text-anchor="middle" font-size="14" fill="var(--sym-data)">x₂</text>
+      <text x="447" y="288" text-anchor="middle" font-size="14" fill="var(--sym-data)">x₃</text>
+      <text x="620" y="288" text-anchor="middle" font-size="14" fill="var(--sym-data)">x₄</text>
+
+      <line x1="100" y1="244" x2="100" y2="194" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="100,182 94,194 106,194" fill="var(--ink-faint)"/>
+      <line x1="273" y1="244" x2="273" y2="194" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="273,182 267,194 279,194" fill="var(--ink-faint)"/>
+      <line x1="447" y1="244" x2="447" y2="194" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="447,182 441,194 453,194" fill="var(--ink-faint)"/>
+      <line x1="620" y1="244" x2="620" y2="194" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="620,182 614,194 626,194" fill="var(--ink-faint)"/>
+    </g>
+  </svg>
+  <figcaption><strong>One cell, drawn four times.</strong> Unrolling turns the loop into four layers: each step folds the previous state and the new input into a fresh state. The weights are shared, so four tokens cost four sequential passes, not four models.</figcaption>
+</figure>
+
 <h3>Part 2 — Reuse the same weights at every step</h3>
 <p>Step 1 and step 1,000 share one set of weights; that sharing is what lets a model trained on 40-token sentences accept 400-token ones. A separate weight matrix per position would need 1,000 × 416,256 weights for a 1,000-step sequence. Why this part exists: parameter sharing is the only reason sequence length is not a hyperparameter baked into the architecture.</p>
 

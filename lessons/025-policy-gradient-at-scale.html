@@ -56,6 +56,49 @@
 <h3>Part 7 — Clip the ratio</h3>
 <p>PPO maximises <code>min(rA, clip(r, 1−ε, 1+ε)A)</code> with <code>r = π_new/π_old</code> and <code>ε = 0.2</code>. Inside the band this is the ordinary policy gradient; outside, the objective goes flat and further movement buys nothing. <strong>Why this part exists:</strong> on-policy data is used once, so a single destructive step wastes the whole rollout that produced it.</p>
 
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-clip-t f-clip-d">
+    <title id="f-clip-t">The clipped PPO objective against the probability ratio</title>
+    <desc id="f-clip-d">A line rises with the ratio r from 0.5 to 1.2, then runs flat to 1.5. A shaded band marks the allowed ratio from 0.8 to 1.2, and a marker at r equal to 1.3 sits on the flat part, so the objective there is the same as at 1.2.</desc>
+    <g data-layer>
+      <rect x="275" y="70" width="220" height="230" fill="var(--sym-opt)" opacity=".12"/>
+      <line x1="275" y1="70" x2="275" y2="300" stroke="var(--sym-opt)" stroke-width="1" stroke-dasharray="4 5" opacity=".55"/>
+      <line x1="495" y1="70" x2="495" y2="300" stroke="var(--sym-opt)" stroke-width="1" stroke-dasharray="4 5" opacity=".55"/>
+
+      <line x1="110" y1="132" x2="690" y2="132" stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 5"/>
+      <line x1="110" y1="174" x2="690" y2="174" stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 5"/>
+      <line x1="110" y1="279" x2="690" y2="279" stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 5"/>
+
+      <line x1="110" y1="300" x2="690" y2="300" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <line x1="110" y1="300" x2="110" y2="60" stroke="var(--ink-faint)" stroke-width="1.6"/>
+
+      <text x="98" y="137" text-anchor="end" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">1.2</text>
+      <text x="98" y="179" text-anchor="end" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">1.0</text>
+      <text x="98" y="284" text-anchor="end" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.5</text>
+
+      <text x="110" y="322" text-anchor="middle" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.5</text>
+      <text x="275" y="322" text-anchor="middle" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.8</text>
+      <text x="385" y="322" text-anchor="middle" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">1.0</text>
+      <text x="495" y="322" text-anchor="middle" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">1.2</text>
+      <text x="660" y="322" text-anchor="middle" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">1.5</text>
+
+      <polyline points="110,279 495,132 660,132" fill="none" stroke="var(--sym-pred)" stroke-width="2.4"/>
+
+      <line x1="550" y1="132" x2="550" y2="300" stroke="var(--sym-loss)" stroke-width="1.2" stroke-dasharray="3 4" opacity=".65"/>
+      <circle cx="550" cy="132" r="6" fill="var(--sym-loss)" stroke="var(--card)" stroke-width="2"/>
+      <text x="562" y="158" text-anchor="start" font-size="14" fill="var(--sym-loss)" font-family="ui-monospace, monospace">r = 1.3</text>
+
+      <text x="385" y="88" text-anchor="middle" font-size="12" fill="var(--sym-opt)" font-family="ui-monospace, monospace">clip band 0.8 – 1.2</text>
+      <text x="596" y="116" text-anchor="middle" font-size="12" fill="var(--sym-loss)" font-family="ui-monospace, monospace">flat past 1.2</text>
+      <text x="126" y="72" text-anchor="start" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">A = +1, ε = 0.2</text>
+
+      <text x="62" y="180" text-anchor="middle" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace" transform="rotate(-90 62 180)">objective</text>
+      <text x="400" y="352" text-anchor="middle" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">ratio r = π_new / π_old</text>
+    </g>
+  </svg>
+  <figcaption><strong>Past r = 1.2 the line is flat.</strong> Pushing a good action from 20% to 30% more likely earns nothing extra, so the gradient beyond the band is zero and the objective stops rewarding the push.</figcaption>
+</figure>
+
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 1 · about 3 minutes each</p>
   <h3 class="lab-title">Take this apart, one symbol at a time</h3>

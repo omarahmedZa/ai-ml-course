@@ -42,6 +42,23 @@
 <p>The linear step produces <code>z</code>, the <strong>pre-activation</strong>, and the bend produces <code>a = φ(z)</code>, the <strong>activation</strong>. Same shape, different stage: <code>z</code> is what the weights computed, <code>a</code> is what the next layer receives. With ReLU, <code>z = [−0.4, 2.1]</code> becomes <code>a = [0, 2.1]</code>.
 <strong>Why this part exists:</strong> every bug report about a "dead layer" is a claim about <code>z</code>, so keeping the two names apart keeps the diagnosis honest.</p>
 
+
+<figure class="fig" data-anim="flow">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-fwd-t f-fwd-d">
+    <title id="f-fwd-t">Values moving through a two-layer network</title>
+    <desc id="f-fwd-d">Five stages in a row: the input vector, the first weighted sum, the first activation, the second weighted sum, and the prediction. A highlight moves left to right.</desc>
+    <g data-layer></g>
+  </svg>
+  <script type="application/json" class="flow-data">{"steps":["x","W₁x","a₁","W₂a₁","ŷ"],"note":"forward pass"}</script>
+  <div class="fig-controls">
+    <button type="button" data-play data-playing="false">Play</button>
+    <label>stage <input type="range" data-scrub min="0" max="100" value="0"></label>
+    <output data-out="step" aria-live="polite">stage 1 / 5 · forward pass</output>
+    <button type="button" data-reset>Restart</button>
+  </div>
+  <figcaption><strong>Each stage consumes the one before it; nothing is reused.</strong> The forward pass is a single left-to-right walk, which is why it is cheap and why it must store every intermediate for the backward pass.</figcaption>
+</figure>
+
 <h3>Part 3 — The shape rule</h3>
 <p>A layer with <code>n_in</code> inputs and <code>n_out</code> units has <code>W</code> of shape <code>n_out × n_in</code> and <code>b</code> of length <code>n_out</code>. The rule is forced by the multiplication — inner dimensions must match — so a 10 → 5 layer maps <code>(5×10)(10×1) → (5×1)</code>.
 <strong>Why this part exists:</strong> writing those two numbers down turns a stack trace into a one-line fix before the code ever runs.</p>
@@ -171,6 +188,8 @@ z2 = W2 @ a1 + b2</code></pre>
 <p class="source">Primary source: 3Blue1Brown, <a href="https://www.3blue1brown.com/topics/neural-networks">Neural Networks, part 2 — gradient descent</a>.</p>
 
 </main>
+  <script src="../assets/graph.js?v=4" defer></script>
+  <script src="../assets/anim.js?v=3" defer></script>
   <script src="../assets/course.js?v=11" defer></script>
 </body>
 </html>

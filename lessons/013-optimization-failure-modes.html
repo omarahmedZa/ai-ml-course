@@ -43,6 +43,41 @@
 <p>Sigmoid's derivative peaks at 0.25 and is far smaller near saturation. Ten sigmoid layers therefore multiply the signal by at most <code>0.25¹⁰ ≈ 9.5 × 10⁻⁷</code>. ReLU has derivative exactly 1 for any positive input, so it shrinks nothing at all.</p>
 <p><strong>Why this part exists:</strong> that one number, 0.25, is why "switch to ReLU" answers almost every vanishing-gradient question.</p>
 
+<figure class="fig" data-graph="curve">
+  <script type="application/json" class="curve-data">{"kind":"expdecay","x":[0,50],"y":[0,1],"xlabel":"layer","ylabel":"gradient","controls":[{"k":"base","label":"per-layer gain","min":0.8,"max":0.99,"step":0.01,"value":0.9}]}</script>
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f013-t f013-d">
+    <title id="f013-t">Gradient magnitude decaying with layer depth</title>
+    <desc id="f013-d">A curve falling from one at layer zero toward zero by layer fifty for a per-layer gain of 0.9. Raising the gain to 0.99 flattens the curve; lowering it to 0.8 makes it collapse before layer twenty.</desc>
+    <g data-layer>
+      <line x1="64" y1="300" x2="700" y2="300" stroke="var(--ink-faint)"/>
+      <line x1="64" y1="24" x2="64" y2="300" stroke="var(--ink-faint)"/>
+      <line x1="64" y1="162" x2="700" y2="162" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+      <line x1="191" y1="24" x2="191" y2="300" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+      <line x1="318" y1="24" x2="318" y2="300" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+      <line x1="446" y1="24" x2="446" y2="300" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+      <line x1="573" y1="24" x2="573" y2="300" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+      <text x="56" y="28" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1</text>
+      <text x="56" y="166" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.5</text>
+      <text x="56" y="304" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0</text>
+      <text x="64" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0</text>
+      <text x="191" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">10</text>
+      <text x="318" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">20</text>
+      <text x="446" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">30</text>
+      <text x="573" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">40</text>
+      <text x="700" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">50</text>
+      <text x="700" y="334" text-anchor="end" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">layer</text>
+      <text x="64" y="18" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">gradient</text>
+      <polyline points="64,24 89,76 115,119 140,153 166,181 191,204 217,222 242,237 268,249 293,259 318,266 344,273 369,278 395,282 420,286 446,288 471,291 496,292 522,294 547,295 573,296 598,297 624,297 649,298 675,298 700,299" fill="none" stroke="var(--sym-param)" stroke-width="2.5"/>
+    </g>
+  </svg>
+  <div class="fig-controls">
+    <label>per-layer gain <input type="range" data-k="base" min="0.8" max="0.99" step="0.01" value="0.9"></label>
+    <output data-out="val" aria-live="polite">base = 0.90</output>
+    <button type="reset">Reset</button>
+  </div>
+  <figcaption><strong>A per-layer gain below one compounds with depth.</strong> At 0.9 only 0.5% of the gradient reaches layer 50; at 0.99, 61% survives. The curve is the product, not the step size — which is why depth, not the learning rate, causes vanishing gradients.</figcaption>
+</figure>
+
 <h3>Part 3 — Initialisation holds the variance steady</h3>
 <p>He initialisation draws weights with standard deviation <code>√(2 / fan_in)</code>; for 512 inputs that is <code>√(2/512) = 0.0625</code>. Xavier uses <code>√(1 / fan_in)</code> and suits tanh, which is centred at zero. The scale is chosen so activation variance stays roughly constant through the layer.</p>
 <p><strong>Why this part exists:</strong> a bad init sets the product at the wrong scale before training begins, and no number of steps reliably recovers from it.</p>
@@ -159,5 +194,6 @@ for depth in (5, 50):
 
 </main>
   <script src="../assets/course.js?v=11" defer></script>
+  <script src="../assets/graph.js?v=4" defer></script>
 </body>
 </html>

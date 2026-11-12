@@ -47,6 +47,39 @@
 <p>A convolutional filter of shape <code>k × k × C_in</code> is applied at every spatial position. A 3×3 filter from 64 channels to 64 outputs has <code>3 × 3 × 64 × 64 = 36,864</code> weights, and that one filter is reused at all 50,176 positions of a 224×224 map. Locality comes from the filter's small size; translation comes from reusing it.</p>
 <p><strong>Why this part exists:</strong> without sharing you would need a separate edge detector for every pixel, which is both enormous and untrainable.</p>
 
+<figure class="fig">
+  <svg viewBox="0 0 420 250" role="img" aria-labelledby="f014-t f014-d">
+    <title id="f014-t">A three by three filter sliding one cell across a six by six image</title>
+    <desc id="f014-d">A six by six grid of image cells with a three by three filter window highlighted. An arrow points one cell right to the next window, where the same nine filter weights are applied again.</desc>
+    <defs>
+      <marker id="f014-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--sym-param)"/>
+      </marker>
+    </defs>
+    <text x="80" y="60" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">image · 6 × 6</text>
+    <g fill="none" stroke="var(--rule)" stroke-width="1">
+      <rect x="80" y="76" width="24" height="24"/><rect x="104" y="76" width="24" height="24"/><rect x="128" y="76" width="24" height="24"/><rect x="152" y="76" width="24" height="24"/><rect x="176" y="76" width="24" height="24"/><rect x="200" y="76" width="24" height="24"/>
+      <rect x="80" y="100" width="24" height="24"/><rect x="104" y="100" width="24" height="24"/><rect x="128" y="100" width="24" height="24"/><rect x="152" y="100" width="24" height="24"/><rect x="176" y="100" width="24" height="24"/><rect x="200" y="100" width="24" height="24"/>
+      <rect x="80" y="124" width="24" height="24"/><rect x="104" y="124" width="24" height="24"/><rect x="128" y="124" width="24" height="24"/><rect x="152" y="124" width="24" height="24"/><rect x="176" y="124" width="24" height="24"/><rect x="200" y="124" width="24" height="24"/>
+      <rect x="80" y="148" width="24" height="24"/><rect x="104" y="148" width="24" height="24"/><rect x="128" y="148" width="24" height="24"/><rect x="152" y="148" width="24" height="24"/><rect x="176" y="148" width="24" height="24"/><rect x="200" y="148" width="24" height="24"/>
+      <rect x="80" y="172" width="24" height="24"/><rect x="104" y="172" width="24" height="24"/><rect x="128" y="172" width="24" height="24"/><rect x="152" y="172" width="24" height="24"/><rect x="176" y="172" width="24" height="24"/><rect x="200" y="172" width="24" height="24"/>
+      <rect x="80" y="196" width="24" height="24"/><rect x="104" y="196" width="24" height="24"/><rect x="128" y="196" width="24" height="24"/><rect x="152" y="196" width="24" height="24"/><rect x="176" y="196" width="24" height="24"/><rect x="200" y="196" width="24" height="24"/>
+    </g>
+    <g fill="var(--sym-param)" fill-opacity="0.2">
+      <rect x="80" y="100" width="24" height="24"/><rect x="104" y="100" width="24" height="24"/><rect x="128" y="100" width="24" height="24"/>
+      <rect x="80" y="124" width="24" height="24"/><rect x="104" y="124" width="24" height="24"/><rect x="128" y="124" width="24" height="24"/>
+      <rect x="80" y="148" width="24" height="24"/><rect x="104" y="148" width="24" height="24"/><rect x="128" y="148" width="24" height="24"/>
+    </g>
+    <rect x="80" y="100" width="72" height="72" fill="none" stroke="var(--sym-param)" stroke-width="2"/>
+    <rect x="104" y="100" width="72" height="72" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".75"/>
+    <path d="M116 94 C116 64 140 64 140 94" fill="none" stroke="var(--sym-param)" stroke-width="2" marker-end="url(#f014-arrow)"/>
+    <text x="246" y="118" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">one 3 × 3 filter</text>
+    <text x="246" y="136" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">same weights at</text>
+    <text x="246" y="154" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">every position</text>
+  </svg>
+  <figcaption><strong>One 3 × 3 filter slides across all 36 positions.</strong> The same filter weights produce each window's output, so a feature learned at the top-left is recognised at the bottom-right. Sharing is what cuts the parameter count from millions to the filter's own 36,864.</figcaption>
+</figure>
+
 <h3>Part 4 — Stride and pooling shrink the map</h3>
 <p>A 3×3 convolution with stride 1 and no padding turns a 224×224 map into 222×222. Stride 2 with padding 1 halves it to 112×112, and every later filter then covers twice as much of the original image.</p>
 <p><strong>Why this part exists:</strong> without downsampling each layer costs as much as the first, and the region any single unit can see never grows enough to contain a whole object.</p>

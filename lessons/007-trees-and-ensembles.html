@@ -43,6 +43,36 @@
 <p>For each feature, sort the values and test a threshold between each adjacent pair — 99 candidate cuts for 100 distinct values. Score a cut by the children's impurity weighted by their sizes, and keep the largest drop: <code>Δ = I(parent) − (n_L/n)I(L) − (n_R/n)I(R)</code>.</p>
 <p>Why this part exists: unweighted child impurity lets a cut that isolates a single row look perfect while the other 99 rows stay mixed.</p>
 
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f007-t f007-d">
+    <title id="f007-t">One split of a small tree, from a mixed parent to two purer children</title>
+    <desc id="f007-d">A root box holding 50 positives and 50 negatives, impurity 0.50, sends rows down two arrows to child boxes holding 45/5 and 5/45, each with impurity 0.18. The weighted drop is 0.32, which is why this cut is taken.</desc>
+    <rect x="290" y="120" width="140" height="70" rx="6" fill="none" stroke="var(--sym-data)" stroke-width="1.8"/>
+    <text x="360" y="150" text-anchor="middle" font-size="15" fill="var(--ink)" font-family="ui-monospace, monospace">50/50</text>
+    <text x="360" y="172" text-anchor="middle" font-size="13" fill="var(--ink-soft)" font-family="ui-monospace, monospace">I = 0.50</text>
+    <text x="360" y="108" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">100 rows</text>
+
+    <line x1="330" y1="190" x2="200" y2="230" stroke="var(--ink-faint)" stroke-width="1.6"/>
+    <polygon points="200.0,230.0 207.1,222.6 210.1,232.1" fill="var(--ink-faint)"/>
+    <line x1="390" y1="190" x2="520" y2="230" stroke="var(--ink-faint)" stroke-width="1.6"/>
+    <polygon points="520.0,230.0 509.9,232.1 512.9,222.6" fill="var(--ink-faint)"/>
+    <text x="248" y="214" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">yes</text>
+    <text x="472" y="214" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">no</text>
+    <text x="360" y="212" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">split: x₁ ≤ 3</text>
+
+    <rect x="110" y="230" width="140" height="70" rx="6" fill="none" stroke="var(--sym-param)" stroke-width="1.8"/>
+    <text x="180" y="260" text-anchor="middle" font-size="15" fill="var(--ink)" font-family="ui-monospace, monospace">45/5</text>
+    <text x="180" y="282" text-anchor="middle" font-size="13" fill="var(--ink-soft)" font-family="ui-monospace, monospace">I = 0.18</text>
+
+    <rect x="470" y="230" width="140" height="70" rx="6" fill="none" stroke="var(--sym-param)" stroke-width="1.8"/>
+    <text x="540" y="260" text-anchor="middle" font-size="15" fill="var(--ink)" font-family="ui-monospace, monospace">5/45</text>
+    <text x="540" y="282" text-anchor="middle" font-size="13" fill="var(--ink-soft)" font-family="ui-monospace, monospace">I = 0.18</text>
+
+    <text x="360" y="336" text-anchor="middle" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">Δ = 0.50 − (0.5 × 0.18 + 0.5 × 0.18) = 0.32</text>
+  </svg>
+  <figcaption><strong>The cut is chosen by the weighted drop in impurity.</strong> The parent at 50/50 has I = 0.50; the two children each at 0.18 pull the weighted average to 0.18, so Δ = 0.32 — that number, not the children's raw score, is what the tree maximises.</figcaption>
+</figure>
+
 <h3>Part 3 — Recurse, then stop</h3>
 <p>The winning cut splits the data and the same search runs inside each child. Stop on maximum depth, minimum samples per leaf, or a validation check. Left alone a tree grows until every leaf holds one row, with impurity 0 and no predictive value.</p>
 <p>Why this part exists: an unconstrained tree has a leaf per training row, so training error is 0 by construction while test error climbs.</p>

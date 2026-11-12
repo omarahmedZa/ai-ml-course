@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>016 — Embeddings</title>
 <link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can explain the distributional hypothesis and compute cosine similarity.">
@@ -48,6 +49,39 @@
 
 <h3>Part 5 — Compare with cosine, not raw dot product</h3>
 <p>Divide the dot product by both lengths and the result lies in −1 to 1, depending only on direction. Two vectors can point the same way while one is five times longer, and the raw score then reports 5 where the cosine reports 1.00. Why this part exists: norm grows with word frequency during training for reasons unrelated to meaning, so an unnormalised score measures popularity as much as similarity.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-emb-t f-emb-d">
+    <title id="f-emb-t">Five words placed in a two-dimensional embedding space</title>
+    <desc id="f-emb-d">Two axes meet at an origin. Cat, kitten and dog sit close together in one neighbourhood, circled by a dashed outline. Car and truck sit far from that neighbourhood, in a separate part of the plane.</desc>
+    <g font-family="ui-monospace, monospace">
+      <line x1="120" y1="250" x2="604" y2="250" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="616,250 602,244 602,256" fill="var(--ink-faint)"/>
+      <line x1="280" y1="330" x2="280" y2="80" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="280,68 274,82 286,82" fill="var(--ink-faint)"/>
+      <text x="600" y="272" text-anchor="end" font-size="14" fill="var(--ink-faint)">dim 1</text>
+      <text x="268" y="96" text-anchor="end" font-size="14" fill="var(--ink-faint)">dim 2</text>
+      <text x="268" y="244" text-anchor="end" font-size="14" fill="var(--ink-faint)">0</text>
+
+      <ellipse cx="360" cy="144" rx="64" ry="44" fill="none" stroke="var(--ink-faint)" stroke-width="1.2" stroke-dasharray="5 4"/>
+
+      <circle cx="350" cy="130" r="6" fill="var(--sym-pred)"/>
+      <circle cx="388" cy="150" r="6" fill="var(--sym-pred)"/>
+      <circle cx="332" cy="158" r="6" fill="var(--sym-pred)"/>
+      <text x="364" y="124" font-size="14" fill="var(--sym-pred)">cat</text>
+      <text x="402" y="155" font-size="14" fill="var(--sym-pred)">kitten</text>
+      <text x="322" y="168" text-anchor="end" font-size="14" fill="var(--sym-pred)">dog</text>
+
+      <circle cx="500" cy="150" r="6" fill="var(--sym-data)"/>
+      <circle cx="546" cy="128" r="6" fill="var(--sym-data)"/>
+      <text x="514" y="155" font-size="14" fill="var(--sym-data)">car</text>
+      <text x="560" y="133" font-size="14" fill="var(--sym-data)">truck</text>
+
+      <text x="360" y="88" text-anchor="middle" font-size="12" fill="var(--ink-faint)">similar contexts</text>
+    </g>
+  </svg>
+  <figcaption><strong>Similar words share a neighbourhood.</strong> cat, kitten and dog sit close because they appear in similar company; car and truck land elsewhere. Meaning is the arrangement of points, not the value of any coordinate on its own.</figcaption>
+</figure>
 
 <h3>Part 6 — Use contextual vectors where the word is ambiguous</h3>
 <p>A static table gives "bank" one row, so it must average the river sense and the money sense into a single blurry direction. A transformer computes a fresh vector for each occurrence, so "river bank" and "bank loan" diverge after the first layer and separate further by layer 12. Why this part exists: a single row cannot represent a word whose meaning depends on the sentence, and the average of two meanings often points at neither.</p>

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>034 — Non-IID data and convergence</title>
 <link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can explain client drift, name the fixes, and state the local-steps trade-off.">
@@ -30,6 +31,36 @@
 <h2>The one core idea</h2>
 <p>Two hikers are roped together but walking to different villages. Each step takes a hiker toward their own village, the rope pulls both back toward the middle, and after enough steps they are standing in a field that is neither village. Neither has arrived, and the rope is doing exactly what it was designed to do.</p>
 <p>In one line: <strong>local training moves each client toward its own optimum, and the average of several different optima is a point that is optimal for nobody.</strong> Client A's optimum is −1 and client B's is +1; after 10 local epochs they sit at −0.9 and +0.9, and the server averages them to 0.0.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-drift-t f-drift-d">
+    <title id="f-drift-t">Two clients drifting apart from a shared global start</title>
+    <desc id="f-drift-d">Both clients start at w equals zero. Local training pulls client B up toward plus one and client A down toward minus one. The dashed average stays at zero, a point optimal for neither client.</desc>
+    <g>
+      <line x1="120" y1="50" x2="120" y2="310" stroke="var(--ink-faint)"/>
+      <line x1="120" y1="330" x2="680" y2="330" stroke="var(--ink-faint)"/>
+      <line x1="112" y1="80" x2="128" y2="80" stroke="var(--ink-faint)"/>
+      <line x1="112" y1="180" x2="128" y2="180" stroke="var(--ink-faint)"/>
+      <line x1="112" y1="280" x2="128" y2="280" stroke="var(--ink-faint)"/>
+      <text x="104" y="86" text-anchor="end" font-size="13" fill="var(--ink-faint)" font-family="ui-monospace, monospace">+1</text>
+      <text x="104" y="186" text-anchor="end" font-size="13" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0</text>
+      <text x="104" y="286" text-anchor="end" font-size="13" fill="var(--ink-faint)" font-family="ui-monospace, monospace">−1</text>
+      <text x="120" y="40" text-anchor="middle" font-size="13" fill="var(--ink-soft)" font-family="ui-monospace, monospace">w</text>
+      <text x="680" y="352" text-anchor="end" font-size="13" fill="var(--ink-soft)" font-family="ui-monospace, monospace">local epochs</text>
+      <line x1="200" y1="180" x2="660" y2="180" stroke="var(--ink-faint)" stroke-width="1.6" stroke-dasharray="6 5"/>
+      <text x="662" y="170" text-anchor="end" font-size="13" fill="var(--ink-faint)" font-family="ui-monospace, monospace">average stays 0</text>
+      <path d="M200 180 C 330 180 470 110 620 80" fill="none" stroke="var(--sym-pred)" stroke-width="2.4"/>
+      <path d="M200 180 C 330 180 470 250 620 280" fill="none" stroke="var(--sym-param)" stroke-width="2.4"/>
+      <circle cx="200" cy="180" r="4" fill="var(--ink)"/>
+      <circle cx="620" cy="80" r="4" fill="var(--sym-pred)"/>
+      <circle cx="620" cy="280" r="4" fill="var(--sym-param)"/>
+      <text x="200" y="168" text-anchor="middle" font-size="13" fill="var(--ink-soft)" font-family="ui-monospace, monospace">start 0</text>
+      <text x="620" y="64" text-anchor="middle" font-size="13" fill="var(--sym-pred)" font-family="ui-monospace, monospace">client B: +1</text>
+      <text x="620" y="304" text-anchor="middle" font-size="13" fill="var(--sym-param)" font-family="ui-monospace, monospace">client A: −1</text>
+    </g>
+  </svg>
+  <figcaption><strong>Drift, not disagreement.</strong> From one global start at 0, local training pulls each client toward its own optimum, −1 and +1. The server's average returns 0, a point that is optimal for neither client.</figcaption>
+</figure>
 
 <h2>How it actually works</h2>
 <p>Six mechanisms turn that picture into a failure you can measure. IID means independent and identically distributed: every client's rows drawn from the same underlying mix.</p>

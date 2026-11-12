@@ -59,6 +59,42 @@
 <p>The server computes <code>w_{t+1} = Σ_k (n_k/n) w_t^k</code>, where <code>n</code> is the total example count. The shares are non-negative and sum to 1, so the result is a convex combination and cannot leave the range spanned by the clients. It broadcasts the result and the loop restarts.</p>
 <p><strong>Why this part exists:</strong> a 700-example client has a lower-variance gradient than a 100-example one and should count seven times more; equal shares let a tiny client outvote the data.</p>
 
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-fed-t f-fed-d">
+    <title id="f-fed-t">One FedAvg round with a server and three clients</title>
+    <desc id="f-fed-d">The server sends global weights down to three clients holding 100, 200 and 700 examples. Each client sends its local update back up, and the server averages them by example count.</desc>
+    <defs>
+      <marker id="f-fed-down" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--sym-pred)"/>
+      </marker>
+      <marker id="f-fed-up" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--sym-opt)"/>
+      </marker>
+    </defs>
+    <text x="360" y="24" text-anchor="middle" font-size="13" fill="var(--ink-soft)" font-family="ui-monospace, monospace">one FedAvg round</text>
+    <rect x="290" y="40" width="140" height="64" rx="8" fill="var(--code-bg)" stroke="var(--rule)"/>
+    <text x="360" y="67" text-anchor="middle" font-size="13" fill="var(--ink)" font-family="ui-monospace, monospace">server</text>
+    <text x="360" y="87" text-anchor="middle" font-size="13" fill="var(--sym-opt)" font-family="ui-monospace, monospace">Σ (nk/n) wk</text>
+    <line x1="320" y1="104" x2="110" y2="248" stroke="var(--sym-pred)" stroke-width="1.6" marker-end="url(#f-fed-down)"/>
+    <line x1="350" y1="104" x2="350" y2="248" stroke="var(--sym-pred)" stroke-width="1.6" marker-end="url(#f-fed-down)"/>
+    <line x1="380" y1="104" x2="590" y2="248" stroke="var(--sym-pred)" stroke-width="1.6" marker-end="url(#f-fed-down)"/>
+    <line x1="150" y1="248" x2="340" y2="104" stroke="var(--sym-opt)" stroke-width="1.6" marker-end="url(#f-fed-up)"/>
+    <line x1="370" y1="248" x2="370" y2="104" stroke="var(--sym-opt)" stroke-width="1.6" marker-end="url(#f-fed-up)"/>
+    <line x1="550" y1="248" x2="400" y2="104" stroke="var(--sym-opt)" stroke-width="1.6" marker-end="url(#f-fed-up)"/>
+    <rect x="40" y="252" width="140" height="64" rx="8" fill="var(--accent-soft)" stroke="var(--rule)"/>
+    <text x="110" y="279" text-anchor="middle" font-size="13" fill="var(--ink)" font-family="ui-monospace, monospace">client A</text>
+    <text x="110" y="299" text-anchor="middle" font-size="13" fill="var(--ink-soft)" font-family="ui-monospace, monospace">n=100</text>
+    <rect x="290" y="252" width="140" height="64" rx="8" fill="var(--accent-soft)" stroke="var(--rule)"/>
+    <text x="360" y="279" text-anchor="middle" font-size="13" fill="var(--ink)" font-family="ui-monospace, monospace">client B</text>
+    <text x="360" y="299" text-anchor="middle" font-size="13" fill="var(--ink-soft)" font-family="ui-monospace, monospace">n=200</text>
+    <rect x="540" y="252" width="140" height="64" rx="8" fill="var(--accent-soft)" stroke="var(--rule)"/>
+    <text x="610" y="279" text-anchor="middle" font-size="13" fill="var(--ink)" font-family="ui-monospace, monospace">client C</text>
+    <text x="610" y="299" text-anchor="middle" font-size="13" fill="var(--ink-soft)" font-family="ui-monospace, monospace">n=700</text>
+    <text x="360" y="344" text-anchor="middle" font-size="13" fill="var(--ink-faint)" font-family="ui-monospace, monospace"><tspan fill="var(--sym-pred)">↓ weights</tspan> · <tspan fill="var(--sym-opt)">↑ updates</tspan></text>
+  </svg>
+  <figcaption><strong>One round, two directions.</strong> The server sends the same weights to every client; each returns a locally trained update. Averaging by example count makes client C, with n=700, speak seven times louder than client A, with n=100.</figcaption>
+</figure>
+
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 1 · about 3 minutes each</p>
   <h3 class="lab-title">Take this apart, one symbol at a time</h3>

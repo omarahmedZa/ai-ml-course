@@ -44,6 +44,50 @@
 <h3>Part 3 — Target network: freeze a copy</h3>
 <p>Keep a second weight vector θ⁻ and copy θ into it only every 10,000 steps. Targets come from θ⁻; gradients flow into θ. Between copies the target is a constant, so the update becomes ordinary regression. <strong>Why this part exists:</strong> a constant target is what lets the loss actually fall — example 2 shows the alternative in numbers.</p>
 
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-dqn-t f-dqn-d">
+    <title id="f-dqn-t">Online network and frozen target network feeding one loss</title>
+    <desc id="f-dqn-d">Two boxes side by side. The online network with weights theta on the left predicts Q; the frozen target network with weights theta-minus on the right produces the target y. Both feed the loss box below, but only the online box receives a gradient back. A dashed arrow across the top copies theta into theta-minus every ten thousand steps.</desc>
+    <g data-layer>
+      <defs>
+        <marker id="f-dqn-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--ink-faint)"/></marker>
+        <marker id="f-dqn-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--sym-param)"/></marker>
+        <marker id="f-dqn-o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--sym-opt)"/></marker>
+      </defs>
+
+      <path d="M240 100 C 300 48, 420 48, 480 100" fill="none" stroke="var(--sym-param)" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#f-dqn-p)"/>
+      <text x="360" y="36" text-anchor="middle" font-size="12" fill="var(--sym-param)" font-family="ui-monospace, monospace">copy every 10k steps</text>
+
+      <text x="165" y="66" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">s, a</text>
+      <text x="555" y="66" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">s′, a′</text>
+
+      <rect x="90" y="80" width="150" height="70" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+      <text x="165" y="102" text-anchor="middle" font-size="13" fill="var(--sym-pred)" font-family="ui-monospace, monospace">online net</text>
+      <text x="165" y="127" text-anchor="middle" font-size="20" fill="var(--sym-pred)" font-family="ui-monospace, monospace">θ</text>
+      <text x="165" y="145" text-anchor="middle" font-size="10" fill="var(--ink-faint)" font-family="ui-monospace, monospace">trained</text>
+
+      <rect x="480" y="80" width="150" height="70" rx="8" fill="var(--card)" stroke="var(--sym-env)" stroke-width="1.6"/>
+      <text x="555" y="102" text-anchor="middle" font-size="13" fill="var(--sym-env)" font-family="ui-monospace, monospace">target net</text>
+      <text x="555" y="127" text-anchor="middle" font-size="20" fill="var(--sym-env)" font-family="ui-monospace, monospace">θ⁻</text>
+      <text x="555" y="145" text-anchor="middle" font-size="10" fill="var(--ink-faint)" font-family="ui-monospace, monospace">no gradient</text>
+
+      <line x1="175" y1="150" x2="325" y2="253" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-dqn-f)"/>
+      <text x="248" y="218" text-anchor="end" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">Q_θ(s,a)</text>
+
+      <line x1="535" y1="150" x2="395" y2="253" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-dqn-f)"/>
+      <text x="596" y="218" text-anchor="end" font-size="12" fill="var(--sym-env)" font-family="ui-monospace, monospace">y = r + γ max Q_θ⁻</text>
+
+      <rect x="285" y="255" width="150" height="70" rx="8" fill="var(--card)" stroke="var(--sym-loss)" stroke-width="1.6"/>
+      <text x="360" y="282" text-anchor="middle" font-size="14" fill="var(--sym-loss)" font-family="ui-monospace, monospace">loss</text>
+      <text x="360" y="306" text-anchor="middle" font-size="14" fill="var(--sym-loss)" font-family="ui-monospace, monospace">(y − Q)²</text>
+
+      <path d="M285 290 L 215 290 L 215 154" fill="none" stroke="var(--sym-opt)" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#f-dqn-o)"/>
+      <text x="252" y="278" text-anchor="middle" font-size="12" fill="var(--sym-opt)" font-family="ui-monospace, monospace">∇θ</text>
+    </g>
+  </svg>
+  <figcaption><strong>Two copies of one network.</strong> Gradients reach only the online θ; the frozen θ⁻ is overwritten every 10,000 steps, so the target stands still while the estimate walks toward it.</figcaption>
+</figure>
+
 <h3>Part 4 — Huber loss: cap the outlier</h3>
 <p>Below an error of 1 the Huber loss is <code>0.5 × error²</code>; above it the loss is <code>|error| − 0.5</code>, so a TD error of 50 contributes about 50 of gradient instead of 2,500. Big errors come from rare rewards and from targets still catching up. <strong>Why this part exists:</strong> one unclipped outlier can undo a thousand careful updates in a single step.</p>
 

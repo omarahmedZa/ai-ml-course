@@ -6,6 +6,8 @@
   var NS = "http://www.w3.org/2000/svg";
   var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   var F = window.FIG;
+  if (!F) return;
+  var P = F.P;
 
   function mk(tag, attrs, parent) { return F.mk(tag, attrs, parent); }
 
@@ -53,6 +55,49 @@
         var read = fig.querySelector("[data-out='step']");
         if (read) read.textContent = "step " + k + " / " + (this.seq.length - 1) + "  ·  θ = " + this.seq[k].toFixed(2) + "  ·  J = " + this.J(this.seq[k]).toFixed(2);
       }
+    }
+  };
+
+
+  A.flow = {
+    draw: function (fig, t) {
+      var svg = fig.querySelector("svg");
+      var raw = fig.querySelector(".flow-data");
+      var spec;
+      try { spec = JSON.parse(raw.textContent); } catch (e) { return; }
+      raw.style.display = "none";
+      var g = F.clearLayer(svg);
+      var steps = spec.steps || [];
+      var n = steps.length;
+      var k = Math.min(n - 1, Math.round(t * (n - 1)));
+      var w = Math.min(150, (P.r - P.l - (n - 1) * 24) / n);
+      var gap = 24;
+      var total = n * w + (n - 1) * gap;
+      var x = (720 - total) / 2;
+      var y = 150;
+      steps.forEach(function (label, i) {
+        var on = i === k, done = i < k;
+        mk("rect", {
+          x: x, y: y, width: w, height: 64, rx: 8,
+          fill: on ? "var(--sym-pred)" : "var(--card)",
+          "fill-opacity": on ? .14 : 1,
+          stroke: on ? "var(--sym-pred)" : "var(--rule)",
+          "stroke-width": on ? 2.2 : 1.2
+        }, g);
+        var tx = mk("text", {
+          x: x + w / 2, y: y + 38, "text-anchor": "middle", "font-size": 14,
+          fill: on ? "var(--sym-pred)" : (done ? "var(--ink)" : "var(--ink-faint)"),
+          "font-family": "ui-monospace, monospace"
+        }, g);
+        tx.textContent = label;
+        if (i < n - 1) {
+          F.arrow(g, x + w + 4, y + 32, x + w + gap - 4, y + 32,
+            i < k ? "var(--sym-pred)" : "var(--ink-faint)", 1.4);
+        }
+        x += w + gap;
+      });
+      var out = fig.querySelector("[data-out='step']");
+      if (out) out.textContent = "stage " + (k + 1) + " / " + n + "  ·  " + (spec.note || "");
     }
   };
 

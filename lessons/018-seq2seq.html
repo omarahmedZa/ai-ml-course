@@ -41,6 +41,42 @@
 <h3>Part 2 — Pass one context vector across the gap</h3>
 <p><code>h_n</code> is the entire channel between the two halves — 512 numbers, whatever the input length. The decoder's first hidden state is initialised from it directly. Why this part exists: without a shared starting state the decoder is an unconditioned language model, fluent and irrelevant, writing plausible sentences that have nothing to do with the input.</p>
 
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-s2s-t f-s2s-d">
+    <title id="f-s2s-t">Encoder stack passing one vector into a decoder stack</title>
+    <desc id="f-s2s-d">Three input boxes labelled x-one to x-three stack on the left as the encoder. An arrow runs from the middle of that stack into a single bottleneck box holding h-n, 512 numbers. A second arrow runs from the bottleneck into a three-box decoder stack labelled y-one to y-three on the right.</desc>
+    <g font-family="ui-monospace, monospace">
+      <text x="360" y="40" text-anchor="middle" font-size="12" fill="var(--ink-faint)">one vector is the whole channel between the halves</text>
+
+      <rect x="30" y="60" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+      <rect x="30" y="140" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+      <rect x="30" y="220" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+      <text x="90" y="100" text-anchor="middle" font-size="14" fill="var(--sym-data)">x₁</text>
+      <text x="90" y="180" text-anchor="middle" font-size="14" fill="var(--sym-data)">x₂</text>
+      <text x="90" y="260" text-anchor="middle" font-size="14" fill="var(--sym-data)">x₃</text>
+      <text x="90" y="308" text-anchor="middle" font-size="12" fill="var(--ink-faint)">encoder · reads</text>
+
+      <rect x="300" y="140" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-param)" stroke-width="1.6"/>
+      <text x="360" y="168" text-anchor="middle" font-size="14" fill="var(--sym-param)">h_n</text>
+      <text x="360" y="188" text-anchor="middle" font-size="12" fill="var(--ink-faint)">512 numbers</text>
+
+      <line x1="154" y1="172" x2="286" y2="172" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="300,172 288,166 288,178" fill="var(--ink-faint)"/>
+      <line x1="424" y1="172" x2="546" y2="172" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="560,172 548,166 548,178" fill="var(--ink-faint)"/>
+
+      <rect x="560" y="60" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+      <rect x="560" y="140" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+      <rect x="560" y="220" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+      <text x="620" y="100" text-anchor="middle" font-size="14" fill="var(--sym-pred)">y₁</text>
+      <text x="620" y="180" text-anchor="middle" font-size="14" fill="var(--sym-pred)">y₂</text>
+      <text x="620" y="260" text-anchor="middle" font-size="14" fill="var(--sym-pred)">y₃</text>
+      <text x="620" y="308" text-anchor="middle" font-size="12" fill="var(--ink-faint)">decoder · writes</text>
+    </g>
+  </svg>
+  <figcaption><strong>Everything the decoder knows crosses one vector.</strong> The encoder reads the whole input and keeps only its final state. The decoder writes from that single summary, so a long input must still fit in the same 512 numbers.</figcaption>
+</figure>
+
 <h3>Part 3 — Decode one token at a time</h3>
 <p>At step <code>t</code> the decoder consumes the previous token's embedding plus its own state and produces one score per vocabulary entry — 50,000 scores for a 50,000-token vocabulary. The highest score becomes <code>y_t</code>, and <code>y_t</code> becomes the next input. Why this part exists: output length is unknown in advance, so the model must be able to run for as long as it takes to emit a stop symbol.</p>
 

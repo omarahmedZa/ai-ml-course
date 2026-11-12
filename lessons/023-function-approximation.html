@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>023 — Function approximation</title>
 <link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can explain why tabular RL fails at scale, and why approximation removes the convergence guarantee.">
@@ -39,6 +40,44 @@
 
 <h3>Part 2 — Count the slots first</h3>
 <p>The cost is <code>|S| × |A|</code> numbers. A 5×5 grid with 4 actions needs 25 × 4 = 100; a 100×100 grid needs 10,000 × 4 = 40,000, which is 320 KB at 8 bytes each. Pixels end the argument: a 210×160 colour frame at 256 levels holds 256<sup>100,800</sup> distinct states, because 210 × 160 × 3 = 100,800. <strong>Why this part exists:</strong> this arithmetic is the whole case for approximation.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-tab-t f-tab-d">
+    <title id="f-tab-t">State count of three environments on a log scale</title>
+    <desc id="f-tab-d">Three bars on a log scale. A 5 by 5 grid has 25 states, a 1,000 by 1,000 grid has one million, and an Atari colour frame has one billion. Each jump adds orders of magnitude, while the number of states an agent can actually visit stays in the thousands.</desc>
+    <g data-layer>
+      <line x1="110" y1="290" x2="690" y2="290" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <line x1="110" y1="290" x2="110" y2="60" stroke="var(--ink-faint)" stroke-width="1.6"/>
+
+      <line x1="110" y1="221" x2="690" y2="221" stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 5"/>
+      <line x1="110" y1="152" x2="690" y2="152" stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 5"/>
+      <line x1="110" y1="83" x2="690" y2="83" stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 5"/>
+
+      <text x="98" y="295" text-anchor="end" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">1</text>
+      <text x="98" y="226" text-anchor="end" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">10³</text>
+      <text x="98" y="157" text-anchor="end" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">10⁶</text>
+      <text x="98" y="88" text-anchor="end" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">10⁹</text>
+
+      <rect x="145" y="258" width="120" height="32" rx="2" fill="var(--sym-pred)" opacity=".3"/>
+      <rect x="335" y="152" width="120" height="138" rx="2" fill="var(--sym-pred)" opacity=".55"/>
+      <rect x="525" y="83" width="120" height="207" rx="2" fill="var(--sym-pred)" opacity=".8"/>
+
+      <text x="205" y="250" text-anchor="middle" font-size="14" fill="var(--ink)" font-family="ui-monospace, monospace">25</text>
+      <text x="395" y="144" text-anchor="middle" font-size="14" fill="var(--ink)" font-family="ui-monospace, monospace">10⁶</text>
+      <text x="585" y="75" text-anchor="middle" font-size="14" fill="var(--ink)" font-family="ui-monospace, monospace">10⁹</text>
+
+      <text x="205" y="315" text-anchor="middle" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">grid</text>
+      <text x="395" y="315" text-anchor="middle" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">large</text>
+      <text x="585" y="315" text-anchor="middle" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace">pixels</text>
+      <text x="205" y="334" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">5×5</text>
+      <text x="395" y="334" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1,000×1,000</text>
+      <text x="585" y="334" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">Atari frame</text>
+
+      <text x="62" y="175" text-anchor="middle" font-size="14" fill="var(--ink-soft)" font-family="ui-monospace, monospace" transform="rotate(-90 62 175)">states (log scale)</text>
+    </g>
+  </svg>
+  <figcaption><strong>Twenty-five entries fit in a notebook; a billion do not.</strong> The state count climbs by orders of magnitude while the states an agent actually visits stay in the thousands — that gap is the whole case for approximation.</figcaption>
+</figure>
 
 <h3>Part 3 — Replace the table with a function</h3>
 <p>Write <code>Q_θ(s,a)</code>: a function with parameters θ that returns a number for any pair you hand it. A linear model is <code>Q(s) = w·s</code>; a network stacks such layers. Nothing is stored per state — the answer is computed on demand from θ. <strong>Why this part exists:</strong> a computed answer exists for unseen states, so one visit informs the neighbours.</p>

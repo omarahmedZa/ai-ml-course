@@ -41,6 +41,13 @@
 <h3>Part 2 — Shrink the interval until the ratio settles</h3>
 <p>Pick a small <code>h</code> and compute <code>(f(w+h) − f(w)) / h</code>: at <code>w = 3</code>, <code>h = 0.01</code> gives 6.01 and <code>h = 0.001</code> gives 6.001. The sequence homes in on 6, the <strong>derivative</strong>, and for <code>w²</code> the algebra says the answer is <code>2w</code> at every point. Why this part exists: stopping early ties the answer to an arbitrary <code>h</code> — <code>h = 1</code> gives 7 — and that error would never wash out of the step size.</p>
 
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f002-t f002-d"><title id="f002-t">The gradient is the slope of the loss curve under the marker</title><desc id="f002-d">An upward-opening loss bowl for f of w equals w squared, with a blue dot marking the current weight and a dashed drop to the axis. At w equal to 3 the curve is steep and the slope is 6; near the bottom at w equal to 0 the curve flattens and the slope falls to 0. A slider moves the dot along the curve.</desc><g data-layer></g></svg>
+  <script type="application/json" class="curve-data">{"kind":"quadratic","x":[-1,5],"y":[0,20],"xlabel":"w (weight)","ylabel":"loss","controls":[{"k":"w","label":"w","min":-1,"max":5,"step":0.1,"value":3},{"k":"mu","label":"bottom","min":-1,"max":3,"step":0.1,"value":0},{"k":"floor","label":"offset","min":0,"max":3,"step":0.1,"value":0}],"marker":"w"}</script>
+  <div class="fig-controls"></div>
+  <figcaption><strong>The gradient is the tangent slope at the dot.</strong> At w = 3 the tangent rises 6 units per unit of w, so one step moves 0.6; as the dot nears the bottom the same tangent flattens toward zero and the step shrinks with it.</figcaption>
+</figure>
+
 <h3>Part 3 — Freeze every other knob</h3>
 <p>A <strong>partial derivative</strong> <code>∂f/∂x</code> nudges <code>x</code> with every other variable frozen. On <code>f(x, y) = x² + 3y</code> at <code>(2, 1)</code>, <code>∂f/∂x = 2x = 4</code> and <code>∂f/∂y = 3</code>; the second never shrinks, so no value of <code>y</code> settles there. Why this part exists: turn two knobs at once and the change belongs to neither, so you cannot tell which one to fix.</p>
 
@@ -174,6 +181,7 @@ for step in range(4):
 <p class="source">Primary source: 3Blue1Brown, <a href="https://www.3blue1brown.com/lessons/gradient">Essence of Calculus, ch. 10 — The gradient</a>.</p>
 
 </main>
+  <script src="../assets/graph.js?v=4" defer></script>
   <script src="../assets/course.js?v=11" defer></script>
 </body>
 </html>

@@ -123,6 +123,32 @@
 
 <p><strong>What to notice.</strong> Two rows are learning-rate problems, which is why the first experiment is a ladder — <code>η</code> in <code>{1e-2, 1e-3, 1e-4}</code>. A factor-of-ten sweep finds the order of magnitude in three runs. The flat row is different: a loss that never leaves 0.693 is not slow, it is stationary.</p>
 
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-curve011-t f-curve011-d">
+    <title id="f-curve011-t">Training and validation loss over steps</title>
+    <desc id="f-curve011-d">Axes labelled step and loss. The solid training curve falls steeply then flattens into a low plateau. The dashed validation curve falls alongside it, bottoms out at a marked minimum labelled stop here, then rises steadily while training loss keeps falling. That rising tail is the overfitting signature.</desc>
+
+    <line x1="90" y1="48" x2="90" y2="300" stroke="var(--ink-faint)" stroke-width="1.4"/>
+    <line x1="90" y1="300" x2="690" y2="300" stroke="var(--ink-faint)" stroke-width="1.4"/>
+
+    <text x="60" y="174" transform="rotate(-90 60 174)" font-size="12" font-family="ui-monospace, monospace" fill="var(--ink-faint)" text-anchor="middle">loss</text>
+    <text x="690" y="324" font-size="12" font-family="ui-monospace, monospace" fill="var(--ink-faint)" text-anchor="end">step</text>
+    <text x="82" y="316" font-size="12" font-family="ui-monospace, monospace" fill="var(--ink-faint)" text-anchor="end">0</text>
+
+    <polyline points="100,86 130,120 160,152 190,178 220,198 250,212 280,222 310,229 340,234 380,238 420,241 470,243 520,245 570,246 620,247 690,248" fill="none" stroke="var(--sym-loss)" stroke-width="2.2"/>
+
+    <polyline points="100,96 130,130 160,160 190,184 220,203 250,217 280,227 310,233 340,236 380,233 420,225 460,212 500,196 540,178 580,158 620,138 660,120 690,108" fill="none" stroke="var(--sym-pred)" stroke-width="2" stroke-dasharray="7 5"/>
+
+    <line x1="340" y1="240" x2="340" y2="300" stroke="var(--sym-pred)" stroke-width="1" stroke-dasharray="2 4" opacity="0.7"/>
+    <circle cx="340" cy="236" r="4" fill="var(--sym-pred)"/>
+    <text x="348" y="292" font-size="12" font-family="ui-monospace, monospace" fill="var(--sym-pred)">stop here</text>
+
+    <text x="470" y="86" font-size="15" font-family="ui-monospace, monospace" fill="var(--sym-pred)" text-anchor="middle">validation: falls, then rises</text>
+    <text x="686" y="266" font-size="15" font-family="ui-monospace, monospace" fill="var(--sym-loss)" text-anchor="end">training</text>
+  </svg>
+  <figcaption><strong>The shape tells you what to change.</strong> Both curves fall while the model learns. The dashed one turning back up is overfitting: stop at its minimum and regularise. A curve that never leaves its first value is not slow — it is stationary.</figcaption>
+</figure>
+
 <h2>The trap</h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>

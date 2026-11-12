@@ -47,6 +47,13 @@
 <h3>Part 4 — Likelihood flips which thing is fixed</h3>
 <p><code>p(data | θ)</code> fixes the parameters and asks about the data. Training fixes the data — you already have it — and varies the parameters; that reversed view is the likelihood <code>L(θ)</code>. Three heads in three tosses gives <code>L(0.7) = 0.7³ = 0.343</code> and <code>L(0.5) = 0.125</code>, with only the hypothesis changing between them. Why this part exists: the forward question is about data you have not collected, so it cannot be evaluated after the fact.</p>
 
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f003-t f003-d"><title id="f003-t">A distribution over three outcomes, with the observed outcome highlighted</title><desc id="f003-d">Three bars that sum to one: heads at 0.7, tails at 0.2, edge at 0.1. The heads bar is highlighted because heads is the outcome that happened. Likelihood scores that one bar rather than the others: 0.7 for a single toss, and 0.343 for three independent heads.</desc><g data-layer></g></svg>
+  <script type="application/json" class="bars-data">{"values":[0.7,0.2,0.1],"labels":["heads","tails","edge"],"max":0.8,"ylabel":"probability","highlight":0}</script>
+  <div class="fig-controls"></div>
+  <figcaption><strong>A distribution is one quote; likelihood scores the bar that happened.</strong> The three bars sum to 1. With heads observed, the likelihood is the highlighted 0.7 — not 0.2 or 0.1 — and three independent heads multiply it to 0.343.</figcaption>
+</figure>
+
 <h3>Part 5 — Independence multiplies, so logs add</h3>
 <p>Independent observations multiply: three heads is <code>0.7 × 0.7 × 0.7</code>. A long sequence gives thousands of factors below 1, and the product underflows to 0.0 near <code>10⁻³⁰⁸</code> in float64. Logs rescue it because <code>log(ab) = log a + log b</code>, turning 0.343 into <code>3 × (−0.357) = −1.070</code>; the maximiser does not move, since log is monotonic. Why this part exists: once the product underflows, the loss becomes <code>−log 0 = inf</code>, and infinity has no gradient to descend.</p>
 
@@ -164,6 +171,7 @@ print(&quot;softmax:&quot;, probs.round(3))</code></pre>
 <p class="source">Primary source: <a href="https://www.khanacademy.org/math/statistics-probability">Khan Academy — Statistics and probability</a> (expectation, distributions, likelihood).</p>
 
 </main>
+  <script src="../assets/graph.js?v=4" defer></script>
   <script src="../assets/course.js?v=11" defer></script>
 </body>
 </html>

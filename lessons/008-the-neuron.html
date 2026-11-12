@@ -32,6 +32,56 @@
 <p>A neuron is a straight-line score with a gate on its output. The score says which side of a boundary the input falls on, and how far; the gate decides how much of that score survives into the next layer. Training changes only the score's weights — the gate is fixed and never learned.</p>
 <p>In one line: <strong>score first, then bend.</strong> With <code>w = [2, −3]</code> and <code>b = 1</code>, the input <code>[1, −1]</code> scores <code>2 + 3 + 1 = 6</code> and ReLU returns <code>6</code>; the input <code>[−2, 1]</code> scores <code>−4 − 3 + 1 = −6</code> and ReLU returns <code>0</code>.</p>
 
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-neuron-t f-neuron-d">
+    <title id="f-neuron-t">One neuron as a diagram: inputs, weighted sum, activation, output</title>
+    <desc id="f-neuron-d">Four boxes in a row. A grey box holds the two inputs x-one and x-two. A red box computes the weighted sum w dot x plus b, producing the score z. A grey box applies the fixed activation phi, max of zero and z. A blue box holds the output a, one number passed to the next layer. Arrows run left to right; the first is red because it carries the weights, the last is blue because it carries the prediction.</desc>
+
+    <text x="360" y="52" font-size="15" font-family="ui-monospace, monospace" fill="var(--ink-soft)" text-anchor="middle">one neuron · score first, then bend</text>
+
+    <text x="0" y="130" font-size="12" font-family="ui-monospace, monospace" fill="var(--sym-data)">inputs</text>
+    <text x="190" y="130" font-size="12" font-family="ui-monospace, monospace" fill="var(--sym-param)">weighted sum</text>
+    <text x="380" y="130" font-size="12" font-family="ui-monospace, monospace" fill="var(--sym-data)">activation</text>
+    <text x="720" y="130" font-size="12" font-family="ui-monospace, monospace" fill="var(--sym-pred)" text-anchor="end">output</text>
+
+    <rect x="0" y="145" width="150" height="70" rx="6" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+    <text x="75" y="174" font-size="15" font-family="ui-monospace, monospace" fill="var(--sym-data)" text-anchor="middle">x₁</text>
+    <text x="75" y="196" font-size="15" font-family="ui-monospace, monospace" fill="var(--sym-data)" text-anchor="middle">x₂</text>
+
+    <rect x="190" y="145" width="150" height="70" rx="6" fill="var(--card)" stroke="var(--sym-param)" stroke-width="1.6"/>
+    <text x="265" y="174" font-size="15" font-family="ui-monospace, monospace" fill="var(--sym-param)" text-anchor="middle">w·x + b</text>
+    <text x="265" y="196" font-size="12" font-family="ui-monospace, monospace" fill="var(--sym-param)" text-anchor="middle">z = score</text>
+
+    <rect x="380" y="145" width="150" height="70" rx="6" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+    <text x="455" y="174" font-size="15" font-family="ui-monospace, monospace" fill="var(--sym-data)" text-anchor="middle">φ(z)</text>
+    <text x="455" y="196" font-size="12" font-family="ui-monospace, monospace" fill="var(--sym-data)" text-anchor="middle">max(0, z)</text>
+
+    <rect x="570" y="145" width="150" height="70" rx="6" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+    <text x="645" y="174" font-size="15" font-family="ui-monospace, monospace" fill="var(--sym-pred)" text-anchor="middle">a</text>
+    <text x="645" y="196" font-size="12" font-family="ui-monospace, monospace" fill="var(--sym-pred)" text-anchor="middle">1 number</text>
+
+    <line x1="152" y1="180" x2="182" y2="180" stroke="var(--sym-param)" stroke-width="1.6"/>
+    <polygon points="182,176 190,180 182,184" fill="var(--sym-param)"/>
+    <text x="170" y="166" font-size="12" font-family="ui-monospace, monospace" fill="var(--sym-param)" text-anchor="middle">w, b</text>
+
+    <line x1="342" y1="180" x2="372" y2="180" stroke="var(--sym-data)" stroke-width="1.6"/>
+    <polygon points="372,176 380,180 372,184" fill="var(--sym-data)"/>
+
+    <line x1="532" y1="180" x2="562" y2="180" stroke="var(--sym-pred)" stroke-width="1.6"/>
+    <polygon points="562,176 570,180 562,184" fill="var(--sym-pred)"/>
+
+    <text x="360" y="254" font-size="12" font-family="ui-monospace, monospace" fill="var(--ink-soft)" text-anchor="middle">w = [2, −3], b = 1, x = [1, −1]   →   z = 6   →   a = ReLU(6) = 6</text>
+
+    <rect x="149" y="312" width="12" height="12" rx="2" fill="none" stroke="var(--sym-data)" stroke-width="1.6"/>
+    <text x="169" y="322" font-size="12" font-family="ui-monospace, monospace" fill="var(--ink-soft)">data &amp; fixed φ</text>
+    <rect x="304" y="312" width="12" height="12" rx="2" fill="none" stroke="var(--sym-param)" stroke-width="1.6"/>
+    <text x="324" y="322" font-size="12" font-family="ui-monospace, monospace" fill="var(--ink-soft)">weights, learned</text>
+    <rect x="480" y="312" width="12" height="12" rx="2" fill="none" stroke="var(--sym-pred)" stroke-width="1.6"/>
+    <text x="500" y="322" font-size="12" font-family="ui-monospace, monospace" fill="var(--ink-soft)">prediction</text>
+  </svg>
+  <figcaption><strong>Score, then bend.</strong> Grey inputs meet red weights and the bias to form one score z; the fixed grey φ clamps negatives to zero, and the blue a is what the next layer receives. Training moves only the red numbers.</figcaption>
+</figure>
+
 <h2>How it actually works</h2>
 
 <h3>Part 1 — The weighted sum is the score</h3>

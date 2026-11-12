@@ -51,6 +51,28 @@
 <p>Add Gaussian noise with standard deviation <code>σC</code> to the clipped sum; with <code>C = 1</code> and <code>σ = 1.1</code> the noise standard deviation is 1.1. The guarantee is a ratio of probabilities, so the noise must be comparable to the largest contribution it hides. Bigger σ means smaller ε and less accuracy.</p>
 <p><strong>Why this part exists:</strong> clipping alone is not privacy — a clipped vector still points at its example — so the noise is what converts a bounded leak into a probabilistic one.</p>
 
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-priv-t f-priv-d">
+    <title id="f-priv-t">Accuracy falls as the privacy noise scale rises</title>
+    <desc id="f-priv-d">Three bars compare accuracy at increasing noise. At sigma 0.5 accuracy is 0.92, at sigma 1.1 it is 0.88, and at sigma 4.0 it is 0.81.</desc>
+    <g data-layer>
+      <line x1="64" y1="290" x2="700" y2="290" stroke="var(--ink-faint)"/>
+      <rect x="130" y="60" width="80" height="230" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="342" y="70" width="80" height="220" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="554" y="88" width="80" height="202" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <text x="170" y="52" text-anchor="middle" font-size="13" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.92</text>
+      <text x="382" y="62" text-anchor="middle" font-size="13" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.88</text>
+      <text x="594" y="80" text-anchor="middle" font-size="13" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.81</text>
+      <text x="170" y="308" text-anchor="middle" font-size="13" fill="var(--ink-faint)" font-family="ui-monospace, monospace">σ = 0.5</text>
+      <text x="382" y="308" text-anchor="middle" font-size="13" fill="var(--ink-faint)" font-family="ui-monospace, monospace">σ = 1.1</text>
+      <text x="594" y="308" text-anchor="middle" font-size="13" fill="var(--ink-faint)" font-family="ui-monospace, monospace">σ = 4.0</text>
+      <text x="54" y="18" text-anchor="start" font-size="13" fill="var(--ink-soft)" font-family="ui-monospace, monospace">accuracy</text>
+    </g>
+  </svg>
+  <div class="bars-data" hidden>{"values":[0.92,0.88,0.81],"labels":["σ = 0.5","σ = 1.1","σ = 4.0"],"max":1,"ylabel":"accuracy"}</div>
+  <figcaption><strong>Privacy has a price.</strong> Raising the noise scale from σ = 0.5 to σ = 4.0 lowers accuracy from 0.92 to 0.81. Each step toward a smaller ε spends utility that must be budgeted for.</figcaption>
+</figure>
+
 <h3>Part 5 — Secure aggregation hides the individual vector</h3>
 <p>Clients add random masks that cancel when summed, so the server receives only the total and never an individual update; with 1,000 clients it sees one sum instead of 1,000 vectors. That complements DP rather than replacing it, since the total is still a function of everyone's data, and it protects the curious server — not a client's own device and not the model's integrity.</p>
 <p><strong>Why this part exists:</strong> differential privacy is statistical — enough observations can erode it — and secure aggregation removes the individual observation entirely for the party that runs the round.</p>
@@ -168,6 +190,7 @@ print(f&quot;norm {norm:.2f} -&gt; clipped norm {np.linalg.norm(clipped):.2f}&qu
 <p class="source">Primary source: Kairouz et al., <a href="https://arxiv.org/abs/1912.04977">Advances and Open Problems in Federated Learning</a> (2019), §3–4.</p>
 
 </main>
+  <script src="../assets/graph.js?v=4" defer></script>
   <script src="../assets/course.js?v=11" defer></script>
 </body>
 </html>

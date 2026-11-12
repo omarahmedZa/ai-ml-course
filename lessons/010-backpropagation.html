@@ -48,6 +48,23 @@
 <h3>Part 4 — Multiply by the local derivative</h3>
 <p>Each node applies one rule: <code>u²</code> gives <code>2u</code>, an add passes the gradient through unchanged, a multiply by a constant scales it, ReLU passes it only where <code>z &gt; 0</code>. Walking back from <code>L</code> to <code>w</code> in the example above accumulates <code>2(z − y)·x</code>. <strong>Why this part exists:</strong> this is the chain rule, the only way a slope measured at the loss becomes a slope at a weight nine operations away.</p>
 
+
+<figure class="fig" data-anim="flow">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-back-t f-back-d">
+    <title id="f-back-t">Gradients travelling backwards through the graph</title>
+    <desc id="f-back-d">Five stages in a row, ordered from the loss back to the first weight: the loss, its derivative with respect to the prediction, then through the activation, then the second layer, then the first weight.</desc>
+    <g data-layer></g>
+  </svg>
+  <script type="application/json" class="flow-data">{"steps":["L","∂L/∂ŷ","∂L/∂z₂","∂L/∂a₁","∂L/∂W₁"],"note":"backward pass"}</script>
+  <div class="fig-controls">
+    <button type="button" data-play data-playing="false">Play</button>
+    <label>stage <input type="range" data-scrub min="0" max="100" value="0"></label>
+    <output data-out="step" aria-live="polite">stage 1 / 5 · backward pass</output>
+    <button type="button" data-reset>Restart</button>
+  </div>
+  <figcaption><strong>One sweep walks from the loss back to layer 1.</strong> Each stage multiplies by a local derivative, so every parameter is priced in the same pass.</figcaption>
+</figure>
+
 <h3>Part 5 — Forks add their contributions</h3>
 <p>When one value feeds two branches, both send a gradient back and the node sums them. A value reached by two paths has a total derivative equal to the sum over paths, never the product. <strong>Why this part exists:</strong> dropping one branch silently halves the gradient, which behaves exactly like halving the learning rate for those weights alone.</p>
 
@@ -173,6 +190,8 @@ print(f&quot;pred={pred} loss={loss} dL/dw={d_w} dL/db={d_b}&quot;)</code></pre>
 <p class="source">Primary source: Karpathy, <a href="https://karpathy.ai/zero-to-hero.html">Neural Networks: Zero to Hero</a>, episode 1 (backprop from scratch).</p>
 
 </main>
+  <script src="../assets/graph.js?v=4" defer></script>
+  <script src="../assets/anim.js?v=3" defer></script>
   <script src="../assets/course.js?v=11" defer></script>
 </body>
 </html>

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>012 — Overfitting in deep learning</title>
 <link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can choose among dropout, weight decay, augmentation and early stopping for a given symptom.">
@@ -45,6 +46,40 @@
 <h3>Part 3 — Dropout removes neighbours</h3>
 <p>During training each activation is set to zero with probability <code>p</code>, commonly 0.3 in wide fully-connected layers. The survivors are divided by <code>1 − p</code> so the expected sum is unchanged: with <code>p = 0.3</code> a unit of 2.0 survives as <code>2.0 / 0.7 ≈ 2.86</code>. At inference dropout is switched off and no rescaling happens.</p>
 <p><strong>Why this part exists:</strong> a unit can normally protect itself by co-adapting with one specific neighbour. Removing neighbours at random forces every unit to carry useful signal on its own.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 420 230" role="img" aria-labelledby="f012-t f012-d">
+    <title id="f012-t">A dropout mask over a five by three grid of units</title>
+    <desc id="f012-d">Fifteen units in a five by three grid. Four are crossed out for this training step and the eleven survivors are divided by one minus p, so the expected activation sum is unchanged.</desc>
+    <text x="150" y="34" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">one training step · p = 0.3</text>
+    <g fill="none" stroke="var(--rule)" stroke-width="1">
+      <rect x="150" y="56" width="24" height="24"/><rect x="174" y="56" width="24" height="24"/><rect x="198" y="56" width="24" height="24"/><rect x="222" y="56" width="24" height="24"/><rect x="246" y="56" width="24" height="24"/>
+      <rect x="150" y="80" width="24" height="24"/><rect x="174" y="80" width="24" height="24"/><rect x="198" y="80" width="24" height="24"/><rect x="222" y="80" width="24" height="24"/><rect x="246" y="80" width="24" height="24"/>
+      <rect x="150" y="104" width="24" height="24"/><rect x="174" y="104" width="24" height="24"/><rect x="198" y="104" width="24" height="24"/><rect x="222" y="104" width="24" height="24"/><rect x="246" y="104" width="24" height="24"/>
+    </g>
+    <g fill="var(--sym-param)" fill-opacity="0.2" stroke="var(--sym-param)" stroke-width="2">
+      <rect x="174" y="56" width="24" height="24"/>
+      <rect x="222" y="80" width="24" height="24"/>
+      <rect x="150" y="104" width="24" height="24"/>
+      <rect x="246" y="104" width="24" height="24"/>
+    </g>
+    <g stroke="var(--sym-param)" stroke-width="1.8">
+      <line x1="177" y1="59" x2="195" y2="77"/><line x1="195" y1="59" x2="177" y2="77"/>
+      <line x1="225" y1="83" x2="243" y2="101"/><line x1="243" y1="83" x2="225" y2="101"/>
+      <line x1="153" y1="107" x2="171" y2="125"/><line x1="171" y1="107" x2="153" y2="125"/>
+      <line x1="249" y1="107" x2="267" y2="125"/><line x1="267" y1="107" x2="249" y2="125"/>
+    </g>
+    <g>
+      <rect x="150" y="160" width="14" height="14" fill="var(--sym-param)" fill-opacity="0.2" stroke="var(--sym-param)" stroke-width="2"/>
+      <line x1="152" y1="162" x2="162" y2="172" stroke="var(--sym-param)" stroke-width="1.5"/>
+      <line x1="162" y1="162" x2="152" y2="172" stroke="var(--sym-param)" stroke-width="1.5"/>
+      <text x="172" y="171" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">dropped this step</text>
+      <rect x="150" y="180" width="14" height="14" fill="none" stroke="var(--rule)" stroke-width="1"/>
+      <text x="172" y="191" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">kept, then × 1/(1 − p)</text>
+    </g>
+  </svg>
+  <figcaption><strong>Dropout masks units; it does not scale them down.</strong> Four of fifteen units are crossed out for this step, and the eleven survivors are divided by 1 − p, so the expected activation sum is unchanged. A fresh mask is drawn every step, which is why inference needs no correction.</figcaption>
+</figure>
 
 <h3>Part 4 — Weight decay charges rent on large weights</h3>
 <p>Add <code>λ‖w‖²</code> to the loss, where <code>‖w‖²</code> is the sum of squared weights. With <code>λ = 10⁻⁴</code> and a squared weight sum of 2,500, the penalty contributes 0.25 on top of a data loss of 0.84, giving 1.09. Its gradient is <code>2λw</code>, so each weight is pulled toward zero in proportion to its own size.</p>

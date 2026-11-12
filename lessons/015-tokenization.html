@@ -47,6 +47,39 @@
 <h3>Part 4 — Encode by replaying the merge list</h3>
 <p>Encoding new text means applying the same merges in the same order, greedily, left to right. Nothing is counted at inference time; the ordered merge list is the entire algorithm. A 12-character word such as <code>unbelievable</code> lands in 3 pieces, and English averages about 4 characters per token. Why this part exists: a deterministic order guarantees that one sentence always produces one sequence of IDs, so caching, batching and replay stay consistent.</p>
 
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-tok-t f-tok-d">
+    <title id="f-tok-t">One word split into three tokens and three integer IDs</title>
+    <desc id="f-tok-d">Three boxes left to right: the text unbelievable, the three token pieces un, believ and able, and the integer IDs 371, 7892 and 531. Arrows show the tokenizer mapping text to pieces, then pieces to IDs.</desc>
+    <g font-family="ui-monospace, monospace">
+      <text x="120" y="138" text-anchor="middle" font-size="14" fill="var(--ink-faint)">text</text>
+      <text x="360" y="138" text-anchor="middle" font-size="14" fill="var(--ink-faint)">tokens</text>
+      <text x="600" y="138" text-anchor="middle" font-size="14" fill="var(--ink-faint)">IDs</text>
+
+      <rect x="60" y="160" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+      <text x="120" y="197" text-anchor="middle" font-size="14" fill="var(--sym-data)">unbelievable</text>
+
+      <rect x="300" y="160" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+      <text x="360" y="175" text-anchor="middle" font-size="14" fill="var(--sym-pred)">[&quot;un&quot;,</text>
+      <text x="360" y="194" text-anchor="middle" font-size="14" fill="var(--sym-pred)">&quot;believ&quot;,</text>
+      <text x="360" y="213" text-anchor="middle" font-size="14" fill="var(--sym-pred)">&quot;able&quot;]</text>
+
+      <rect x="540" y="160" width="120" height="64" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+      <text x="600" y="175" text-anchor="middle" font-size="14" fill="var(--sym-pred)">[371,</text>
+      <text x="600" y="194" text-anchor="middle" font-size="14" fill="var(--sym-pred)">7892,</text>
+      <text x="600" y="213" text-anchor="middle" font-size="14" fill="var(--sym-pred)">531]</text>
+
+      <line x1="184" y1="192" x2="286" y2="192" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="300,192 288,186 288,198" fill="var(--ink-faint)"/>
+      <line x1="424" y1="192" x2="526" y2="192" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="540,192 528,186 528,198" fill="var(--ink-faint)"/>
+
+      <text x="360" y="278" text-anchor="middle" font-size="12" fill="var(--ink-faint)">frozen merge list · no counting at inference</text>
+    </g>
+  </svg>
+  <figcaption><strong>Three integers, not twelve letters.</strong> The model never sees the string: a frozen merge list splits it into three known pieces, and each piece is one lookup. Token count, context window and price are all measured in that third box.</figcaption>
+</figure>
+
 <h3>Part 5 — Reserve special tokens</h3>
 <p>Four structural symbols live in the vocabulary and never come from raw text: <code>&lt;bos&gt;</code> opens a sequence, <code>&lt;eos&gt;</code> closes it, <code>&lt;pad&gt;</code> fills short rows in a batch, <code>&lt;mask&gt;</code> hides a position during training. To the model they are ordinary IDs. Why this part exists: batching requires equal-length rows, and without a dedicated filler the model would treat padding characters as content and learn from them.</p>
 

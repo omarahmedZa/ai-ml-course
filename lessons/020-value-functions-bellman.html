@@ -52,6 +52,32 @@
 <span class="formula">V^π(s) = Σ_a π(a|s) Σ_{s′} P(s′|s,a)[ R(s,a,s′) + γ V^π(s′) ]</span>
 <p>Read it inside out: for each action, average over next states; for each next state, take its reward plus the discounted value there; then average over actions. Why this part exists: the definition of return is an endless sum, and this equation replaces it with one step plus a table lookup — a finite computation you can run, and running it repeatedly is policy evaluation.</p>
 
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-bell-t f-bell-d">
+    <title id="f-bell-t">One Bellman backup: reward plus discounted value of the next state</title>
+    <desc id="f-bell-d">Two state boxes, s on the left and s prime on the right. A straight arrow labelled R runs from s to s prime. A curved arrow returns from s prime to s, labelled gamma times V of s prime, showing that the next state's value already contains everything after it.</desc>
+    <g font-family="ui-monospace, monospace" font-size="12">
+      <defs>
+        <marker id="bell-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--sym-opt)"/></marker>
+        <marker id="bell-v" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--sym-pred)"/></marker>
+      </defs>
+      <text x="355" y="62" text-anchor="middle" font-size="14" fill="var(--ink)">V(s)  =  R  +  γV(s′)</text>
+      <text x="355" y="86" text-anchor="middle" font-size="11" fill="var(--ink-faint)">one step, then a table lookup</text>
+      <rect x="120" y="120" width="160" height="94" rx="10" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+      <rect x="430" y="120" width="160" height="94" rx="10" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+      <text x="200" y="179" text-anchor="middle" font-size="20" font-style="italic" fill="var(--ink)">s</text>
+      <text x="510" y="179" text-anchor="middle" font-size="20" font-style="italic" fill="var(--ink)">s′</text>
+      <line x1="280" y1="152" x2="430" y2="152" stroke="var(--sym-opt)" stroke-width="2.5" marker-end="url(#bell-r)"/>
+      <text x="352" y="142" text-anchor="middle" font-size="13" fill="var(--sym-opt)">R</text>
+      <text x="352" y="174" text-anchor="middle" font-size="11" fill="var(--ink-faint)">reward now</text>
+      <path d="M 480 216 C 462 298, 234 298, 216 218" fill="none" stroke="var(--sym-pred)" stroke-width="2.5" marker-end="url(#bell-v)"/>
+      <text x="350" y="306" text-anchor="middle" font-size="13" fill="var(--sym-pred)">γV(s′)</text>
+      <text x="350" y="328" text-anchor="middle" font-size="11" fill="var(--ink-faint)">everything after s′, already priced</text>
+    </g>
+  </svg>
+  <figcaption><strong>A backup replaces the whole future with one step and a lookup.</strong> Take the reward R, add the discounted value of the next state, and stop. Whatever happens after s′ is already inside V(s′), so the same equation applies again.</figcaption>
+</figure>
+
 <h3>Part 6 — The max turns evaluation into control</h3>
 <p>Replace the average over actions with a maximum and you get <code>Q*(s,a) = Σ_{s′} P[R + γ max_{a′} Q*(s′,a′)]</code>. The target now asks what the best next action would give, not what the current policy does. Why this part exists: evaluation scores the policy you already have, and the max scores the best one available. Without it you can rank policies but never improve one.</p>
 

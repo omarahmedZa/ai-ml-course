@@ -44,6 +44,44 @@
 <h3>Part 3 — Optimise the policy with a leash</h3>
 <p>PPO, a reinforcement-learning loop, samples answers, scores them with the reward model, and updates the model to raise that score. The objective subtracts <code>β · KL(π ‖ π_SFT)</code>, a penalty on drifting away from the fine-tuned model. <strong>Why this part exists:</strong> the reward model is a rough approximation, so an unconstrained optimiser finds its errors — repetitive, flattering, or confidently wrong text that scores highly.</p>
 
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-align-t f-align-d">
+    <title id="f-align-t">The SFT to reward model to PPO pipeline, with a KL leash back to SFT</title>
+    <desc id="f-align-d">Three boxes in a row: SFT model, reward model, PPO policy. Arrows run left to right between them. A dashed arc runs from the bottom of the PPO policy back to the bottom of the SFT model, labelled beta times the KL divergence between the policy and the SFT model.</desc>
+    <defs>
+      <marker id="f-align-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--ink-faint)"/>
+      </marker>
+      <marker id="f-align-k" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--sym-param)"/>
+      </marker>
+    </defs>
+
+    <text x="120" y="112" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--ink-soft)">1 · copy</text>
+    <text x="360" y="112" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--ink-soft)">2 · score</text>
+    <text x="600" y="112" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--ink-soft)">3 · optimise</text>
+
+    <rect x="50" y="130" width="140" height="64" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+    <text x="120" y="156" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--sym-pred)">SFT model</text>
+    <text x="120" y="176" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--sym-pred)">π_SFT</text>
+
+    <rect x="290" y="130" width="140" height="64" rx="8" fill="var(--card)" stroke="var(--sym-loss)" stroke-width="1.6"/>
+    <text x="360" y="156" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--sym-loss)">reward model</text>
+    <text x="360" y="176" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--sym-loss)">r(x, y)</text>
+
+    <rect x="530" y="130" width="140" height="64" rx="8" fill="var(--card)" stroke="var(--sym-opt)" stroke-width="1.6"/>
+    <text x="600" y="156" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--sym-opt)">PPO policy</text>
+    <text x="600" y="176" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--sym-opt)">π_θ</text>
+
+    <path d="M190 162 H290" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-align-a)"/>
+    <path d="M430 162 H530" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-align-a)"/>
+
+    <path d="M600 194 C600 300, 120 300, 120 198" fill="none" stroke="var(--sym-param)" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#f-align-k)"/>
+    <text x="360" y="300" text-anchor="middle" font-size="13" font-family="ui-monospace, monospace" fill="var(--sym-param)">β · KL(π ‖ π_SFT)</text>
+  </svg>
+  <figcaption><strong>Copy, then score, then climb the score under a leash.</strong> SFT supplies the starting policy, the reward model replaces human judgement, and PPO raises the reward while the KL term keeps the policy near SFT — so it cannot wander into the region where the reward model is simply wrong.</figcaption>
+</figure>
+
 <h3>Part 4 — Or skip the reward model with DPO</h3>
 <p>Direct preference optimisation uses the same pairs but writes the loss directly on the model's own log-probabilities, so the reward network and the sampling loop disappear. It needs one forward pass per answer instead of an RL rollout. <strong>Why this part exists:</strong> PPO is expensive and unstable; DPO reaches the same optimum with a classification-style loss.</p>
 
