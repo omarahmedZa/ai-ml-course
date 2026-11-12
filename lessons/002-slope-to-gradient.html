@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>002 — Slope to gradient</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="002">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 02 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 0 · Mathematical floor · Topic 2 of 35</p>
+  <h1>Slope → gradient</h1>
+  <p class="objective">You can compute a gradient and explain why training steps <em>against</em> it.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Every training loop in this course — backprop, Q-learning, PPO — is the same sentence: measure the slope, step the other way. If the gradient is a mystery, every optimizer you meet is a mystery too.</p>
+
+<h2>The one core idea</h2>
+<p>A <strong>gradient</strong> is the slope of the loss with respect to every parameter at once. It points uphill, so learning means stepping downhill — subtract it.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><strong>Derivative</strong> = local slope of a 1-D function: <code>(f(w+h) − f(w)) / h</code> as <code>h → 0</code>. It answers "if I nudge <code>w</code>, how much does <code>f</code> move?"</li>
+  <li><strong>Partial derivative</strong> = the same question with every other variable frozen.</li>
+  <li><strong>Gradient</strong> <code>∇f</code> = the vector of all partials. Its direction is steepest <em>ascent</em>; its length is how steep.</li>
+  <li><strong>The update:</strong> <code>w ← w − η∇f</code>. <code>η</code> is the <strong>learning rate</strong> — how far you trust the slope.</li>
+</ul>
+
+<table>
+  <tr><th>Rule</th><th>Result</th><th>Example</th></tr>
+  <tr><td>Power</td><td class="num">d/dw wⁿ = n·wⁿ⁻¹</td><td class="num">d/dw w² = 2w</td></tr>
+  <tr><td>Linear</td><td class="num">d/dw (aw + b) = a</td><td class="num">d/dw (3w + 5) = 3</td></tr>
+  <tr><td>Chain</td><td class="num">d/dw f(g(w)) = f′(g(w))·g′(w)</td><td class="num">d/dw (2w)² = 8w</td></tr>
+</table>
+
+<p>In deep learning <code>f</code> is the loss over millions of parameters. Backprop (topic 10) computes that whole gradient in one backward pass — it is bookkeeping on the chain rule, not a new kind of math.</p>
+
+<h2>Worked example</h2>
+
+<h3>1. One parameter</h3>
+<p><code>f(w) = w²</code>, so <code>f′(w) = 2w</code>. Start at <code>w = 3</code>, <code>η = 0.1</code>:</p>
+
+<table>
+  <tr><th>Step</th><th class="num">w</th><th class="num">gradient = 2w</th><th class="num">loss = w²</th></tr>
+  <tr><td>start</td><td class="num">3.00</td><td class="num">6.00</td><td class="num">9.00</td></tr>
+  <tr><td>1</td><td class="num">2.40</td><td class="num">4.80</td><td class="num">5.76</td></tr>
+  <tr><td>2</td><td class="num">1.92</td><td class="num">3.84</td><td class="num">3.69</td></tr>
+</table>
+
+<p>The step shrinks as the slope flattens. That is why gradient descent slows near a minimum instead of overshooting it.</p>
+
+<h3>2. Two parameters</h3>
+<p><code>f(x, y) = x² + 3y</code> at <code>(2, 1)</code>:</p>
+
+<table>
+  <tr><th>Partial</th><th class="num">Value at (2,1)</th></tr>
+  <tr><td>∂f/∂x = 2x</td><td class="num">4</td></tr>
+  <tr><td>∂f/∂y = 3</td><td class="num">3</td></tr>
+  <tr><td>∇f</td><td class="num">(4, 3)</td></tr>
+</table>
+
+<p>With <code>η = 0.1</code>: <code>(2, 1) → (1.6, 0.7)</code>. Loss moves from <code>4 + 3 = 7</code> to <code>2.56 + 2.1 = 4.66</code>. Check the direction: <code>y</code> felt a constant push of 3, so it moves every step until it hits a boundary — <code>f</code> is linear in <code>y</code>, with no minimum there.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The gradient points downhill."</strong> It points <em>uphill</em> — toward increasing loss. Adding the gradient makes training worse, which is exactly why the update has a minus sign.</p>
+  <p><strong>Second trap: too large a step.</strong> On <code>f(w) = w²</code> with <code>η = 1</code>, <code>w = 3 → 3 − 6 = −3</code>, and the loss returns to 9. Repeat forever: the parameters oscillate and nothing converges.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li><code>f(w) = 3w²</code> at <code>w = 2</code>. Compute the gradient and one step with <code>η = 0.1</code>.
+    <details><summary>Answer</summary>
+      <p><code>f′ = 6w = 12</code>. <code>w ← 2 − 0.1(12) = 0.8</code>. Loss falls from 12 to <code>3(0.64) = 1.92</code>.</p>
+    </details>
+  </li>
+  <li>You have the gradient of the loss. Why subtract it rather than add it?
+    <details><summary>Answer</summary>
+      <p>Because it points toward higher loss. Subtracting moves toward lower loss locally. The minus sign is the whole algorithm; everything else is choosing <code>η</code>.</p>
+    </details>
+  </li>
+  <li><code>f(x, y) = x + y²</code> at <code>(1, 3)</code>. What is <code>∇f</code>, and which parameter will keep moving forever?
+    <details><summary>Answer</summary>
+      <p><code>∇f = (1, 6)</code>. <code>x</code> keeps moving: <code>f</code> is linear in <code>x</code>, so the gradient never shrinks. <code>y</code> settles at 0, where its gradient vanishes.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 3: Probability, expectation, likelihood.</strong> Gradient descent needs something to descend. That something is a loss, and every loss in this course is a likelihood in disguise.</p>
+  <div class="pager">
+    <a href="001-vectors-matrices-dot-product.html">← 01 · Dot product</a>
+    <a href="003-probability-expectation-likelihood.html">03 · Probability →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: 3Blue1Brown, <a href="https://www.3blue1brown.com/lessons/gradient">Essence of Calculus, ch. 10 — The gradient</a>.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

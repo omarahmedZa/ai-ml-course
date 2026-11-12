@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>023 — Function approximation</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="023">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 23 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 6 · Deep reinforcement learning · Topic 23 of 35</p>
+  <h1>Function approximation: why tables die</h1>
+  <p class="objective">You can explain why tabular RL fails at scale, and why approximation removes the convergence guarantee.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Every deep RL result — Atari, Go, robot locomotion, RLHF — exists because someone replaced a table with a neural network. The price is the guarantee, and the exam will ask what was lost.</p>
+
+<h2>The one core idea</h2>
+<p>Tabular RL stores one number per state. When states are images, that table cannot exist — so you <strong>approximate</strong> <code>Q(s,a) ≈ Q_θ(s,a)</code>, trading exactness for generalisation, and losing the convergence proof with it.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><strong>Table size</strong>: <code>|S| × |A|</code>. A 25-cell grid is trivial. An Atari frame is 210×160 pixels with 256 values each — more states than atoms in the observable universe.</li>
+  <li><strong>Approximation</strong> generalises: updating one state changes predictions for nearby states. That is the point — and the danger.</li>
+  <li><strong>The deadly triad</strong> (Sutton &amp; Barto): <strong>function approximation</strong> + <strong>bootstrapping</strong> + <strong>off-policy</strong> data can diverge. Any two are fine; all three together are not.</li>
+  <li><strong>Why</strong>: the target <code>r + γ max Q_θ(s′)</code> depends on the same weights you are updating. You are chasing a target that moves when you move — and approximation makes the error affect states you never visited.</li>
+  <li><strong>Supervised assumptions break</strong>: samples are correlated in time (not i.i.d.), the distribution shifts as the policy changes, and the label is a guess.</li>
+</ul>
+
+<span class="formula">Q(s,a) → Q_θ(s,a)     loss = ( r + γ max_{a′} Q_θ(s′,a′) − Q_θ(s,a) )²</span>
+
+<h2>Worked example</h2>
+
+<h3>1. Counting states</h3>
+<table>
+  <tr><th>Environment</th><th class="num">State space</th><th>Table?</th></tr>
+  <tr><td>5×5 grid</td><td class="num">25</td><td>Trivial</td></tr>
+  <tr><td>Chess</td><td class="num">~10⁴⁴</td><td>Impossible</td></tr>
+  <tr><td>Atari frame (210×160×3, 256 levels)</td><td class="num">256¹⁰⁰⁸⁰⁰</td><td>Absurd</td></tr>
+</table>
+
+<h3>2. What generalisation buys — and costs</h3>
+<p>Two grid cells look identical to the network (same input features). Update one, and the other's value changes too. Usually that is helpful: experience transfers. But if the two cells need opposite values, the network averages them and neither is correct. That is <strong>catastrophic interference</strong>, and it is invisible in a table.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A neural network is just a big table with better memory."</strong> It is a smooth function over all inputs. That smoothness is an assumption — and if the true value function is discontinuous, approximation will average across the discontinuity and never represent it.</p>
+  <p><strong>Second trap:</strong> assuming RL convergence proofs survive the swap. Tabular Q-learning converges to <code>Q*</code>; with approximation and off-policy bootstrapping, it can oscillate or diverge. DQN's fixes (topic 24) are engineering, not a proof.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Why is a table impossible for a camera-based robot?
+    <details><summary>Answer</summary>
+      <p>The state is a high-dimensional image, so <code>|S|</code> is astronomically large. No table of that size can be stored, and most states would never be visited anyway.</p>
+    </details>
+  </li>
+  <li>Name the three ingredients of the deadly triad.
+    <details><summary>Answer</summary>
+      <p>Function approximation, bootstrapping (using estimated values as targets), and off-policy training. Any two are stable; all three can diverge.</p>
+    </details>
+  </li>
+  <li>Why does approximation break the i.i.d. assumption that supervised learning relies on?
+    <details><summary>Answer</summary>
+      <p>Transitions arrive in temporal order from the current policy, so consecutive samples are highly correlated and the data distribution shifts as the policy improves.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 24: DQN.</strong> The deadly triad is not a death sentence. DQN is two specific engineering fixes that made value-based deep RL actually work.</p>
+  <div class="pager">
+    <a href="022-two-solution-families.html">← 22 · Solution families</a>
+    <a href="024-dqn.html">24 · DQN →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Sutton &amp; Barto, <a href="http://incompleteideas.net/book/the-book-2nd.html">Reinforcement Learning: An Introduction</a>, ch. 9 &amp; 11.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

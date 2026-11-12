@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>012 — Overfitting in deep learning</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="012">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 12 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 3 · Making deep learning work · Topic 12 of 35</p>
+  <h1>Overfitting in deep learning</h1>
+  <p class="objective">You can choose among dropout, weight decay, augmentation and early stopping for a given symptom.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Networks have enough parameters to memorise any dataset you can afford to label. The difference between a demo and a shipped model is usually one of these four levers, applied for the right reason.</p>
+
+<h2>The one core idea</h2>
+<p>Every regulariser works by <strong>making the model's job harder during training</strong> so it cannot rely on memorisable, brittle cues — and each one attacks a different kind of brittleness.</p>
+
+<h2>How it actually works</h2>
+<table>
+  <tr><th>Lever</th><th>Mechanism</th><th>Use when</th></tr>
+  <tr><td><strong>Dropout</strong></td><td>Zero each activation with probability <code>p</code> during training; rescale by <code>1/(1−p)</code>; identity at inference</td><td>Large fully-connected layers, small data</td></tr>
+  <tr><td><strong>Weight decay</strong></td><td>Add <code>λ‖w‖²</code> to the loss; pulls weights toward 0</td><td>Weights growing large; always a sane default</td></tr>
+  <tr><td><strong>Augmentation</strong></td><td>Random crops, flips, colour jitter, mixup — label-preserving transforms</td><td>Images, audio, text; the cheapest data you will ever get</td></tr>
+  <tr><td><strong>Early stopping</strong></td><td>Keep the checkpoint with best validation loss</td><td>Always. Costs nothing but bookkeeping</td></tr>
+</table>
+
+<p>Dropout works because no unit can rely on a specific neighbour being present — it must be useful on its own. Weight decay works because large weights produce sharp, high-curvature functions that fit noise. Augmentation works because it teaches invariance directly instead of hoping the data implies it.</p>
+
+<h2>Worked example</h2>
+
+<h3>1. A 28-point gap</h3>
+<p>Train accuracy 0.99, validation 0.71, 8,000 images.</p>
+
+<table>
+  <tr><th>Intervention</th><th class="num">Train</th><th class="num">Val</th></tr>
+  <tr><td>Baseline</td><td class="num">0.99</td><td class="num">0.71</td></tr>
+  <tr><td>+ dropout 0.3 on FC layers</td><td class="num">0.88</td><td class="num">0.82</td></tr>
+  <tr><td>+ flip/crop augmentation</td><td class="num">0.86</td><td class="num">0.91</td></tr>
+</table>
+
+<p>Training accuracy <em>fell</em> and the model got better. That is the signature of a regulariser working: you are trading memorisation for generalisation.</p>
+
+<h3>2. Picking the lever</h3>
+<p>Symptom drives choice. Huge gap with plenty of data → augmentation first (it adds information). Huge gap with 500 rows → dropout and weight decay. Gap that appears only late in training → early stopping. No gap but bad performance → you are not overfitting; regularising will make it worse.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Dropout improves the model."</strong> It does nothing at inference — it is identity. Its only effect is on the <em>training</em> dynamics. Leaving it on at evaluation produces random, noisy predictions and a mysteriously bad validation score.</p>
+  <p><strong>Second trap:</strong> augmentation that changes the label. Horizontal flips of digits turn 6 into 9; vertical flips of text destroy meaning. Every transform must preserve what you are asking the model to predict.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Dropout with <code>p = 0.4</code> is active. What happens to the surviving activations during training, and at inference?
+    <details><summary>Answer</summary>
+      <p>Survivors are divided by <code>1 − 0.4 = 0.6</code>, so the expected sum is unchanged. At inference dropout is off and no rescaling happens — that is why the two modes must never mix.</p>
+    </details>
+  </li>
+  <li>Your train and validation loss are both 1.4 and flat. Should you add dropout?
+    <details><summary>Answer</summary>
+      <p>No. Equal, high losses mean underfitting. Regularisation increases bias; you need capacity, better features, or more training.</p>
+    </details>
+  </li>
+  <li>Why is augmentation usually the first lever for images?
+    <details><summary>Answer</summary>
+      <p>It encodes real invariances (a cat is still a cat when shifted) and multiplies effective data without new labels. Dropout only limits capacity; augmentation adds information.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 13: Optimization failure modes.</strong> Regularisation stops the model memorising. Topic 13 covers the opposite failure: a model that cannot learn at all because its gradients never arrive.</p>
+  <div class="pager">
+    <a href="011-training-loop.html">← 11 · Training loop</a>
+    <a href="013-optimization-failure-modes.html">13 · Optimization failures →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Goodfellow, Bengio &amp; Courville, <a href="https://www.deeplearningbook.org">Deep Learning</a>, ch. 7.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

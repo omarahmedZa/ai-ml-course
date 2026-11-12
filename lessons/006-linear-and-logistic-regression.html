@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>006 — Linear and logistic regression</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="006">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 06 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 1 · Machine learning foundations · Topic 6 of 35</p>
+  <h1>Linear &amp; logistic regression</h1>
+  <p class="objective">You can derive a logistic decision boundary, and say why squared error is the wrong loss for classification.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">These are the baselines every project must beat before deep learning is justified, and logistic regression is literally the last layer of every classifier in Unit 7. Same dot product, one extra function.</p>
+
+<h2>The one core idea</h2>
+<p>A linear model computes <em>one</em> weighted sum. The <strong>link function</strong> decides whether that sum is a prediction (regression) or a probability (classification).</p>
+
+<h2>How it actually works</h2>
+<table>
+  <tr><th></th><th>Linear regression</th><th>Logistic regression</th></tr>
+  <tr><td>Score</td><td class="num">z = w·x + b</td><td class="num">z = w·x + b</td></tr>
+  <tr><td>Output</td><td class="num">ŷ = z (any real)</td><td class="num">p = σ(z) ∈ (0,1)</td></tr>
+  <tr><td>Loss</td><td class="num">squared error</td><td class="num">binary cross-entropy</td></tr>
+  <tr><td>Solved by</td><td class="num">closed form or GD</td><td class="num">gradient descent</td></tr>
+</table>
+
+<span class="formula">σ(z) = 1 / (1 + e⁻ᶻ)     boundary:  w·x + b = 0</span>
+
+<ul>
+  <li><code>z</code> is the <strong>logit</strong> = log-odds: <code>z = ln(p / (1−p))</code>. The model is linear in log-odds, not in probability.</li>
+  <li>Predict class 1 when <code>p &gt; 0.5</code>, i.e. when <code>z &gt; 0</code>. So the decision boundary is the hyperplane <code>w·x + b = 0</code> — always straight, no matter how confident the probabilities get.</li>
+  <li><code>w</code> is the boundary's normal vector; <code>b</code> shifts it. Doubling <code>‖w‖</code> does not move the boundary — it only makes probabilities more extreme.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. One point, one probability</h3>
+<p><code>w = [1, −1]</code>, <code>b = 0</code>, <code>x = [2, 0.5]</code>:</p>
+
+<table>
+  <tr><th>Step</th><th class="num">Value</th></tr>
+  <tr><td>z</td><td class="num">2 − 0.5 = 1.5</td></tr>
+  <tr><td>p = σ(1.5)</td><td class="num">1 / (1 + e⁻¹·⁵) = 0.818</td></tr>
+  <tr><td>Class</td><td class="num">1 (since z &gt; 0)</td></tr>
+</table>
+
+<p>The distance from the boundary controls confidence: <code>z = 0 → p = 0.5</code>; <code>z = 4 → p = 0.982</code>. Points far from the line are not "more correct" — only more confidently classified.</p>
+
+<h3>2. Where the boundary sits</h3>
+<p>With two features and <code>w = [1, −2]</code>, <code>b = 1</code>, the boundary is <code>x₁ − 2x₂ + 1 = 0</code>, i.e. <code>x₂ = 0.5x₁ + 0.5</code> — a line with slope 0.5. Everything above it is class 0; below, class 1. If the true boundary is curved, no choice of <code>w</code> will fix it: that is where hidden layers enter (Unit 2).</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Use squared error, it worked for regression."</strong> For classification it is a bad objective: the sigmoid saturates, the gradient vanishes exactly when the model is most wrong, and the loss is non-convex in <code>w</code>. Cross-entropy is the correct likelihood (topic 3) and has a clean gradient, <code>(p − y)x</code>.</p>
+  <p><strong>Second trap:</strong> judging it by accuracy on imbalanced data. 99% accuracy on 1% positives is achieved by predicting "no" forever. Use precision, recall, or AUC — and always compare to that trivial baseline.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>With <code>w = [2, 1]</code>, <code>b = −3</code>, classify <code>x = [1, 1]</code> and give its probability.
+    <details><summary>Answer</summary>
+      <p><code>z = 2 + 1 − 3 = 0</code>, so <code>p = 0.5</code> — the point sits exactly on the boundary. Not a confident prediction; a tie.</p>
+    </details>
+  </li>
+  <li>Why does scaling <code>w</code> by 10 not move the decision boundary?
+    <details><summary>Answer</summary>
+      <p>The boundary is where <code>w·x + b = 0</code>. Scaling <code>w</code> scales both sides, so the set of solutions is unchanged. It only steepens the sigmoid, pushing probabilities toward 0 and 1.</p>
+    </details>
+  </li>
+  <li>Your classifier reports 97% accuracy on a dataset with 3% positives. What is the trivial baseline, and what should you report instead?
+    <details><summary>Answer</summary>
+      <p>Always predicting "negative" scores 97%. Report precision, recall, and AUC against that baseline; 97% may mean the model learned nothing.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 7: Trees &amp; ensembles.</strong> Linear models cannot bend. Trees can — and on tabular data they will beat your neural network more often than you expect.</p>
+  <div class="pager">
+    <a href="005-generalization.html">← 05 · Generalization</a>
+    <a href="007-trees-and-ensembles.html">07 · Trees →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: <a href="https://scikit-learn.org/stable/modules/linear_model.html">scikit-learn — Generalized linear models</a>.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

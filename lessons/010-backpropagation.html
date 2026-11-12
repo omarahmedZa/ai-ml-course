@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>010 — Backpropagation</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="010">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 10 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 2 · Neural network mechanics · Topic 10 of 35</p>
+  <h1>Backpropagation</h1>
+  <p class="objective">You can apply the chain rule to a small graph and say what each gradient means.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Every "the model won't learn" bug is a gradient bug: wrong sign, vanished, exploded, or detached. Backprop is the one mechanism you must be able to inspect rather than trust.</p>
+
+<h2>The one core idea</h2>
+<p>Backprop is the <strong>chain rule applied right-to-left</strong> over the computation graph: each node passes its local derivative back to its inputs, multiplied by the derivative flowing in from the loss.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><strong>Graph</strong>: every operation (add, multiply, ReLU, matmul) is a node. The forward pass stores the values it needs.</li>
+  <li><strong>Upstream gradient</strong> <code>∂L/∂out</code> arrives at a node. The node multiplies it by its <strong>local derivative</strong> <code>∂out/∂in</code> and passes the product down.</li>
+  <li><strong>Fan-out adds</strong>: if a value feeds two paths, the gradients from both are summed. This is why "gradient accumulation" works.</li>
+  <li><strong>One sweep suffices</strong>: reverse-mode automatic differentiation costs roughly one extra forward pass, regardless of how many parameters there are. Numerical gradients would cost one pass <em>per</em> parameter.</li>
+</ul>
+
+<span class="formula">∂L/∂w = ∂L/∂out · ∂out/∂z · ∂z/∂w</span>
+
+<h2>Worked example</h2>
+
+<h3>1. One linear unit, by hand</h3>
+<p><code>z = wx + b</code>, <code>L = (z − y)²</code>, with <code>x = 2</code>, <code>w = 3</code>, <code>b = 1</code>, <code>y = 10</code>.</p>
+
+<table>
+  <tr><th>Quantity</th><th>Derivation</th><th class="num">Value</th></tr>
+  <tr><td>z</td><td class="num">3(2) + 1</td><td class="num">7</td></tr>
+  <tr><td>L</td><td class="num">(7 − 10)²</td><td class="num">9</td></tr>
+  <tr><td>∂L/∂z</td><td class="num">2(z − y)</td><td class="num">−6</td></tr>
+  <tr><td>∂L/∂w</td><td class="num">∂L/∂z · x</td><td class="num">−12</td></tr>
+  <tr><td>∂L/∂b</td><td class="num">∂L/∂z · 1</td><td class="num">−6</td></tr>
+</table>
+
+<p>With <code>η = 0.1</code>: <code>w = 3 − 0.1(−12) = 4.2</code>, <code>b = 1 − 0.1(−6) = 1.6</code>. Feed forward: <code>4.2(2) + 1.6 = 10</code>, loss 0. One step, exact — because this loss is quadratic and the step was chosen well.</p>
+
+<h3>2. Reading a real graph</h3>
+<p>For <code>L = (a·b + c)²</code> with <code>a=2, b=3, c=1</code>: <code>u = ab + c = 7</code>, <code>L = 49</code>. Then <code>∂L/∂u = 2u = 14</code>, so <code>∂L/∂a = 14·b = 42</code>, <code>∂L/∂b = 14·a = 28</code>, <code>∂L/∂c = 14</code>. Three gradients from one backward sweep — that is the entire trick.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Backprop is a special algorithm for neural networks."</strong> It is reverse-mode autodiff, and it works on any differentiable graph — physics simulations, rendering, control. Networks are just the most profitable place to point it.</p>
+  <p><strong>Second trap:</strong> reading a gradient as "how important this parameter is". It is a <em>local</em> slope at the current parameters. The same weight can have a huge gradient at initialisation and a tiny one a step later.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li><code>L = (3w)²</code>. What is <code>dL/dw</code> at <code>w = 2</code>?
+    <details><summary>Answer</summary>
+      <p><code>L = 9w²</code>, so <code>dL/dw = 18w = 36</code>. Via the chain rule: <code>2(3w)·3 = 18w</code>. Same answer; the chain rule is not optional bookkeeping, it is the derivative.</p>
+    </details>
+  </li>
+  <li>A value feeds two branches of the graph. How do the two gradients combine?
+    <details><summary>Answer</summary>
+      <p>They add. Total derivative = sum of contributions from every path. This is exactly why accumulating gradients across micro-batches is mathematically valid.</p>
+    </details>
+  </li>
+  <li>Why is backprop cheaper than finite differences for 1M parameters?
+    <details><summary>Answer</summary>
+      <p>Finite differences need two forward passes per parameter — about 2M passes. Backprop gets every gradient in one backward pass, roughly the cost of one forward pass.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 11: The training loop.</strong> You have a gradient. Wrap it in five lines, add a learning rate, and you have the loop that trains every model in the rest of this course.</p>
+  <div class="pager">
+    <a href="009-layers-and-forward-pass.html">← 09 · Forward pass</a>
+    <a href="011-training-loop.html">11 · Training loop →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Karpathy, <a href="https://karpathy.ai/zero-to-hero.html">Neural Networks: Zero to Hero</a>, episode 1 (backprop from scratch).<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

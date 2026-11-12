@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>028 — Pretraining</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="028">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 28 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 7 · Attention and LLMs · Topic 28 of 35</p>
+  <h1>Pretraining: prediction as supervision</h1>
+  <p class="objective">You can contrast next-token and masked objectives, and explain what scale buys.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Pretraining is why an LLM needs no labels: every document is its own answer key. It also explains why the model is a probability distribution over text, not a database of facts.</p>
+
+<h2>The one core idea</h2>
+<p><strong>Self-supervision</strong>: hide part of the text, predict it, and the gradient teaches everything needed to predict it. No human labels; the loss is just cross-entropy on tokens.</p>
+
+<h2>How it actually works</h2>
+<table>
+  <tr><th></th><th>GPT-style (causal)</th><th>BERT-style (masked)</th></tr>
+  <tr><td>Predicts</td><td>Next token, left to right</td><td>Masked tokens from both sides</td></tr>
+  <tr><td>Sees</td><td>Only the past</td><td>The whole context</td></tr>
+  <tr><td>Good at</td><td>Generation</td><td>Classification, extraction</td></tr>
+  <tr><td>Trained on</td><td>Every position in the document</td><td>~15% of positions</td></tr>
+</table>
+
+<ul>
+  <li><strong>Loss</strong>: mean negative log-likelihood of the true next token. Same object as topic 3.</li>
+  <li><strong>Perplexity</strong> <code>= exp(loss)</code> — "effectively choosing between this many equally likely tokens". Lower is better.</li>
+  <li><strong>Scale</strong>: loss falls as a power law in parameters, data, and compute. Capability improvements are mostly predicted by that curve, not by architecture tweaks.</li>
+  <li><strong>What is learned</strong>: a compressed model of text statistics — syntax, facts, style, some reasoning procedures. Not a lookup table, and not verified truth.</li>
+</ul>
+
+<span class="formula">perplexity = exp( −(1/N) Σ log p(token_t | token_&lt;t) )</span>
+
+<h2>Worked example</h2>
+
+<h3>1. Reading a loss number</h3>
+<table>
+  <tr><th class="num">Loss (nats)</th><th class="num">Perplexity</th><th>Plain reading</th></tr>
+  <tr><td class="num">5.0</td><td class="num">148</td><td>Barely better than random over a 50k vocab</td></tr>
+  <tr><td class="num">3.0</td><td class="num">20</td><td>Roughly "one of 20 plausible next tokens"</td></tr>
+  <tr><td class="num">2.0</td><td class="num">7.4</td><td>Strong local fluency</td></tr>
+</table>
+
+<p><code>e³ ≈ 20.1</code>. A drop of one nat is a 2.7× reduction in effective uncertainty — which is why leaderboard differences of 0.05 nats are meaningful, not noise.</p>
+
+<h3>2. Why masking differs from causal</h3>
+<p>Causal training gives a gradient at every position; masked training gives one at 15% of positions but with bidirectional context. That is why BERT is a stronger encoder and a useless generator: it never learned <code>p(next | past)</code>.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A lower perplexity means a better assistant."</strong> Perplexity measures fit to the pretraining distribution. It says nothing about instruction following, factuality, or safety — those come from post-training (topic 29).</p>
+  <p><strong>Second trap:</strong> treating benchmark scores as independent evidence. Public test sets leak into pretraining corpora; a score can reflect memorisation of the benchmark rather than the skill.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>A model reports loss 2.3 nats. What is its perplexity, and what does that mean?
+    <details><summary>Answer</summary>
+      <p><code>e²·³ ≈ 10</code>. At each position it is about as uncertain as a uniform choice among 10 tokens — reasonably fluent, far from solved.</p>
+    </details>
+  </li>
+  <li>Why can a causal LM be used for generation but a masked LM cannot?
+    <details><summary>Answer</summary>
+      <p>The causal model is trained on <code>p(token | previous tokens)</code>, exactly the distribution needed to sample text. The masked model is trained to fill gaps using both sides, which is unavailable during left-to-right generation.</p>
+    </details>
+  </li>
+  <li>What does self-supervision replace, and what does it cost?
+    <details><summary>Answer</summary>
+      <p>It replaces human labels with the text itself. The cost is scale: you need enormous corpora and compute, and the objective optimises plausibility rather than truth.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 29: Alignment and inference.</strong> A pretrained model completes text; it does not follow instructions. Topic 29 covers the three stages that turn one into the other.</p>
+  <div class="pager">
+    <a href="027-transformer-block.html">← 27 · Transformer</a>
+    <a href="029-alignment-and-inference.html">29 · Alignment →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: <a href="https://huggingface.co/learn/nlp-course">Hugging Face NLP Course</a>, ch. 1 (pretraining objectives).<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

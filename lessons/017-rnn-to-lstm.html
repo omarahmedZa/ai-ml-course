@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>017 — RNN to LSTM</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="017">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 17 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 4 · Natural language processing · Topic 17 of 35</p>
+  <h1>RNN → LSTM: memory that survives</h1>
+  <p class="objective">You can explain the fixed-vector bottleneck and how gates address it.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">The LSTM is the last honest attempt to give a network memory without attention — and its failure is precisely the reason transformers exist. Exam questions love "why does the RNN forget?"</p>
+
+<h2>The one core idea</h2>
+<p>A vanilla RNN compresses everything seen so far into one fixed-size vector, updated every step. Gradients must travel back through every step, so long-range signal decays — <strong>gates</strong> give that signal a near-identity path.</p>
+
+<h2>How it actually works</h2>
+<span class="formula">h_t = tanh(W_h h_{t−1} + W_x x_t + b)</span>
+
+<ul>
+  <li>The hidden state <code>h_t</code> is the <em>entire</em> memory. Same size at step 1 and step 1,000 — that is the <strong>fixed-vector bottleneck</strong>.</li>
+  <li><strong>BPTT</strong> (backprop through time) unrolls the sequence and multiplies a Jacobian per step. Repeated multiplication is the whole problem.</li>
+  <li><strong>LSTM gates</strong>: <code>f</code> forget, <code>i</code> input, <code>o</code> output, each a sigmoid in [0,1].<br>
+  <code>c_t = f ⊙ c_{t−1} + i ⊙ g</code> — the cell state is updated <em>additively</em>.</li>
+  <li>Because <code>f ≈ 1</code> is learnable, the cell state can carry information across many steps with gradient flowing undiminished. That is the trick: an additive, gated highway.</li>
+  <li><strong>GRU</strong> is the cheaper cousin: two gates, no separate cell state.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. Decay per step</h3>
+<p>Suppose each step's Jacobian has magnitude 0.9 (a healthy value):</p>
+
+<table>
+  <tr><th>Steps back</th><th class="num">0.9ⁿ</th><th class="num">1.1ⁿ</th></tr>
+  <tr><td>5</td><td class="num">0.59</td><td class="num">1.61</td></tr>
+  <tr><td>20</td><td class="num">0.12</td><td class="num">6.73</td></tr>
+  <tr><td>50</td><td class="num">0.005</td><td class="num">117</td></tr>
+</table>
+
+<p>Even a well-behaved RNN has lost 99.5% of its gradient by 50 steps. Word 1 of a paragraph contributes nothing to the loss at word 60.</p>
+
+<h3>2. What the forget gate buys</h3>
+<p>With <code>f = 0.99</code> held constant, after 100 steps the cell retains <code>0.99¹⁰⁰ ≈ 0.37</code> of the original signal — a 74× improvement over the 0.9 case above, and, importantly, <em>learnable</em> rather than architectural luck.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"LSTM solves long-term memory."</strong> It mitigates decay on <em>synthetic</em> tasks with clear signals. On real language, performance still degrades with distance, and the fixed-size state is still a bottleneck: 500 tokens must fit in 512 numbers.</p>
+  <p><strong>Second trap:</strong> forgetting the sequence is sequential. Training cannot parallelise over time, which is why RNNs lost to transformers on long sequences — not because attention is more expressive per se.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Why does a vanilla RNN struggle with a dependency 100 tokens apart?
+    <details><summary>Answer</summary>
+      <p>The gradient passes through ~100 Jacobians; if their magnitudes average below 1, the signal decays exponentially. The state also has to hold all intermediate information in a fixed vector.</p>
+    </details>
+  </li>
+  <li>What makes the LSTM cell state easier to train than a plain hidden state?
+    <details><summary>Answer</summary>
+      <p>Its update is additive and gated: <code>c_t = f·c_{t−1} + i·g</code>. With <code>f</code> near 1, the gradient path is close to identity, so it does not get multiplied away each step.</p>
+    </details>
+  </li>
+  <li>Name one problem gates do <em>not</em> fix.
+    <details><summary>Answer</summary>
+      <p>The fixed-size state and sequential computation. Long inputs still must be compressed into one vector, and time steps still cannot be processed in parallel.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 18: Seq2seq.</strong> Put an RNN in front of the input and another behind the output, and you can translate. The bottleneck you just met becomes impossible to ignore.</p>
+  <div class="pager">
+    <a href="016-embeddings.html">← 16 · Embeddings</a>
+    <a href="018-seq2seq.html">18 · Seq2seq →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Goodfellow, Bengio &amp; Courville, <a href="https://www.deeplearningbook.org">Deep Learning</a>, ch. 10.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

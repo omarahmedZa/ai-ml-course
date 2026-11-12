@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>004 — Supervised learning</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="004">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 04 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 1 · Machine learning foundations · Topic 4 of 35</p>
+  <h1>Supervised learning as function fitting</h1>
+  <p class="objective">You can write down <code>(X, y, f_θ, L)</code> for any supervised task and say what is being learned.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Every model in this course — a spam filter, a translation system, a Q-network — is this same four-part object. Name the four parts and you can read a paper's method section instead of guessing at it.</p>
+
+<h2>The one core idea</h2>
+<p>Supervised learning chooses <strong>parameters θ</strong> so that <strong>f_θ</strong> maps inputs <strong>X</strong> to targets <strong>y</strong> with minimum average <strong>loss L</strong> — on data you have, hoping it holds on data you don't.</p>
+
+<h2>How it actually works</h2>
+<table>
+  <tr><th>Object</th><th>Shape / type</th><th>Spam example</th></tr>
+  <tr><td><strong>X</strong> — inputs</td><td class="num">n × d matrix</td><td>10,000 emails × 2 features</td></tr>
+  <tr><td><strong>y</strong> — targets</td><td class="num">n × 1 vector</td><td>1 = spam, 0 = ham</td></tr>
+  <tr><td><strong>f_θ</strong> — model</td><td class="num">d → 1</td><td><code>σ(w·x + b)</code></td></tr>
+  <tr><td><strong>L</strong> — loss</td><td class="num">scalar</td><td>binary cross-entropy</td></tr>
+</table>
+
+<ul>
+  <li><strong>Hypothesis class</strong> = the set of functions <code>f_θ</code> you allow. Linear models can only draw straight boundaries; a 3-layer net can draw curved ones. Choosing the class is choosing what is learnable.</li>
+  <li><strong>Empirical risk</strong> = average loss on the training set. Training minimises it.</li>
+  <li><strong>What is learned is θ</strong>, not the data. With 10,000 emails and 3 parameters, the model compresses 10,000 rows into 3 numbers.</li>
+</ul>
+
+<span class="formula">θ* = argmin_θ  (1/n) Σᵢ L(f_θ(xᵢ), yᵢ)</span>
+
+<h2>Worked example</h2>
+
+<h3>1. One email, end to end</h3>
+<p>Features: <code>x = [1, 50]</code> = "contains 'free'" (1), "length in words" (50). Parameters <code>w = [2, −0.01]</code>, <code>b = −1</code>.</p>
+
+<table>
+  <tr><th>Step</th><th class="num">Value</th></tr>
+  <tr><td>z = w·x + b</td><td class="num">2(1) + (−0.01)(50) − 1 = 0.5</td></tr>
+  <tr><td>p = σ(z)</td><td class="num">0.622</td></tr>
+  <tr><td>Loss if y = 1</td><td class="num">−ln 0.622 = 0.475</td></tr>
+  <tr><td>Loss if y = 0</td><td class="num">−ln 0.378 = 0.973</td></tr>
+</table>
+
+<p>The prediction is "62% spam". Training's job is to nudge <code>w</code> and <code>b</code> until spam-like emails get high <code>p</code> and ham-like ones get low <code>p</code>.</p>
+
+<h3>2. Reading a new paper</h3>
+<p>Given "we fine-tune a transformer with cross-entropy on 1M labelled pairs", the four objects are immediate: <code>X</code> = token IDs, <code>y</code> = next token, <code>f_θ</code> = transformer, <code>L</code> = cross-entropy. If you cannot fill a cell, that is the question to ask about the paper.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The model learned the data."</strong> It learned parameters. A model with more parameters than data points can score perfectly and still be useless — it memorised <code>X</code> without learning the mapping from <code>X</code> to <code>y</code>.</p>
+  <p><strong>The hidden assumption:</strong> future data comes from the same distribution as training data (i.i.d.). Break that — a new hospital, a new year, a shifted user base — and a perfect training score means nothing. Topic 5 is entirely about this gap.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>For "predict house price from 8 features", name all four objects with shapes.
+    <details><summary>Answer</summary>
+      <p><code>X</code>: n×8 · <code>y</code>: n×1 continuous · <code>f_θ</code>: a linear model or gradient-boosted trees · <code>L</code>: squared error. If <code>L</code> were classification loss, you would be answering a different question.</p>
+    </details>
+  </li>
+  <li>Your model gets 100% training accuracy and 71% test accuracy. Is it a good model?
+    <details><summary>Answer</summary>
+      <p>No. The 29-point gap says it memorised rather than generalised. The 71% number is the only one that describes the deployed system.</p>
+    </details>
+  </li>
+  <li>What does changing the hypothesis class change — the data, the loss, or what the model is capable of representing?
+    <details><summary>Answer</summary>
+      <p>Only the last one. Data and loss can stay identical while moving from linear to tree to neural, and the achievable functions change completely.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 5: Generalization.</strong> You just saw a 100%/71% split. Topic 5 explains where that gap comes from, how to read it, and which lever fixes it.</p>
+  <div class="pager">
+    <a href="003-probability-expectation-likelihood.html">← 03 · Probability</a>
+    <a href="005-generalization.html">05 · Generalization →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: <a href="https://scikit-learn.org/stable/supervised_learning.html">scikit-learn — Supervised learning</a> (the taxonomy, with runnable examples).<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

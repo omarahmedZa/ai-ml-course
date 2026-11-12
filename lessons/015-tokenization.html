@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>015 — Tokenization</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="015">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 15 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 4 · Natural language processing · Topic 15 of 35</p>
+  <h1>Tokenization: text → integers</h1>
+  <p class="objective">You can explain vocabularies, subwords, OOV, and why token count is not word count.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Context windows, API bills, and truncation bugs are all counted in tokens, not words. Every number you read about an LLM — 128k context, $3 per million — is in this unit.</p>
+
+<h2>The one core idea</h2>
+<p>A model needs integers, so text is split into <strong>tokens</strong> from a fixed vocabulary. Splitting on words fails on the long tail; splitting on characters loses meaning. <strong>Subword</strong> tokenisation splits the difference.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><strong>Vocabulary</strong> = fixed list of tokens, each mapped to an integer ID. Typical sizes: 32k–100k for modern LLMs.</li>
+  <li><strong>Word-level</strong>: clean, but any unseen word becomes <code>&lt;UNK&gt;</code> — the <strong>out-of-vocabulary</strong> problem. Rare names, typos, and morphology all break.</li>
+  <li><strong>Character-level</strong>: no OOV ever, but sequences get 4–5× longer and each token carries little meaning.</li>
+  <li><strong>BPE / WordPiece</strong>: start from characters, repeatedly merge the most frequent adjacent pair. Frequent words become one token; rare words become a few meaningful pieces.</li>
+  <li><strong>Special tokens</strong>: <code>&lt;bos&gt;</code>, <code>&lt;eos&gt;</code>, <code>&lt;pad&gt;</code>, <code>&lt;mask&gt;</code> — structural signals, not content.</li>
+  <li><strong>Context window</strong> is measured in tokens, and so is cost. A token is roughly 4 characters of English (~0.75 words).</li>
+</ul>
+
+<span class="formula">"unbelievable" → ["un", "believ", "able"] → [371, 7892, 531]</span>
+
+<h2>Worked example</h2>
+
+<h3>1. Why 1,000 words is not 1,000 tokens</h3>
+<table>
+  <tr><th>Text</th><th class="num">Words</th><th class="num">Tokens (approx.)</th></tr>
+  <tr><td>Plain English prose</td><td class="num">1,000</td><td class="num">1,300</td></tr>
+  <tr><td>Code</td><td class="num">1,000</td><td class="num">1,700</td></tr>
+  <tr><td>Base64 blob / hashes</td><td class="num">1,000</td><td class="num">4,000+</td></tr>
+</table>
+
+<p>Punctuation, indentation and rare identifiers fragment into many tokens. A 4,000-token budget that fits your prose will silently truncate a code file.</p>
+
+<h3>2. Where the boundary falls</h3>
+<p>Byte-pair merges are frequency-driven, so common words are single tokens and rare ones fragment: <code>"the"</code> → 1 token; <code>"antidisestablishmentarianism"</code> → 7. The same word with a leading space (<code>"the"</code> vs <code>" the"</code>) can be a <em>different</em> token, because spacing is part of the merge history.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Tokens are words."</strong> They are not. Counting words to check a context limit under-counts by 30% on prose and far more on code. Truncating by characters can slice a token in half, producing a different token than either half.</p>
+  <p><strong>Second trap:</strong> assuming a model can count letters or reverse words reliably. It never sees characters — it sees IDs. Asking "how many r's in strawberry" is a question about a representation the model does not have.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Why does word-level tokenisation fail on medical text?
+    <details><summary>Answer</summary>
+      <p>The vocabulary cannot contain every drug name and abbreviation. Unseen terms collapse to <code>&lt;UNK&gt;</code>, erasing distinctions the model needs — including negation and dosage.</p>
+    </details>
+  </li>
+  <li>A 128k-token context holds roughly how many English words? What about lines of code?
+    <details><summary>Answer</summary>
+      <p>Roughly 95,000 words of prose (÷1.3), but far fewer lines of code — code runs nearer 1.7 tokens per word, and identifiers fragment further.</p>
+    </details>
+  </li>
+  <li>What does BPE actually merge, and in what order?
+    <details><summary>Answer</summary>
+      <p>The most frequent adjacent pair of symbols, repeatedly, starting from characters. Frequency decides order, which is why frequent words end up as single tokens.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 16: Embeddings.</strong> An ID is a meaningless integer. Topic 16 turns each ID into a vector whose geometry encodes meaning.</p>
+  <div class="pager">
+    <a href="014-architecture-families.html">← 14 · Architectures</a>
+    <a href="016-embeddings.html">16 · Embeddings →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: <a href="https://huggingface.co/learn/nlp-course/chapter2/4">Hugging Face NLP Course — Tokenizers</a>.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

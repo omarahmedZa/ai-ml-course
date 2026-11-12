@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>035 — Privacy and threat model</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="035">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 35 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 9 · Federated learning · Topic 35 of 35</p>
+  <h1>Privacy &amp; threat model</h1>
+  <p class="objective">You can explain DP noise, secure aggregation, and poisoning/backdoor attacks.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Federated learning is often sold as "private by default". It is not: a gradient can be inverted into a recognisable image. This topic is the difference between a privacy claim and a privacy mechanism.</p>
+
+<h2>The one core idea</h2>
+<p>Federated learning protects <strong>data locality</strong>, not <strong>data secrecy</strong>. Privacy requires an additional mechanism that bounds what any single update reveals.</p>
+
+<h2>How it actually works</h2>
+<table>
+  <tr><th>Threat</th><th>Mechanism</th><th>Defence</th></tr>
+  <tr><td>Membership inference</td><td>Overfitting makes seen examples more confident</td><td>Regularisation, DP</td></tr>
+  <tr><td>Gradient inversion</td><td>Optimise a dummy input to match the observed gradient</td><td>DP-SGD, secure aggregation</td></tr>
+  <tr><td>Poisoning</td><td>Malicious client sends a corrupted update</td><td>Robust aggregation (median, trimming)</td></tr>
+  <tr><td>Backdoor</td><td>Trigger pattern → attacker-chosen label</td><td>Update inspection, clipping, DP</td></tr>
+</table>
+
+<ul>
+  <li><strong>Differential privacy</strong>: a randomised mechanism <code>M</code> is <code>(ε, δ)</code>-DP if for any two datasets differing in one record, <code>P(M(D) ∈ S) ≤ e^ε P(M(D′) ∈ S) + δ</code>. ε is a budget: smaller means more privacy and more noise.</li>
+  <li><strong>DP-SGD</strong>: clip each per-example gradient to norm <code>C</code>, sum, add Gaussian noise <code>N(0, σ²C²)</code>. Clipping bounds sensitivity; noise hides the contribution.</li>
+  <li><strong>Secure aggregation</strong>: clients' updates are summed under cryptographic masking, so the server sees only the sum. Protects against a curious server, not against a malicious client.</li>
+  <li><strong>Privacy budget composition</strong>: every round spends ε. 1,000 rounds of <code>ε = 0.01</code> is not <code>ε = 0.01</code> overall.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. Clipping and noise</h3>
+<p>A per-example gradient has norm 10. Clip to <code>C = 1</code> → multiply by <code>0.1</code>. Sum over a batch of 256 → each example contributes at most 1, so total sensitivity ≤ 1 (per example). Add noise with <code>σ = 1.1</code> → the noise standard deviation is 1.1, comparable to one example's contribution.</p>
+
+<table>
+  <tr><th class="num">C</th><th class="num">σ</th><th>Effect</th></tr>
+  <tr><td class="num">1.0</td><td class="num">0.5</td><td>Weak privacy, better accuracy</td></tr>
+  <tr><td class="num">1.0</td><td class="num">1.1</td><td>Standard operating point</td></tr>
+  <tr><td class="num">1.0</td><td class="num">4.0</td><td>Strong privacy, large accuracy cost</td></tr>
+</table>
+
+<h3>2. Why averaging is not anonymisation</h3>
+<p>The server sees <code>w_t^k</code>, a deterministic function of client <code>k</code>'s data. If that client is the only one with a rare condition, the update is a fingerprint. Gradient-inversion attacks reconstruct recognisable inputs from such updates in a handful of iterations.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Federated = private."</strong> Locality removes the data-transfer step, not the information leak. Without clipping, noise, or secure aggregation, the server can read the data out of the gradients.</p>
+  <p><strong>Second trap:</strong> treating DP as free. Every unit of privacy costs accuracy, and the cost compounds across rounds. Choose ε from the threat model, then measure the accuracy you can afford — not the reverse.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Why does DP-SGD clip per-example gradients before summing?
+    <details><summary>Answer</summary>
+      <p>To bound sensitivity: one example can change the sum by at most <code>C</code>, regardless of how extreme its gradient is. Noise can then be calibrated to that bound.</p>
+    </details>
+  </li>
+  <li>Secure aggregation protects against which party, and not which?
+    <details><summary>Answer</summary>
+      <p>It hides individual updates from the server. It does not stop a malicious client from submitting a poisoned update, nor protect the data from that client's own device.</p>
+    </details>
+  </li>
+  <li>Ten rounds of <code>ε = 0.1</code>. Is the total budget 1.0?
+    <details><summary>Answer</summary>
+      <p>Basic composition gives 1.0 (10 × 0.1); advanced accounting gives somewhat less. Either way the budget grows with rounds — reporting the per-round ε as the total is the standard mistake.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Course complete.</strong> You have the full stack: math → ML → DL → NLP → RL → DRL → attention → XAI → FL. Next: the Unit 0–2 cheat sheet, then answer the retrieval checks you skipped.</p>
+  <div class="pager">
+    <a href="034-non-iid-and-convergence.html">← 34 · Non-IID</a>
+    <a href="../index.html">Course map</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Kairouz et al., <a href="https://arxiv.org/abs/1912.04977">Advances and Open Problems in Federated Learning</a> (2019), §3–4.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

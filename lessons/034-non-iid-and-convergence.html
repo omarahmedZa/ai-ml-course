@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>034 — Non-IID data and convergence</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="034">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 34 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 9 · Federated learning · Topic 34 of 35</p>
+  <h1>Non-IID data &amp; client drift</h1>
+  <p class="objective">You can explain client drift, name the fixes, and state the local-steps trade-off.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Every FL tutorial uses MNIST split evenly across clients. Real deployments never look like that — one phone belongs to a teenager, another to a radiologist. This gap is where federated models quietly underperform.</p>
+
+<h2>The one core idea</h2>
+<p>When clients' data distributions differ, local training pulls each client's weights toward its <strong>own</strong> optimum. Averaging those divergent models gives a point that is optimal for nobody — <strong>client drift</strong>.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><strong>Label skew</strong>: client A only sees digit 3, client B only digit 7. Each local model becomes confidently wrong about the other 8 classes.</li>
+  <li><strong>Feature skew</strong>: same task, different sensors — different scales, noise, or lighting.</li>
+  <li><strong>Quantity skew</strong>: 10 examples versus 100,000, which also tilts the weighted average.</li>
+  <li><strong>Drift grows with E</strong>: more local epochs means each client travels further toward its private optimum before the average.</li>
+  <li><strong>FedProx</strong>: add a proximal term <code>(μ/2)‖w − w_t‖²</code> to each local objective, anchoring clients near the global model. μ controls the leash.</li>
+  <li><strong>Personalisation</strong>: accept that one global model is the wrong goal — train a shared representation and fine-tune per client, or keep some layers local (FedBN).</li>
+  <li><strong>Fairness</strong>: the global model can be accurate on average and terrible for small clients. Report per-client accuracy, not just the mean.</li>
+</ul>
+
+<span class="formula">local objective:  F_k(w) + (μ/2)‖w − w_t‖²</span>
+
+<h2>Worked example</h2>
+
+<h3>1. The local-steps trade-off</h3>
+<p>Two clients, one parameter, global start 0.0. Client A's optimum is −1, client B's is +1.</p>
+
+<table>
+  <tr><th>Local epochs E</th><th class="num">A ends at</th><th class="num">B ends at</th><th class="num">Average</th><th>Verdict</th></tr>
+  <tr><td class="num">1</td><td class="num">−0.2</td><td class="num">+0.2</td><td class="num">0.0</td><td>Stable, slow</td></tr>
+  <tr><td class="num">10</td><td class="num">−0.9</td><td class="num">+0.9</td><td class="num">0.0</td><td>Still 0, but each model is extreme</td></tr>
+</table>
+
+<p>The average is unchanged, but the clients have each become specialists. On a third client with mixed data, the averaged model is worse than either specialist — this is drift, not convergence.</p>
+
+<h3>2. Why "more local work" is not free</h3>
+<p>Local epochs reduce communication rounds (good) while increasing drift (bad). FedProx makes the trade explicit: with <code>μ &gt; 0</code>, clients can take more steps without wandering, because every step pays a penalty for leaving <code>w_t</code>.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"More local epochs always improve communication efficiency."</strong> They reduce rounds but increase client drift, and beyond a small E the global model degrades. The optimum is empirical, not monotone.</p>
+  <p><strong>Second trap:</strong> evaluating on a pooled test set only. A model can be excellent in aggregate and useless for the smallest client — exactly the user the deployment was meant to serve.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>What is client drift, in one sentence?
+    <details><summary>Answer</summary>
+      <p>Local updates move each client's weights toward its own data distribution, so the averaged global model sits in a region that is optimal for no client.</p>
+    </details>
+  </li>
+  <li>What does the proximal term in FedProx do as μ increases?
+    <details><summary>Answer</summary>
+      <p>It penalises distance from the global weights more heavily, shrinking each client's step toward its local optimum. Large μ behaves more like federated SGD.</p>
+    </details>
+  </li>
+  <li>Why might per-client accuracy be the right metric instead of the global average?
+    <details><summary>Answer</summary>
+      <p>Because FL is usually deployed to serve each client. A high mean can hide a small or unusual client being systematically misclassified — a fairness failure invisible in aggregate.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 35: Privacy and threat model.</strong> You can now train without centralising data. Topic 35 asks the harder question: what does the server still learn?</p>
+  <div class="pager">
+    <a href="033-federated-setting-fedavg.html">← 33 · FedAvg</a>
+    <a href="035-privacy-and-threat-model.html">35 · Privacy →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Li et al., <a href="https://arxiv.org/abs/1812.06127">Federated Optimization in Heterogeneous Networks</a> (2018).<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

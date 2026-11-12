@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>014 — Architecture families</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="014">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 14 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 3 · Making deep learning work · Topic 14 of 35</p>
+  <h1>Architecture families: what each one assumes</h1>
+  <p class="objective">You can state what MLP, CNN and RNN each assume about data, and choose one for a task.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Choosing an architecture is choosing which invariances you get for free. Get it right and the model needs less data; get it wrong and it fights the problem — a CNN on tabular data, an MLP on images.</p>
+
+<h2>The one core idea</h2>
+<p>An architecture is a <strong>prior</strong>: a statement about which transformations should not change the answer. CNNs assume locality and translation; RNNs assume order and shared dynamics; MLPs assume nothing.</p>
+
+<h2>How it actually works</h2>
+<table>
+  <tr><th></th><th>MLP</th><th>CNN</th><th>RNN</th></tr>
+  <tr><td>Assumes</td><td>Features independent, no spatial/order structure</td><td>Local patterns, same pattern anywhere</td><td>Sequence order matters; same rule each step</td></tr>
+  <tr><td>Weight sharing</td><td>No</td><td>Yes — one filter slides everywhere</td><td>Yes — one cell reused per timestep</td></tr>
+  <tr><td>Parallel over input</td><td>Yes</td><td>Yes</td><td>No — strictly sequential</td></tr>
+  <tr><td>Best for</td><td>Tabular, small fixed vectors</td><td>Images, audio spectrograms, 1-D signals</td><td>Time series, text (historically)</td></tr>
+</table>
+
+<ul>
+  <li><strong>MLP</strong>: <code>y = W₂φ(W₁x)</code>. Permuting input features changes the function completely — it has no idea that feature 3 sits next to feature 4.</li>
+  <li><strong>CNN</strong>: a filter of shape <code>k×k×C_in</code> is applied at every position. A 3×3 filter over 64 channels to 64 outputs has <code>3·3·64·64 = 36,864</code> weights and works on any image size.</li>
+  <li><strong>RNN</strong>: <code>h_t = φ(W_h h_{t−1} + W_x x_t)</code>. The same weights at every step, so the model generalises across sequence lengths.</li>
+  <li><strong>Transformers</strong> (Unit 7) drop the sequence assumption and use attention — parallel, but with <code>O(n²)</code> cost.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. The parameter argument for convolutions</h3>
+<p>One 3×3 conv layer, 64 in, 64 out: <strong>36,864</strong> weights. The dense layer on the same 224×224×64 input (3,211,264 values) to 64 outputs needs <code>3,211,264 × 64 ≈ 205 million</code> — 5,500× more, and it would have to relearn an edge detector at every pixel.</p>
+
+<h3>2. Choosing under constraint</h3>
+<table>
+  <tr><th>Task</th><th>Pick</th><th>Reason</th></tr>
+  <tr><td>Churn prediction, 40 columns</td><td>GBM (or MLP)</td><td>No spatial structure; trees handle mixed scales</td></tr>
+  <tr><td>X-ray classification, 5k images</td><td>CNN (pretrained)</td><td>Locality + transfer beats training from zero</td></tr>
+  <tr><td>Sensor stream, 10 Hz</td><td>1-D CNN or GRU</td><td>Local temporal patterns; short memory</td></tr>
+  <tr><td>Machine translation</td><td>Transformer</td><td>Long-range dependencies, parallel training</td></tr>
+</table>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Deeper/newer is better."</strong> Architecture must match the data's structure. A transformer on 800 tabular rows will lose to logistic regression, and a CNN on shuffled columns is strictly worse than an MLP.</p>
+  <p><strong>Second trap:</strong> assuming an RNN "remembers" because it is recurrent. Its state is a fixed-size vector; information from 200 steps ago is mostly gone (topic 17).</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Why does a CNN use far fewer parameters than a dense layer on the same image?
+    <details><summary>Answer</summary>
+      <p>Weight sharing: one small filter is reused at every spatial position instead of a separate weight per pixel per output. It also encodes translation invariance for free.</p>
+    </details>
+  </li>
+  <li>Your data is 30 numeric columns from a survey. Which family first, and why not a CNN?
+    <details><summary>Answer</summary>
+      <p>Trees/GBM first. There is no spatial adjacency, so convolution's core assumption is false — the "neighbouring" columns are arbitrary.</p>
+    </details>
+  </li>
+  <li>What does an RNN assume that a transformer does not?
+    <details><summary>Answer</summary>
+      <p>That order is processed sequentially and the same transition applies at each step. A transformer treats the sequence as a set plus positional information, which allows parallel computation.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 15: Tokenization.</strong> Unit 4 starts where every language model starts: turning text into integers, and losing information in ways that show up as bugs later.</p>
+  <div class="pager">
+    <a href="013-optimization-failure-modes.html">← 13 · Optimization failures</a>
+    <a href="015-tokenization.html">15 · Tokenization →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: <a href="https://www.deeplearningbook.org">Deep Learning</a>, ch. 9 (convolutional networks) and ch. 10 (sequence modelling).<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>008 — The neuron</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="008">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 08 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 2 · Neural network mechanics · Topic 8 of 35</p>
+  <h1>The neuron: weighted sum plus one bend</h1>
+  <p class="objective">You can prove that stacked linear layers collapse into one, so a nonlinearity is mandatory.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">If you cannot say why the ReLU is there, you cannot debug a network that refuses to learn. The entire expressive power of deep learning lives in that one non-linear function between layers.</p>
+
+<h2>The one core idea</h2>
+<p>A neuron computes <code>a = φ(w·x + b)</code>. The dot product decides <em>what it looks for</em>; <code>φ</code> is the only thing that stops the whole network from being one matrix.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><code>w·x + b</code> — a linear score, exactly topic 1. <code>b</code> shifts the threshold, so the neuron can fire at <code>x = 0</code> or not.</li>
+  <li><code>φ</code> — the <strong>activation</strong>, applied elementwise. Without it, a neuron is logistic regression.</li>
+  <li><strong>Why φ is mandatory</strong>: take two layers, <code>h = W₁x + b₁</code> then <code>y = W₂h + b₂</code>. Substitute: <code>y = (W₂W₁)x + (W₂b₁ + b₂)</code>. That is a single linear layer with weights <code>W₂W₁</code>. Any depth collapses.</li>
+  <li><strong>Common activations</strong>: ReLU <code>max(0, z)</code> — cheap, no saturation for positive inputs; sigmoid — probabilities, saturates; tanh — zero-centred, still saturates; GELU — smooth ReLU, standard in transformers.</li>
+</ul>
+
+<span class="formula">2 → 2 → 1 network:  (2·2 + 2) + (2·1 + 1) = 9 parameters</span>
+
+<h2>Worked example</h2>
+
+<h3>1. The collapse, with numbers</h3>
+<p><code>W₁ = [[1, 2], [3, 4]]</code>, <code>b₁ = 0</code>, <code>x = [1, 1]</code> → <code>h = [3, 7]</code>. Then <code>W₂ = [1, −1]</code>, <code>b₂ = 0</code> → <code>y = 3 − 7 = −4</code>.</p>
+<p>Now collapse: <code>W₂W₁ = [1·1 + (−1)·3, 1·2 + (−1)·4] = [−2, −2]</code>, and <code>[−2, −2]·[1, 1] = −4</code>. Identical. Two layers, one matrix, zero extra power.</p>
+
+<h3>2. The same network with a ReLU</h3>
+<p><code>h = ReLU([3, 7]) = [3, 7]</code> — no change here, because both were positive. Try <code>x = [1, −1]</code>: <code>h = [1−2, 3−4] = [−1, −1] → ReLU → [0, 0]</code>. Output <code>0</code>, whereas the collapsed linear model would give <code>[−2,−2]·[1,−1] = 0</code>. Pick <code>x = [2, −1]</code> instead: linear gives <code>−2</code>; with ReLU, <code>h = [0, 2] → y = −2</code>. Coincidence again — but now change <code>W₂</code> to <code>[1, 1]</code>: linear gives <code>0</code>, ReLU gives <code>+2</code>. The bend has created a behaviour no single matrix can produce.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A neuron is a simplified brain cell."</strong> It is a dot product and a clamp. The metaphor invites the wrong intuitions (that neurons "detect concepts") and none of the maths.</p>
+  <p><strong>Second trap:</strong> forgetting the bias. Removing <code>b</code> forces every neuron's boundary through the origin; on data not centred there, the network needs absurd weights to compensate. Always initialise and train biases.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Why does removing all activation functions make a 50-layer network no stronger than logistic regression?
+    <details><summary>Answer</summary>
+      <p>A product of matrices is a matrix. <code>W₅₀…W₁x</code> equals <code>Wx</code> for some <code>W</code>, so depth adds parameters but not expressiveness.</p>
+    </details>
+  </li>
+  <li>Count the parameters in a 3 → 4 → 2 network, biases included.
+    <details><summary>Answer</summary>
+      <p>Layer 1: <code>3·4 + 4 = 16</code>. Layer 2: <code>4·2 + 2 = 10</code>. Total 26.</p>
+    </details>
+  </li>
+  <li>A ReLU unit outputs 0 for every input in your batch. What happened, and what are two fixes?
+    <details><summary>Answer</summary>
+      <p>The unit is "dead": its pre-activation is negative everywhere, so its gradient is 0 and it can never recover. Fixes: lower the learning rate, or use LeakyReLU/GELU so negative inputs keep a gradient.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 9: Layers and the forward pass.</strong> One neuron is a scoring function. Stack them into matrices and you can trace any network on paper — which is the only way to debug one.</p>
+  <div class="pager">
+    <a href="007-trees-and-ensembles.html">← 07 · Trees</a>
+    <a href="009-layers-and-forward-pass.html">09 · Forward pass →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: 3Blue1Brown, <a href="https://www.3blue1brown.com/topics/neural-networks">Neural Networks, part 1</a>.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

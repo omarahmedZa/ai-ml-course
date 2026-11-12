@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>033 — Federated setting and FedAvg</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="033">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 33 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 9 · Federated learning · Topic 33 of 35</p>
+  <h1>Federated learning &amp; FedAvg</h1>
+  <p class="objective">You can describe the round protocol, write the averaging rule, and justify data locality.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Phones, hospitals and banks hold data that legally or practically cannot be centralised. Federated learning is the answer that keeps the data where it is and ships the model instead.</p>
+
+<h2>The one core idea</h2>
+<p>Move the <strong>model</strong> to the data, not the data to the model: each client trains locally, and the server averages the resulting weights.</p>
+
+<h2>How it actually works</h2>
+<ol>
+  <li><strong>Broadcast</strong>: server sends current weights <code>w_t</code> to a sample of clients.</li>
+  <li><strong>Local training</strong>: each client runs <code>E</code> epochs of SGD on its own data, producing <code>w_t^k</code>.</li>
+  <li><strong>Upload</strong>: clients send weights (or updates) — never examples.</li>
+  <li><strong>Aggregate</strong>: server computes a sample-weighted average.</li>
+</ol>
+
+<span class="formula">w_{t+1} = Σ_k (n_k / n) · w_t^k     where n = Σ_k n_k</span>
+
+<ul>
+  <li><strong>Why weight by n<sub>k</sub></strong>: a client with 700 examples has a less noisy local model than one with 100. Equal weighting biases the global model toward small clients.</li>
+  <li><strong>Rounds replace epochs</strong>: communication is the bottleneck, often by orders of magnitude. FedAvg exists to reduce round count, not local compute.</li>
+  <li><strong>Data locality</strong>: raw data never leaves the device. Weights do — which matters for the privacy claims in topic 35.</li>
+  <li><strong>Partial participation</strong>: only a fraction of clients are available per round (phones charge overnight, hospitals batch nightly).</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. One aggregation step</h3>
+<p>Three clients with 100, 200 and 700 examples, one scalar parameter:</p>
+
+<table>
+  <tr><th>Client</th><th class="num">n<sub>k</sub></th><th class="num">Local w</th><th class="num">Weight</th><th class="num">Contribution</th></tr>
+  <tr><td>A</td><td class="num">100</td><td class="num">0.10</td><td class="num">0.10</td><td class="num">0.010</td></tr>
+  <tr><td>B</td><td class="num">200</td><td class="num">0.50</td><td class="num">0.20</td><td class="num">0.100</td></tr>
+  <tr><td>C</td><td class="num">700</td><td class="num">0.90</td><td class="num">0.70</td><td class="num">0.630</td></tr>
+  <tr><td><strong>Global</strong></td><td class="num">1000</td><td></td><td></td><td class="num"><strong>0.740</strong></td></tr>
+</table>
+
+<p>Equal weighting would give <code>(0.1+0.5+0.9)/3 = 0.50</code> — a model that ignores that 70% of the data says 0.9.</p>
+
+<h3>2. The cost model</h3>
+<p>100 rounds × 1,000 clients × 1 MB of weights = <strong>100 GB</strong> of transfer, against a centralised training run that moves the dataset once. FedAvg's entire research programme is about cutting that number.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"FedAvg is equivalent to training on the pooled data."</strong> It is equivalent only when client distributions are identical and local training is a single step. With heterogeneous data, averaging weights averages <em>different objectives</em>, and the result can be worse than any client's own model.</p>
+  <p><strong>Second trap:</strong> assuming the server sees updates, so privacy is solved. Gradients carry information about the data that produced them (topic 35).</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Two clients: 900 examples with local loss optimum 0.2, 100 examples with optimum 0.8. What does one FedAvg round produce?
+    <details><summary>Answer</summary>
+      <p><code>0.9(0.2) + 0.1(0.8) = 0.26</code>. The global model lands near the large client and largely ignores the small one — the source of fairness complaints in FL.</p>
+    </details>
+  </li>
+  <li>Why is communication, not computation, the binding constraint?
+    <details><summary>Answer</summary>
+      <p>Clients are often on mobile networks with limited upload bandwidth, and there may be millions of them. Local compute is comparatively cheap and parallel.</p>
+    </details>
+  </li>
+  <li>What exactly does the server receive from a client?
+    <details><summary>Answer</summary>
+      <p>Model weights or weight updates — never raw examples. That is the defining constraint, and also why privacy is not automatic.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 34: Non-IID data.</strong> Real clients do not share a distribution. Topic 34 explains why the averaging above starts to fail — and what FedProx does about it.</p>
+  <div class="pager">
+    <a href="032-evaluating-explanations.html">← 32 · Evaluating</a>
+    <a href="034-non-iid-and-convergence.html">34 · Non-IID →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: McMahan et al., <a href="https://arxiv.org/abs/1602.05629">Communication-Efficient Learning of Deep Networks from Decentralized Data</a> (2017).<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

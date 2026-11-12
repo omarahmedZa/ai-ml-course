@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>005 — Generalization</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="005">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 05 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 1 · Machine learning foundations · Topic 5 of 35</p>
+  <h1>Generalization: overfitting, underfitting, and the gap</h1>
+  <p class="objective">You can diagnose over- vs underfitting from train/test curves and pick the fix that matches the diagnosis.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">This is the single most examined idea in Unit 1, and the first thing that will go wrong in your project. A model that scores 99% on data it has seen is a memory; a model that scores 85% on data it has not seen is a product.</p>
+
+<h2>The one core idea</h2>
+<p><strong>Generalization</strong> is performance on unseen data. It is a property of the <em>procedure</em> (data + model class + training), not of the fitted model — and it is measured by holding data back.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><strong>Split</strong>: train (fit θ), validation (choose hyperparameters), test (report once, at the end). 60/20/20 is a sane default.</li>
+  <li><strong>Underfitting</strong>: train loss high, val loss high → the model is too simple or undertrained. Fix: bigger model, better features, longer training.</li>
+  <li><strong>Overfitting</strong>: train loss low, val loss high → the model learned noise. Fix: more data, regularization, simpler model, early stopping.</li>
+  <li><strong>Bias–variance</strong>: expected error = bias² + variance + irreducible noise. Simple models are biased; complex ones are variance-heavy. The sweet spot is the model just complex enough for the signal.</li>
+</ul>
+
+<table>
+  <tr><th>Symptom</th><th>Diagnosis</th><th>Lever</th></tr>
+  <tr><td>Train 0.95 / Val 0.94, both bad</td><td>Underfit</td><td>Capacity ↑, features, epochs ↑</td></tr>
+  <tr><td>Train 0.99 / Val 0.71</td><td>Overfit</td><td>Data ↑, regularization, capacity ↓</td></tr>
+  <tr><td>Train 0.60 / Val 0.58, both terrible</td><td>Wrong hypothesis class</td><td>Change the model family</td></tr>
+</table>
+
+<h2>Worked example</h2>
+
+<h3>1. The same 20 points, two models</h3>
+<table>
+  <tr><th>Model</th><th class="num">Train MSE</th><th class="num">Test MSE</th><th>Verdict</th></tr>
+  <tr><td>Degree 1 (line)</td><td class="num">0.90</td><td class="num">0.95</td><td>Underfit — both high</td></tr>
+  <tr><td>Degree 9 (wiggle)</td><td class="num">0.02</td><td class="num">3.40</td><td>Overfit — gap explodes</td></tr>
+</table>
+
+<p>The degree-9 curve threads every training point by swinging wildly between them. Those swings are the model fitting noise, and they cost 3.4 MSE where it counts.</p>
+
+<h3>2. The fix, in order of cost</h3>
+<ol>
+  <li>More data — reduces variance, never fixes bias.</li>
+  <li>Regularization — penalise large weights (weight decay, topic 12).</li>
+  <li>Early stopping — halt when validation loss turns upward.</li>
+  <li>Simpler model — the last resort, because it raises bias.</li>
+</ol>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"I'll tune until the test score is good."</strong> Do that and the test set has become a validation set. Your reported number is then optimistic, and the gap reappears in production where you cannot measure it.</p>
+  <p><strong>Leakage</strong> is the same disease in disguise: scaling or imputing before the split lets test statistics into training. Fit the scaler on train only, then apply it to test.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Train accuracy 0.99, validation 0.68. Name the diagnosis and two fixes that do not involve collecting more data.
+    <details><summary>Answer</summary>
+      <p>Overfitting. Regularization (weight decay/dropout) and early stopping both reduce variance without new data. Reducing capacity also works, at the risk of bias.</p>
+    </details>
+  </li>
+  <li>Why is a validation set necessary if you already have a test set?
+    <details><summary>Answer</summary>
+      <p>Because every decision made using test performance contaminates it. Validation absorbs the tuning; test measures the final, frozen choice exactly once.</p>
+    </details>
+  </li>
+  <li>Both train and validation loss are 0.60 and flat. Does more data help?
+    <details><summary>Answer</summary>
+      <p>Barely. That is bias, not variance — the model cannot represent the pattern. More data lowers variance; it will not teach a line to curve.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 6: Linear and logistic regression.</strong> The two baselines that every project should beat before anything deep is justified — and the exact model that sits inside every neural network's last layer.</p>
+  <div class="pager">
+    <a href="004-supervised-learning.html">← 04 · Supervised learning</a>
+    <a href="006-linear-and-logistic-regression.html">06 · Linear &amp; logistic →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Scott Fortmann-Roe, <a href="http://scott.fortmann-roe.com/docs/BiasVariance.html">Understanding the Bias-Variance Tradeoff</a>.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>003 — Probability, expectation, likelihood</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="003">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 03 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 0 · Mathematical floor · Topic 3 of 35</p>
+  <h1>Probability, expectation, likelihood</h1>
+  <p class="objective">You can explain why a loss is a negative log-likelihood, and read mean and variance off a distribution.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">A classifier does not output a label; it outputs a distribution over labels. A loss does not measure "wrongness"; it measures surprise. Without that framing, softmax and cross-entropy are arbitrary formulas to memorise.</p>
+
+<h2>The one core idea</h2>
+<p>A model assigns <strong>probability</strong> to what actually happened. The <strong>loss</strong> is how surprised the model was — and surprise is <code>−log p</code>.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><strong>Random variable</strong> = an outcome with a number attached. A <strong>PMF</strong> gives each discrete outcome a probability; it sums to 1. A <strong>PDF</strong> is the continuous version; it integrates to 1.</li>
+  <li><strong>Expectation</strong> <code>E[X] = Σ x·p(x)</code> = the long-run average. <strong>Variance</strong> = <code>E[(X − E[X])²]</code> = spread.</li>
+  <li><strong>Likelihood</strong> <code>L(θ) = p(data | θ)</code> — the probability of the observed data, viewed as a function of the parameters. Data fixed, parameters varying.</li>
+  <li><strong>Independence</strong> multiplies probabilities. Products of many small numbers underflow, so take logs: they turn into sums.</li>
+  <li><strong>Maximum likelihood</strong> = pick <code>θ</code> maximising <code>L</code> = minimising <code>−log L</code> (NLL).</li>
+  <li><strong>Cross-entropy</strong> is exactly NLL for a softmax output. Nothing new is happening.</li>
+</ul>
+
+<span class="formula">NLL(θ) = −Σᵢ log p_θ(yᵢ | xᵢ)</span>
+
+<h2>Worked example</h2>
+
+<h3>1. A biased coin</h3>
+<p>Model says <code>p(heads) = 0.7</code>. You observe 3 heads in 3 tosses.</p>
+
+<table>
+  <tr><th>Model</th><th class="num">Likelihood</th><th class="num">NLL = −ln L</th></tr>
+  <tr><td>p = 0.7</td><td class="num">0.343</td><td class="num">1.07</td></tr>
+  <tr><td>p = 0.5</td><td class="num">0.125</td><td class="num">2.08</td></tr>
+</table>
+
+<p>Lower NLL wins, so the data prefer <code>p = 0.7</code>. With 3 observations the evidence is weak — 3 heads also happens 12.5% of the time under a fair coin.</p>
+
+<h3>2. A classifier</h3>
+<p>Logits <code>z = [2, 1, 0]</code> → softmax:</p>
+
+<table>
+  <tr><th>Class</th><th class="num">eᶻ</th><th class="num">p</th><th>Loss if true</th></tr>
+  <tr><td>1</td><td class="num">7.389</td><td class="num">0.665</td><td class="num">0.41</td></tr>
+  <tr><td>2</td><td class="num">2.718</td><td class="num">0.245</td><td class="num">1.41</td></tr>
+  <tr><td>3</td><td class="num">1.000</td><td class="num">0.090</td><td class="num">2.41</td></tr>
+</table>
+
+<p>If the true class is 1, loss is <code>−ln 0.665 = 0.41</code>. If it is 3, loss is <code>2.41</code> — the model was confident and wrong, so it pays more. Confidence is only rewarded when it is correct.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Likelihood is the probability that my model is correct."</strong> It is not. Likelihood is <code>P(data | parameters)</code>. The probability of the model given the data is a different quantity (Bayes), and nobody computes it in training.</p>
+  <p><strong>Second trap:</strong> thinking squared error and cross-entropy are unrelated. Minimising squared error is maximum likelihood under a Gaussian noise assumption. Same principle, different distribution.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>A model says <code>p(heads) = 0.5</code>. Two tosses land heads. What is the NLL?
+    <details><summary>Answer</summary>
+      <p><code>L = 0.25</code>, so <code>NLL = −ln 0.25 = 1.386</code>. Two independent observations multiply; the log turns that into two additions of 0.693.</p>
+    </details>
+  </li>
+  <li>Why do we take the log of a likelihood before optimising it?
+    <details><summary>Answer</summary>
+      <p>Products of many probabilities underflow to zero in floating point, and derivatives of products are messy. Logs turn products into sums and preserve the location of the maximum.</p>
+    </details>
+  </li>
+  <li>Model A scores NLL 0.5 on the test set; model B scores 1.2. Which do you ship, and what does 1.2 mean in plain language?
+    <details><summary>Answer</summary>
+      <p>Ship A. On average its predicted probability for the true class is <code>e^−0.5 ≈ 0.61</code>; B's is <code>e^−1.2 ≈ 0.30</code>. B is roughly twice as surprised by reality.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 4: Supervised learning.</strong> You now have a loss. Unit 1 supplies the other three objects — data, function, and parameters — and the whole of ML falls out of arranging them.</p>
+  <div class="pager">
+    <a href="002-slope-to-gradient.html">← 02 · Gradient</a>
+    <a href="004-supervised-learning.html">04 · Supervised learning →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: <a href="https://www.khanacademy.org/math/statistics-probability">Khan Academy — Statistics and probability</a> (expectation, distributions, likelihood).<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

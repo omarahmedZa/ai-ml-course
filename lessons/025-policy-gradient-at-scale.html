@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>025 — Policy gradient at scale</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="025">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 25 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 6 · Deep reinforcement learning · Topic 25 of 35</p>
+  <h1>Policy gradient at scale: REINFORCE → PPO</h1>
+  <p class="objective">You can trace REINFORCE → baseline → actor–critic → PPO and explain the variance problem.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">PPO is the default algorithm behind robot control, game agents, and the RLHF step that made chat models usable. If you understand three upgrades to REINFORCE, you understand all of it.</p>
+
+<h2>The one core idea</h2>
+<p>REINFORCE is correct but enormously noisy: one rollout estimates the gradient. Each upgrade — <strong>baseline</strong>, <strong>critic</strong>, <strong>clipping</strong> — reduces variance or prevents destructive updates without changing the objective.</p>
+
+<h2>How it actually works</h2>
+<span class="formula">∇J(θ) = E[ ∇_θ log π_θ(a|s) · A(s,a) ]</span>
+
+<table>
+  <tr><th>Stage</th><th>Change</th><th>Fixes</th></tr>
+  <tr><td>REINFORCE</td><td>Weight by return <code>G_t</code></td><td>Nothing — high variance</td></tr>
+  <tr><td>+ baseline</td><td>Weight by <code>G_t − b(s)</code></td><td>Variance; <code>b</code> can be any function of state</td></tr>
+  <tr><td>Actor–critic (A2C)</td><td><code>b = V_φ(s)</code>, learned</td><td>Variance further; adds bias</td></tr>
+  <tr><td>+ GAE</td><td>Blend 1-step and n-step advantages with λ</td><td>Bias–variance tuning</td></tr>
+  <tr><td>PPO</td><td>Clip the probability ratio to <code>[1−ε, 1+ε]</code></td><td>Prevents a big, destructive update</td></tr>
+</table>
+
+<ul>
+  <li><strong>Why a baseline is free</strong>: subtracting a state-dependent constant does not change the expected gradient, because <code>Σ_a π(a|s)∇log π(a|s) = 0</code>. It only removes variance.</li>
+  <li><strong>Advantage</strong> <code>A = Q − V</code>: "how much better than average was this action here".</li>
+  <li><strong>PPO objective</strong>: <code>min(r_t A, clip(r_t, 1−ε, 1+ε) A)</code>, where <code>r_t = π_new/π_old</code>. ε is typically 0.2.</li>
+  <li><strong>On-policy</strong>: after the update, the data is stale. PPO squeezes a few epochs out of it, then throws it away.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. The clip, concretely</h3>
+<p><code>ε = 0.2</code>, advantage positive (the action was good), ratio <code>r = 1.3</code>:</p>
+
+<table>
+  <tr><th>Term</th><th class="num">Value</th></tr>
+  <tr><td>Unclipped</td><td class="num">1.3 × A</td></tr>
+  <tr><td>Clipped</td><td class="num">1.2 × A</td></tr>
+  <tr><td>Objective (min)</td><td class="num">1.2 × A</td></tr>
+</table>
+
+<p>The gradient stops rewarding further increases beyond 1.2. If the advantage is negative, the clip works on the other side: <code>r = 0.5</code> → clipped to 0.8, preventing an oversized decrease.</p>
+
+<h3>2. Why variance is the enemy</h3>
+<p>Returns in a task range from 0 to 100. Weighting one action's gradient by 100 instead of 40 is not a model error — it is sampling noise, and it moves the policy as if it were signal. A baseline turns "100 versus 40" into "60 versus 0", preserving the ranking while shrinking the magnitude.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"PPO's clip guarantees the policy changes by at most ε."</strong> It clips the <em>objective</em>, not the parameter update. Multiple epochs, momentum and shared parameters can still move the policy far. Clipping is a soft penalty, not a trust region.</p>
+  <p><strong>Second trap:</strong> blaming the algorithm when PPO does not learn. Nine times out of ten it is reward scaling, advantage normalisation, or a learning rate that is too high for the batch size.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Why does subtracting a baseline not bias the policy gradient?
+    <details><summary>Answer</summary>
+      <p>Because <code>Σ_a π(a|s) ∇log π(a|s) = ∇Σ_a π(a|s) = ∇1 = 0</code>. Any state-dependent baseline contributes zero in expectation, so only the variance changes.</p>
+    </details>
+  </li>
+  <li>What is the probability ratio in PPO, and what is it measuring?
+    <details><summary>Answer</summary>
+      <p><code>π_new(a|s) / π_old(a|s)</code> — how much more (or less) likely the action has become since the data was collected. It is 1 when nothing has changed.</p>
+    </details>
+  </li>
+  <li>Why is PPO described as sample-inefficient?
+    <details><summary>Answer</summary>
+      <p>It is on-policy: once the policy updates, old rollouts are invalid and must be discarded. DQN can reuse a transition a million times; PPO uses it for a handful of epochs.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 26: Attention.</strong> Unit 5 and 6 are done. Unit 7 returns to sequences — and replaces recurrence with a soft lookup that scales.</p>
+  <div class="pager">
+    <a href="024-dqn.html">← 24 · DQN</a>
+    <a href="026-attention.html">26 · Attention →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Schulman et al., <a href="https://arxiv.org/abs/1707.06347">Proximal Policy Optimization Algorithms</a> (2017).<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

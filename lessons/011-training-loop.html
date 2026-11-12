@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>011 — The training loop</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="011">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 11 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 2 · Neural network mechanics · Topic 11 of 35</p>
+  <h1>The training loop</h1>
+  <p class="objective">You can write the five-line loop and read a loss curve well enough to diagnose it.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">This is the loop you will run hundreds of times in your project. Ninety percent of "my model doesn't work" is one of four mistakes inside these five lines, and all four are visible in the loss curve.</p>
+
+<h2>The one core idea</h2>
+<p>Training is a fixed cycle: <strong>forward → loss → backward → step → zero the gradients</strong>, repeated over shuffled batches. The learning rate is the only number that reliably decides whether it works.</p>
+
+<h2>How it actually works</h2>
+<pre class="formula" style="text-align:left"><code>for x, y in loader:          # one batch
+    pred = model(x)          # forward
+    loss = criterion(pred, y)
+    loss.backward()          # gradients accumulated
+    opt.step()               # w ← w − η∇w
+    opt.zero_grad()          # reset, or gradients add up</code></pre>
+
+<table>
+  <tr><th>Term</th><th>Meaning</th></tr>
+  <tr><td>Batch</td><td>Subset of data in one step. Size trades noise for speed.</td></tr>
+  <tr><td>Step</td><td>One parameter update. <code>steps = epochs × n / batch</code></td></tr>
+  <tr><td>Epoch</td><td>One pass over the whole dataset.</td></tr>
+  <tr><td>Learning rate η</td><td>Step size. Too high → divergence; too low → glacial.</td></tr>
+</table>
+
+<h2>Worked example</h2>
+
+<h3>1. Sizing a run</h3>
+<p>10,000 training examples, batch 100 → <strong>100 steps per epoch</strong>. Twenty epochs → 2,000 updates. At batch 1,000 you get 10 steps per epoch and 200 total: 10× fewer updates, 10× less noise per step.</p>
+
+<h3>2. Reading the curve</h3>
+<table>
+  <tr><th>Curve</th><th>Diagnosis</th><th>Action</th></tr>
+  <tr><td>Falls, then rises</td><td>Overfitting</td><td>Early stop, regularise</td></tr>
+  <tr><td>Spikes to NaN</td><td>η too high</td><td>÷10, add warmup</td></tr>
+  <tr><td>Dead flat at <code>−ln(1/C)</code></td><td>Uniform output</td><td>Check lr, labels, zero_grad</td></tr>
+  <tr><td>Falls then plateaus high</td><td>Underfit</td><td>Capacity ↑, schedule η ↓</td></tr>
+</table>
+
+<p>A flat loss of 0.693 on a binary task is <code>−ln 0.5</code>: the model outputs 0.5 for everything. It is not "slow", it is not moving at all.</p>
+
+<h3>3. The learning-rate ladder</h3>
+<p>When nothing works, try <code>η ∈ {1e-2, 1e-3, 1e-4}</code> before changing architecture. A factor-of-10 sweep finds the order of magnitude in three runs; refinement after that is noise-chasing.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The optimizer remembers nothing, so zeroing is cosmetic."</strong> PyTorch accumulates gradients by default. Skip <code>zero_grad()</code> and each step uses the sum of all previous batches' gradients — a different, usually worse, algorithm.</p>
+  <p><strong>Second trap:</strong> measuring accuracy in <code>train()</code> mode. Dropout and batch norm behave differently at inference; forgetting <code>model.eval()</code> makes your validation number wrong, not just noisy.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>50,000 examples, batch size 250, 8 epochs. How many parameter updates?
+    <details><summary>Answer</summary>
+      <p><code>50000/250 = 200</code> steps per epoch, × 8 = <strong>1,600 updates</strong>. Epochs alone tell you nothing without the batch size.</p>
+    </details>
+  </li>
+  <li>Loss is <code>0.693</code> and perfectly flat on binary cross-entropy. What is the model outputting, and name two causes.
+    <details><summary>Answer</summary>
+      <p>Probability 0.5 for every input. Causes: learning rate far too high (weights oscillate), or a broken gradient path (missing activation, detached tensor, forgotten <code>zero_grad</code>).</p>
+    </details>
+  </li>
+  <li>What does <code>opt.zero_grad()</code> prevent?
+    <details><summary>Answer</summary>
+      <p>Accumulation. Without it, step <em>t</em> uses the sum of gradients from steps 1…t, so the effective learning rate grows over time and training destabilises.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 12: Overfitting in deep learning.</strong> Your loop now runs. Next: the four levers that stop a high-capacity network from memorising its way to a great training score.</p>
+  <div class="pager">
+    <a href="010-backpropagation.html">← 10 · Backprop</a>
+    <a href="012-overfitting-in-deep-learning.html">12 · Overfitting in DL →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: <a href="https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html">PyTorch — Optimizing Model Parameters</a>.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

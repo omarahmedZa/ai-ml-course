@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>020 — Value functions and Bellman</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="020">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 20 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 5 · Reinforcement learning · Topic 20 of 35</p>
+  <h1>Value functions &amp; the Bellman equation</h1>
+  <p class="objective">You can write V and Q and explain the recursive expectation.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">"How good is this state?" is the question every RL algorithm answers. The Bellman equation turns that unanswerable question into a fixed-point computation — and it is guaranteed exam material.</p>
+
+<h2>The one core idea</h2>
+<p>The value of a state equals the reward you get now plus the discounted value of where you land. That is a <strong>recursive expectation</strong>: value is defined in terms of itself, one step ahead.</p>
+
+<h2>How it actually works</h2>
+<span class="formula">V^π(s) = Σ_a π(a|s) Σ_{s′} P(s′|s,a)[ R(s,a,s′) + γ V^π(s′) ]</span>
+
+<table>
+  <tr><th>Function</th><th>Question</th><th>Shape</th></tr>
+  <tr><td><code>V^π(s)</code></td><td>Expected return starting in <code>s</code>, following <code>π</code></td><td class="num">|S|</td></tr>
+  <tr><td><code>Q^π(s,a)</code></td><td>Expected return after taking <code>a</code> in <code>s</code>, then <code>π</code></td><td class="num">|S|×|A|</td></tr>
+  <tr><td><code>V*(s)</code></td><td>Best possible value; <code>V* = max_a Q*(s,a)</code></td><td class="num">|S|</td></tr>
+</table>
+
+<ul>
+  <li><strong>Relationship</strong>: <code>V^π(s) = Σ_a π(a|s) Q^π(s,a)</code>. V averages Q over the policy's choices.</li>
+  <li><strong>Optimality</strong>: <code>Q*(s,a) = Σ_{s′} P[R + γ max_{a′} Q*(s′,a′)]</code>. The <code>max</code> is what makes it <em>optimal</em> rather than <em>policy evaluation</em>.</li>
+  <li><strong>Terminal states</strong> have <code>V = 0</code>; the recursion stops there.</li>
+  <li><strong>TD learning</strong> turns the expectation into a sample: <code>V(s) ← V(s) + α[r + γV(s′) − V(s)]</code>. The bracket is the <strong>TD error</strong>.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. One backup</h3>
+<p>State <code>s</code>, action <code>a</code> gives reward 1 and lands in <code>s′</code> with <code>V(s′) = 2</code>. <code>γ = 0.9</code>:</p>
+
+<table>
+  <tr><th>Term</th><th class="num">Value</th></tr>
+  <tr><td>Immediate reward</td><td class="num">1.0</td></tr>
+  <tr><td>Discounted future</td><td class="num">0.9 × 2 = 1.8</td></tr>
+  <tr><td><code>Q(s,a)</code></td><td class="num">2.8</td></tr>
+</table>
+
+<p>If <code>s</code> has two actions with <code>Q = 2.8</code> and <code>Q = 1.5</code>, then <code>V*(s) = 2.8</code> and the optimal policy picks the first. One backup, one decision.</p>
+
+<h3>2. Why bootstrapping is legitimate</h3>
+<p>The true value would require summing over every possible future. The Bellman equation replaces that infinite sum with one step plus an estimate of the rest — an <em>estimate plugged into an estimate</em>. It is biased (the estimate is wrong early), but converges because the recursion is a contraction: each backup reduces the error by a factor of γ.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"V and Q are the same thing."</strong> V is per state; Q is per state–action pair. You cannot choose an action from V alone without a model of the dynamics. Q-learning learns Q precisely so that <code>argmax</code> needs no model.</p>
+  <p><strong>Second trap:</strong> bootstrapping off a terminal state. There is no future after termination; using <code>γV(s′)</code> there adds phantom value and inflates every trajectory that ends.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li><code>r = 0</code>, <code>γ = 0.9</code>, <code>V(s′) = 5</code>. What is <code>Q(s,a)</code>?
+    <details><summary>Answer</summary>
+      <p><code>0 + 0.9 × 5 = 4.5</code>. The whole value is deferred — which is exactly why discounting matters for long horizons.</p>
+    </details>
+  </li>
+  <li>Why does the optimal Bellman equation contain a <code>max</code> while the policy-evaluation one contains a sum over actions?
+    <details><summary>Answer</summary>
+      <p>Evaluation averages over the policy's action distribution. Optimisation asks what the best action would give, so it maximises instead of averaging.</p>
+    </details>
+  </li>
+  <li>What is the TD error, and what does its sign tell you?
+    <details><summary>Answer</summary>
+      <p><code>r + γV(s′) − V(s)</code>: the surprise between the bootstrapped target and the current estimate. Positive means the state was undervalued; negative, overvalued.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 21: Exploration vs exploitation.</strong> Values tell you which action is best <em>according to your current estimates</em>. When those estimates are wrong, greed is a trap.</p>
+  <div class="pager">
+    <a href="019-rl-frame.html">← 19 · RL frame</a>
+    <a href="021-exploration-vs-exploitation.html">21 · Exploration →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Sutton &amp; Barto, <a href="http://incompleteideas.net/book/the-book-2nd.html">Reinforcement Learning: An Introduction</a>, ch. 3–4.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

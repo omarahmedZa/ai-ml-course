@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>018 — Seq2seq</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="018">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 18 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 4 · Natural language processing · Topic 18 of 35</p>
+  <h1>Seq2seq &amp; encoder–decoder</h1>
+  <p class="objective">You can explain translation as encode-then-decode, and state the alignment problem attention solves.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Encoder–decoder is the shape of every modern generative model: summarisation, translation, speech-to-text, and the chat model you are talking to. The decoder is the same object in all of them.</p>
+
+<h2>The one core idea</h2>
+<p>Read the input into a state, then generate the output one token at a time conditioned on that state. The weakness is structural: <strong>everything the decoder knows must fit through one fixed vector</strong>.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><strong>Encoder</strong>: an RNN consumes <code>x₁…x_n</code> and returns a final hidden state <code>h_n</code>. No output, just a summary.</li>
+  <li><strong>Decoder</strong>: initialised with <code>h_n</code>, emits <code>y₁…y_m</code> autoregressively. Each step's output is fed back as the next input.</li>
+  <li><strong>Teacher forcing</strong>: during training, feed the <em>true</em> previous token instead of the model's prediction. Speeds convergence, but creates a train/test mismatch.</li>
+  <li><strong>Exposure bias</strong>: at inference the model consumes its own errors, so one bad token can derail the rest. Mitigations: scheduled sampling, beam search.</li>
+  <li><strong>The bottleneck</strong>: a 30-token sentence and a 3-token sentence both compress to the same 512 numbers. Early words are the first to be overwritten.</li>
+  <li><strong>Attention</strong> (topic 26) removes the bottleneck: the decoder looks back at <em>all</em> encoder states, not just the last one.</li>
+</ul>
+
+<span class="formula">encoder: (x₁…x_n) → h_n     decoder: (h_n, y₁…y_{t−1}) → y_t</span>
+
+<h2>Worked example</h2>
+
+<h3>1. The compression problem, by volume</h3>
+<table>
+  <tr><th>Input</th><th class="num">Tokens</th><th class="num">State size</th><th class="num">Floats per token</th></tr>
+  <tr><td>Short sentence</td><td class="num">8</td><td class="num">512</td><td class="num">64</td></tr>
+  <tr><td>Paragraph</td><td class="num">120</td><td class="num">512</td><td class="num">4.3</td></tr>
+  <tr><td>Page</td><td class="num">600</td><td class="num">512</td><td class="num">0.85</td></tr>
+</table>
+
+<p>By the third row, the model has less than one number per input token. Nothing about the architecture is broken; the information simply is not there.</p>
+
+<h3>2. Why the decoder is slow</h3>
+<p>Generating <code>m</code> tokens requires <code>m</code> sequential forward passes: step <code>t</code> needs <code>y_{t−1}</code>. Training is parallel (teacher forcing supplies all previous tokens at once); inference is not. This asymmetry is why generation latency scales with output length.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Seq2seq means transformer."</strong> The original 2014 seq2seq was two LSTMs. The transformer is a different <em>implementation</em> of the same encoder–decoder contract, with attention replacing recurrence.</p>
+  <p><strong>Second trap:</strong> assuming teacher forcing is also used at inference. It cannot be — the true next token does not exist yet. That gap between training and deployment is a real source of degradation.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Why does a longer input sentence hurt a vanilla seq2seq model more than a shorter one?
+    <details><summary>Answer</summary>
+      <p>All information must pass through one fixed-size vector. Longer inputs mean more content per dimension, so early tokens are overwritten by later ones.</p>
+    </details>
+  </li>
+  <li>What is teacher forcing, and what problem does it create?
+    <details><summary>Answer</summary>
+      <p>Feeding the ground-truth previous token during training. It makes training fast and stable, but the model never practises recovering from its own mistakes — exposure bias.</p>
+    </details>
+  </li>
+  <li>How does attention change the decoder's access to the input?
+    <details><summary>Answer</summary>
+      <p>Instead of one summary vector, the decoder can query every encoder state and weight them per output step. The bottleneck becomes a soft lookup.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 19: The RL frame.</strong> Unit 5 changes the problem: no labels, only rewards. First we need the vocabulary — states, actions, returns.</p>
+  <div class="pager">
+    <a href="017-rnn-to-lstm.html">← 17 · RNN → LSTM</a>
+    <a href="019-rl-frame.html">19 · RL frame →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Sutskever, Vinyals &amp; Le, <a href="https://arxiv.org/abs/1409.3215">Sequence to Sequence Learning with Neural Networks</a> (2014).<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

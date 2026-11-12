@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>024 — DQN</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="024">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 24 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 6 · Deep reinforcement learning · Topic 24 of 35</p>
+  <h1>DQN: two fixes that made it work</h1>
+  <p class="objective">You can explain replay buffer and target network as fixes for correlated data and moving targets.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">DQN is the canonical example of "the algorithm was known for decades; the engineering made it work". It is also the cleanest exam question in Unit 6: name the two tricks and the problem each solves.</p>
+
+<h2>The one core idea</h2>
+<p>Q-learning with a neural network fails for two concrete reasons — <strong>correlated samples</strong> and <strong>a target that moves with the weights</strong>. Replay buffer fixes the first; target network fixes the second.</p>
+
+<h2>How it actually works</h2>
+<table>
+  <tr><th>Problem</th><th>Fix</th><th>Mechanism</th></tr>
+  <tr><td>Consecutive frames are nearly identical → gradients chase one trajectory</td><td><strong>Replay buffer</strong></td><td>Store 10⁶ transitions; sample random minibatches. Restores approximate i.i.d.</td></tr>
+  <tr><td>Target <code>r + γ max Q_θ</code> uses the weights being updated → chasing a moving target</td><td><strong>Target network</strong></td><td>Copy <code>θ⁻ ← θ</code> every ~10k steps; compute targets with the frozen copy</td></tr>
+  <tr><td>Large TD errors dominate the loss</td><td><strong>Huber loss</strong></td><td>Quadratic near 0, linear beyond — robust to outliers</td></tr>
+  <tr><td>Overestimation from <code>max</code> over noisy estimates</td><td><strong>Double DQN</strong></td><td>Select with <code>θ</code>, evaluate with <code>θ⁻</code></td></tr>
+</table>
+
+<span class="formula">L(θ) = E[( r + γ max_{a′} Q_{θ⁻}(s′,a′) − Q_θ(s,a) )²]</span>
+
+<ul>
+  <li><strong>Behaviour vs target policy</strong>: acting uses ε-greedy on <code>Q_θ</code>; learning uses the frozen target. Off-policy is what makes the buffer legal.</li>
+  <li><strong>ε decay</strong>: 1.0 → 0.1 over the first million frames. Random data early is what fills the buffer with variety.</li>
+  <li><strong>Frame stacking</strong> (4 frames) gives the network velocity — a single frame cannot distinguish "moving left" from "moving right".</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. Why the target network matters, numerically</h3>
+<p>Suppose <code>Q_θ(s,a) = 0.5</code> and the target is <code>1 + 0.9·max Q_θ(s′,·) = 1.72</code>. One gradient step raises <code>Q_θ(s,a)</code> toward 1.72 — but it also raises <code>Q_θ(s′,·)</code>, so the target for the <em>next</em> update has moved. With a frozen target, the target stays 1.72 for 10,000 steps and the update is a stable regression. That is the entire argument.</p>
+
+<h3>2. Replay in one line</h3>
+<p>A buffer of 1,000,000 transitions, minibatch 32. Sampling uniformly means each gradient step sees 32 unrelated moments from thousands of episodes — the opposite of "32 consecutive frames of the same corridor".</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Replay buffers are a general RL trick."</strong> They require off-policy learning. Put a replay buffer behind REINFORCE or PPO and you are training on data from policies that no longer exist — the importance weights blow up, and the gradient is wrong.</p>
+  <p><strong>Second trap:</strong> believing Double DQN removes overestimation entirely. It reduces the bias from the <code>max</code>; it does not make Q estimates unbiased.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>What does the target network freeze, and for how long?
+    <details><summary>Answer</summary>
+      <p>The weights used to compute <code>max Q(s′,a′)</code>. They are copied from the online network every N steps (commonly 10k), then held fixed while the online network trains.</p>
+    </details>
+  </li>
+  <li>Why does a replay buffer improve sample efficiency?
+    <details><summary>Answer</summary>
+      <p>Every stored transition can be reused in many updates instead of being discarded after one gradient step. It also decorrelates batches, which stabilises the fit.</p>
+    </details>
+  </li>
+  <li>Why can't PPO use a replay buffer the same way?
+    <details><summary>Answer</summary>
+      <p>PPO is on-policy: its gradient is only valid for data from the current policy. Reusing old-policy data requires importance sampling, and the ratio variance grows quickly with policy drift.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 25: Policy gradient at scale.</strong> DQN handles discrete actions. For continuous control — and for RLHF — the other family wins, once you fix its variance.</p>
+  <div class="pager">
+    <a href="023-function-approximation.html">← 23 · Function approximation</a>
+    <a href="025-policy-gradient-at-scale.html">25 · Policy gradient →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Mnih et al., <a href="https://www.nature.com/articles/nature14236">Human-level control through deep reinforcement learning</a> (2015).<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>027 — The Transformer block</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="027">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 27 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 7 · Attention and LLMs · Topic 27 of 35</p>
+  <h1>The Transformer block</h1>
+  <p class="objective">You can name every sub-layer, its purpose, and why residual + LayerNorm are required.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">"Transformer" is not one clever idea; it is four ordinary ideas stacked in a specific order. Knowing the order lets you read any architecture diagram and any config file without guessing.</p>
+
+<h2>The one core idea</h2>
+<p>A block is <strong>attention (mix information across tokens)</strong> plus <strong>FFN (process each token)</strong>, each wrapped in a residual connection and normalisation. Stack 96 of them and you have GPT-3's body.</p>
+
+<h2>How it actually works</h2>
+<span class="formula">x → x + MHA(LN(x)) → x + FFN(LN(x))     (pre-LN form)</span>
+
+<table>
+  <tr><th>Sub-layer</th><th>Job</th><th>Shape</th></tr>
+  <tr><td>Multi-head attention</td><td>Each head learns a different relation; outputs concatenated and projected</td><td class="num">n×d → n×d</td></tr>
+  <tr><td>Feed-forward (FFN)</td><td>Per-token nonlinear transform; where most parameters live</td><td class="num">d → 4d → d</td></tr>
+  <tr><td>Residual</td><td><code>x + f(x)</code>: gradient highway, preserves information</td><td class="num">n×d</td></tr>
+  <tr><td>LayerNorm</td><td>Normalises each token across its features; stabilises scale</td><td class="num">n×d</td></tr>
+  <tr><td>Positional encoding</td><td>Injects order — attention itself is permutation-invariant</td><td class="num">n×d</td></tr>
+</table>
+
+<ul>
+  <li><strong>Multi-head</strong>: <code>d_model = 512</code>, 8 heads → each head works in 64 dimensions. Splitting lets one head track syntax and another track coreference, without increasing total cost.</li>
+  <li><strong>FFN</strong>: <code>Linear(d, 4d) → GELU → Linear(4d, d)</code>. At <code>d = 512</code> that is ~2.1M parameters per block — two-thirds of the block.</li>
+  <li><strong>Causal mask</strong>: a lower-triangular mask sets future scores to −∞ before softmax, so token <code>t</code> cannot see <code>t+1</code>. Without it, next-token prediction is trivial and useless.</li>
+  <li><strong>Pre-LN vs post-LN</strong>: pre-LN (norm inside the residual branch) trains more stably at depth and is the modern default.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. Parameter count for one block</h3>
+<p><code>d = 512</code>, 8 heads:</p>
+
+<table>
+  <tr><th>Component</th><th>Formula</th><th class="num">Parameters</th></tr>
+  <tr><td>Q, K, V, O projections</td><td class="num">4 × 512 × 512</td><td class="num">1,048,576</td></tr>
+  <tr><td>FFN</td><td class="num">2 × 512 × 2048</td><td class="num">2,097,152</td></tr>
+  <tr><td>LayerNorms</td><td class="num">2 × 2 × 512</td><td class="num">2,048</td></tr>
+  <tr><td><strong>Total</strong></td><td></td><td class="num">≈ 3.15M</td></tr>
+</table>
+
+<h3>2. The mask, in one row</h3>
+<p>Token 3 attends to scores <code>[s₁, s₂, s₃, −∞, −∞]</code>. After softmax, tokens 4 and 5 receive exactly 0 probability. Remove the mask and the model can copy the answer from the future — training loss collapses to ~0 and generation produces gibberish.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Attention makes the model order-aware."</strong> It is permutation-invariant by construction: shuffle the tokens and the outputs shuffle with them. Order comes only from positional encodings, which is why they are not an optional extra.</p>
+  <p><strong>Second trap:</strong> assuming LayerNorm and BatchNorm are interchangeable. LayerNorm normalises across features <em>within one token</em>, so it works identically for a batch of 1 and a batch of 1,000 — essential for variable-length generation.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Why does the FFN hold most of the parameters even though attention gets the attention?
+    <details><summary>Answer</summary>
+      <p>It expands to <code>4d</code> and back, twice the matrices of the attention projections at 4× the width: <code>2·d·4d</code> versus <code>4·d²</code>.</p>
+    </details>
+  </li>
+  <li>What happens to next-token prediction if the causal mask is removed?
+    <details><summary>Answer</summary>
+      <p>The model sees the target token in its own input, so the loss goes to near zero during training. At generation time the future is absent, and quality collapses.</p>
+    </details>
+  </li>
+  <li>Why is pre-LN preferred for very deep transformers?
+    <details><summary>Answer</summary>
+      <p>The residual path stays unnormalised, so gradients flow cleanly to early layers. Post-LN requires careful warmup and still destabilises beyond a few dozen blocks.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 28: Pretraining.</strong> You have the architecture. Topic 28 supplies the objective and the data — and explains why scale alone produced a step change in capability.</p>
+  <div class="pager">
+    <a href="026-attention.html">← 26 · Attention</a>
+    <a href="028-pretraining.html">28 · Pretraining →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Vaswani et al., <a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a> (2017), §3.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

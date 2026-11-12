@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>007 — Trees and ensembles</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="007">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 07 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 1 · Machine learning foundations · Topic 7 of 35</p>
+  <h1>Trees &amp; ensembles</h1>
+  <p class="objective">You can explain axis-aligned splits, bagging vs boosting, and when trees beat linear models.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">On tabular data — spreadsheets, medical records, sensor tables — gradient-boosted trees are still the strongest default. Your project may well beat a neural network with 200 lines of XGBoost, and the exam will ask why.</p>
+
+<h2>The one core idea</h2>
+<p>A tree partitions feature space with <strong>axis-aligned cuts</strong>, choosing each cut that most reduces impurity. An <strong>ensemble</strong> is many trees combined — bagging averages away variance, boosting builds a sequence that removes bias.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><strong>Split selection</strong> is greedy: try every feature and threshold, keep the cut with the largest impurity drop. No global optimisation — a known weakness.</li>
+  <li><strong>Impurity</strong>: Gini <code>1 − Σ pₖ²</code> or entropy <code>−Σ pₖ log pₖ</code> for classification; variance/MSE for regression.</li>
+  <li><strong>Stopping</strong>: max depth, min samples per leaf, or validation-based pruning. Unconstrained trees memorise.</li>
+  <li><strong>Bagging</strong> (random forest): train many deep trees on bootstrap samples, average. Each tree has low bias, high variance; averaging cuts variance.</li>
+  <li><strong>Boosting</strong> (GBM, XGBoost, LightGBM): train shallow trees sequentially, each fitting the previous ensemble's residual. Low bias grows slowly; variance is controlled by shrinkage and depth.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. Which split is better?</h3>
+<p>100 samples, 50 positive / 50 negative. Parent Gini = <code>1 − (0.5² + 0.5²) = 0.5</code>.</p>
+
+<table>
+  <tr><th>Split</th><th>Left child</th><th>Right child</th><th class="num">Weighted Gini</th></tr>
+  <tr><td>A (good)</td><td>50: 45+/5− → 0.18</td><td>50: 5+/45− → 0.18</td><td class="num">0.18</td></tr>
+  <tr><td>B (useless)</td><td>50: 25+/25− → 0.50</td><td>50: 25+/25− → 0.50</td><td class="num">0.50</td></tr>
+</table>
+
+<p>Split A drops impurity by 0.32; split B by 0. The tree takes A and recurses into each child.</p>
+
+<h3>2. Bagging vs boosting, same data</h3>
+<table>
+  <tr><th></th><th>Bagging (RF)</th><th>Boosting (GBM)</th></tr>
+  <tr><td>Trees built</td><td>In parallel, deep</td><td>Sequentially, shallow</td></tr>
+  <tr><td>Attacks</td><td>Variance</td><td>Bias</td></tr>
+  <tr><td>Overfit risk</td><td>Low, saturates with more trees</td><td>Real — needs early stopping</td></tr>
+  <tr><td>Typical win</td><td>Noisy, small data</td><td>Tight accuracy on tabular</td></tr>
+</table>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Trees can learn any pattern, including trends."</strong> They cannot extrapolate. A tree predicts the average of the training targets in a leaf, so it can never output a value outside the range it has seen. Ask it to forecast next year's growth and it flatlines.</p>
+  <p><strong>Second trap:</strong> reading built-in feature importance as truth. Impurity-based importance is biased toward high-cardinality and continuous features. Use permutation importance on held-out data instead (topic 31).</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>A node has 40 samples, 30 positive and 10 negative. Compute its Gini impurity.
+    <details><summary>Answer</summary>
+      <p><code>1 − (0.75² + 0.25²) = 1 − (0.5625 + 0.0625) = 0.375</code>. Pure nodes score 0; a 50/50 node scores 0.5, the maximum for two classes.</p>
+    </details>
+  </li>
+  <li>You have 500 rows and a noisy target. Do you reach for a random forest or a boosted ensemble first, and why?
+    <details><summary>Answer</summary>
+      <p>Random forest. With 500 noisy rows, boosting's sequential fitting will chase noise unless heavily regularised. Bagging is the safer default at small n.</p>
+    </details>
+  </li>
+  <li>Why can a tree not predict a house price above every price in its training set?
+    <details><summary>Answer</summary>
+      <p>Its prediction is a leaf average of training targets. No average can exceed the maximum observation, so the model is structurally incapable of extrapolation.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 8: The neuron.</strong> Unit 1 is done. Unit 2 asks what happens when you stack 10,000 of these weighted sums and insert a bend between them.</p>
+  <div class="pager">
+    <a href="006-linear-and-logistic-regression.html">← 06 · Linear &amp; logistic</a>
+    <a href="008-the-neuron.html">08 · The neuron →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: <a href="https://scikit-learn.org/stable/modules/ensemble.html">scikit-learn — Ensembles</a>.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

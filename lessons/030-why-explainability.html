@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>030 — Why explainability</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="030">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 30 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 8 · Explainable AI · Topic 30 of 35</p>
+  <h1>Why explainability exists</h1>
+  <p class="objective">You can distinguish intrinsic vs post-hoc and local vs global, and name the accountability use case.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Your project will make a prediction somebody has to act on. "The model said so" is not an answer to a rejected loan applicant, a clinician, or an auditor — and in some jurisdictions it is not a legal answer either.</p>
+
+<h2>The one core idea</h2>
+<p>An explanation is an <strong>argument about why an output occurred</strong>, addressed to a specific stakeholder. Different stakeholders need different arguments — and most XAI failures are a mismatch between the method and the audience.</p>
+
+<h2>How it actually works</h2>
+<table>
+  <tr><th>Axis</th><th>Option A</th><th>Option B</th></tr>
+  <tr><td>When</td><td><strong>Intrinsic</strong>: the model is interpretable by design (linear, small tree)</td><td><strong>Post-hoc</strong>: explain a trained black box afterwards</td></tr>
+  <tr><td>Scope</td><td><strong>Global</strong>: how the model behaves overall</td><td><strong>Local</strong>: why this one prediction</td></tr>
+  <tr><td>Form</td><td><strong>Feature attribution</strong>: which inputs mattered</td><td><strong>Example / counterfactual</strong>: nearest case, minimal change</td></tr>
+</table>
+
+<ul>
+  <li><strong>Debugging</strong>: a surgeon's model keys on the hospital's scanner ID, not the lesion. Attribution finds it; accuracy never would.</li>
+  <li><strong>Accountability</strong>: the applicant is owed the <em>actual</em> reason, not a plausible-sounding one. GDPR Art. 22 constrains purely automated decisions with significant effects.</li>
+  <li><strong>Trust and adoption</strong>: a clinician will not act on a score they cannot sanity-check.</li>
+  <li><strong>Safety</strong>: explanations expose spurious shortcuts before deployment, when they are cheap to fix.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. The same model, three audiences</h3>
+<p>A loan model rejects an application with <code>p(default) = 0.31</code> against a 0.25 threshold.</p>
+
+<table>
+  <tr><th>Audience</th><th>Useful explanation</th></tr>
+  <tr><td>Applicant</td><td>"Debt-to-income and two recent missed payments" — actionable, specific</td></tr>
+  <tr><td>Loan officer</td><td>Feature contributions plus comparable approved cases</td></tr>
+  <tr><td>Regulator</td><td>Global validation: error rates by protected group, plus the decision rule</td></tr>
+</table>
+
+<p>One explanation cannot serve all three. Shipping SHAP values to the applicant answers a question they did not ask.</p>
+
+<h3>2. Intrinsic vs post-hoc trade-off</h3>
+<p>A logistic regression is fully interpretable and may lose 3 AUC points to a gradient-boosted model. That trade is sometimes correct (regulated lending) and sometimes not (ad ranking). The mistake is refusing to make the trade explicitly.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"An explanation tells you the cause."</strong> Post-hoc methods describe the model's <em>function</em>, not the world's causal structure. "Income contributed 0.2" means the model's output would change if income changed — not that income causes repayment.</p>
+  <p><strong>Second trap:</strong> explainability theatre — producing a heatmap because it looks rigorous. An explanation nobody can act on, or that is never validated (topic 32), is decoration with a compliance cost.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>A decision tree of depth 4 is used for credit scoring. Is it intrinsic or post-hoc, and local or global?
+    <details><summary>Answer</summary>
+      <p>Intrinsic — the model <em>is</em> the explanation. It supports both local (the path taken) and global (the whole tree) readings.</p>
+    </details>
+  </li>
+  <li>Why is a global explanation insufficient for an individual rejection?
+    <details><summary>Answer</summary>
+      <p>Global describes average behaviour. The applicant needs the reason for <em>their</em> output, which may be a rare interaction invisible in aggregate importance.</p>
+    </details>
+  </li>
+  <li>What is the difference between explaining a model and explaining a prediction?
+    <details><summary>Answer</summary>
+      <p>The model explanation characterises the function everywhere; the prediction explanation is a local claim about one input. Methods differ: global importance vs local attribution.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 31: Attribution methods.</strong> You know which argument you need. Topic 31 covers the four methods that produce it — and what each one actually computes.</p>
+  <div class="pager">
+    <a href="029-alignment-and-inference.html">← 29 · Alignment</a>
+    <a href="031-attribution-methods.html">31 · Attribution →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Molnar, <a href="https://christophm.github.io/interpretable-ml-book/">Interpretable Machine Learning</a>, ch. 1–2.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

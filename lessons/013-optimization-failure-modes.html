@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>013 — Optimization failure modes</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="013">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 13 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 3 · Making deep learning work · Topic 13 of 35</p>
+  <h1>Optimization failure modes</h1>
+  <p class="objective">You can diagnose vanishing or exploding gradients and name the fix.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">A 40-layer network that trains like a 2-layer one is not magic; it is four specific engineering fixes. Without them, depth actively hurts, and the failure looks like "my model just doesn't learn".</p>
+
+<h2>The one core idea</h2>
+<p>Backprop multiplies Jacobians layer by layer. Products of numbers below 1 <strong>vanish</strong>; above 1 they <strong>explode</strong>. Every fix either keeps those factors near 1 or shortens the path the gradient travels.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><strong>Vanishing</strong>: sigmoid's derivative peaks at 0.25. Ten layers → <code>0.25¹⁰ ≈ 9.5 × 10⁻⁷</code>. Early layers receive nothing and stop learning.</li>
+  <li><strong>Exploding</strong>: weights with gain 1.5 over ten layers → <code>1.5¹⁰ ≈ 58</code>; over fifty layers → <code>6 × 10⁸</code>. Loss becomes NaN.</li>
+  <li><strong>Initialisation</strong>: Xavier/Glorot for tanh, He for ReLU — scale initial weights so variance is preserved through the layer.</li>
+  <li><strong>Normalisation</strong>: BatchNorm/LayerNorm re-centre and re-scale activations, keeping the operating point in the responsive range.</li>
+  <li><strong>Residual connections</strong>: <code>y = x + f(x)</code> gives gradients an identity path straight to the input. This single idea is what made 100+ layer networks trainable.</li>
+  <li><strong>Gradient clipping</strong>: rescale the gradient when its norm exceeds a threshold. The standard fix for exploding gradients in RNNs and RL.</li>
+  <li><strong>Warmup</strong>: start with a tiny learning rate, ramp up. Prevents early divergence when initial gradients are large.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. How fast the signal dies</h3>
+<table>
+  <tr><th>Layers</th><th class="num">Gain 0.25</th><th class="num">Gain 1.5</th></tr>
+  <tr><td>5</td><td class="num">9.8 × 10⁻⁴</td><td class="num">7.6</td></tr>
+  <tr><td>10</td><td class="num">9.5 × 10⁻⁷</td><td class="num">58</td></tr>
+  <tr><td>50</td><td class="num">8 × 10⁻³¹</td><td class="num">6.4 × 10⁸</td></tr>
+</table>
+
+<p>The first column is below float32 precision by layer 30 — the gradient is literally zero. The second overflows. There is no learning rate that fixes either.</p>
+
+<h3>2. Diagnosis from symptoms</h3>
+<table>
+  <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+  <tr><td>Loss flat, early layers unchanged</td><td>Vanishing</td><td>ReLU/GELU, He init, residuals, norm</td></tr>
+  <tr><td>Loss NaN after a few steps</td><td>Exploding</td><td>Clip gradients, lower η, warmup</td></tr>
+  <tr><td>Loss explodes only in one batch</td><td>Outlier / bad sample</td><td>Clip, check labels</td></tr>
+  <tr><td>Unit output always 0</td><td>Dying ReLU</td><td>Lower η, LeakyReLU</td></tr>
+</table>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"More depth is more power, so just add layers."</strong> Beyond a point, depth without residual connections and normalisation <em>reduces</em> trainability. The optimisation problem gets harder faster than the representation gets richer.</p>
+  <p><strong>Second trap:</strong> assuming BatchNorm behaves the same in training and inference. At inference it uses stored running statistics, not batch statistics. Forget <code>model.eval()</code> and a batch of one produces nonsense.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Why does <code>y = x + f(x)</code> help gradients reach layer 1?
+    <details><summary>Answer</summary>
+      <p><code>∂y/∂x = I + ∂f/∂x</code>. The identity term carries the gradient through untouched, so it cannot be shrunk to zero by the block's Jacobian alone.</p>
+    </details>
+  </li>
+  <li>Loss goes to NaN after 30 steps. Name the first two things you try.
+    <details><summary>Answer</summary>
+      <p>Lower the learning rate by 10×, and clip the gradient norm (e.g. 1.0). Both target the same cause: a step so large it leaves the numerically stable region.</p>
+    </details>
+  </li>
+  <li>A 20-layer sigmoid network's first five layers have gradients around 1e-9. Which single change helps most?
+    <details><summary>Answer</summary>
+      <p>Replace sigmoid with ReLU (or GELU). Sigmoid's derivative is at most 0.25, so depth multiplies the gradient away; ReLU has derivative 1 for positive inputs.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 14: Architecture families.</strong> You can now train a deep network. Next: which shape of network to use, because MLP, CNN and RNN each bake in a different assumption about your data.</p>
+  <div class="pager">
+    <a href="012-overfitting-in-deep-learning.html">← 12 · Overfitting in DL</a>
+    <a href="014-architecture-families.html">14 · Architectures →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Goodfellow, Bengio &amp; Courville, <a href="https://www.deeplearningbook.org">Deep Learning</a>, ch. 8 (optimization).<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

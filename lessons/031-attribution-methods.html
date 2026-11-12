@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>031 — Attribution methods</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="031">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 31 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 8 · Explainable AI · Topic 31 of 35</p>
+  <h1>Attribution methods: what each one computes</h1>
+  <p class="objective">You can explain what saliency, LIME and SHAP compute, and their failure modes.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Four methods produce four different "explanations" of the same prediction. Knowing the definition behind each is the difference between citing an attribution and being fooled by one.</p>
+
+<h2>The one core idea</h2>
+<p>Every attribution method apportions the output among input features — but they differ in <strong>what count as evidence</strong>: a local gradient, a local surrogate, or an average over all feature orderings.</p>
+
+<h2>How it actually works</h2>
+<table>
+  <tr><th>Method</th><th>Computes</th><th>Cost</th><th>Weakness</th></tr>
+  <tr><td><strong>Saliency</strong></td><td><code>∂f/∂xᵢ</code> at the input</td><td class="num">1 backward pass</td><td>Saturates; noisy; not class-complete</td></tr>
+  <tr><td><strong>Integrated gradients</strong></td><td>Path integral of gradients from a baseline to <code>x</code></td><td class="num">20–300 passes</td><td>Baseline choice changes the answer</td></tr>
+  <tr><td><strong>LIME</strong></td><td>Fit a sparse linear model to perturbations near <code>x</code></td><td class="num">Hundreds of queries</td><td>Unstable; sampling near a point is ill-defined</td></tr>
+  <tr><td><strong>SHAP</strong></td><td>Shapley values: average marginal contribution over all feature subsets</td><td class="num">Exponential exact; sampled in practice</td><td>Assumes feature independence unless corrected</td></tr>
+</table>
+
+<ul>
+  <li><strong>Saliency answers</strong>: "if I nudge this pixel, how fast does the score move?" It is local and instantaneous — flat regions (saturated ReLU, sigmoid) report zero importance even when the feature matters.</li>
+  <li><strong>Integrated gradients</strong> fixes saturation by averaging gradients along a straight line from a neutral baseline. Completeness holds: attributions sum to <code>f(x) − f(baseline)</code>.</li>
+  <li><strong>LIME</strong> is model-agnostic: perturb, query, fit a simple surrogate. The surrogate explains the <em>surrogate</em>, not the model — and different random seeds give different answers.</li>
+  <li><strong>Shapley</strong> is the unique attribution satisfying efficiency, symmetry, dummy and additivity. Those axioms are why SHAP is the default in regulated settings.</li>
+</ul>
+
+<span class="formula">φᵢ = Σ_{S ⊆ F\{i}}  |S|!(|F|−|S|−1)! / |F|!  · [ v(S ∪ {i}) − v(S) ]</span>
+
+<h2>Worked example</h2>
+
+<h3>1. Shapley by hand, two features</h3>
+<p><code>v(∅) = 0</code>, <code>v({1}) = 0.6</code>, <code>v({2}) = 0.4</code>, <code>v({1,2}) = 1.0</code>.</p>
+
+<table>
+  <tr><th>Feature</th><th>Order 1→2</th><th>Order 2→1</th><th class="num">Average φ</th></tr>
+  <tr><td>1</td><td class="num">0.6 − 0 = 0.6</td><td class="num">1.0 − 0.4 = 0.6</td><td class="num">0.6</td></tr>
+  <tr><td>2</td><td class="num">1.0 − 0.6 = 0.4</td><td class="num">0.4 − 0 = 0.4</td><td class="num">0.4</td></tr>
+</table>
+
+<p>They sum to 1.0, the full output. That efficiency property is what makes SHAP auditable: the parts add up to the whole.</p>
+
+<h3>2. When saliency lies</h3>
+<p>A pixel has gradient 0 because the ReLU is off, yet removing it changes the prediction. The gradient is a local slope, not a measure of necessity. Integrated gradients or an occlusion test would catch it; raw saliency will not.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"SHAP values are causal."</strong> They are conditional expectations under the model's input distribution. Correlated features split credit arbitrarily — two identical columns each get half, and neither is "the cause".</p>
+  <p><strong>Second trap:</strong> treating LIME's stability as guaranteed. Re-run it with a different seed and the top feature can change. If an explanation is not stable, it is not evidence.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Why does integrated gradients need a baseline, and what breaks if you choose a bad one?
+    <details><summary>Answer</summary>
+      <p>It integrates gradients along a path from that baseline to the input. A baseline that is off-manifold (e.g. all-black where black is meaningful) produces attributions for a path the model never encounters.</p>
+    </details>
+  </li>
+  <li>Which property do Shapley values satisfy that saliency does not?
+    <details><summary>Answer</summary>
+      <p>Efficiency/completeness: attributions sum exactly to the difference between the prediction and the baseline. Saliency has no such conservation law.</p>
+    </details>
+  </li>
+  <li>Two features are perfectly correlated. What does SHAP do, and why is that a problem?
+    <details><summary>Answer</summary>
+      <p>It splits credit between them roughly evenly, because each is marginally redundant given the other. A domain expert would name one as the driver; SHAP reports both as half-important.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 32: Evaluating explanations.</strong> You can now produce four kinds of explanation. Topic 32 asks the only question that matters: is any of them true?</p>
+  <div class="pager">
+    <a href="030-why-explainability.html">← 30 · Why XAI</a>
+    <a href="032-evaluating-explanations.html">32 · Evaluating →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Lundberg &amp; Lee, <a href="https://arxiv.org/abs/1705.07874">A Unified Approach to Interpreting Model Predictions</a> (2017).<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

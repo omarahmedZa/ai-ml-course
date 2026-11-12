@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>032 — Evaluating explanations</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="032">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 32 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 8 · Explainable AI · Topic 32 of 35</p>
+  <h1>Evaluating explanations</h1>
+  <p class="objective">You can test faithfulness and explain the correlation ≠ causation trap.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">An explanation that looks convincing and is wrong is worse than no explanation: it launders a black box into false confidence. This topic is the quality control that Unit 8 otherwise lacks.</p>
+
+<h2>The one core idea</h2>
+<p>Explanations must be judged on <strong>faithfulness</strong> (does it reflect the model's actual computation?) not <strong>plausibility</strong> (does a human like it?). The two frequently disagree.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><strong>Deletion test</strong>: remove the top-k attributed features and measure the drop in output. A faithful explanation removes features that actually mattered.</li>
+  <li><strong>Insertion test</strong>: add features from least to most important; a faithful ranking recovers the prediction quickly.</li>
+  <li><strong>Model randomisation sanity check</strong>: retrain with shuffled labels or randomise weights layer by layer. A faithful method's output must change. Many saliency maps do not — they are edge detectors, not explanations (Adebayo et al., 2018).</li>
+  <li><strong>Stability</strong>: perturb the input slightly or re-sample the explainer; a stable method returns similar attributions.</li>
+  <li><strong>Explanation hacking</strong>: a model trained <em>with</em> an explanation penalty can learn to produce nice explanations while behaving differently. Never optimise the explainer and the model together without an independent check.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. Deletion test, two methods</h3>
+<p>Image classifier, 5,000 test images, AUC 0.94.</p>
+
+<table>
+  <tr><th>Removed features</th><th>Method A AUC</th><th>Method B AUC</th><th>Random</th></tr>
+  <tr><td>Top 10% by attribution</td><td class="num">0.71</td><td class="num">0.90</td><td class="num">0.91</td></tr>
+  <tr><td>Top 30%</td><td class="num">0.38</td><td class="num">0.82</td><td class="num">0.85</td></tr>
+</table>
+
+<p>Method A's "important" pixels really are load-bearing; removing them destroys the prediction. Method B's are decorative — its map is smooth and pretty, and nearly useless. Plausibility would have ranked B first.</p>
+
+<h3>2. The randomisation test in one line</h3>
+<p>Replace the trained weights with random ones, keeping the architecture. A saliency map that barely changes was never about the learned features. Run this before publishing any heatmap.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A domain expert found the explanation convincing, so it is validated."</strong> Human judgement measures plausibility, and humans are systematically fooled by smooth, local, sparse-looking maps. Faithfulness needs a perturbation experiment, not an opinion.</p>
+  <p><strong>Second trap:</strong> confusing "the model attends here" with "this caused the decision". Attention and attribution are correlational summaries of one forward pass (topic 26).</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>What is the difference between faithfulness and plausibility?
+    <details><summary>Answer</summary>
+      <p>Faithfulness: the explanation reflects the model's actual computation, testable by perturbation. Plausibility: it matches human intuition. A method can score high on one and low on the other.</p>
+    </details>
+  </li>
+  <li>Why does the model-randomisation test catch fake saliency?
+    <details><summary>Answer</summary>
+      <p>If the weights are randomised, the learned features are gone. An explanation that ignores this is responding to input statistics (edges, contrast), not to the model.</p>
+    </details>
+  </li>
+  <li>You remove the top 5 features and accuracy does not change. What do you conclude?
+    <details><summary>Answer</summary>
+      <p>The attribution is not faithful for this model — those features were not necessary for the prediction. Either the method is wrong, or the model is using redundant features.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 33: Federated learning.</strong> Unit 9 changes the constraint: the data cannot leave the device. Everything you know about training now has to work without ever seeing the dataset.</p>
+  <div class="pager">
+    <a href="031-attribution-methods.html">← 31 · Attribution</a>
+    <a href="033-federated-setting-fedavg.html">33 · FedAvg →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Adebayo et al., <a href="https://arxiv.org/abs/1810.03292">Sanity Checks for Saliency Maps</a> (2018).<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

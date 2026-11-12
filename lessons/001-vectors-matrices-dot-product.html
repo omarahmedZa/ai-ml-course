@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>001 — Vectors, matrices, dot product</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="001">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 01 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 0 · Mathematical floor · Topic 1 of 35</p>
+  <h1>Vectors, matrices, and the dot product</h1>
+  <p class="objective">You can read any score function as a dot product, and check its shapes mechanically.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Every model in this course is a dot product in disguise: a linear layer, an embedding lookup, an attention score, a Q-value. Make dot products and shape rules automatic, and the notation stops eating your working memory.</p>
+
+<h2>The one core idea</h2>
+<p>A score is a measurement of <strong>alignment</strong> between two vectors: what the input <em>is</em> (<code>x</code>), and what the model is <em>looking for</em> (<code>w</code>). Training is nothing more than choosing <code>w</code> so that the right inputs align.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><strong>Vector</strong> = <em>n</em> numbers treated as one object: one data point with <em>n</em> features, or an arrow from the origin.</li>
+  <li><strong>Dot product</strong> = multiply matching positions, then add.</li>
+</ul>
+
+<span class="formula">x · w = x₁w₁ + x₂w₂ + … + xₙwₙ</span>
+
+<p>Three equivalent readings of that number:</p>
+
+<table>
+  <tr><th>Reading</th><th>What it tells you</th></tr>
+  <tr><td>Sum of per-feature agreements</td><td>Feature 1 wants +3, you have +2 → contribution +6</td></tr>
+  <tr><td><code>‖x‖ ‖w‖ cos θ</code></td><td>How parallel the two arrows are, scaled by their lengths</td></tr>
+  <tr><td>Projection × length</td><td>How far <code>x</code>'s shadow reaches along <code>w</code></td></tr>
+</table>
+
+<figure>
+  <svg viewBox="0 0 340 150" role="img" aria-label="Vector x projected onto vector w, with angle theta between them">
+    <line x1="20" y1="130" x2="320" y2="130" stroke="currentColor" stroke-opacity="0.25" stroke-width="1"/>
+    <line x1="20" y1="130" x2="20" y2="12" stroke="currentColor" stroke-opacity="0.25" stroke-width="1"/>
+    <line x1="20" y1="130" x2="250" y2="130" stroke="var(--accent)" stroke-width="2.5"/>
+    <line x1="20" y1="130" x2="150" y2="42" stroke="currentColor" stroke-width="2.5"/>
+    <line x1="150" y1="42" x2="150" y2="130" stroke="currentColor" stroke-dasharray="4 3" stroke-opacity="0.5" stroke-width="1.5"/>
+    <path d="M 78 130 A 58 58 0 0 0 62 108" fill="none" stroke="currentColor" stroke-opacity="0.6" stroke-width="1.2"/>
+    <text x="86" y="120" font-size="13" font-style="italic" fill="currentColor">θ</text>
+    <text x="256" y="126" font-size="13" fill="var(--accent)">w</text>
+    <text x="152" y="36" font-size="13" fill="currentColor">x</text>
+    <text x="118" y="146" font-size="11" fill="currentColor" fill-opacity="0.6">shadow of x</text>
+  </svg>
+  <figcaption>Alignment is the shadow length, signed. Past 90° the shadow points backwards — a negative score.</figcaption>
+</figure>
+
+<ul>
+  <li><strong>Sign is the message.</strong> Positive → same half-space as <code>w</code>. Zero → perpendicular, nothing in common. Negative → pointing away.</li>
+  <li><strong>Cosine similarity</strong> divides the lengths out: <code>cos θ = (x·w) / (‖x‖‖w‖)</code>, range −1 to 1. Use it when magnitude is noise — exactly the case for embeddings (topic 16).</li>
+  <li><strong>Matrix</strong> = <em>m</em> row-vectors stacked; <code>Wx</code> is <em>m</em> dot products at once. Shape rule <code>(m×n)(n×k) → (m×k)</code>: inner dimensions must match.</li>
+  <li><strong>A neuron before its nonlinearity</strong> is <code>w·x + b</code>. The bias shifts the threshold; it does not rotate <code>w</code>.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. One score, three features</h3>
+<p><code>x = [2, 1]</code>, <code>w = [3, −1]</code>, <code>b = −1</code>:</p>
+
+<table>
+  <tr><th>Step</th><th class="num">Value</th></tr>
+  <tr><td>Feature 1</td><td class="num">2 × 3 = 6</td></tr>
+  <tr><td>Feature 2</td><td class="num">1 × (−1) = −1</td></tr>
+  <tr><td>Dot product</td><td class="num">5</td></tr>
+  <tr><td>Plus bias</td><td class="num">5 + (−1) = <strong>4</strong></td></tr>
+</table>
+
+<p>Positive, so <code>x</code> sits on <code>w</code>'s side. Flip the second weight to <code>w = [3, 1]</code> and the score is <code>6</code>. <code>x</code> never changed; the model changed what it looked for.</p>
+
+<h3>2. A matrix, then a batch</h3>
+<p>Two output scores, three features each:</p>
+
+<span class="formula">W = [[1, 0, −1], [0, 2, 1]]  ·  x = [1, 2, 3]</span>
+
+<table>
+  <tr><th>Output</th><th>Dot product</th><th class="num">Result</th></tr>
+  <tr><td>Score 1 (row 1)</td><td class="num">1(1) + 0(2) + (−1)(3)</td><td class="num">−2</td></tr>
+  <tr><td>Score 2 (row 2)</td><td class="num">0(1) + 2(2) + 1(3)</td><td class="num">7</td></tr>
+</table>
+
+<p>Stack four examples: <code>X</code> is 4×3, and <code>X Wᵀ</code> gives <code>(4×3)(3×2) → (4×2)</code> — four examples, two scores. The transpose is what makes inner dimensions agree; that habit catches most shape bugs.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A bigger dot product means more similar."</strong> False — it mixes direction with length. With <code>q = [1, 0]</code>, both <code>a = [50, 0]</code> and <code>b = [1, 0.1]</code> point along <code>q</code>, but <code>a</code> scores 50 and <code>b</code> scores 1. The dot product picked the long vector.</p>
+  <p><strong>Correction:</strong> ask what length means. Meaningful length (price, count) → raw dot product. Noise length (document length, embedding norm) → normalize, i.e. cosine.</p>
+</div>
+<p>Related trap, same root: a matrix–vector product is <em>not</em> elementwise — each output cell is one row·column dot product, and <code>Wx</code> ≠ <code>xW</code>. Let the shapes decide which you meant.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Compute <code>[1, −2, 3] · [4, 0, −1]</code>.
+    <details><summary>Answer</summary>
+      <p><code>4 + 0 + (−3) = 1</code>. Positive but small: nearly perpendicular, so only weak agreement.</p>
+    </details>
+  </li>
+  <li><code>A</code> is 5×3. You want <code>Ax</code>. How long must <code>x</code> be, and how long is the result?
+    <details><summary>Answer</summary>
+      <p><code>x</code> must have 3 entries; the result has 5. Rule: <code>(5×3)(3×1) → (5×1)</code>. A 4-entry <code>x</code> makes the expression undefined, not merely wrong.</p>
+    </details>
+  </li>
+  <li>You retrieve docs for <code>q = [1, 0]</code>. Doc A = <code>[50, 0]</code>: dot 50, cosine 1.0. Doc B = <code>[1, 0.1]</code>: dot 1, cosine 0.995. Which ranks first, and why?
+    <details><summary>Answer</summary>
+      <p>By cosine they are effectively tied, and A is marginally better aligned. By raw dot product A wins 50-to-1 — for a reason that has nothing to do with relevance. When embedding norms vary for arbitrary reasons, normalize; otherwise the longest document wins every query.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 2: Slope → gradient.</strong> Your score now depends on <code>w</code>. Which direction do you nudge <code>w</code> to improve it? That direction is the engine of every training loop in this course.</p>
+  <div class="pager">
+    <a href="../index.html">← Course map</a>
+    <span class="muted">02 · Slope → gradient — not written yet</span>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: 3Blue1Brown, <a href="https://www.3blue1brown.com/lessons/dot-products">Essence of Linear Algebra, ch. 9</a> (12 min).<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a><br>
+  Anything unclear above, ask me. A wrong answer here is cheap; a wrong mental model in Unit 2 is expensive.
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

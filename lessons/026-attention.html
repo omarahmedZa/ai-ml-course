@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>026 — Attention</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="026">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 26 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 7 · Attention and LLMs · Topic 26 of 35</p>
+  <h1>Attention: a soft lookup</h1>
+  <p class="objective">You can compute scaled dot-product attention by hand for two tokens and explain the Q/K/V roles.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Attention is the single mechanism behind every LLM you have used. It is also, underneath, topic 1: dot products, normalised, used as weights.</p>
+
+<h2>The one core idea</h2>
+<p>Each token asks a <strong>question</strong> (query), every token advertises what it <strong>offers</strong> (key), and the best matches donate their <strong>content</strong> (value). Matching is a dot product; donation is a weighted average.</p>
+
+<h2>How it actually works</h2>
+<table>
+  <tr><th>Vector</th><th>Role</th><th>Analogy</th></tr>
+  <tr><td><strong>Q</strong> (query)</td><td>What this position is looking for</td><td>Search query</td></tr>
+  <tr><td><strong>K</strong> (key)</td><td>What this position offers</td><td>Document title / index</td></tr>
+  <tr><td><strong>V</strong> (value)</td><td>What this position passes on</td><td>Document body</td></tr>
+</table>
+
+<span class="formula">Attention(Q,K,V) = softmax( QKᵀ / √d_k ) V</span>
+
+<ul>
+  <li><strong>Scores</strong>: <code>QKᵀ</code> gives every query–key dot product. That is a similarity matrix of shape <code>n × n</code>.</li>
+  <li><strong>Scaling by √d_k</strong>: dot products of <code>d</code>-dimensional vectors grow like <code>√d</code>. Without scaling, softmax saturates and gradients vanish.</li>
+  <li><strong>Softmax</strong> turns each row into a distribution summing to 1 — competitive attention, not independent gates.</li>
+  <li><strong>Weighted sum</strong>: each output is a blend of all values, weighted by relevance.</li>
+  <li><strong>Self-attention</strong>: Q, K, V all come from the same sequence. <strong>Cross-attention</strong>: Q from the decoder, K and V from the encoder.</li>
+  <li><strong>Cost</strong>: <code>O(n²d)</code> — doubling the context quadruples the score matrix. That is why long context is expensive.</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. Two tokens, by hand</h3>
+<p>Query <code>q = [1, 0]</code>; keys <code>k₁ = [1, 0]</code>, <code>k₂ = [0, 1]</code>; values <code>v₁ = [10, 0]</code>, <code>v₂ = [0, 10]</code>; <code>d_k = 2</code>.</p>
+
+<table>
+  <tr><th>Step</th><th>Computation</th><th class="num">Result</th></tr>
+  <tr><td>Raw scores</td><td class="num">q·k₁ = 1, q·k₂ = 0</td><td class="num">[1, 0]</td></tr>
+  <tr><td>Scaled</td><td class="num">÷ √2</td><td class="num">[0.707, 0]</td></tr>
+  <tr><td>Softmax</td><td class="num">e⁰·⁷⁰⁷ = 2.028, e⁰ = 1</td><td class="num">[0.670, 0.330]</td></tr>
+  <tr><td>Output</td><td class="num">0.67(10,0) + 0.33(0,10)</td><td class="num">[6.70, 3.30]</td></tr>
+</table>
+
+<p>Token 1 matched perfectly, so it dominates — but token 2 still contributes 33%, because softmax never assigns exactly zero. Attention is graded, not discrete.</p>
+
+<h3>2. Why scale?</h3>
+<p>With <code>d = 64</code> and random unit vectors, scores have standard deviation ≈ 8. After softmax, the largest score can reach 0.999 and the rest are ~0: the gradient through softmax collapses. Dividing by <code>√64 = 8</code> restores unit-scale logits.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Attention weights explain the model's decision."</strong> They redistribute information for the <em>next</em> layer; a high weight does not mean causal importance. Topic 32 shows why this claim fails empirically.</p>
+  <p><strong>Second trap:</strong> thinking attention has memory or recurrence. It has neither — position must be injected explicitly (topic 27), and every token is processed independently per layer.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Why divide by <code>√d_k</code> rather than by <code>d_k</code>?
+    <details><summary>Answer</summary>
+      <p>A dot product of <code>d</code> independent terms has variance proportional to <code>d</code>, so its standard deviation grows like <code>√d</code>. Dividing by <code>√d</code> normalises the standard deviation, not the variance.</p>
+    </details>
+  </li>
+  <li>In self-attention, where do Q, K and V come from?
+    <details><summary>Answer</summary>
+      <p>All three are learned linear projections of the same input sequence — three different weight matrices applied to the same tokens.</p>
+    </details>
+  </li>
+  <li>Why is attention cost quadratic in sequence length?
+    <details><summary>Answer</summary>
+      <p>Every token scores against every other token, producing an <code>n × n</code> matrix. Doubling <code>n</code> quadruples both computation and memory.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 27: The Transformer block.</strong> Attention is one of four sub-layers. Topic 27 assembles them, and explains why the other three are not optional.</p>
+  <div class="pager">
+    <a href="025-policy-gradient-at-scale.html">← 25 · Policy gradient</a>
+    <a href="027-transformer-block.html">27 · Transformer →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Jay Alammar, <a href="https://jalammar.github.io/illustrated-transformer/">The Illustrated Transformer</a>.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

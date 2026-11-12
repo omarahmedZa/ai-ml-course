@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>016 — Embeddings</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="016">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 16 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 4 · Natural language processing · Topic 16 of 35</p>
+  <h1>Embeddings: meaning as a vector</h1>
+  <p class="objective">You can explain the distributional hypothesis and compute cosine similarity.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Embeddings are the interface between language and every model in this course. Retrieval, clustering, recommendation, and the first layer of every transformer all reduce to "compare two vectors".</p>
+
+<h2>The one core idea</h2>
+<p>Words that appear in similar contexts get similar vectors. Meaning becomes <strong>geometry</strong>: direction encodes what a word is like, and cosine similarity measures how alike two words are.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><strong>Distributional hypothesis</strong> (Firth, 1957): "you shall know a word by the company it keeps." Context is the supervision signal.</li>
+  <li><strong>Embedding matrix</strong> <code>E</code> of shape <code>V × d</code>. Token ID <code>i</code> → row <code>E[i]</code>. A lookup, not a computation.</li>
+  <li><strong>Training</strong>: Word2Vec predicts a word from its neighbours (skip-gram) or neighbours from a word (CBOW). Gradient descent moves vectors that help prediction closer together.</li>
+  <li><strong>Similarity</strong>: cosine <code>(a·b)/(‖a‖‖b‖)</code>. Length is arbitrary, direction is meaning — exactly the case from topic 1.</li>
+  <li><strong>Static vs contextual</strong>: Word2Vec gives one vector per word. Transformers give one vector per <em>occurrence</em>, so "bank" differs in "river bank" and "bank loan".</li>
+</ul>
+
+<span class="formula">a = [0.8, 0.6], b = [0.6, 0.8]  →  cos = 0.96 / (1 · 1) = 0.96</span>
+
+<h2>Worked example</h2>
+
+<h3>1. Three words, one space</h3>
+<table>
+  <tr><th>Word</th><th>Vector</th><th class="num">cos vs "cat"</th></tr>
+  <tr><td>cat</td><td class="num">[0.8, 0.6]</td><td class="num">1.00</td></tr>
+  <tr><td>kitten</td><td class="num">[0.6, 0.8]</td><td class="num">0.96</td></tr>
+  <tr><td>car</td><td class="num">[0.6, −0.8]</td><td class="num">0.00</td></tr>
+</table>
+
+<p><code>cat</code> and <code>kitten</code> point almost the same way; <code>car</code> is perpendicular — no shared direction, no semantic overlap in this toy space. The absolute magnitudes are meaningless; only angles are.</p>
+
+<h3>2. Where analogy arithmetic comes from</h3>
+<p><code>king − man + woman ≈ queen</code> works because the offset "male → female" is roughly a constant direction across many word pairs. It is a property of the geometry, not a reasoning step — and it fails for most pairs, especially rare ones.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Each dimension has a meaning."</strong> It does not. Dimension 37 is not "royalty"; meaning is distributed across all dimensions, and individual axes are usually uninterpretable.</p>
+  <p><strong>Second trap:</strong> comparing raw dot products instead of cosine. A frequent word can have a larger norm purely because it appeared more often in training, and it will then win every similarity query. Normalise.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Two embeddings have cosine similarity 0. What does that say, and what does it not say?
+    <details><summary>Answer</summary>
+      <p>Their directions are orthogonal — no linear relationship in the learned space. It does not mean they are unrelated in meaning; the space is trained for prediction, not for truth.</p>
+    </details>
+  </li>
+  <li>Why does a static embedding fail on the word "bank"?
+    <details><summary>Answer</summary>
+      <p>It has one vector for every occurrence, so it must average the financial and river senses into a single blurry direction. Contextual models produce a different vector per sentence.</p>
+    </details>
+  </li>
+  <li>Your retrieval system ranks long documents first regardless of query. What is the likely bug?
+    <details><summary>Answer</summary>
+      <p>Using raw dot products instead of cosine. Long documents accumulate larger norms, so the score measures length as much as relevance.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 17: RNN → LSTM.</strong> Embeddings give each token a vector. Topic 17 asks how to combine a sequence of them into one representation — and why the obvious answer breaks.</p>
+  <div class="pager">
+    <a href="015-tokenization.html">← 15 · Tokenization</a>
+    <a href="017-rnn-to-lstm.html">17 · RNN → LSTM →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: Jay Alammar, <a href="https://jalammar.github.io/illustrated-word2vec/">The Illustrated Word2Vec</a>.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>

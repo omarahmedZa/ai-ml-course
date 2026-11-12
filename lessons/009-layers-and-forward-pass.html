@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>009 — Layers and the forward pass</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="009">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 09 / 35</span>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Unit 2 · Neural network mechanics · Topic 9 of 35</p>
+  <h1>Layers and the forward pass</h1>
+  <p class="objective">You can trace shapes and values through a two-layer network by hand.</p>
+</header>
+
+<h2>Why this matters</h2>
+<p class="lede">Shape errors cause more failed training runs than bad ideas. If you can walk a batch through a network on paper, you can read a stack trace and know which matrix is wrong before running anything.</p>
+
+<h2>The one core idea</h2>
+<p>A forward pass is a sequence of <strong>affine maps</strong> (<code>Wx + b</code>) separated by <strong>elementwise nonlinearities</strong>. Each layer changes the shape in a predictable way; nothing else happens.</p>
+
+<h2>How it actually works</h2>
+<ul>
+  <li><strong>Layer ℓ</strong>: <code>zˡ = Wˡaˡ⁻¹ + bˡ</code>, then <code>aˡ = φ(zˡ)</code>. <code>z</code> is pre-activation, <code>a</code> is activation.</li>
+  <li><strong>Shape rules</strong>: if layer ℓ has <code>nˡ</code> units and the previous has <code>nˡ⁻¹</code>, then <code>Wˡ</code> is <code>nˡ × nˡ⁻¹</code> and <code>bˡ</code> is <code>nˡ</code>. Outputs are column vectors.</li>
+  <li><strong>Batching</strong>: stack examples as rows, <code>X</code> is <code>B × n⁰</code>. Then <code>Zˡ = Aˡ⁻¹(Wˡ)ᵀ + bˡ</code> and shapes become <code>B × nˡ</code>. The batch dimension is never mixed.</li>
+  <li><strong>The bias broadcasts</strong> across the batch: one vector added to every row.</li>
+  <li><strong>Depth</strong> = number of weight matrices. Width = units per layer. Capacity grows with both, but depth composes features (edges → shapes → objects).</li>
+</ul>
+
+<h2>Worked example</h2>
+
+<h3>1. Two inputs, one example</h3>
+<p><code>x = [1, −1]</code>, <code>W¹ = [[1, 2], [−1, 0]]</code>, <code>b¹ = [0, 1]</code>, ReLU, then <code>W² = [1, 1]</code>, <code>b² = −0.5</code>.</p>
+
+<table>
+  <tr><th>Step</th><th>Computation</th><th class="num">Result</th></tr>
+  <tr><td>z¹₁</td><td class="num">1(1) + 2(−1) + 0</td><td class="num">−1</td></tr>
+  <tr><td>z¹₂</td><td class="num">−1(1) + 0(−1) + 1</td><td class="num">0</td></tr>
+  <tr><td>a¹ = ReLU(z¹)</td><td class="num">max(0, ·)</td><td class="num">[0, 0]</td></tr>
+  <tr><td>z²</td><td class="num">1(0) + 1(0) − 0.5</td><td class="num">−0.5</td></tr>
+  <tr><td>a² = σ(z²)</td><td class="num">1/(1+e⁰·⁵)</td><td class="num">0.378</td></tr>
+</table>
+
+<p>Note what the ReLU destroyed: both hidden units were at or below zero, so the entire input information vanished. This example is one dead network away from "why is my loss stuck at 0.69?"</p>
+
+<h3>2. The same pass as a batch</h3>
+<p>Four examples: <code>X</code> is <code>4 × 2</code>. <code>W¹</code> is <code>2 × 2</code>, so <code>A¹ = ReLU(X(W¹)ᵀ + b¹)</code> is <code>4 × 2</code>. Then <code>W²</code> is <code>1 × 2</code>: output <code>4 × 1</code>.</p>
+
+<span class="formula">(4×2)(2×2) → (4×2) → (4×2)(2×1) → (4×1)</span>
+
+<p>Every row is independent. That independence is exactly what mini-batch training exploits: one matrix multiply processes 256 examples at once.</p>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The nonlinearity is optional detail."</strong> Drop it between two layers and topic 8's proof applies: the stack collapses. A suspiciously linear loss curve often means a missing activation.</p>
+  <p><strong>Second trap:</strong> mixing up <code>Wx</code> and <code>xWᵀ</code> when batching. Both can be "right" numerically for square matrices and silently wrong otherwise. Write the shapes down before the code.</p>
+</div>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Layer 1: 10 units. Layer 2: 5 units. What are the shapes of <code>W²</code>, <code>b²</code>, and the output for a batch of 32?
+    <details><summary>Answer</summary>
+      <p><code>W²</code> is <code>5 × 10</code>, <code>b²</code> is <code>5</code>, output is <code>32 × 5</code>. The batch dimension only appears at the edges, never in the weights.</p>
+    </details>
+  </li>
+  <li>In the worked example, why did the network output exactly 0.378 regardless of the input's second feature?
+    <details><summary>Answer</summary>
+      <p>Both ReLU units were clipped to 0, so <code>z² = b² = −0.5</code> for every input. The hidden layer stopped transmitting information; only the bias survived.</p>
+    </details>
+  </li>
+  <li>Where does the parameter count for a layer come from?
+    <details><summary>Answer</summary>
+      <p><code>nˡ × nˡ⁻¹</code> weights plus <code>nˡ</code> biases. A 512 → 512 layer has 262,144 + 512 = 262,656 parameters.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="next">
+  <p><strong>Next → Topic 10: Backpropagation.</strong> The forward pass computes a number. Backprop asks how that number would change if every one of those parameters moved — in one sweep.</p>
+  <div class="pager">
+    <a href="008-the-neuron.html">← 08 · The neuron</a>
+    <a href="010-backpropagation.html">10 · Backprop →</a>
+  </div>
+</div>
+
+<p class="footer-meta">
+  Primary source: 3Blue1Brown, <a href="https://www.3blue1brown.com/topics/neural-networks">Neural Networks, part 2 — gradient descent</a>.<br>
+  <a href="../CURRICULUM.md">Curriculum</a> · <a href="../MISSION.md">Mission</a> · <a href="../index.html">Course map</a>
+</p>
+
+</main>
+  <script src="../assets/course.js" defer></script>
+</body>
+</html>
