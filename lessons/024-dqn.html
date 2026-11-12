@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>024 — DQN</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,20 @@
 <p class="lede">DQN is the canonical example of "the algorithm was known for decades; the engineering made it work". It is also the cleanest exam question in Unit 6: name the two tricks and the problem each solves.</p>
 <p>Every value-based deep RL system you will meet is DQN with the serial numbers filed off — including the critic inside most modern agents. Two failures it removes, and you will meet both. The exam failure: <em>"Your Q-network's loss drops for a while, then the average return collapses. Name a likely cause and the fix."</em> One line on correlated frames and one on a moving target earns the marks; "tune the learning rate" earns none. The project failure: you train on consecutive frames, the agent memorises one corridor, reward spikes, then falls off a cliff — and because the loss looked healthy the whole time, you keep training and burn a day of GPU.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>2</b><span>faults that break Q-learning with a network</span></div>
+  <div><b>10⁶</b><span>transitions held in the replay buffer</span></div>
+  <div><b>10,000</b><span>steps between target-network copies</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>Two separate faults need two separate repairs. The data you learn from must look like a shuffled deck rather than a film played in order; the answer key you mark against must be printed and pinned to the wall rather than rewritten each time you look at it. Neither repair changes what Q-learning is trying to compute.</p>
 <p>In one line: <strong>shuffle a million transitions, and freeze the answer key for 10,000 steps.</strong> A batch of 32 consecutive frames holds roughly 1 distinct situation; 32 draws from a 1,000,000-transition buffer hold 32.</p>
+
+<div class="keybox">
+  <span class="sym">y = r + γ max Q_θ⁻(s′,a′)</span>
+  <p>Build the target from a frozen copy θ⁻ refreshed every 10,000 steps; gradients move only the online θ.</p>
+</div>
 
 <h2>How it actually works</h2>
 <p>Six parts follow; each repairs one fault, and later parts assume the earlier repairs hold.</p>
@@ -162,6 +173,11 @@
   <p><strong>Correction:</strong> replay is an off-policy tool. On-policy methods may reuse a rollout for a few epochs, then must discard it. A second trap: Double DQN reduces the bias from the <code>max</code>; it does not make estimates unbiased.</p>
 </div>
 <p><strong>The tell:</strong> the ratio histogram in your logs has a tail past 10, or the entropy collapses in a few hundred steps while the loss looks fine. For the moving-target fault the tell is different: loss falls smoothly, evaluation return rises and then breaks, and reloading an older checkpoint recovers the run — a target that outran its own predictions.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>A replay buffer is just more data, so it helps any algorithm.</td><td>Replay is off-policy: stored transitions come from an older policy, and on-policy methods must discard them.</td></tr>
+</table>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

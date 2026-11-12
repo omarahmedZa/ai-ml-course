@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>006 — Linear and logistic regression</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,17 @@
 <p class="lede">These are the baselines every project must beat before deep learning is justified, and logistic regression is literally the last layer of every classifier in Unit 7. Same dot product, one extra function. A linear model predicts a quantity — tomorrow's demand, a house price, a dose. A logistic model predicts a probability — will this customer default, is this scan abnormal — and thresholds it into yes or no. Between them they cover most tabular problems you will meet, and a stack of fifty neural layers still ends in <code>σ(w·x + b)</code>.</p>
 <p><strong>The failure it prevents.</strong> An exam question gives <code>w = [1, −2]</code>, <code>b = 1</code> and asks where the boundary sits and which side is class 1. Students who read the output as a score draw the line correctly and then label both sides backwards, because the boundary is <code>z = 0</code>, not <code>p = 0</code>. In a project the same confusion ships a classifier reporting 97% accuracy on data with 3% positives — it answers "no" to every row and the metric never notices.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>3</b><span>numbers stored by a 2-feature classifier: two weights and a bias</span></div>
+  <div><b>0.5</b><span>sigmoid output at z = 0, exactly where the boundary sits</span></div>
+  <div><b>97%</b><span>accuracy from always saying "no" on 3% positives</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>Both models are a single weighted sum, <code>w·x + b</code>. What changes is the last step: linear regression hands that sum out unchanged, while logistic regression pushes it through a squashing function so it lands between 0 and 1. Same engine, different gauge on the dashboard — and the gauge decides what the number is allowed to mean.</p>
 <p>In one line: <strong>one weighted sum, then a link function that says whether it is a quantity or a probability.</strong> With <code>w = [1, −1]</code>, <code>b = 0</code> and <code>x = [2, 0.5]</code>, the score is 2 − 0.5 = 1.5; read raw that is 1.5 units, read through the sigmoid it is a probability of 0.818.</p>
+
+<div class="keybox"><span class="sym">p = σ(w·x + b), boundary at w·x + b = 0</span><p>One weighted sum; the link decides whether the output is a quantity or a probability.</p></div>
 
 <h2>How it actually works</h2>
 <p>Six parts, from the sum itself to the algorithm that finds its weights.</p>
@@ -140,6 +148,11 @@
   <p><strong>Correction:</strong> the output type picks the loss. A quantity wants squared error; a probability wants binary cross-entropy, which is the negative log-likelihood and whose gradient stays large under exactly the mistakes you care about. Underneath sits a second, quieter assumption — that accuracy is a fair score — and on imbalanced data it is not.</p>
 </div>
 <p><strong>The tell:</strong> a loss curve that is flat from the first epoch while accuracy sits at the majority-class rate, or predicted probabilities bunched near 0.5 with no confident values anywhere. The other tell is a reported accuracy that exactly equals the fraction of the majority class, to the decimal — always compare against that number before celebrating.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>Squared error worked for regression, so it will work here.</td><td>Behind a sigmoid its gradient fades exactly where the prediction is most wrong.</td></tr>
+</table>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

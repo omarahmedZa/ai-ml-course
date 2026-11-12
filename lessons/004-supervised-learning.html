@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>004 — Supervised learning</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,17 @@
 <p class="lede">Every model in this course — a spam filter, a translation system, a Q-network — is the same four-part object. Name the four parts and you can read a paper's method section instead of guessing at it. Supervised learning is the pattern behind them all: a bank scores loan applications, a hospital flags scans, a phone predicts the next word. In each case somebody collected examples where the right answer was known, and the work is to find a rule that reproduces those answers and keeps holding on new ones. The vocabulary changes by field — "regression", "classification", "fine-tuning" — while the structure underneath stays put.</p>
 <p><strong>The failure it prevents.</strong> An exam question hands you "predict next month's sales from 14 store features, using three years of records" and asks for the four objects with shapes. An answer saying "the model learns the pattern" scores nothing, because no object is named. In code the same gap shows up as a model that trains happily and predicts the wrong column: the loss was computed against a misaligned <code>y</code>, or a target leaked into <code>X</code>. Writing four lines before any code catches both.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>10,000</b><span>training emails, scanned once per epoch</span></div>
+  <div><b>3</b><span>numbers stored: <code>w = [2, −0.01]</code> and <code>b = −1</code></span></div>
+  <div><b>29 pts</b><span>train–test gap when memorisation replaces learning</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>A supervised model is a guess-machine with adjustable dials. You show it an input, it produces an output, and a loss function scores how far that output sits from the recorded answer. Training turns the dials — the <strong>parameters θ</strong>, the numbers the model actually stores — in whichever direction lowers the average score. There is no lookup table and no understanding, only a fixed shape of function whose dials are tuned until its mistakes are small.</p>
 <p>In one line: <strong>pick θ so that <code>f_θ</code> turns <code>X</code> into something close to <code>y</code>, judged by <code>L</code>.</strong> With 10,000 emails, 2 features and 3 dials, training squeezes those rows into 3 numbers, so the model's whole memory is <code>w = [2, −0.01]</code> and <code>b = −1</code>.</p>
+
+<div class="keybox"><span class="sym">f_θ(X) ≈ y, with θ chosen to lower L</span><p>Four objects — data, model, loss — and the parameters training tunes.</p></div>
 
 <h2>How it actually works</h2>
 
@@ -141,6 +149,11 @@
   <p><strong>Correction:</strong> separate the two claims. "Training loss is low" is a statement about the search; "the mapping generalises" is a statement about new rows, and only a held-out set supports it. Underneath sits a hidden assumption — future data comes from the same distribution as training data, called i.i.d. — and breaking it makes a perfect training score worth nothing.</p>
 </div>
 <p><strong>The tell:</strong> training accuracy 100% with test accuracy 71% is the signature, and the 29-point gap is the measurement, not rounding. A second tell is a test score that moves each time you retrain on a new seed while training loss barely moves — variance from a model with too much freedom for the number of rows.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>A falling training loss means the model learned the data.</td><td>It stored 3 numbers; 71% test accuracy is the only score that ships.</td></tr>
+</table>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

@@ -593,3 +593,34 @@ img, svg { max-width: 100%; }
   .fig { overflow: visible; }
   .fig svg { min-width: 0; }
 }
+
+/* ---------- section anchors: worked numbers, key relation, belief table ---------- */
+.numstrip {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem;
+  margin: 1rem 0 1.2rem;
+}
+.numstrip > div {
+  border: 1px solid var(--rule); border-radius: 8px;
+  padding: .55rem .7rem; background: var(--card);
+}
+.numstrip b {
+  display: block; font-family: ui-monospace, monospace;
+  font-size: 1.02rem; color: var(--accent); font-weight: 600;
+}
+.numstrip span {
+  display: block; margin-top: .15rem;
+  font-size: .72rem; line-height: 1.4; color: var(--ink-soft);
+}
+.keybox {
+  border-left: 3px solid var(--accent); background: var(--code-bg);
+  border-radius: 0 8px 8px 0; padding: .9rem 1rem; margin: 1rem 0 1.2rem;
+}
+.keybox .sym {
+  display: block; font-family: ui-monospace, monospace;
+  font-size: 1.02rem; color: var(--ink);
+}
+.keybox p { margin: .35rem 0 0; font-size: .84rem; color: var(--ink-soft); }
+.trap-table td:first-child { color: var(--ink-soft); font-style: italic; }
+@media (max-width: 700px) {
+  .numstrip { grid-template-columns: 1fr 1fr; }
+}

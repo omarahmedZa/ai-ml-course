@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>020 — Value functions and Bellman</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -27,10 +27,12 @@
 <h2>Why this matters</h2>
 <p class="lede">A value function is a price tag on a situation: one number answering "if I am here, and behave like this from now on, how much reward is left?" Every algorithm in this unit uses one. Value iteration ranks states with it, Q-learning stores one per state–action pair, actor–critic trains a critic to score the actor, and policy gradient subtracts a state value to steady its updates.</p>
 <p>Two kinds of damage come from getting it wrong. In an exam it is a two-line backup — <code>r = 1</code>, <code>γ = 0.9</code>, <code>V(s′) = 2</code>, so <code>Q = 2.8</code> — and candidates lose the marks by adding the reward twice or forgetting the discount. In a project it is silent inflation: bootstrap past a terminal state and every finished episode is credited with a future that does not exist. With <code>γ = 0.9</code> and a phantom <code>V = 5</code>, each ending gains 4.5 of invented value, so the average return climbs, the training curve looks healthy, and the policy gets worse.</p>
+<div class="numstrip" role="group" aria-label="Key numbers"><div><b>2.8</b><span>Q from r = 1, γ = 0.9, V(s′) = 2</span></div><div><b>2.41</b><span>V under a 0.7 / 0.3 policy mix</span></div><div><b>0.39</b><span>price of that 0.3 chance of the worse action</span></div></div>
 
 <h2>The one core idea</h2>
 <p>Treat a state's value as the price of a ticket entitling you to the rest of the trip. Today's price is today's reward plus the price of a ticket from wherever you land next. The far future never has to be enumerated, because it is already folded into the next state's price — the recursion does the bookkeeping.</p>
 <p>In one line: <strong><code>V(s) = r + γV(s′)</code>, a number defined in terms of a smaller copy of itself.</strong> With <code>r = 1</code>, <code>γ = 0.9</code> and <code>V(s′) = 2</code>, the value is <code>1 + 1.8 = 2.8</code>.</p>
+<div class="keybox"><span class="sym">V(s) = r + γV(s′)</span><p>Today's value is today's reward plus the discounted price of wherever you land next — the future is already inside V(s′).</p></div>
 
 <h2>How it actually works</h2>
 <p>Seven parts, from the quantity being predicted to the update that learns it from samples.</p>
@@ -142,6 +144,10 @@
   <p><strong>Second trap:</strong> bootstrapping off a terminal state. There is no future after termination, so <code>γV(s′)</code> there adds phantom value and inflates every episode that ends.</p>
 </div>
 <p><strong>The tell:</strong> if you catch yourself writing <code>V[s]</code> and then asking which action that was, you are holding the wrong table. The terminal version shows up in the numbers rather than the code: the value of the last state before the end must equal the final reward, with no <code>γ</code> term. If that entry is larger than the reward, something is being added after the episode is over.</p>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>V and Q are the same thing.</td><td>V holds one number per state; Q holds one per state–action pair, and only Q names a move.</td></tr>
+</table>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

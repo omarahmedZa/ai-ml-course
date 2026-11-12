@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>029 — Alignment and inference</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,13 @@
 <p class="lede">A pretrained model completes text, including text that argues, lies or refuses. Alignment is the stage that turns it into something that answers requests, and inference settings decide what you get out of it at the moment you ask.</p>
 <p>Three stages do the work: supervised fine-tuning on demonstrations, preference optimisation against a learned judge, and then the decoding choices — context window, temperature, cache. Most "the model is being weird" complaints trace to one of them. In an exam, "what does the KL term prevent?" has a one-line answer: drift into regions where the reward model is wrong. In a project, the bug is usually the context window: a 6,000-token prompt sent to a model with a 4,000-token limit, where the oldest part — often the instruction itself — is silently dropped and the model answers a question you did not ask. The second is temperature: setting it to 0 expecting determinism, then failing a test that passed an hour ago on a different machine.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers"><div><b>6,000</b><span>token prompt that overflows the window</span></div><div><b>4,000</b><span>token limit that drops the instruction</span></div><div><b>87%</b><span>probability on the top token at T = 0.5</span></div></div>
+
 <h2>The one core idea</h2>
 <p>Alignment trains a stand-in judge and then optimises the model against it. The judge is a reward model: a network that reads a prompt and an answer and outputs one number saying how good a human would find it. Training against a stand-in is cheap and scales; it is also the source of every failure in this lesson, because the model will find the gap between the judge and what you actually wanted.</p>
 <p>In one line: <strong>copy good answers, learn to score answers, then push the score up without drifting too far from the copy.</strong> With logits <code>[2, 1, 0]</code>, temperature 1 gives probabilities <code>[0.665, 0.245, 0.090]</code>; temperature 0.5 gives <code>[0.867, 0.117, 0.016]</code> — same ranking, far sharper.</p>
+
+<div class="keybox"><span class="sym">max E[r] − β·KL(π ‖ π_SFT)</span><p>Optimise the policy against a learned reward model while the KL term keeps it close to the supervised fine-tuned model.</p></div>
 
 <h2>How it actually works</h2>
 <p>Seven parts, from a base model to the token you see on screen.</p>
@@ -147,6 +151,10 @@
   <p><strong>"RLHF makes the model more truthful."</strong> It feels right because the training signal comes from humans, and humans were asked to prefer accurate answers.</p>
   <p>The correction is that RLHF makes the model better at satisfying the reward model, which is a compressed approximation of human judgement. If that approximation rewards confidence, length or agreement, you get more of those — including confident errors. Truthfulness needs verification against something outside the model, not preference optimisation. A second trap is expecting <code>T = 0</code> to be deterministic: batching, float non-associativity and hardware scheduling change results slightly, so greedy decoding is reproducible on one machine, not across machines.</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>RLHF makes the model more truthful.</td><td>It optimises a compressed reward proxy, which can reward confidence or length instead of truth.</td></tr>
+</table>
 <p><strong>The tell:</strong> the model gets more confident but not more correct — wrong answers arrive in the same fluent, well-formatted shape as right ones, and asking for a source produces a plausible citation rather than a checkable one. The other tell is length inflation: if answers grow steadily longer while accuracy stays flat, the reward model is scoring form rather than content.</p>
 
 <h2>Retrieval check</h2>

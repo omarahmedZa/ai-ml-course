@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>033 — Federated setting and FedAvg</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,17 @@
 <p class="lede">Federated learning is how you train when the examples cannot be collected in one place: a phone keyboard that improves without uploading your messages, a hospital network that shares a tumour model but never the scans, a bank consortium that shares a fraud detector but never transactions. The data stays with its owner; only the model's numbers travel.</p>
 <p>In an exam the question is almost always one round of averaging — three clients hold 100, 200 and 700 examples, their local weights are 0.10, 0.50 and 0.90, so what is the new global weight? Equal averaging writes 0.50 and loses the marks; the weighted answer is 0.74. In a project the same mistake is one line, <code>np.mean(client_weights)</code>, sitting in the aggregation step. Training runs, the loss curve falls, and the client that owns 70% of the data quietly receives a model that has stopped listening to it.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>0.74</b><span>weighted global weight from 100/200/700 clients</span></div>
+  <div><b>10%</b><span>of 1,000 clients sampled each round</span></div>
+  <div><b>100 GB</b><span>moved over 100 rounds at 1,000 clients</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>Picture a class where the teacher may not collect the homework. Each student marks their own work at home, and the teacher averages the sheets into one master copy that everyone uses next week. The master copy is never exactly right for any single student, but it is close for the class, and no exercise book left the house.</p>
 <p>In one line: <strong>the model is a list of numbers, each client pulls those numbers toward what its own data prefers, and the server replaces them with the evidence-weighted average.</strong> Weights 0.10, 0.50 and 0.90 from clients holding 100, 200 and 700 examples give <code>0.1(0.10) + 0.2(0.50) + 0.7(0.90) = 0.74</code>.</p>
+
+<div class="keybox"><span class="sym">w_{t+1} = Σ_k (n_k/n) w_t^k</span><p>Each client trains locally, then the server replaces the weights with an example-weighted average: 700 examples speak seven times louder than 100.</p></div>
 
 <h2>How it actually works</h2>
 <p>One round is six steps. Keep each client's example count in view throughout; it decides how loudly that client speaks.</p>
@@ -169,6 +177,10 @@
   <p>The equivalence dies twice. Several local steps make each model a function of its own order of data, so averaging models is not averaging gradients. And with heterogeneous data the clients optimise different objectives, so the average can be worse than every client's own model — the drift of topic 34. A second trap hides behind it: assuming a server that sees only updates has solved privacy. An update is a function of the rows that produced it.</p>
   <p><strong>Correction:</strong> read FedAvg as one approximate step on a reweighted objective, repeated — not as pooled training.</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>FedAvg is training on the pooled data.</td><td>It is one approximate step on a reweighted objective; several local steps and non-IID clients break the equivalence.</td></tr>
+</table>
 <p><strong>The tell:</strong> a report showing federated accuracy just below centralised accuracy and calling the gap "implementation noise". If the gap widens as you raise <code>E</code> from 1 to 20, it is drift. The second tell is an aggregation line using <code>np.mean</code> while clients have wildly different example counts; check that the shares sum to 1 and ask whether the largest client dominates the result.</p>
 
 <h2>Retrieval check</h2>

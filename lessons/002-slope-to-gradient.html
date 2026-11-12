@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>002 — Slope to gradient</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,20 @@
 <p class="lede">Every training loop in this course — backprop, Q-learning, PPO — is the same sentence: measure the slope, step the other way. PyTorch reduces it to two lines, <code>loss.backward()</code> then <code>p ← p − η · p.grad</code>, and every optimizer you meet is a variation on how far to trust the second one.</p>
 <p>The failure this prevents is a run that looks alive and is not. On <code>f(w) = w²</code> with <code>η = 10</code> instead of <code>0.1</code>, one step takes <code>w = 3</code> to <code>3 − 10(6) = −57</code> and the loss from 9 to 3,249, then keeps multiplying until it overflows; the traceback names a matrix multiply, never the learning rate. The same two lines settle the exam question <em>"<code>f(w) = 3w²</code> at <code>w = 2</code>, one step at <code>η = 0.1</code>"</em>: the slope is <code>6w = 12</code>, so <code>w ← 2 − 1.2 = 0.8</code>.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>0.1</b><span>learning rate that behaves</span></div>
+  <div><b>3,249</b><span>loss after one oversized step</span></div>
+  <div><b>12</b><span>slope of 3w² at w = 2</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>Stand on a hillside in fog. You cannot see the valley, but you can feel which way the ground tilts under one boot. A <strong>gradient</strong> is that reading taken at every knob at once: one slope per parameter, each answering "if I turn this alone, how fast does the loss change?" A thousand knobs give a thousand slopes that still describe one direction — the steepest way up.</p>
 <p>In one line: <strong>the gradient is the uphill direction, so learning is a subtraction, repeated.</strong> On <code>f(w) = w²</code> at <code>w = 3</code> the slope is <code>2w = 6</code>; with <code>η = 0.1</code> the step is <code>3 − 0.6 = 2.4</code> and the loss falls 9 → 5.76. At <code>w = 1</code> the slope is only 2, so the same <code>η</code> buys a quarter of the drop.</p>
+
+<div class="keybox">
+  <span class="sym">w ← w − η∇f</span>
+  <p>Step against the uphill slope, scaled by the learning rate.</p>
+</div>
 
 <h2>How it actually works</h2>
 <p>Seven parts. Each one fixes a problem the previous part leaves open.</p>
@@ -129,6 +140,10 @@
   <p>At <code>w = 3</code> on <code>w²</code> the gradient is <code>+6</code>, and the loss is <em>rising</em> in that direction: add it with <code>η = 0.1</code> and you land at 3.6 with loss 12.96.</p>
   <p><strong>Correction:</strong> <code>∇f</code> is steepest <em>ascent</em>. The descent direction is <code>−∇f</code>, and the minus lives in the update rule, not in the vector.</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>The gradient points downhill.</td><td>It points uphill; the update subtracts it.</td></tr>
+</table>
 <p><strong>The tell:</strong> the loss climbs from step one while the gradient magnitude <em>shrinks</em> — smooth, monotone, no oscillation, because you are walking uphill and the ground gets gentler. Compare example 3, where a too-large rate also raises the loss but flips the step's sign each row and grows. If flipping one character in the update fixes training, it was never the learning rate.</p>
 
 <h2>Retrieval check</h2>

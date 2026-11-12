@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>001 — Vectors, matrices, dot product</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,20 @@
 <p class="lede">Every model in this course eventually computes one number from two lists of numbers. A linear layer does it. An embedding lookup does it. An attention score does it. A Q-value does it. The notation changes; the operation does not.</p>
 <p>That matters for two practical reasons. In an exam, a shape question is free marks: <em>"A is 5×3 and x has four entries — what happens?"</em> has one correct answer and no ambiguity. In your project, most failures in the first hour are not conceptual; they are a matrix with the wrong orientation, and Python reports a shape error several lines away from the cause. If you can see the dot product underneath, both problems become mechanical rather than mysterious.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>5×3</b><span>matrix shape needing three inputs</span></div>
+  <div><b>0.995</b><span>cosine of the near-parallel document</span></div>
+  <div><b>50</b><span>dot score of the long document</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>A score measures <strong>alignment</strong> between two vectors: what the input <em>is</em> (<code>x</code>) and what the model is <em>looking for</em> (<code>w</code>). The dot product adds up, feature by feature, how much they agree.</p>
 <p>In one line: <strong>each feature casts a vote, the weight says how much that vote counts, and the dot product adds the votes.</strong> With <code>x = [2, 1]</code> and <code>w = [3, −1]</code>, feature 1 votes <code>+6</code>, feature 2 votes <code>−1</code>, and the total is <code>5</code>.</p>
+
+<div class="keybox">
+  <span class="sym">x·w = x₁w₁ + x₂w₂ + … + xₙwₙ</span>
+  <p>Features vote; weights say how much each vote counts.</p>
+</div>
 
 <h2>How it actually works</h2>
 <p>Take it in seven parts. Each part is one idea, and each builds on the one before it.</p>
@@ -144,6 +155,10 @@
   <p>Concretely: <code>q = [1, 0]</code>. Document <code>a = [50, 0]</code> scores 50 with cosine 1.0. Document <code>b = [1, 0.1]</code> scores 1 with cosine 0.995. Both point almost exactly along the query; the dot product prefers the longer one, which has nothing to do with relevance.</p>
   <p><strong>Correction:</strong> decide what length means before choosing a metric. Meaningful length (price, count, dose) → raw dot product. Noise length (document length, word frequency, embedding norm) → normalize first, which is cosine.</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>A bigger dot product means more similar.</td><td>Length inflates it; cosine compares direction only.</td></tr>
+</table>
 <p><strong>The tell:</strong> if duplicating a document's text — doubling every number in its vector — makes it rank higher for the same query, you are scoring length, not meaning. The second tell is a shape that <em>runs</em> but produces numbers 10× too large: someone multiplied elementwise when they meant a matrix product. A matrix–vector product is never elementwise; each output cell is one full row·column dot product.</p>
 
 <h2>Retrieval check</h2>

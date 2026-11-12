@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>003 — Probability, expectation, likelihood</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,20 @@
 <p class="lede">A classifier does not output a label; it outputs a distribution over labels, and that distribution is what gets scored. Softmax turns scores into probabilities, cross-entropy turns the probability of the true class into a loss, and both are likelihood arithmetic. The same move reappears in a language model (probability of the next token) and in RL (expected return over a policy).</p>
 <p>The failure this prevents is quiet. Compare total NLL on two test sets — 500 rows and 2,000 rows — and the larger set wins by default, because <code>−Σ log p</code> is a sum that grows with the row count. A team reporting the sum can "improve" a model by evaluating it on more data. Dividing by <code>N</code> makes the number per-row and comparable, which is the difference between a metric and a mood.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>500</b><span>rows in the first test set</span></div>
+  <div><b>2,000</b><span>rows in the second test set</span></div>
+  <div><b>N</b><span>divisor that makes NLL comparable</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>A model is a bookmaker. Before the result is known it quotes a probability for each outcome; afterwards you score the quote by how much probability it gave to what actually happened. A quote of 0.9 on the winner is good, 0.01 is embarrassing, and the score is just <code>−log</code> of the quoted probability. Probability asks what will happen; <strong>likelihood</strong> asks how good this quote was.</p>
 <p>In one line: <strong>loss is surprise, and surprise is <code>−log p</code>.</strong> A model that gave the truth 0.9 pays 0.105; one that gave it 0.1 pays 2.303; one that gave it 0.01 pays 4.605. Being confidently wrong costs about 44 times more than being confidently right, which is why the penalty tracks overconfidence rather than mere error.</p>
+
+<div class="keybox">
+  <span class="sym">loss = −log p</span>
+  <p>Surprise is the negative log of the probability you quoted.</p>
+</div>
 
 <h2>How it actually works</h2>
 <p>Seven parts. Each one closes a gap the previous part leaves open.</p>
@@ -119,6 +130,10 @@
   <p><strong>"Likelihood is the probability that my model is correct."</strong> It feels right because both quantities are numbers between 0 and 1 attached to a model, "maximum likelihood" sounds like "most likely model", and the fitted value does end up high.</p>
   <p><strong>Correction:</strong> <code>L(θ) = P(data | θ)</code>, with the data fixed. Turning that around to <code>P(θ | data)</code> needs a prior over models and a Bayes step that training never takes. Likelihood ranks hypotheses about parameters for one dataset; it is not a score you can quote as "70% chance this model is right".</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>Likelihood is the chance the model is right.</td><td>It scores the data given the parameters, not the reverse.</td></tr>
+</table>
 <p><strong>The tell:</strong> someone says "the model is 70% likely" when they mean the true class averaged probability 0.7. The second tell is a metrics table where total NLL improves purely because the evaluation set grew — sums scale with row count, means do not.</p>
 
 <h2>Retrieval check</h2>

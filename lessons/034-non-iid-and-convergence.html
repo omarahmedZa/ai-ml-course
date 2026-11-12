@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>034 — Non-IID data and convergence</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -27,6 +27,12 @@
 <h2>Why this matters</h2>
 <p class="lede">Non-IID data is the normal condition of every real deployment: one phone belongs to a teenager who types in Portuguese, the next to a radiologist who types in English. Papers usually demonstrate on an evenly split dataset where every client sees the same ten classes; that split is the one thing a real fleet never gives you.</p>
 <p>In an exam the question is sharp: <em>"does raising the number of local epochs improve communication efficiency?"</em> The answer is no in general — it cuts rounds but grows drift — and answering "yes, fewer rounds" is the standard half-mark answer. In a project the failure is quieter: you raise <code>E</code> from 1 to 50 to cut the bandwidth bill, total accuracy falls two points, you blame the learning rate, and the drop sits in the three clients with the least data. Nothing in the code is wrong; the assumption was.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>0.9</b><span>drift at E = 10, against 0.2 at E = 1</span></div>
+  <div><b>56%</b><span>extra pooled loss from averaging local optima</span></div>
+  <div><b>0.81</b><span>client loss at the global point, against 0.04 at E = 1</span></div>
+</div>
 
 <h2>The one core idea</h2>
 <p>Two hikers are roped together but walking to different villages. Each step takes a hiker toward their own village, the rope pulls both back toward the middle, and after enough steps they are standing in a field that is neither village. Neither has arrived, and the rope is doing exactly what it was designed to do.</p>
@@ -62,6 +68,8 @@
   <figcaption><strong>Drift, not disagreement.</strong> From one global start at 0, local training pulls each client toward its own optimum, −1 and +1. The server's average returns 0, a point that is optimal for neither client.</figcaption>
 </figure>
 
+<div class="keybox"><span class="sym">average of optima = optimum for nobody</span><p>Client A's optimum is −1 and client B's is +1; local training pulls them apart and the server's average lands at 0.0, a point neither client wants.</p></div>
+
 <h2>How it actually works</h2>
 <p>Six mechanisms turn that picture into a failure you can measure. IID means independent and identically distributed: every client's rows drawn from the same underlying mix.</p>
 
@@ -88,6 +96,8 @@
 <h3>Part 6 — Personalisation and fairness</h3>
 <p>Sometimes the honest response is to stop chasing one global model: share a representation, then fine-tune the last layers per client, or keep batch-norm statistics local (FedBN). Report accuracy per client as well as the mean; a mean of 95% across 1,000 clients is compatible with 40% on the smallest.</p>
 <p><strong>Why this part exists:</strong> a single aggregate number hides exactly the clients that non-IID data hurts, and those are usually the users the system was deployed to serve.</p>
+
+<div class="keybox"><span class="sym">E local steps: w_t^k → client k's own optimum, then average</span><p>Each epoch moves a client further from the shared start before averaging, so drift grows with E; FedProx's μ(w − w_t) term pulls each step back.</p></div>
 
 <h2>Worked example</h2>
 
@@ -135,6 +145,10 @@
   <p>Two quantities move in opposite directions: rounds fall roughly as <code>1/E</code>, while drift grows with <code>E</code> until the average stops being useful. Past a small value the accuracy falls faster than the saving grows, so the cost to reach a target accuracy rises. The optimum is empirical, never monotone.</p>
   <p><strong>Correction:</strong> tune <code>E</code> and <code>μ</code> together against a target accuracy, and always report the number of rounds needed to reach it — not rounds per unit of local work. A second trap: evaluating only on a pooled test set, where the average client dominates and the smallest client disappears.</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>More local epochs always mean cheaper training.</td><td>Rounds fall roughly as 1/E, but drift grows with E; past a small value accuracy falls faster than the saving grows.</td></tr>
+</table>
 <p><strong>The tell:</strong> accuracy that drops as you increase <code>E</code> while training loss on the pooled set keeps falling — that combination means each client is fitting its own corner of the data. The second tell is a single global accuracy number in a report that never breaks results down by client; if the smallest client is not shown, its 40% is inside the 95%.</p>
 
 <h2>Retrieval check</h2>

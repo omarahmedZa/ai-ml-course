@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>022 — Two solution families</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -27,11 +27,11 @@
 <h2>Why this matters</h2>
 <p class="lede">Every algorithm you will read about for the rest of this course is one of two things, or a hybrid of both. That single fact tells you, before any tuning, whether the method can reuse yesterday's data and whether it can cope with a wheel that turns by degrees rather than clicks.</p>
 <p>The distinction is also the first thing a reviewer will ask about: "is this off-policy?" is a question about data budget, not fashion. Pick badly and the symptom is concrete. A Q-learning agent on a seven-joint robot arm must solve an optimisation over a continuous action space at every single step, just to pick its move, which makes the control loop orders of magnitude slower than the policy it replaced. Pick the other way and a replay buffer of stale actions quietly biases a policy-gradient update. In an exam, one table with five rows answers half the questions on this topic.</p>
+<div class="numstrip" role="group" aria-label="Key numbers"><div><b>1.72</b><span>Q-learning target from r = 1, γ = 0.9, max Q′ = 0.8</span></div><div><b>0.622</b><span>Q after one update at α = 0.1</span></div><div><b>0.39</b><span>advantage when Q = 2.8 and V = 2.41</span></div></div>
 
 <h2>The one core idea</h2>
 <p>There are two routes to good behaviour. <strong>Price every move</strong> and always take the cheapest-looking one: that is value-based learning, and the thing learned is a map of payoffs. Or <strong>adjust the habit directly</strong>, making whatever worked more likely next time: that is policy-based learning, and the thing learned is a reflex.</p>
 <p>In one line: <strong>learn the scoreboard, or learn the reflex — and actor–critic learns both at once.</strong> With <code>Q = 0.5</code>, <code>r = 1</code>, <code>γ = 0.9</code>, next-state <code>Q′ = 0.8</code> and <code>α = 0.1</code>, the target is <code>1.72</code>, the error <code>1.22</code>, and the new <code>Q</code> is <code>0.622</code>.</p>
-
 <figure class="fig">
   <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-fam-t f-fam-d">
     <title id="f-fam-t">Value-based and policy-based learning compared on three rows</title>
@@ -70,6 +70,7 @@
   </svg>
   <figcaption><strong>Same objective, different object stored.</strong> Value-based keeps a scoreboard and reads a policy off it, so it can replay old data. Policy-based keeps the policy itself, so it emits continuous actions directly but must learn from fresh data.</figcaption>
 </figure>
+<div class="keybox"><span class="sym">Q(s,a) ← Q(s,a) + α[ r + γ max_{a′} Q(s′,a′) − Q(s,a) ]</span><p>Price every move and act greedily, or raise the probability of whatever worked — actor–critic learns both at once.</p></div>
 
 <h2>How it actually works</h2>
 <p>Seven parts, moving from what both families share to the update rule each one uses.</p>
@@ -150,6 +151,10 @@
   <p><strong>Second trap:</strong> assuming a policy gradient needs a differentiable reward. The gradient flows through <code>log π</code>, so a win, a loss, or a human rating is enough.</p>
 </div>
 <p><strong>The tell:</strong> check the age of the actions in your buffer. If the policy producing them is dozens of versions old while the loss falls smoothly and episode return stays flat, you are optimising against a policy that no longer exists. The other tell is a continuous-action project where the wall clock is dominated by an inner optimiser: that is a <code>max</code> being solved numerically, and a policy network would have emitted the action directly.</p>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>Q-learning is strictly better because it reuses data.</td><td>Reuse plus bootstrapping plus function approximation can diverge — the deadly triad.</td></tr>
+</table>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>007 — Trees and ensembles</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,17 @@
 <p class="lede">On tabular data — spreadsheets, medical records, sensor tables — gradient-boosted trees are still the strongest default. Your project may well beat a neural network with 200 lines of XGBoost, and the exam will ask why. Trees win on tables because they ask questions instead of drawing lines: is income below 40k, is the account older than six months. Categories, missing values and wildly different scales all survive that treatment, which is why credit scoring and fraud review still run on boosted trees.</p>
 <p><strong>The failure it prevents.</strong> An exam question gives two candidate splits and asks which one the tree takes. Students compare the two children's impurity directly, pick the smaller, and lose the marks — the comparison has to be weighted by how many rows land on each side. In a project the same lesson arrives as a forest that memorises 500 noisy rows, because nobody capped depth and validation loss turned upward after the fourth tree.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>0.32</b><span>impurity drop that makes the 45/5 cut worth taking</span></div>
+  <div><b>37%</b><span>rows left out of each bootstrap sample</span></div>
+  <div><b>350k</b><span>flat prediction for a house beyond the observed range</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>A tree is a questionnaire. Each node asks one yes/no question about one feature, the answer routes the row left or right, and the leaf at the end hands back a single number — the average target of the training rows that landed there. Nothing is fitted globally: each question is chosen to make the two resulting groups as pure as possible, one question at a time.</p>
 <p>In one line: <strong>a tree cuts the feature space into boxes, then predicts one number per box.</strong> Start with 100 rows split 50 positive and 50 negative: impurity is <code>1 − (0.5² + 0.5²) = 0.5</code>. A cut producing 45/5 and 5/45 lowers it to 0.18, a drop of 0.32, so that is the cut taken.</p>
+
+<div class="keybox"><span class="sym">Δ = I(parent) − (n_L/n)I(L) − (n_R/n)I(R)</span><p>A tree cuts space into boxes; each split takes the largest weighted purity gain.</p></div>
 
 <h2>How it actually works</h2>
 <p>Six parts: three build one tree, three explain how many trees are combined.</p>
@@ -142,6 +150,11 @@
   <p><strong>Correction:</strong> match the model to the shape of the question. For interpolation inside the observed range, a tree is excellent. For trends, ratios or anything expected to continue past the data, use a model with a slope. A second correction: impurity-based feature importance is not truth — it favours high-cardinality and continuous columns, so use permutation importance on held-out rows instead.</p>
 </div>
 <p><strong>The tell:</strong> plot predictions against the feature and the far left and right come out as flat shelves while the middle wiggles. A second tell is a model that never predicts above the training maximum: if those two numbers are equal, it has hit its ceiling.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>A tree can learn any pattern, including a trend.</td><td>Past the observed range it repeats 350k and never exceeds 400k.</td></tr>
+</table>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

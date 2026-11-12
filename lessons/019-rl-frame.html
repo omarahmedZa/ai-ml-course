@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>019 — The RL frame</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -27,10 +27,12 @@
 <h2>Why this matters</h2>
 <p class="lede">Reinforcement learning trains by reward instead of by a labelled answer key. That is the only option when the right move depends on a long future: a robot arm stacking cups, a scheduler picking the next job, a game engine hunting a winning line. Nobody can label each decision as correct, because correctness only shows up in how the episode ends.</p>
 <p>What you <em>can</em> write down is what you want to happen — points for the goal, a penalty for the crash — and this frame turns that wish into five fields an algorithm can consume. It also prevents an expensive failure: optimising the number you wrote instead of the outcome you meant. A warehouse robot rewarded +1 per shelf passed learns to circle one shelf forever; the code and the arithmetic are right, the behaviour is useless. In an exam, "25 cells, four moves, a 10% slip, −1 per step, +10 at the goal" is a complete specification worth marks.</p>
+<div class="numstrip" role="group" aria-label="Key numbers"><div><b>1.75</b><span>return on three unit rewards at γ = 0.5</span></div><div><b>25</b><span>states in a 5×5 grid</span></div><div><b>100</b><span>state–action pairs, 25 × 4</span></div></div>
 
 <h2>The one core idea</h2>
 <p>Picture the agent as a traveller in a maze who is paid as it walks: at each junction it sees one room, picks a corridor, and collects whatever coins lie there. Good behaviour is not "take the nearest coin"; it is "take the route whose total coins, with a haircut for lateness, is largest". The haircut is the discount, because a coin in hand can be spent now.</p>
 <p>In one line: <strong>return is a discounted running total of rewards, and the agent's only job is to make it large.</strong> With a reward of 1 arriving at three consecutive steps and <code>γ = 0.5</code>, the return is <code>1 + 0.5 + 0.25 = 1.75</code> — not 3.</p>
+<div class="keybox"><span class="sym">G_t = r_{t+1} + γr_{t+2} + γ²r_{t+3} + …</span><p>Return is a discounted running total; the agent's only job is to make it large, not to grab the next reward.</p></div>
 
 <h2>How it actually works</h2>
 <p>Seven parts, one field each.</p>
@@ -162,6 +164,10 @@
   <p><strong>Second trap:</strong> writing a proxy for the goal instead of the goal. Told to maximise time alive, an agent learns to avoid finishing. Reward design <em>is</em> the specification.</p>
 </div>
 <p><strong>The tell:</strong> if you can raise the agent's score without improving the task, you are measuring a proxy, and the score climbs while the demo gets worse. The other tell is a γ you never chose — libraries often default it to 0.99. Set it to 0 and rerun: if behaviour collapses to grabbing the next reward while the task needs planning, that value was carrying the design.</p>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>The agent maximises reward.</td><td>It maximises discounted return, so γ decides which policy wins.</td></tr>
+</table>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>008 — The neuron</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,17 @@
 <p class="lede">A neuron is the smallest trainable unit in every network here: one weighted sum, one bias, one bend. Embeddings, attention heads and output layers are stacks of it.</p>
 <p>Two failures make it worth an hour. In an exam, <em>"a 50-layer network with no activations — how much more can it represent than a single linear layer?"</em> has a one-line answer: nothing, because a product of matrices is a matrix. In a project, the same mistake shows up as a loss that drops to the level of logistic regression and sits there, because the ReLU was deleted during a cleanup. Neither symptom is visible unless you can point at the missing part.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>9</b><span>parameters in the 2 → 2 → 1 network</span></div>
+  <div><b>6</b><span>score for [1, −1] with w = [2, −3], b = 1</span></div>
+  <div><b>50</b><span>linear layers that still collapse into one matrix</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>A neuron is a straight-line score with a gate on its output. The score says which side of a boundary the input falls on, and how far; the gate decides how much of that score survives into the next layer. Training changes only the score's weights — the gate is fixed and never learned.</p>
 <p>In one line: <strong>score first, then bend.</strong> With <code>w = [2, −3]</code> and <code>b = 1</code>, the input <code>[1, −1]</code> scores <code>2 + 3 + 1 = 6</code> and ReLU returns <code>6</code>; the input <code>[−2, 1]</code> scores <code>−4 − 3 + 1 = −6</code> and ReLU returns <code>0</code>.</p>
+
+<div class="keybox"><span class="sym">a = max(0, w·x + b)</span><p>Score first, then bend: a dot product followed by a fixed clamp.</p></div>
 
 <figure class="fig">
   <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-neuron-t f-neuron-d">
@@ -170,6 +178,11 @@
   <p><strong>Correction:</strong> a neuron is <code>max(0, w·x + b)</code> and nothing else. There is no memory, no timing, no spiking. The inputs are a dot product, the "firing" is a clamp at zero, and training touches only weights and bias. Any biology intuition — that it detects a concept — has to be re-derived from that line or discarded.</p>
 </div>
 <p><strong>The tell:</strong> you can describe what a unit does but cannot write its four numbers — weights, input, bias, output — on one line. Debugging gives the second tell: a unit that outputs <code>0</code> for every example has all-negative pre-activations and a gradient of exactly zero forever. Check <code>z</code> first.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>A neuron is a simplified brain cell that detects a concept.</td><td>It is <code>max(0, w·x + b)</code>: no memory, no timing, no spiking; training moves only weights and bias.</td></tr>
+</table>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>011 — The training loop</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,17 @@
 <p class="lede">The training loop is five moves repeated until the loss stops falling, and every model in the rest of this course runs it unchanged. Learn it once and experiments become edits to a single line.</p>
 <p>It is also where most first runs die, for four reasons that are all visible in the curve. The exam version is pure counting: "50,000 examples, batch 250, eight epochs — how many parameter updates?" The project version is a loss flat at <code>0.693</code> on a binary task, because the model outputs <code>0.5</code> for everything and has not moved at all. Neither question needs the architecture; both need the loop.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>5</b><span>moves repeated by the training loop</span></div>
+  <div><b>0.693</b><span>flat binary cross-entropy when p = 0.5</span></div>
+  <div><b>1,600</b><span>updates for 50,000 examples at batch 250, 8 epochs</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>The loop is a thermostat with a fixed routine: look at a batch, measure the error, find the slope, nudge every weight a little, clear the slate. Nothing clever happens here — the information is in the gradients, and the loop only decides how far to step.</p>
 <p>In one line: <strong>forward, loss, backward, step, zero.</strong> With <code>η = 0.05</code> and <code>∂L/∂w = −32</code>, the update is <code>w ← w − 0.05(−32) = w + 1.6</code>.</p>
+
+<div class="keybox"><span class="sym">w ← w − η·∂L/∂w</span><p>Forward, loss, backward, step, zero: the loop only decides how far.</p></div>
 
 <h2>How it actually works</h2>
 <pre class="formula" style="text-align:left"><code>for x, y in loader:          # one batch
@@ -156,6 +164,11 @@
   <p><strong>Correction:</strong> <code>.grad</code> is a buffer that <code>backward()</code> adds into, so step <em>t</em> uses the sum of the gradients from steps 1 to <em>t</em>. The algorithm you are running is no longer gradient descent but a running sum, and its effective learning rate grows linearly with the step count.</p>
 </div>
 <p><strong>The tell:</strong> the loss falls for a few dozen steps, then gets jumpy or turns to NaN while the data and architecture are unchanged — and the first batch always behaves. Accumulation is also deliberate in gradient accumulation, so check the intent before deleting the line: two micro-batches of 16 with one <code>step()</code> approximates one batch of 32, but only if <code>zero_grad</code> comes after the step.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>The optimizer resets itself each step, so zeroing is cosmetic.</td><td><code>.grad</code> is a buffer <code>backward()</code> adds into; skipping <code>zero_grad</code> sums gradients and grows the step.</td></tr>
+</table>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

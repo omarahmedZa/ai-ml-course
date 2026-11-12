@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>018 — Seq2seq</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,17 @@
 <p class="lede">Encoder–decoder is the shape of every generative system you will use: translation, summarisation, speech-to-text, optical character reading, chat. One half reads, the other half writes, and they meet at a single vector. The decoder in a 2014 translation model and the decoder in a chat model are the same object with different plumbing.</p>
 <p>A summariser is trained on 100-token news snippets and deployed on 600-token reports. The output stays fluent and loses the headline, because the encoder compressed the first paragraph into the same 512 numbers it uses for everything else and the decoder never sees the input again. On an exam the same gap shows up as "what is teacher forcing, and what problem does it create?" — a question you cannot answer if you think generation works the way training does.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>100</b><span>tokens in a training snippet</span></div>
+  <div><b>600</b><span>tokens in the deployed report</span></div>
+  <div><b>512</b><span>numbers in the only context vector</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>A translator reads the whole page, closes the book, and writes the translation from memory. That is the architecture, not a simplification of it: the encoder's last state <em>is</em> the book, and everything written afterwards is reconstructing a page from a summary. A better translator is not allowed to reopen the book — only a longer memory would help.</p>
 <p>In one line: <strong>everything the decoder knows arrives through one vector, so a 40-token sentence gives it 12.8 numbers per token and a 400-token one gives it 1.28.</strong> The second case is not slower or less accurate in some vague sense; it is arithmetically short of room.</p>
+
+<div class="keybox"><span class="sym">x₁…x_n → h_n → y₁…y_m</span><p>Everything the decoder knows arrives through one fixed vector, so longer inputs get fewer numbers per token.</p></div>
 
 <h2>How it actually works</h2>
 <p>Seven parts: three for reading, three for writing, one for the patch that arrives later.</p>
@@ -146,6 +154,10 @@
   <p><strong>"The decoder can look at the input while it writes."</strong> It feels right because the name says encoder–decoder, as if two halves share a workspace, and because attention in a modern transformer does exactly that.</p>
   <p>The correction: in the 2014 architecture the decoder holds <code>h_n</code> and nothing else. Attention is the later patch that reopens the channel, which is why a model with attention translates long sentences better while using the same decoder. And a transformer is a different implementation of this same contract — attention replacing recurrence — not a different idea, so "seq2seq means transformer" is backwards.</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>The decoder can look at the input while it writes.</td><td>It holds h_n and nothing else; attention is the later patch that reopens the channel.</td></tr>
+</table>
 <p><strong>The tell:</strong> change only the beginning of the input and watch the first few output tokens. If they barely move, the model is writing from a summary that has already averaged the start away. A second tell is a summary that is fluent and vague in equal measure — correct grammar, no names, no numbers — which is what reconstruction from 512 numbers looks like when the source was 600 tokens. If your training loss is fine and your generations degrade after the first wrong word, the gap is exposure bias, not capacity.</p>
 
 <h2>Retrieval check</h2>

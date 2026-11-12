@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>028 — Pretraining</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,13 @@
 <p class="lede">Pretraining is the stage where a model reads text at scale and learns one skill: predict the next token. No human labels are needed, because every document carries its own answer key, and the result is a probability distribution over text rather than a store of facts.</p>
 <p>That single sentence explains most of what a base model can and cannot do. It can continue a sentence in a style it has seen thousands of times; it cannot look anything up, and it has no notion of being right. In an exam, "a model reports loss 3.0 nats — what is its perplexity?" separates people who know the definition from people who compute <code>3^e</code> or <code>10³</code>; the answer is <code>e³ ≈ 20</code>, and the unit is "equally likely tokens". In a project, the classic evaluation bug is comparing perplexity between two models that use different tokenizers: 50,000-token and 100,000-token vocabularies score different units, so the smaller number may belong to the worse model. The second classic is averaging loss per batch rather than per token, which lets short sequences dominate.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers"><div><b>50,000</b><span>vocabulary entries the model chooses from</span></div><div><b>3.0</b><span>nats of loss for a trained model</span></div><div><b>20</b><span>perplexity, e³</span></div></div>
+
 <h2>The one core idea</h2>
 <p>Imagine a fill-in-the-blank worksheet where the answer key is printed on the same page, under a flap. You read the sentence so far, guess the next word, lift the flap, and adjust. Nobody has to write the answers, because the text already contains them — that is what <strong>self-supervision</strong> means: the labels come from the data itself.</p>
 <p>In one line: <strong>hide the next token, measure how much probability the model gave it, and push that probability up.</strong> With a 50,000-token vocabulary, a model that guesses uniformly has loss <code>ln(50,000) = 10.82</code> nats; a trained model at loss 3.0 has perplexity <code>e³ ≈ 20</code>, i.e. it is as unsure as a choice among 20 tokens.</p>
+
+<div class="keybox"><span class="sym">L = −(1/N) Σ log p(token_t | token_&lt;t)</span><p>Every position is a labelled example: hide the next token and raise the probability the model gives it.</p></div>
 
 <h2>How it actually works</h2>
 <p>Seven parts, following one document through one training step.</p>
@@ -155,6 +159,10 @@
   <p><strong>"Lower perplexity means a better assistant."</strong> It feels right because perplexity is the number printed on the training curve, it always goes down, and smaller feels like an objective improvement.</p>
   <p>The correction is that perplexity measures fit to the pretraining distribution — mostly web text, code and books — and nothing else. It says nothing about instruction following, factuality or safety, all of which arrive in post-training (topic 29). A model can be superb at predicting the next token of a forum argument and useless when asked to summarise a contract. A second trap is treating benchmark scores as independent evidence: public test sets leak into pretraining corpora, so a high score can reflect memorisation rather than skill.</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>Lower perplexity means a better assistant.</td><td>Perplexity measures fit to pretraining text, not instruction following, factuality or safety.</td></tr>
+</table>
 <p><strong>The tell:</strong> the same model with a better perplexity score fails a two-line instruction test, or answers a riddle by reciting the dataset version of it. The other tell is a perplexity comparison across tokenizers or across languages — if the vocabulary or the token count per sentence changed, the number changed unit, and the comparison is meaningless.</p>
 
 <h2>Retrieval check</h2>

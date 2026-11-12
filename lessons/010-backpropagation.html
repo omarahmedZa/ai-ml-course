@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>010 — Backpropagation</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,17 @@
 <p class="lede">Every "the model won't learn" bug is a gradient bug: wrong sign, vanished, exploded, or detached from the graph. Backprop is the one mechanism you must be able to inspect rather than trust.</p>
 <p>An exam will ask you to differentiate a small graph by hand, and there is no way to bluff it: either the local slopes are multiplied in the right order or the number is wrong. In a project the same skill explains a frozen loss — a ReLU that zeroed its own gradient, a tensor cut out of the graph with <code>.detach()</code>, or a learning rate that turned a slope of <code>−12</code> into a jump past the minimum. All three look identical from outside: the curve is flat.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>1</b><span>seed at the loss, ∂L/∂L</span></div>
+  <div><b>−12</b><span>gradient ∂L/∂w in the worked example</span></div>
+  <div><b>36</b><span>dL/dw for L = (3w)² at w = 2</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>Blame flows backwards through the graph. Each operation knows its own local slope — how much its output moves when its input moves by one — and the loss hands back a single number. A node multiplies what it received by its own slope and passes the product to its inputs.</p>
 <p>In one line: <strong>upstream times local, added at every fork.</strong> For <code>L = (3w)²</code> at <code>w = 2</code>, the outside slope is <code>2(6) = 12</code>, the inside slope is <code>3</code>, and the product is <code>36</code>.</p>
+
+<div class="keybox"><span class="sym">∂L/∂w = upstream × local slope, summed at forks</span><p>Blame flows backwards: multiply each local slope and add at forks.</p></div>
 
 <h2>How it actually works</h2>
 
@@ -139,6 +147,11 @@
   <p><strong>Correction:</strong> a gradient is a local slope at the current weights, not a property of the parameter. It depends on the input scale, the loss scale and everything downstream, and it is recomputed from scratch every step. The same weight can have a gradient of <code>−12</code> at initialisation and <code>−0.01</code> one update later.</p>
 </div>
 <p><strong>The tell:</strong> keep the prediction identical while multiplying one input by 100 and dividing its weight by 100 — the loss does not move, but that weight's gradient grows 100×. A quantity that changes when units change is a slope, not an importance score. The second tell is a ranking — "this feature matters least because its gradient is smallest" — that reorders when you standardise the columns.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>A big gradient means an important parameter.</td><td>A gradient is a local slope; it depends on input scale and is recomputed every step.</td></tr>
+</table>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

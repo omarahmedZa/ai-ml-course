@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>027 — The Transformer block</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,13 @@
 <p class="lede">A Transformer block is the repeating unit inside every large language model. A config file names 96 layers, a width of 12,288 and 96 heads; this lesson is the map from those three numbers to the four sub-layers that do the work.</p>
 <p>Once you can name the parts, an architecture diagram stops being decoration. Reading "pre-LN, 96 layers, 96 heads, d_model 12,288" tells you each head is 128 numbers wide, the feed-forward layer is 49,152 wide inside, and the residual stream carries 12,288 numbers per token from the first block to the last. In an exam, "why does a block need a residual connection?" is a two-mark question with a mechanical answer about gradient paths. In a project, the missing part is usually the causal mask: training loss drops to 0.02 within an hour, the samples are fluent nonsense, and the logs show nothing unusual. The other common failure is a shape that broadcasts — adding a 512-number vector to a whole sequence without noticing — which produces plausible numbers and a model that never converges.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers"><div><b>96</b><span>layers in the example model</span></div><div><b>12,288</b><span>numbers across the residual stream</span></div><div><b>128</b><span>numbers per attention head</span></div></div>
+
 <h2>The one core idea</h2>
 <p>A block is a meeting followed by a memo. Attention is the meeting: every token talks to the others and leaves with a blend of what it heard. The feed-forward network is the memo: each token, alone, rewrites its own notes. The residual connection keeps the original notes on the desk so nothing is lost, and LayerNorm keeps the volume steady so no sub-layer shouts.</p>
 <p>In one line: <strong>mix across tokens, then process each token, add both results back, normalise on the way in.</strong> At width 512 with 8 heads, each head is 64 numbers; one block holds about 3.15M parameters, and 12 of them hold about 37.8M.</p>
+
+<div class="keybox"><span class="sym">x → x + MHA(LN(x)) → x + FFN(LN(x))</span><p>Attention mixes across tokens; the feed-forward layer rewrites each token alone; both results add back to the residual stream.</p></div>
 
 <h2>How it actually works</h2>
 <p>Seven parts, in the order the numbers flow.</p>
@@ -172,6 +176,10 @@
   <p><strong>"Attention makes the model order-aware."</strong> It feels right because word order obviously changes meaning, and attention weights do change when you reorder a sentence.</p>
   <p>The correction is that attention is permutation-equivariant: shuffle the input tokens and the outputs shuffle with them, unchanged in value. Order enters only through positional encodings added to the token vectors, which is why they are not an optional extra. A second trap is treating LayerNorm and BatchNorm as interchangeable. LayerNorm normalises across features within one token, so it behaves identically for a batch of 1 and a batch of 1,000 — essential when generating one token at a time.</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>Attention alone makes the model order-aware.</td><td>Attention is permutation-equivariant; order enters only through positional encodings.</td></tr>
+</table>
 <p><strong>The tell:</strong> delete the positional encodings and retrain. Accuracy on order-sensitive tasks collapses to roughly what a bag of words would score, while the code still runs and the loss still falls. If someone claims a block "understands sequence" from attention alone, ask them where the position information enters — there is exactly one answer.</p>
 
 <h2>Retrieval check</h2>

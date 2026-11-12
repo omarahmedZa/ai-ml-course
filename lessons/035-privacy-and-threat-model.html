@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>035 — Privacy and threat model</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,17 @@
 <p class="lede">Every organisation that trains on personal data eventually has to write a sentence a lawyer, an auditor or a regulator will read: "this model was trained without exposing individual records." It is also about three claims you will be asked to defend: that a single update does not reveal its example, that the server cannot read a device's contribution, and that one hostile client cannot rewrite the model.</p>
 <p>In an exam the question is <em>"does federated learning guarantee privacy?"</em> and "yes, the data never leaves the device" earns one mark out of five; the rest comes from saying what still leaks and which mechanism bounds it. In a project the same gap is expensive: a team ships a "privacy-preserving" prototype, someone runs a published gradient-inversion script on a captured update, and a face appears. The code was correct; nobody had written down an adversary or a budget.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>0.81</b><span>accuracy at σ = 4.0, against 0.92 at σ = 0.5</span></div>
+  <div><b>1.1</b><span>noise scale σC at C = 1, σ = 1.1</span></div>
+  <div><b>10.0</b><span>total ε after 1,000 rounds at 0.01 per round</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>Think of a locked suggestion box with a translucent slot. Posting your note through the slot guarantees the collector never visits your house — and guarantees nothing about whether the note can be read through the slot. Federated learning builds the box; privacy engineering decides how opaque the paper is.</p>
 <p>In one line: <strong>locality hides where the data is, while privacy hides what the update says about it.</strong> A gradient with norm 10 is a fingerprint of one example; clipping it to <code>C = 1</code> and adding noise of scale <code>σC = 1.1</code> is what turns an unbounded leak into a measured one.</p>
+
+<div class="keybox"><span class="sym">locality ≠ privacy: an update is a function of the rows</span><p>Keeping rows on the device hides where the data is; clipping to C and adding noise σC bounds what each update reveals about them.</p></div>
 
 <h2>How it actually works</h2>
 <p>Six parts, in the order you should reason about them: adversary, leak, bound, noise, cryptography, accounting.</p>
@@ -138,6 +146,10 @@
   <p>The update is a compressed picture of the data, and compression is not encryption: a server that stores a thousand rounds has a thousand pictures of the same client. Clipping, noise and secure aggregation each remove one channel, and none of them is implied by the federated loop. A second trap is treating DP as free: every unit of ε buys privacy with accuracy, and the bill compounds across rounds.</p>
   <p><strong>Correction:</strong> write the claim as a mechanism plus a number — "trained with DP-SGD, ε = 1.0 at δ = 10⁻⁵, secure aggregation over 100 rounds" — and check that each part maps to an adversary you named.</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>Federated means private.</td><td>Locality hides where the data sits, not what the update says; without clipping, noise and secure aggregation, a stored update still leaks.</td></tr>
+</table>
 <p><strong>The tell:</strong> the word "privacy-preserving" with no ε, no noise scale and no adversary anywhere in the document. The second tell is a single ε quoted for a long run; ask whether it is per round or total, and the answer moves by an order of magnitude. The third is a reconstruction demo that works on the deployed system: there, cryptography was doing the work the statistics was meant to do.</p>
 
 <h2>Retrieval check</h2>

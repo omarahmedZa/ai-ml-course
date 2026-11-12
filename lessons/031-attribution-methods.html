@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>031 — Attribution methods</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -26,11 +26,13 @@
 
 <h2>Why this matters</h2>
 <p class="lede">Four attribution methods look at one prediction and return four different lists of important features. All four are defensible, and they disagree. Knowing the definition behind each is the difference between citing an attribution and being fooled by one, because the number on the chart is only as good as the procedure that produced it.</p>
+<div class="numstrip" role="group" aria-label="Key numbers"><div><b>20–300</b><span>passes for integrated gradients</span></div><div><b>0.42 → 0.05</b><span>LIME weight, two seeds</span></div><div><b>3,628,800</b><span>orderings, ten features</span></div></div>
 <p>A credit team shipped LIME explanations with a fixed seed. Auditing six months later with the library's default seed, the top feature moved from "missed payments" to "account age" for the same applicant and the same model. Nothing about the decision had changed; the random sample under the explainer had. That is the failure this topic prevents: four definitions of "important", and only one that must add up to the prediction.</p>
 
 <h2>The one core idea</h2>
 <p>Every attribution method apportions one output among the inputs. They differ in <strong>what counts as evidence</strong>: the slope right here, the average slope along a path from a neutral input, the weights of a simple model fitted nearby, or the average gain from adding a feature to a coalition. Same question in English, four different mathematical answers.</p>
 <p>In one line: <strong>saliency asks about a nudge, integrated gradients about a journey, LIME about a neighbourhood, and Shapley about a coalition.</strong> With two features where <code>v({1}) = 0.6</code>, <code>v({2}) = 0.4</code> and <code>v({1,2}) = 1.0</code>, Shapley returns <code>0.6</code> and <code>0.4</code> — and they sum to exactly <code>1.0</code>, the whole output.</p>
+<div class="keybox"><span class="sym">φᵢ = share of f(x) − f(x′) assigned to input i</span><p>Every method answers that one question; they differ in what evidence they accept — a slope here, a path, a neighbourhood, or a coalition.</p></div>
 
 <h2>How it actually works</h2>
 <p>Seven parts, from one number to four procedures.</p>
@@ -138,6 +140,10 @@
   <p><strong>Correction:</strong> read every attribution as "how much of this output this input explains, given the others as measured". If a correlated split is unacceptable, drop one column or use a conditional variant — but never turn a SHAP number into a claim about intervening in the world.</p>
   <p><strong>Second trap:</strong> trusting LIME because it is model-agnostic. Agnostic buys coverage, not stability; seed 2 above is the counter-example.</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>Shapley comes from game theory, so the number is causal.</td><td>It splits a model output under the training distribution; correlated inputs share credit but no intervention is performed.</td></tr>
+</table>
 <p><strong>The tell:</strong> a sentence with no zero point in it — "income is the most important feature" — or numbers that cannot be made to sum to anything. Ask which baseline the value is measured from, then re-run the explainer with a different seed and a slightly perturbed input. If the ranking survives both, you have evidence; if it moves, you have a screenshot.</p>
 <h2>Retrieval check</h2>
 <ol class="quiz">

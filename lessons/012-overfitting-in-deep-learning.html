@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>012 — Overfitting in deep learning</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,13 @@
 <p class="lede">Regularisation is the set of techniques that stop a network from memorising its training set. You reach for it on every real project, because the moment your labelled data is finite — which is always — the model has more adjustable knobs than it has constraints.</p>
 <p>Concretely: a model scoring 0.99 on 8,000 training images and 0.71 on held-out images is not unlucky. It has learned those exact images rather than the pattern behind them. Without a lever to pull you would ship it, because the training number looks excellent, and the failure surfaces in production where every input is new. The exam version is the same question in disguise: <em>"training loss keeps falling while validation loss rises — name the problem and one fix."</em></p>
 
+<div class="numstrip" role="group" aria-label="Key numbers"><div><b>0.99</b><span>training accuracy</span></div><div><b>0.71</b><span>validation accuracy</span></div><div><b>0.28</b><span>accuracy gap</span></div></div>
+
 <h2>The one core idea</h2>
 <p>Picture a student who has memorised last year's exam paper. Their score on that paper is perfect and their score on this year's paper is not. Regularisation is the teacher rephrasing the questions slightly every week, so only actual understanding survives the change.</p>
 <p>In one line: <strong>make training harder than deployment, so the only way to succeed is to learn something that transfers.</strong> With 8,000 images and 30% of activations dropped at each step, the network sees a slightly different architecture every time, and no single fragile weight combination can be counted on.</p>
+
+<div class="keybox"><span class="sym">train harder → learn what transfers</span><p>Restrict what training may rely on; only structure that survives the handicap generalises.</p></div>
 
 <h2>How it actually works</h2>
 <p>Four levers share one logic: restrict what the model may rely on during training. Take them in the order you would apply them on a real project.</p>
@@ -131,6 +135,10 @@
   <p><strong>Correction:</strong> dropout is a training-time mask plus a matching rescale, and an evaluation-time no-op. Two modes, one switch. Evaluate with it still on and the same image returns a different answer on every call.</p>
   <p><strong>Second trap:</strong> augmentation that quietly changes the label. A horizontal flip turns a handwritten 6 into a 9; a vertical flip destroys text. Every transform must preserve the thing you are asking the model to predict.</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>Dropout improves the model.</td><td>It is a training-time mask and an inference-time no-op.</td></tr>
+</table>
 <p><strong>The tell:</strong> validation accuracy that moves by several points when you evaluate the same checkpoint twice means a training-only layer is still live — check <code>model.eval()</code> before you blame the data. For augmentation, the tell is a model that is confidently wrong on exactly the class your transform confuses: 6s predicted as 9s after flip augmentation is the transform's signature, not a mystery.</p>
 
 <h2>Retrieval check</h2>

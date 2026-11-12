@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>005 — Generalization</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,17 @@
 <p class="lede">This is the single most examined idea in Unit 1, and the first thing that will go wrong in your project. A model that scores 99% on data it has seen is a memory; a model that scores 85% on data it has not seen is a product. Every shipping decision is a bet about rows nobody has collected yet: does this hold up next month, in another hospital, on another customer? Generalization is the word for that bet, and the train/validation/test split is the only honest way to price it. When a paper claims "state of the art", this is the machinery the claim rests on.</p>
 <p><strong>The failure it prevents.</strong> An exam question shows two curves, one flat and high, one diving on train while rising on validation, and asks which model to ship. Without the vocabulary you describe the shapes; with it you write "underfit at 0.95/0.94, so raise capacity" and collect the marks. In a project the same blind spot costs a release: tune 40 hyperparameter settings against the test set, report the best of 40, and the 91% you announce is really a 74% model that was measured until it flattered you.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>0.28</b><span>gap between 0.99 train and 0.71 test accuracy</span></div>
+  <div><b>3.38</b><span>degree-9 gap: 0.02 train against 3.40 test</span></div>
+  <div><b>0.20</b><span>noise no model can remove, in every model's error</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>Think of two students preparing for an exam. One memorises the answers to last year's paper; the other learns the method. On the practice paper they tie. On the real paper the memoriser collapses, because the questions are new. A model is the memoriser unless you check: with enough parameters it reproduces every training label exactly, and that tells you nothing about the next row.</p>
 <p>In one line: <strong>generalization is the size of the gap between error on rows the model fit and error on rows it never saw.</strong> Numbers make it concrete: train error 0.02 and test error 0.34 give a gap of 0.32, while train 0.90 and test 0.95 give a gap of only 0.05 — and the second model, with the smaller gap, is the worse product.</p>
+
+<div class="keybox"><span class="sym">gap = test error − train error</span><p>Read the gap for the disease and the level for how sick; the smaller gap can still be the worse model.</p></div>
 
 <h2>How it actually works</h2>
 <p>Six parts. The first three protect the measurement; the last three use it.</p>
@@ -122,6 +130,11 @@
   <p><strong>Correction:</strong> keep three roles separate. Validation absorbs all the looking; test is opened once and then frozen; if you must look again, the old test set becomes validation and you need a new, untouched holdout. Leakage is the same disease in disguise: fitting a scaler or an imputer on the full dataset before splitting lets test statistics into training, so fit on train and apply the result to test.</p>
 </div>
 <p><strong>The tell:</strong> your test score improves in step with the number of experiments you run, and drops the day a genuinely fresh holdout arrives. A second tell is a test score reported to three decimal places from a set of 200 rows, where a single flipped label moves it half a point.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>Tuning until the test score looks good.</td><td>Every peek turns test into validation; the best of 40 is optimistic.</td></tr>
+</table>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

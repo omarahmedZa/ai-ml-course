@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>030 — Why explainability</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -26,6 +26,7 @@
 
 <h2>Why this matters</h2>
 <p class="lede">A model that outputs <code>0.31</code> has not given anyone a reason. Explainability is the practice of producing one: which inputs drove this output, how much each contributed, and what the model would have said without them. You need it whenever a number turns into a decision a human must defend — a loan declined, a scan flagged, a claim denied. It is also the fastest way to debug a model that scores well and behaves absurdly.</p>
+<div class="numstrip" role="group" aria-label="Key numbers"><div><b>0.96</b><span>AUC at the training hospital</span></div><div><b>0.61</b><span>AUC one hospital later</span></div><div><b>0.31</b><span>output, with no reason attached</span></div></div>
 <p>A pneumonia classifier reached AUC 0.96 (area under the ROC curve; 1.0 is perfect) at its training hospital and 0.61 at the next one. One local explanation showed why: the five highest-contributing pixels sat in the burned-in scanner label in the corner. Accuracy could never surface that, because on the training site the label correlated perfectly with pneumonia — the shortcut looked exactly like skill. One attribution map found it in ten seconds.</p>
 
 <h2>The one core idea</h2>
@@ -67,6 +68,7 @@
 
 <h2>How it actually works</h2>
 <p>Six parts: three of vocabulary, three of decisions.</p>
+<div class="keybox"><span class="sym">explanation = when × scope × form</span><p>When it is made (intrinsic or post-hoc), how much it covers (global or local), and what shape it takes (attribution or example). The use case fixes the position.</p></div>
 
 <h3>Part 1 — Importance is always relative</h3>
 <p>Nothing is important on its own; importance is a difference, so it needs a baseline. A contribution of <code>+0.70</code> means nothing until you say it is measured against an average applicant, or against this applicant with one field blanked out.</p>
@@ -137,6 +139,10 @@
   <p><strong>Correction:</strong> read every attribution as a claim about the function, with an implicit "holding the rest of the input fixed". Causal claims need an experiment or a causal graph; no explainer produces either.</p>
   <p><strong>Second trap:</strong> explainability theatre, a heatmap shipped because it looks rigorous. An explanation nobody can act on, or never validated (topic 32), is decoration with a compliance cost.</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>The output moved when the feature moved, so the explanation names the cause.</td><td>It names a dependence in the model's function, holding other inputs fixed — never an intervention in the world.</td></tr>
+</table>
 <p><strong>The tell:</strong> ask for one counterfactual with a number in it — "what would this applicant have had to change to score below 0.25?" If nobody can answer, you have a picture, not a reason. The second tell is a top feature no domain expert has mentioned; when the model's first reason surprises the people who know the problem, you have found a bug or the project's best insight, and only a check tells them apart.</p>
 <h2>Retrieval check</h2>
 <ol class="quiz">

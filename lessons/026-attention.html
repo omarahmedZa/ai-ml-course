@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>026 — Attention</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,13 @@
 <p class="lede">Attention lets a language model treat a sentence as a web of related positions rather than a fixed row of slots. Each token writes a question, compares that question against every token's advertisement, and copies a blend of what the best matches offer.</p>
 <p>It is the only place in a Transformer where information moves sideways between positions; the feed-forward layer, the normalisation and the output head all work on one token at a time. That is why "it" can take its meaning from a noun eight tokens back. In an exam, "compute attention for these two tokens" is four mechanical steps, and the marks sit in the arithmetic. In a project, the same four steps host the quiet bugs: a softmax computed down the columns instead of across the rows, so each key sums to 1 while each query sums to 1.7 and the output arrives 70% too long; or a scale factor left out because the code "looked fine". Both run without error and train badly.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers"><div><b>70%</b><span>output overshoot when softmax runs down columns</span></div><div><b>512</b><span>numbers in each token vector</span></div><div><b>8</b><span>attention heads per block</span></div></div>
+
 <h2>The one core idea</h2>
 <p>Picture a library desk. You arrive with a question (the <strong>query</strong>). Every book has a label on its spine (the <strong>key</strong>) saying what it covers, and pages inside (the <strong>value</strong>) holding the actual content. You do not pick one book and ignore the rest; you score every label against your question and photocopy a fraction of each book, in proportion to how well its label matched.</p>
 <p>In one line: <strong>attention is a soft lookup — score everything, then take a weighted average.</strong> With <code>q = [1, 0]</code>, <code>k₁ = [1, 0]</code>, <code>k₂ = [0, 1]</code>, the two scores are 1 and 0; after dividing by <code>√2</code> and exponentiating they become weights 0.670 and 0.330, so the output is <code>0.670 × v₁ + 0.330 × v₂</code>.</p>
+
+<div class="keybox"><span class="sym">softmax(QKᵀ/√d_k)·V</span><p>Every query scores every key, the scores become row weights that sum to 1, and those weights blend the values.</p></div>
 
 <h2>How it actually works</h2>
 <p>Seven parts. Each one is a line of the formula below, in the order the numbers travel.</p>
@@ -198,6 +202,10 @@
   <p>The correction is that a weight is a routing decision for the <em>next</em> layer, not a causal contribution to the output. A token can receive a weight of 0.8 and add nothing, because its value vector is close to zero; and the feed-forward layer that follows can ignore whatever arrived. Attention heads are also redundant: ablating a single head often leaves the prediction unchanged. Topic 32 shows this empirically.</p>
   <p>A related error is expecting memory or recurrence. Attention has neither — it re-reads the whole prefix on every pass, and order has to be injected explicitly (topic 27).</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>A high attention weight explains the answer.</td><td>A weight routes values to the next layer; it is not a causal contribution.</td></tr>
+</table>
 <p><strong>The tell:</strong> replace the highest-weighted token's value with zeros and rerun. If the output barely moves, the weight was routing, not explaining. The second tell is instability: two seeds trained on the same data give different attention maps with the same accuracy — a real explanation would not move.</p>
 
 <h2>Retrieval check</h2>

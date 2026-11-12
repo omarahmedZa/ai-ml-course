@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>025 — Policy gradient at scale</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,20 @@
 <p class="lede">PPO is the default algorithm behind robot control, game agents, and the RLHF step that made chat models usable. If you understand three upgrades to REINFORCE, you understand all of it.</p>
 <p>You need this the moment actions are continuous — a torque, a joint angle, a throttle — because "take the max over a discrete table" has nothing to maximise. Policy gradient instead moves the probabilities themselves, which is why it also powers the fine-tuning of language models, where the "action" is a token. Two failures it prevents. The exam failure: <em>"Subtract a baseline from the return. Prove the gradient is still unbiased, then say what did change."</em> The proof is one line of algebra; the answer is variance, and "bias" loses the mark. The project failure: you run REINFORCE on returns spanning 0 to 100, one lucky episode returns 100 instead of 40, and the next update moves the policy so far that it never recovers. The gradient was correct and the step size was not.</p>
 
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>3</b><span>upgrades between REINFORCE and PPO</span></div>
+  <div><b>100</b><span>return of the lucky episode</span></div>
+  <div><b>0.2</b><span>PPO's clip range ε</span></div>
+</div>
+
 <h2>The one core idea</h2>
 <p>Estimating a gradient from one rollout is an opinion poll of size one. The poll is unbiased — run it a million times and the average is right — but any single result can be wildly off, and you act on that single result. Every upgrade in this lesson leaves the average untouched and shrinks the spread around it.</p>
 <p>In one line: <strong>same expected gradient, smaller variance.</strong> A state where all actions return 100 contributes a weight of 100 and no information; subtract <code>V(s) = 100</code> and it contributes 0, while a state returning 0 or 40 contributes −50 or −10.</p>
+
+<div class="keybox">
+  <span class="sym">E[∇log π · (G − b(s))] = E[∇log π · G]</span>
+  <p>A state-only baseline leaves the expected gradient unchanged and shrinks only the variance around it.</p>
+</div>
 
 <h2>How it actually works</h2>
 <p>Seven parts follow, each one an upgrade stacked on the last.</p>
@@ -158,6 +169,11 @@
   <p><strong>Correction:</strong> clipping is a soft penalty on <em>incentive</em>, not a trust region on <em>distance</em>. Measure the actual change — mean KL between old and new policies — instead of assuming the formula delivered it.</p>
 </div>
 <p><strong>The tell:</strong> after an update, the mean ratio on the same batch has drifted well past 1.2, or the KL spikes while every individual loss term looks capped. The second tell is a run that improves for one epoch and then degrades across epochs within a single batch — clipping cannot be the explanation, so look at epochs, learning rate and advantage normalisation before blaming the algorithm.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>ε = 0.2 caps how far the policy can move.</td><td>The clip caps incentive, not parameter distance; epochs and Adam can push the ratio past 1.2.</td></tr>
+</table>
 
 <h2>Retrieval check</h2>
 <ol class="quiz">

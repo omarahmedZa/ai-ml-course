@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>013 — Optimization failure modes</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=6">
+<link rel="stylesheet" href="../assets/lesson.css?v=7">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,9 +28,13 @@
 <p class="lede">A gradient is a message travelling backwards from the loss to the first layer. Every hop multiplies it by one more factor, so a 40-layer network asks that message to survive 40 multiplications. When it does not arrive, the early layers never change and the model looks broken rather than badly tuned.</p>
 <p>This is the difference between a deep network that trains like a shallow one and a deep network that simply sits there. Without these fixes, adding layers makes results worse and you conclude that depth does not work — when in fact depth works only when the signal reaches it. The exam form is a diagnosis question: <em>"a 20-layer network's first five layers have gradients near 10⁻⁹; name the cause and the single most effective change."</em></p>
 
+<div class="numstrip" role="group" aria-label="Key numbers"><div><b>40</b><span>layers the signal crosses</span></div><div><b>0.25</b><span>sigmoid's peak derivative</span></div><div><b>9.5 × 10⁻⁷</b><span>signal after ten layers</span></div></div>
+
 <h2>The one core idea</h2>
 <p>Imagine a rumour passed along a line of ten people, each repeating it at 60% of the volume they heard. By the tenth person it is inaudible. Now imagine each of them repeats it at 150% volume: by the tenth it is a shout, and by the fiftieth it is a physical event. Backpropagation is that line of people.</p>
 <p>In one line: <strong>a gradient's size is a product, so factors below 1 collapse and factors above 1 detonate.</strong> Ten layers at 0.25 leave <code>9.5 × 10⁻⁷</code> of the original signal — below float32 resolution. Ten layers at 1.5 give <code>58×</code>, and the loss becomes NaN shortly after.</p>
+
+<div class="keybox"><span class="sym">g_L = f₁ · f₂ ⋯ f_L</span><p>Factors below 1 shrink the gradient with depth; factors above 1 explode it.</p></div>
 
 <h2>How it actually works</h2>
 <p>Every fix below does one of two things: it keeps the per-layer factor near 1, or it gives the gradient a shortcut that skips the multiplication altogether.</p>
@@ -141,6 +145,10 @@
   <p><strong>Correction:</strong> depth is a claim you have to earn with He initialisation, normalisation and residual paths. Given those, 100 layers train. Without them, 20 layers can already be untrainable, and the failure looks identical to a learning rate that is too small.</p>
   <p><strong>Second trap:</strong> assuming BatchNorm behaves the same in training and inference. At inference it uses stored running statistics, not the statistics of the batch in front of it. Forget <code>model.eval()</code> and a single-image batch produces nonsense.</p>
 </div>
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>More depth is more power.</td><td>An unassisted 50-layer network is usually worse than a 10-layer one.</td></tr>
+</table>
 <p><strong>The tell:</strong> print the mean gradient norm of each layer, first to last, on one batch. If it falls by an order of magnitude per layer you have vanishing; if it doubles per layer you have exploding; if it is healthy but loss is flat, you have a different problem entirely. The second tell is a loss curve that is not smooth but stair-stepped upward in the first hundred steps — that is a warmup or clipping problem, not a data problem.</p>
 
 <h2>Retrieval check</h2>
