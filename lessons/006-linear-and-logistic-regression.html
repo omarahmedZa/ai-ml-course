@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>006 — Linear and logistic regression</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can derive a logistic decision boundary, and say why squared error is the wrong loss for classification.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— regression</span></h2>
 <p class="lede">These are the baselines every project must beat before deep learning is justified, and logistic regression is literally the last layer of every classifier in Unit 7. Same dot product, one extra function. A linear model predicts a quantity — tomorrow's demand, a house price, a dose. A logistic model predicts a probability — will this customer default, is this scan abnormal — and thresholds it into yes or no. Between them they cover most tabular problems you will meet, and a stack of fifty neural layers still ends in <code>σ(w·x + b)</code>.</p>
 <p><strong>The failure it prevents.</strong> An exam question gives <code>w = [1, −2]</code>, <code>b = 1</code> and asks where the boundary sits and which side is class 1. Students who read the output as a score draw the line correctly and then label both sides backwards, because the boundary is <code>z = 0</code>, not <code>p = 0</code>. In a project the same confusion ships a classifier reporting 97% accuracy on data with 3% positives — it answers "no" to every row and the metric never notices.</p>
 
@@ -34,13 +34,13 @@
   <div><b>97%</b><span>accuracy from always saying "no" on 3% positives</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— regression</span></h2>
 <p>Both models are a single weighted sum, <code>w·x + b</code>. What changes is the last step: linear regression hands that sum out unchanged, while logistic regression pushes it through a squashing function so it lands between 0 and 1. Same engine, different gauge on the dashboard — and the gauge decides what the number is allowed to mean.</p>
 <p>In one line: <strong>one weighted sum, then a link function that says whether it is a quantity or a probability.</strong> With <code>w = [1, −1]</code>, <code>b = 0</code> and <code>x = [2, 0.5]</code>, the score is 2 − 0.5 = 1.5; read raw that is 1.5 units, read through the sigmoid it is a probability of 0.818.</p>
 
 <div class="keybox"><span class="sym">p = σ(w·x + b), boundary at w·x + b = 0</span><p>One weighted sum; the link decides whether the output is a quantity or a probability.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— regression</span></h2>
 <p>Six parts, from the sum itself to the algorithm that finds its weights.</p>
 
 <h3>Part 1 — One weighted sum is the whole model</h3>
@@ -98,7 +98,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— regression</span></h2>
 
 <h3>1. One point through the sigmoid</h3>
 <p><code>w = [1, −1]</code>, <code>b = 0</code>, <code>x = [2, 0.5]</code>. Work the score first, then the squash.</p>
@@ -141,7 +141,7 @@
 
 <p><strong>What to notice.</strong> The useless predictor wins on accuracy, 97.0% against 95.0%, while missing every case anyone cares about. Model A costs 9 false positives to catch 5 true positives, and accuracy is blind to that trade. Report precision and recall against the trivial baseline; otherwise the metric rewards the model that does nothing.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— regression</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Use squared error — it worked for regression."</strong> It feels right because it is the loss you already know, it does decrease at first, and every library offers it, so nothing raises an error. But with a sigmoid in front, squared error is non-convex and its gradient shrinks to almost nothing exactly where the prediction is most wrong: the model sits at 0.49 for a clear positive and barely moves.</p>
@@ -154,7 +154,7 @@
   <tr><td>Squared error worked for regression, so it will work here.</td><td>Behind a sigmoid its gradient fades exactly where the prediction is most wrong.</td></tr>
 </table>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— regression</span></h2>
 <ol class="quiz">
   <li>With <code>w = [2, 1]</code>, <code>b = −3</code>, classify <code>x = [1, 1]</code> and give its probability.
     <details><summary>Answer</summary>
@@ -173,7 +173,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— regression</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/006-linear-and-logistic-regression.ipynb">open the notebook in Colab</a> · <a href="../notebooks/006-linear-and-logistic-regression.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 rng = np.random.default_rng(0)
@@ -183,7 +183,7 @@ y = X @ true + 1 + rng.normal(0, .1, 50)
 A = np.c_[X, np.ones(50)]
 coef, *_ = np.linalg.lstsq(A, y, rcond=None)</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— regression</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "A logistic decision boundary is…", "o": ["A hyperplane", "A circle", "Dependent on σ", "A quadratic"], "a": 0, "why": "The boundary is w·x+b=0, always linear in x."}, {"q": "Correct loss for classification?", "o": ["Binary cross-entropy", "Squared error", "Absolute error", "Euclidean norm"], "a": 0, "why": "BCE is the likelihood; MSE saturates and is non-convex here."}]</script></div>
 

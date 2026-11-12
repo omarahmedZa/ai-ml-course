@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>034 — Non-IID data and convergence</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can explain client drift, name the fixes, and state the local-steps trade-off.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— non-IID data</span></h2>
 <p class="lede">Non-IID data is the normal condition of every real deployment: one phone belongs to a teenager who types in Portuguese, the next to a radiologist who types in English. Papers usually demonstrate on an evenly split dataset where every client sees the same ten classes; that split is the one thing a real fleet never gives you.</p>
 <p>In an exam the question is sharp: <em>"does raising the number of local epochs improve communication efficiency?"</em> The answer is no in general — it cuts rounds but grows drift — and answering "yes, fewer rounds" is the standard half-mark answer. In a project the failure is quieter: you raise <code>E</code> from 1 to 50 to cut the bandwidth bill, total accuracy falls two points, you blame the learning rate, and the drop sits in the three clients with the least data. Nothing in the code is wrong; the assumption was.</p>
 
@@ -34,7 +34,7 @@
   <div><b>0.81</b><span>client loss at the global point, against 0.04 at E = 1</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— non-IID data</span></h2>
 <p>Two hikers are roped together but walking to different villages. Each step takes a hiker toward their own village, the rope pulls both back toward the middle, and after enough steps they are standing in a field that is neither village. Neither has arrived, and the rope is doing exactly what it was designed to do.</p>
 <p>In one line: <strong>local training moves each client toward its own optimum, and the average of several different optima is a point that is optimal for nobody.</strong> Client A's optimum is −1 and client B's is +1; after 10 local epochs they sit at −0.9 and +0.9, and the server averages them to 0.0.</p>
 
@@ -70,7 +70,7 @@
 
 <div class="keybox"><span class="sym">average of optima = optimum for nobody</span><p>Client A's optimum is −1 and client B's is +1; local training pulls them apart and the server's average lands at 0.0, a point neither client wants.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— non-IID data</span></h2>
 <p>Six mechanisms turn that picture into a failure you can measure. IID means independent and identically distributed: every client's rows drawn from the same underlying mix.</p>
 
 <h3>Part 1 — IID is the assumption being broken</h3>
@@ -99,7 +99,7 @@
 
 <div class="keybox"><span class="sym">E local steps: w_t^k → client k's own optimum, then average</span><p>Each epoch moves a client further from the shared start before averaging, so drift grows with E; FedProx's μ(w − w_t) term pulls each step back.</p></div>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— non-IID data</span></h2>
 
 <h3>1. Drift grows with local epochs</h3>
 <p>Two clients, one parameter, global start 0.0. Client A's optimum is −1 and client B's is +1; the table adds the FedProx row using the fixed point derived below.</p>
@@ -138,7 +138,7 @@
 
 <p><strong>What to notice.</strong> The leash changes how far the client gets, not which way it wants to go, and it moves on a smooth curve rather than a switch. That is what lets you raise <code>E</code> without raising drift by the same factor: at <code>μ = 4</code> the client travels 0.2 instead of 1.0.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— non-IID data</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"More local epochs always improve communication efficiency."</strong> It feels right because local epochs do reduce round count, and round count is the number everyone plots on the x-axis, usually stopping at <code>E = 10</code> where the curve still looks flat.</p>
@@ -151,7 +151,7 @@
 </table>
 <p><strong>The tell:</strong> accuracy that drops as you increase <code>E</code> while training loss on the pooled set keeps falling — that combination means each client is fitting its own corner of the data. The second tell is a single global accuracy number in a report that never breaks results down by client; if the smallest client is not shown, its 40% is inside the 95%.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— non-IID data</span></h2>
 <ol class="quiz">
   <li>What is client drift, in one sentence?
     <details><summary>Answer</summary>
@@ -170,7 +170,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— non-IID data</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/034-non-iid-and-convergence.ipynb">open the notebook in Colab</a> · <a href="../notebooks/034-non-iid-and-convergence.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 # two clients with opposite single-class data
@@ -180,7 +180,7 @@ for rnd in range(4):
     locals_ = []
     for data in (A, B):</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— non-IID data</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "Client drift is caused by…", "o": ["Non-IID local training", "IID data", "A high lr", "Small batches"], "a": 0, "why": "Local optima pull apart before averaging."}, {"q": "FedProx adds…", "o": ["A proximal term", "Dropout", "A replay buffer", "A mask"], "a": 0, "why": "It anchors clients to the global weights."}]</script></div>
 

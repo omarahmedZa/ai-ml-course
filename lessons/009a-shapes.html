@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>009.1 — Shape algebra</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -78,7 +78,7 @@
   <p><code>A<sub>1</sub></code> is <strong>8×2</strong>. The batch of 8 meets <code>W<sub>1</sub></code>'s inner 2, and the hidden count of 2 survives; then (8×2)(2×1) gives 8×1. Only the leading number moved.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— Shape algebra</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"If the code runs, the shapes are right."</strong> It feels right because shape errors are the ones that do raise an exception, so a silent run seems like confirmation.</p>
@@ -86,7 +86,7 @@
 </div>
 <p><strong>The tell:</strong> write the four shapes on paper before running. If the output is 4×2 when you expected 2×4, you have a transpose, not a mistake in the arithmetic.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— Shape algebra</span></h2>
 <ol class="quiz">
   <li><code>X</code> is 4×2 and <code>W<sub>1</sub></code> is 3×2. What is the shape of <code>XW<sub>1</sub><sup>T</sup></code>?
     <details><summary>Answer</summary>

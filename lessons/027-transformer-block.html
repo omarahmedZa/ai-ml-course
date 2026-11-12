@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>027 — The Transformer block</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,19 +24,19 @@
   <p class="objective">You can name every sub-layer, its purpose, and why residual + LayerNorm are required.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— the transformer</span></h2>
 <p class="lede">A Transformer block is the repeating unit inside every large language model. A config file names 96 layers, a width of 12,288 and 96 heads; this lesson is the map from those three numbers to the four sub-layers that do the work.</p>
 <p>Once you can name the parts, an architecture diagram stops being decoration. Reading "pre-LN, 96 layers, 96 heads, d_model 12,288" tells you each head is 128 numbers wide, the feed-forward layer is 49,152 wide inside, and the residual stream carries 12,288 numbers per token from the first block to the last. In an exam, "why does a block need a residual connection?" is a two-mark question with a mechanical answer about gradient paths. In a project, the missing part is usually the causal mask: training loss drops to 0.02 within an hour, the samples are fluent nonsense, and the logs show nothing unusual. The other common failure is a shape that broadcasts — adding a 512-number vector to a whole sequence without noticing — which produces plausible numbers and a model that never converges.</p>
 
 <div class="numstrip" role="group" aria-label="Key numbers"><div><b>96</b><span>layers in the example model</span></div><div><b>12,288</b><span>numbers across the residual stream</span></div><div><b>128</b><span>numbers per attention head</span></div></div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— the transformer</span></h2>
 <p>A block is a meeting followed by a memo. Attention is the meeting: every token talks to the others and leaves with a blend of what it heard. The feed-forward network is the memo: each token, alone, rewrites its own notes. The residual connection keeps the original notes on the desk so nothing is lost, and LayerNorm keeps the volume steady so no sub-layer shouts.</p>
 <p>In one line: <strong>mix across tokens, then process each token, add both results back, normalise on the way in.</strong> At width 512 with 8 heads, each head is 64 numbers; one block holds about 3.15M parameters, and 12 of them hold about 37.8M.</p>
 
 <div class="keybox"><span class="sym">x → x + MHA(LN(x)) → x + FFN(LN(x))</span><p>Attention mixes across tokens; the feed-forward layer rewrites each token alone; both results add back to the residual stream.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— the transformer</span></h2>
 <p>Seven parts, in the order the numbers flow.</p>
 
 <span class="formula">x → x + MHA(LN(x)) → x + FFN(LN(x))     (pre-LN form)</span>
@@ -124,7 +124,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— the transformer</span></h2>
 
 <h3>1. Parameter count for one block</h3>
 <p><code>d = 512</code>, 8 heads, expansion factor 4. Only matrix weights are counted; biases and embeddings are left out.</p>
@@ -170,7 +170,7 @@
 
 <p><strong>What to notice.</strong> The output has mean 0 and variance 1, and the gaps between neighbours have changed from 2 to 0.894: information about the original size is gone. That is the point — the next matrix multiply cares about direction, not magnitude — and it is also why the residual matters, since <code>x</code> itself still holds <code>[2, 4, 6, 8]</code> for the addition that follows.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— the transformer</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Attention makes the model order-aware."</strong> It feels right because word order obviously changes meaning, and attention weights do change when you reorder a sentence.</p>
@@ -182,7 +182,7 @@
 </table>
 <p><strong>The tell:</strong> delete the positional encodings and retrain. Accuracy on order-sensitive tasks collapses to roughly what a bag of words would score, while the code still runs and the loss still falls. If someone claims a block "understands sequence" from attention alone, ask them where the position information enters — there is exactly one answer.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— the transformer</span></h2>
 <ol class="quiz">
   <li>Why does the FFN hold most of the parameters even though attention gets the attention?
     <details><summary>Answer</summary>
@@ -201,7 +201,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— the transformer</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/027-transformer-block.ipynb">open the notebook in Colab</a> · <a href="../notebooks/027-transformer-block.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 def softmax(z):
@@ -211,7 +211,7 @@ def layernorm(x, eps=1e-5):
     return (x - mu) / np.sqrt(var + eps)
 rng = np.random.default_rng(0)</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— the transformer</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "Which is not part of a transformer block?", "o": ["Convolution", "Multi-head attention", "Feed-forward", "LayerNorm"], "a": 0, "why": "Convolution belongs to CNN architectures."}, {"q": "The causal mask prevents…", "o": ["Seeing future tokens", "Overfitting", "NaNs", "OOV"], "a": 0, "why": "Future scores are set to −∞ before softmax."}]</script></div>
 

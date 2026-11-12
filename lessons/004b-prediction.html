@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>004.2 — f_θ(xᵢ): one prediction</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -85,7 +85,7 @@
   <p>f<sub>θ</sub>(10) = 2(10) + 1 = <strong>21</strong>. The weights never changed between rows; only the input did.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— f_θ(xᵢ)</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The subscript applies to x."</strong> It does not. The symbol is f<sub>θ</sub> — the model carrying parameters θ — applied to xᵢ. The row is data: measured, fixed, and unaware of θ.</p>
@@ -93,7 +93,7 @@
 </div>
 <p><strong>The tell:</strong> if changing the data seemed to change θ, you are reading the notation backwards. θ stays put until a training step moves it.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— f_θ(xᵢ)</span></h2>
 <ol class="quiz">
   <li>With w = 3 and b = 0, what is f<sub>θ</sub>(2)?
     <details><summary>Answer</summary>

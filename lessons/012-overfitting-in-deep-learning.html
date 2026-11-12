@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>012 — Overfitting in deep learning</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,19 +24,19 @@
   <p class="objective">You can choose among dropout, weight decay, augmentation and early stopping for a given symptom.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— overfitting</span></h2>
 <p class="lede">Regularisation is the set of techniques that stop a network from memorising its training set. You reach for it on every real project, because the moment your labelled data is finite — which is always — the model has more adjustable knobs than it has constraints.</p>
 <p>Concretely: a model scoring 0.99 on 8,000 training images and 0.71 on held-out images is not unlucky. It has learned those exact images rather than the pattern behind them. Without a lever to pull you would ship it, because the training number looks excellent, and the failure surfaces in production where every input is new. The exam version is the same question in disguise: <em>"training loss keeps falling while validation loss rises — name the problem and one fix."</em></p>
 
 <div class="numstrip" role="group" aria-label="Key numbers"><div><b>0.99</b><span>training accuracy</span></div><div><b>0.71</b><span>validation accuracy</span></div><div><b>0.28</b><span>accuracy gap</span></div></div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— overfitting</span></h2>
 <p>Picture a student who has memorised last year's exam paper. Their score on that paper is perfect and their score on this year's paper is not. Regularisation is the teacher rephrasing the questions slightly every week, so only actual understanding survives the change.</p>
 <p>In one line: <strong>make training harder than deployment, so the only way to succeed is to learn something that transfers.</strong> With 8,000 images and 30% of activations dropped at each step, the network sees a slightly different architecture every time, and no single fragile weight combination can be counted on.</p>
 
 <div class="keybox"><span class="sym">train harder → learn what transfers</span><p>Restrict what training may rely on; only structure that survives the handicap generalises.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— overfitting</span></h2>
 <p>Four levers share one logic: restrict what the model may rely on during training. Take them in the order you would apply them on a real project.</p>
 
 <h3>Part 1 — Hold out data before you touch anything</h3>
@@ -101,7 +101,7 @@
 <p>If training and validation loss are both 1.4 and flat, the model is underfitting, and all four levers make it worse by adding bias. The gap, not the absolute loss, tells you which regime you are in: a wide gap means variance, equal-and-high means bias.</p>
 <p><strong>Why this part exists:</strong> the levers trade training fit for generalisation. Applied to a model that has not fit anything yet, they trade away the only signal it had.</p>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— overfitting</span></h2>
 
 <h3>1. A 28-point gap, closed in two steps</h3>
 <p>Baseline: 8,000 images, train accuracy 0.99, validation 0.71. Each row adds one lever and keeps the previous ones in place.</p>
@@ -128,7 +128,7 @@
 
 <p><strong>What to notice.</strong> The sum before dropout is <code>7.5</code>. After masking and rescaling it is <code>2.86 + 0 + 0.71 + 5.71 = 9.28</code>. Averaged over many masks it comes back to about 7.5, because each surviving unit is inflated by exactly the inverse of its survival chance — 0.7 × (7.5 / 0.7) = 7.5. That is also why inference needs no rescale: the correction has already been paid during training. Leave dropout on at evaluation and every forward pass uses a different mask, so predictions jitter for no reason.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— overfitting</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Dropout improves the model."</strong> It feels right because validation accuracy climbs the moment you add it. But dropout does nothing at inference — there it is the identity function. Everything it buys is bought during training, by preventing one unit from depending on another.</p>
@@ -141,7 +141,7 @@
 </table>
 <p><strong>The tell:</strong> validation accuracy that moves by several points when you evaluate the same checkpoint twice means a training-only layer is still live — check <code>model.eval()</code> before you blame the data. For augmentation, the tell is a model that is confidently wrong on exactly the class your transform confuses: 6s predicted as 9s after flip augmentation is the transform's signature, not a mystery.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— overfitting</span></h2>
 <ol class="quiz">
   <li>Dropout with <code>p = 0.4</code> is active. What happens to the surviving activations during training, and at inference?
     <details><summary>Answer</summary>
@@ -160,7 +160,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— overfitting</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/012-overfitting-in-deep-learning.ipynb">open the notebook in Colab</a> · <a href="../notebooks/012-overfitting-in-deep-learning.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 rng = np.random.default_rng(0)
@@ -170,7 +170,7 @@ xt, yt = np.linspace(0, 1, 200), np.sin(2 * np.pi * np.linspace(0, 1, 200))
 x = np.linspace(0, 1, 12)
 y = np.sin(2 * np.pi * x) + rng.normal(0, .3, 12)</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— overfitting</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "Dropout at inference is…", "o": ["The identity", "A 0.5 scale", "Random", "A p scale"], "a": 0, "why": "It is only active during training; survivors are rescaled then."}, {"q": "Train 0.99, validation 0.71. First lever?", "o": ["Regularise", "Add capacity", "Train longer", "Remove features"], "a": 0, "why": "The gap is variance; dropout, decay or augmentation."}]</script></div>
 

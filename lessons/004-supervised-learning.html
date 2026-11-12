@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>004 — Supervised learning</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can write down <code>(X, y, f_θ, L)</code> for any supervised task and say what is being learned.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— the objective</span></h2>
 <p class="lede">Every model in this course — a spam filter, a translation system, a Q-network — is the same four-part object. Name the four parts and you can read a paper's method section instead of guessing at it. Supervised learning is the pattern behind them all: a bank scores loan applications, a hospital flags scans, a phone predicts the next word. In each case somebody collected examples where the right answer was known, and the work is to find a rule that reproduces those answers and keeps holding on new ones. The vocabulary changes by field — "regression", "classification", "fine-tuning" — while the structure underneath stays put.</p>
 <p><strong>The failure it prevents.</strong> An exam question hands you "predict next month's sales from 14 store features, using three years of records" and asks for the four objects with shapes. An answer saying "the model learns the pattern" scores nothing, because no object is named. In code the same gap shows up as a model that trains happily and predicts the wrong column: the loss was computed against a misaligned <code>y</code>, or a target leaked into <code>X</code>. Writing four lines before any code catches both.</p>
 
@@ -34,13 +34,13 @@
   <div><b>29 pts</b><span>train–test gap when memorisation replaces learning</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— the objective</span></h2>
 <p>A supervised model is a guess-machine with adjustable dials. You show it an input, it produces an output, and a loss function scores how far that output sits from the recorded answer. Training turns the dials — the <strong>parameters θ</strong>, the numbers the model actually stores — in whichever direction lowers the average score. There is no lookup table and no understanding, only a fixed shape of function whose dials are tuned until its mistakes are small.</p>
 <p>In one line: <strong>pick θ so that <code>f_θ</code> turns <code>X</code> into something close to <code>y</code>, judged by <code>L</code>.</strong> With 10,000 emails, 2 features and 3 dials, training squeezes those rows into 3 numbers, so the model's whole memory is <code>w = [2, −0.01]</code> and <code>b = −1</code>.</p>
 
 <div class="keybox"><span class="sym">f_θ(X) ≈ y, with θ chosen to lower L</span><p>Four objects — data, model, loss — and the parameters training tunes.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— the objective</span></h2>
 
 <figure class="fig">
   <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-four-t f-four-d">
@@ -113,7 +113,7 @@
 <p>Split before training: roughly 60% train, 20% validation for choosing settings, 20% test for one final number. Training loss says whether the search worked; test loss says whether it mattered.</p>
 <p>Why this part exists: parameters were chosen to fit the training rows, so their error there is biased low — with 3 dials that gap is a fraction of a point, but with 10 million dials it can be 30 points wide.</p>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— the objective</span></h2>
 
 <h3>1. One email, end to end</h3>
 <p>Features <code>x = [1, 50]</code>: "contains 'free'" (1) and "length in words" (50). Parameters <code>w = [2, −0.01]</code>, <code>b = −1</code>. Multiply out every term; that is where sign errors hide.</p>
@@ -141,7 +141,7 @@
 
 <p><strong>What to notice.</strong> Three predictions collapse to 0.280 — the empirical risk θ is optimised against. Email 3 contributes almost half the total despite being "right" — confidence is graded, not pass/fail. A model that always says 0.5 scores <code>−ln 0.5 = 0.693</code>, so 0.693 is the real floor to beat, not 0.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— the objective</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The model learned the data."</strong> It learned parameters. A model with more parameters than data points can score perfectly and still be useless: it memorised <code>X</code> without learning the mapping from <code>X</code> to <code>y</code>.</p>
@@ -155,7 +155,7 @@
   <tr><td>A falling training loss means the model learned the data.</td><td>It stored 3 numbers; 71% test accuracy is the only score that ships.</td></tr>
 </table>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— the objective</span></h2>
 <ol class="quiz">
   <li>For "predict house price from 8 features", name all four objects with shapes.
     <details><summary>Answer</summary>
@@ -174,7 +174,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— the objective</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/004-supervised-learning.ipynb">open the notebook in Colab</a> · <a href="../notebooks/004-supervised-learning.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 x = np.array([1., 50.])          # &quot;free&quot;=1, length=50
@@ -184,7 +184,7 @@ p = 1 / (1 + np.exp(-z))
 print(f&quot;z={z:.2f}  p(spam)={p:.3f}&quot;)
 for y in (1, 0):</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— the objective</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "Which is not one of the four objects?", "o": ["Optimizer", "Inputs X", "Loss L", "Parameters θ"], "a": 0, "why": "X, y, f_θ, L define the task; the optimizer is a solution method."}, {"q": "Train 100%, test 71%. Diagnosis?", "o": ["Overfitting", "Underfitting", "Leakage", "Good model"], "a": 0, "why": "A 29-point gap is memorisation, not generalisation."}]</script></div>
 

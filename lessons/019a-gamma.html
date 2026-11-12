@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>019.1 — γ: the price of waiting</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -87,7 +87,7 @@
   <p>Row 2: 2 + 0.5 × 8 = <strong>6</strong>. Row 3: γ = 0 deletes the second reward entirely, so the return is <strong>2</strong>. Discounting is not a tie-breaker; at γ = 0 it removes the future from the sum.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— γ</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"γ is a technicality for making the infinite sum converge."</strong> Convergence is a side effect, not the job. γ is a design statement about urgency: it decides how large a delayed payoff must be before the agent prefers it to a small reward now.</p>
@@ -95,7 +95,7 @@
 </div>
 <p><strong>The tell:</strong> at γ = 0.9, a reward of 11 arriving after 100 steps is worth about 0.0003. An agent maximising that return takes 1 now, every time — and a report that blames the reward function has missed the discount.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— γ</span></h2>
 <ol class="quiz">
   <li>A reward of 1 at each of three steps, γ = 0.5. What is the return?
     <details><summary>Answer</summary>

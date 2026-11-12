@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>017.1 — h_t: one state, rewritten</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -95,7 +95,7 @@
   <p>Row 3 is tanh(1.94) = <strong>0.96</strong>. Row 4 adds 1 to that: tanh(1.96) = <strong>0.96</strong>. The state is saturating — <code>tanh</code> is squeezing the added input, so more steps buy almost nothing.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— h_t</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The RNN forgets because the hidden state fills up."</strong> It feels right because the state is called memory.</p>
@@ -103,7 +103,7 @@
 </div>
 <p><strong>The tell:</strong> print the size of <code>h<sub>t</sub></code> and the size of the gradient reaching step 1. The state stays near 1 while the gradient collapses. If the state looked healthy and the model still cannot use an early cue, the problem is the product, not the storage.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— h_t</span></h2>
 <ol class="quiz">
   <li><code>h<sub>t</sub></code> is 512 numbers at step 1. How many is it at step 500?
     <details><summary>Answer</summary>

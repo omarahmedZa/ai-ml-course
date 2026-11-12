@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>003.1 — −log p: the price of surprise</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -75,7 +75,7 @@
   <p>−log 0.25 = <strong>1.386</strong> and −log 0.05 = <strong>2.996</strong>. Both rows are wrong; the second one is wrong <em>and</em> dismissive, so it pays about twice as much.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— −log p</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Every wrong answer costs the same."</strong> It does not. Cross-entropy scores the quote, not the label. Two models can both be wrong on the same row and pay 0.7 and 4.6.</p>
@@ -83,7 +83,7 @@
 </div>
 <p><strong>The tell:</strong> a model whose accuracy is flat while its loss climbs is not getting worse at answering — it is getting more confident and staying wrong. Look at the probabilities, not just the labels.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— −log p</span></h2>
 <ol class="quiz">
   <li>The true label gets p = 0.5 from the model. What is the row's loss, and why is it not zero?
     <details><summary>Answer</summary>

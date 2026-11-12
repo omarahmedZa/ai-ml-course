@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>024 — DQN</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can explain replay buffer and target network as fixes for correlated data and moving targets.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— DQN</span></h2>
 <p class="lede">DQN is the canonical example of "the algorithm was known for decades; the engineering made it work". It is also the cleanest exam question in Unit 6: name the two tricks and the problem each solves.</p>
 <p>Every value-based deep RL system you will meet is DQN with the serial numbers filed off — including the critic inside most modern agents. Two failures it removes, and you will meet both. The exam failure: <em>"Your Q-network's loss drops for a while, then the average return collapses. Name a likely cause and the fix."</em> One line on correlated frames and one on a moving target earns the marks; "tune the learning rate" earns none. The project failure: you train on consecutive frames, the agent memorises one corridor, reward spikes, then falls off a cliff — and because the loss looked healthy the whole time, you keep training and burn a day of GPU.</p>
 
@@ -34,7 +34,7 @@
   <div><b>10,000</b><span>steps between target-network copies</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— DQN</span></h2>
 <p>Two separate faults need two separate repairs. The data you learn from must look like a shuffled deck rather than a film played in order; the answer key you mark against must be printed and pinned to the wall rather than rewritten each time you look at it. Neither repair changes what Q-learning is trying to compute.</p>
 <p>In one line: <strong>shuffle a million transitions, and freeze the answer key for 10,000 steps.</strong> A batch of 32 consecutive frames holds roughly 1 distinct situation; 32 draws from a 1,000,000-transition buffer hold 32.</p>
 
@@ -43,7 +43,7 @@
   <p>Build the target from a frozen copy θ⁻ refreshed every 10,000 steps; gradients move only the online θ.</p>
 </div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— DQN</span></h2>
 <p>Six parts follow; each repairs one fault, and later parts assume the earlier repairs hold.</p>
 
 <h3>Part 1 — Two faults, not one</h3>
@@ -117,7 +117,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— DQN</span></h2>
 
 <h3>1. What a correlated batch is worth</h3>
 <p>A 210×160 frame has 210 × 160 = 33,600 pixels. Suppose the ball moves 3 pixels per frame, so each new frame changes 3 pixels. Count what a minibatch of consecutive frames contains:</p>
@@ -165,7 +165,7 @@
 
 <p><strong>What to notice.</strong> Action B's 3.9 is lucky noise, and taking a maximum deliberately seeks out lucky noise. Selection by θ picks A, which is also noise, but scoring it with the other network does not reward the luck. Bias falls from 0.81 to 0.09 — smaller, not zero. If both networks share the same blind spot, both pick the same wrong action and the bias returns.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— DQN</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"A replay buffer is a general RL trick — more data is always better."</strong> It feels right because the buffer is just memory, and memory sounds neutral. But every stored transition was produced by a policy, and reusing it is only valid if your gradient tolerates data from an older policy.</p>
@@ -179,7 +179,7 @@
   <tr><td>A replay buffer is just more data, so it helps any algorithm.</td><td>Replay is off-policy: stored transitions come from an older policy, and on-policy methods must discard them.</td></tr>
 </table>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— DQN</span></h2>
 <ol class="quiz">
   <li>What does the target network freeze, and for how long?
     <details><summary>Answer</summary>
@@ -198,7 +198,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— DQN</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/024-dqn.ipynb">open the notebook in Colab</a> · <a href="../notebooks/024-dqn.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 rng = np.random.default_rng(0)
@@ -208,7 +208,7 @@ for _ in range(1000):
     r = 0.9 * r + rng.normal()          # temporally correlated reward
     buffer.append((s, rng.integers(2), r, s + rng.normal(size=4) * .1))</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— DQN</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "Replay fixes…", "o": ["Correlated samples", "Reward design", "Exploration", "Variance"], "a": 0, "why": "Random minibatches restore approximate i.i.d."}, {"q": "Target network fixes…", "o": ["A moving target", "Correlation", "Overfitting", "Learning rate"], "a": 0, "why": "Targets are frozen for N steps."}]</script></div>
 

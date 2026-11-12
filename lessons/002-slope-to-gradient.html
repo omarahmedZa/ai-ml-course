@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>002 — Slope to gradient</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can compute a gradient and explain why training steps <em>against</em> it.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— the gradient</span></h2>
 <p class="lede">Every training loop in this course — backprop, Q-learning, PPO — is the same sentence: measure the slope, step the other way. PyTorch reduces it to two lines, <code>loss.backward()</code> then <code>p ← p − η · p.grad</code>, and every optimizer you meet is a variation on how far to trust the second one.</p>
 <p>The failure this prevents is a run that looks alive and is not. On <code>f(w) = w²</code> with <code>η = 10</code> instead of <code>0.1</code>, one step takes <code>w = 3</code> to <code>3 − 10(6) = −57</code> and the loss from 9 to 3,249, then keeps multiplying until it overflows; the traceback names a matrix multiply, never the learning rate. The same two lines settle the exam question <em>"<code>f(w) = 3w²</code> at <code>w = 2</code>, one step at <code>η = 0.1</code>"</em>: the slope is <code>6w = 12</code>, so <code>w ← 2 − 1.2 = 0.8</code>.</p>
 
@@ -34,7 +34,7 @@
   <div><b>12</b><span>slope of 3w² at w = 2</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— the gradient</span></h2>
 <p>Stand on a hillside in fog. You cannot see the valley, but you can feel which way the ground tilts under one boot. A <strong>gradient</strong> is that reading taken at every knob at once: one slope per parameter, each answering "if I turn this alone, how fast does the loss change?" A thousand knobs give a thousand slopes that still describe one direction — the steepest way up.</p>
 <p>In one line: <strong>the gradient is the uphill direction, so learning is a subtraction, repeated.</strong> On <code>f(w) = w²</code> at <code>w = 3</code> the slope is <code>2w = 6</code>; with <code>η = 0.1</code> the step is <code>3 − 0.6 = 2.4</code> and the loss falls 9 → 5.76. At <code>w = 1</code> the slope is only 2, so the same <code>η</code> buys a quarter of the drop.</p>
 
@@ -43,7 +43,7 @@
   <p>Step against the uphill slope, scaled by the learning rate.</p>
 </div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— the gradient</span></h2>
 <p>Seven parts. Each one fixes a problem the previous part leaves open.</p>
 
 <h3>Part 1 — A slope is a ratio of two changes</h3>
@@ -91,7 +91,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— the gradient</span></h2>
 
 <h3>1. One parameter, four steps</h3>
 <p><code>f(w) = w²</code>, so <code>f′(w) = 2w</code>. Start at <code>w = 3</code>, <code>η = 0.1</code>. Every step is written out, so the arithmetic can be checked rather than trusted.</p>
@@ -133,7 +133,7 @@
 
 <p><strong>What to notice.</strong> The step changes sign every row and grows by 1.2 each time, so the loss grows by <code>1.2² = 1.44</code>. No gradient here is wrong; each was measured correctly at the point it was used. The learning rate turned a right direction into a wrong-sized step, and the sign flip is the fingerprint: <code>1 − 2η = −1.2</code> is negative.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— the gradient</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The gradient points downhill."</strong> It feels right for two reasons: the algorithm is called descent, and the code contains a minus sign, so the minus gets attached to the gradient instead of to the step. The arrow in every diagram points at the valley, and that arrow is <code>−∇f</code>.</p>
@@ -146,7 +146,7 @@
 </table>
 <p><strong>The tell:</strong> the loss climbs from step one while the gradient magnitude <em>shrinks</em> — smooth, monotone, no oscillation, because you are walking uphill and the ground gets gentler. Compare example 3, where a too-large rate also raises the loss but flips the step's sign each row and grows. If flipping one character in the update fixes training, it was never the learning rate.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— the gradient</span></h2>
 <ol class="quiz">
   <li><code>f(w) = 3w²</code> at <code>w = 2</code>. Compute the gradient and one step with <code>η = 0.1</code>.
     <details><summary>Answer</summary>
@@ -165,7 +165,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— the gradient</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/002-slope-to-gradient.ipynb">open the notebook in Colab</a> · <a href="../notebooks/002-slope-to-gradient.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 f = lambda w: w ** 2
@@ -175,7 +175,7 @@ for step in range(4):
     print(f&quot;step {step}: w={w:7.4f}  loss={f(w):8.4f}  grad={grad(w):7.4f}&quot;)
     w -= lr * grad(w)</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— the gradient</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "f(w)=3w² at w=2, η=0.1. New w?", "o": ["0.8", "1.4", "2.4", "−0.4"], "a": 0, "why": "f′=6w=12; w ← 2 − 0.1(12) = 0.8."}, {"q": "Gradient of f(x,y)=x+y² at (1,3)?", "o": ["(1, 6)", "(2, 3)", "(1, 9)", "(0, 6)"], "a": 0, "why": "∂f/∂x=1, ∂f/∂y=2y=6."}]</script></div>
 

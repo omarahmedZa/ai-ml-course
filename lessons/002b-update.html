@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>002.2 — Why the update subtracts</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -70,7 +70,7 @@
   <p>Slope 2(1 − 2) = −2, so the step is 0.1 × (−2) = −0.2. Subtracting it gives 1 + 0.2 = <strong>1.2</strong>, with loss (1.2 − 2)² + 1 = <strong>1.64</strong>. The weight grew and the loss fell, because the slope was negative.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— Why the update subtracts</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The minus sign makes the weights smaller."</strong> No. It makes the loss smaller, which sometimes means bigger weights. The gradient's sign decides which way w travels; the minus only guarantees you travel against it.</p>
@@ -78,7 +78,7 @@
 </div>
 <p><strong>The tell:</strong> if every weight decreases on every step, the gradient can never be negative, and something is wrong with the derivative or its sign. A healthy run has weights moving both ways.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— Why the update subtracts</span></h2>
 <ol class="quiz">
   <li>At w = 4 the slope of (w − 2)² + 1 is 4. Which way does the update move w, and why?
     <details><summary>Answer</summary>

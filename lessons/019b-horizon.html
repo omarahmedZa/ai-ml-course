@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>019.2 — 1/(1−γ): how far the agent looks</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -84,7 +84,7 @@
   <p>For 0.8: 1 − 0.8 = 0.2, and 1 / 0.2 = <strong>5 steps</strong>. For 0.95: 1 − 0.95 = 0.05, and 1 / 0.05 = <strong>20 steps</strong>. The extra 0.15 of γ bought fifteen more steps, because the denominator fell to a quarter of its size.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— 1/(1−γ)</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"γ = 0.99 is basically γ = 1, so the difference is cosmetic."</strong> It does round to 1.00 at two decimals, and that is exactly the trap. The horizon is a reciprocal, so a change in the third decimal is a change in scale, not a rounding detail.</p>
@@ -92,7 +92,7 @@
 </div>
 <p><strong>The tell:</strong> nudge γ from 0.99 to 0.999 and your agent goes from looking 100 steps ahead to 1,000. If a knob changes the planning window by a factor of ten while appearing to move by 0.009, it is the most consequential number in the configuration.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— 1/(1−γ)</span></h2>
 <ol class="quiz">
   <li>What horizon does γ = 0.98 give?
     <details><summary>Answer</summary>

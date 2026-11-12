@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>004.8 — θ*: optimal for what?</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -79,7 +79,7 @@
   <p>The bracket is zero at θ = 4, so θ* = 4, and the leftover constant is J* = 2.5. The position came from the data; the height came from how well this model can fit it.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— θ*</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"θ* is the true parameter."</strong> No. θ* is the best fit for this data and this loss — the argmin of a function you chose, over rows you happened to collect.</p>
@@ -87,7 +87,7 @@
 </div>
 <p><strong>The tell:</strong> if adding rows changes θ*, it was never "the truth." Truth does not move when you collect more evidence; a sample mean does.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— θ*</span></h2>
 <ol class="quiz">
   <li>Dataset B bottoms at θ = 4. What is θ*?
     <details><summary>Answer</summary>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>017 — RNN to LSTM</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can explain the fixed-vector bottleneck and how gates address it.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— RNN and LSTM</span></h2>
 <p class="lede">An RNN is the smallest machine that turns a sequence of vectors into one vector. Every pre-2017 translation system used one, and small models on cheap hardware still do — time series, on-device keyword spotting, sensor logs. The LSTM is the version that made the idea survive contact with long inputs.</p>
 <p>Consider a review classifier that scores 92% in testing and 61% in production. Training reviews were short; real ones run to 300 tokens, and the model's decision tracks the last clause only, because the gradient carrying the opening verdict never reached the weights. On an exam the same misunderstanding costs marks in a single sentence: "explain why a vanilla RNN forgets" is answerable in one line about repeated multiplication, and unanswerable if you believe the state simply runs out of room.</p>
 
@@ -34,13 +34,13 @@
   <div><b>1,665,024</b><span>parameters in four LSTM gate sets</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— RNN and LSTM</span></h2>
 <p>A reader holds one small notepad. After each word, the reader crosses out the whole page and rewrites it from the page plus the new word. The notepad is 512 numbers wide on word 1 and still 512 on word 1,000, so nothing is ever added to it — only overwritten. That single constraint explains both the memory limit and the training difficulty.</p>
 <p>In one line: <strong>the past is carried by repeated multiplication, so a factor of 0.9 per step leaves 0.9¹⁰⁰ ≈ 0.000027 after a hundred steps.</strong> Nothing vanished at any one step; the loss is compounding, which is why it is invisible in a print statement and obvious in a gradient norm.</p>
 
 <div class="keybox"><span class="sym">c_t = f·c_{t−1} + i·g</span><p>The update is additive and gated, so with f near 1 the gradient path stays close to identity.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— RNN and LSTM</span></h2>
 <p>Seven parts. The first four describe plain recurrence and why it fails; the last three describe the repair.</p>
 
 <h3>Part 1 — Fold the old state and the new token into one vector</h3>
@@ -140,7 +140,7 @@
   <figcaption><strong>Each box overwrites the last. Nothing is stored except h, which is why long gaps fade.</strong></figcaption>
 </figure>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— RNN and LSTM</span></h2>
 
 <h3>1. Decay and blow-up in one table</h3>
 <table>
@@ -175,7 +175,7 @@
 
 <p><strong>What to notice.</strong> The 416,256 difference is larger than the entire input matrix, which is why "just use an LSTM" is not free advice on a small dataset. It also shows where the gate cost comes from: every gate is a full copy of the same two matrices, so a fourth gate is a 25% tax on the layer, paid once and then multiplied by depth and by every layer you stack.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— RNN and LSTM</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The LSTM solves long-term memory."</strong> It feels right because the paper's headline experiment — remember one bit for a hundred steps — works, and because the forgetting curve visibly flattens once gates are added.</p>
@@ -187,7 +187,7 @@
 </table>
 <p><strong>The tell:</strong> hold the sequence length fixed and move the cue earlier. If accuracy is stable at 20 tokens of distance and near chance at 200 while total length never changes, you are watching the state lose information, not the model run out of context. A second tell is a training loop whose step time grows linearly with sequence length while the GPU sits mostly idle — that is the sequential dependency, and more hardware will not shorten it.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— RNN and LSTM</span></h2>
 <ol class="quiz">
   <li>Why does a vanilla RNN struggle with a dependency 100 tokens apart?
     <details><summary>Answer</summary>
@@ -206,7 +206,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— RNN and LSTM</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/017-rnn-to-lstm.ipynb">open the notebook in Colab</a> · <a href="../notebooks/017-rnn-to-lstm.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 # vanilla recurrence: h_t = tanh(W h_{t-1} + x_t)
@@ -216,7 +216,7 @@ traj = []
 for t in range(20):
     h = np.tanh(W @ h + x)</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— RNN and LSTM</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "LSTM cell update is…", "o": ["c = f·c + i·g", "c = tanh(Wc+b)", "c = c + g", "c = f+i+o"], "a": 0, "why": "Additive and gated — that is why it trains."}, {"q": "0.9²⁰ is about…", "o": ["0.12", "0.90", "0.50", "0.01"], "a": 0, "why": "The gradient has lost 88% after 20 steps."}]</script></div>
 

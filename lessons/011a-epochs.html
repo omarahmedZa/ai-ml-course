@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>011.1 — Steps, batches, epochs</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -91,7 +91,7 @@
   <p><strong>320</strong>. First the division: 10,000 / 250 = 40 steps per epoch. Then the multiplication: 40 × 8 = 320 updates. Do them in that order; multiplying the epoch count first gives the wrong shape of answer.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— Steps, batches, epochs</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Twenty epochs means twenty units of training, whatever the batch size."</strong> It feels right because the epoch is the word people report, and the loss curve is usually drawn against it.</p>
@@ -99,7 +99,7 @@
 </div>
 <p><strong>The tell:</strong> hold the epochs fixed and change the batch from 100 to 1,000. The update count falls tenfold and the curve has a tenth as many points. If the reported "training" is unchanged, the report is counting passes, not steps.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— Steps, batches, epochs</span></h2>
 <ol class="quiz">
   <li>10,000 rows, batch 250, eight epochs. How many updates?
     <details><summary>Answer</summary>

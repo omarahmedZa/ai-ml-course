@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>003.2 — Σ: summing surprise over the data</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -76,7 +76,7 @@
   <p>Row 2: 0.105 + 0.357 + 0.693 = 1.155, and 1.155 / 3 = <strong>0.385</strong>. Row 3: 3 × 0.105 = 0.315, and 0.315 / 3 = <strong>0.105</strong> — exactly one row's surprise, as it must be when every row is the same.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— Σ</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"A lower total NLL means a better model."</strong> Only on the same rows. Total is a sum, so a bigger test set always produces a bigger number, and a team can "improve" a score by evaluating on more data.</p>
@@ -84,7 +84,7 @@
 </div>
 <p><strong>The tell:</strong> double the test set, and the total doubles while the model is untouched. If a metric can be moved by changing how much data you looked at, it is a sum, not a score.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— Σ</span></h2>
 <ol class="quiz">
   <li>Three rows each get p = 0.9 on the truth. What is the total NLL, and the mean?
     <details><summary>Answer</summary>

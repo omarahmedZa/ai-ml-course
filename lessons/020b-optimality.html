@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>020.2 — max: the value of the best action</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -113,7 +113,7 @@
   <p><strong>3.4</strong>, and the policy picks a2. The margin over a1 is only 0.3 — smaller than the noise you would get from ten sampled episodes, which is the subject of the next lab.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— max</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Greedy means short-sighted."</strong> Greedy on the wrong numbers is short-sighted. Greedy on Q* is optimal, because every Q* already contains the future through the max in its own target.</p>
@@ -121,7 +121,7 @@
 </div>
 <p><strong>The tell:</strong> the chosen action flips after one new sample, or the 0.3 margin moves by more than 0.3 when you re-run. The max is innocent; the table underneath it has not settled.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— max</span></h2>
 <ol class="quiz">
   <li>Q(left) = 2.8 and Q(right) = 1.5. What is V*(s), and what does the agent do?
     <details><summary>Answer</summary>

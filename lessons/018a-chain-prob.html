@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>018.1 — p(y|x): the chain rule</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -89,7 +89,7 @@
   <p>Row 4: 0.2 × 0.5 = <strong>0.10</strong>. Row 5 must multiply by 0.5 again to reach 0.05, so its probability is <strong>0.5</strong>. Each extra token halves the total even when the model is equally confident.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— p(y|x)</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"A sequence probability of 0.12 means the model is 12% accurate."</strong> It feels right because 0.12 looks like a percentage, and because the number came from the model.</p>
@@ -97,7 +97,7 @@
 </div>
 <p><strong>The tell:</strong> per-token confidence of 0.9 across a 90-token output gives 0.9⁹⁰ ≈ 0.00008. If a report calls that "90% accurate", the per-token number and the sequence number have been quietly swapped. Compare whole sequences only at the same length, or divide by length.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— p(y|x)</span></h2>
 <ol class="quiz">
   <li>Three tokens with probabilities 0.5, 0.5 and 0.5. What is <code>p(y|x)</code>?
     <details><summary>Answer</summary>

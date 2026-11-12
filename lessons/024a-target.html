@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>024.1 — r + γ max Q(s′,a′): the frozen target</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -74,7 +74,7 @@
   <p>Row 2: 2 + 0.45 = <strong>2.45</strong>. Row 3: 0 + 0.5 × 4.0 = <strong>2.0</strong>. γ scales the future, never the reward in hand.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— r + γ max Q(s′,a′)</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"A target network stabilises training, so it must be the fix for any unstable run."</strong> It feels right because the loss visibly calms down once θ⁻ is added. But the frozen copy removes one fault: a target that moves with the weights. Correlated frames, an oversized learning rate, or a reward scale that dwarfs Q will still break the run, and freezing repairs none of them.</p>
@@ -82,7 +82,7 @@
 </div>
 <p><strong>The tell:</strong> loss falls smoothly, evaluation return rises, then collapses, and reloading an earlier checkpoint recovers the run. That signature is a target that outran its predictions, not a learning rate slightly too high.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— r + γ max Q(s′,a′)</span></h2>
 <ol class="quiz">
   <li>r = 2, γ = 0.5, max Q(s′,a′) = 4. Compute the target.
     <details><summary>Answer</summary>

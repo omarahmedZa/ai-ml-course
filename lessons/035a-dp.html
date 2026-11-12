@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>035.1 — ε and δ: the shape of a privacy promise</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -89,7 +89,7 @@
   <p>40 × 0.05 = <strong>2.0</strong>, so forty rounds exhausts the budget exactly. 100 × 0.01 = <strong>1.0</strong>: smaller steps per round buy more rounds for the same total.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— ε and δ</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"ε is the probability that privacy leaks."</strong> It is a bound on how much the output distribution may shift when one person joins or leaves — a ratio of e<sup>ε</sup>, not a percentage. ε = 1 lets one record change the chance of an output by a factor of about 2.7.</p>
@@ -97,7 +97,7 @@
 </div>
 <p><strong>The tell:</strong> the claim quotes ε = 0.1 and stops. No δ, no round count, no accountant. Ask for the total after composition, and for the clip norm — the same ε over 500 rounds is a different promise from ε over 5.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— ε and δ</span></h2>
 <ol class="quiz">
   <li>With C = 1 and σ = 1.1, what is the noise standard deviation, and what happens to ε and accuracy as σ rises?
     <details><summary>Answer</summary>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>013.1 — g^L: how much gradient survives</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -90,7 +90,7 @@
   <p>Row 2: <code>0.9<sup>30</sup> ≈ 0.042</code>, so 96% of the signal is gone. Row 4: <code>1.5<sup>20</sup> ≈ 3,325</code>. The asymmetry is the lesson: thirty gentle layers lose almost everything while twenty aggressive ones multiply by thousands.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— gL</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Vanishing gradients mean the learning rate is too small."</strong> The learning rate scales one step; it cannot repair a product. At <code>g = 0.25</code> the first layer receives a millionth of the signal, so a rate a thousand times larger is still a thousand times too small — and it destabilises the layers that were healthy.</p>
@@ -98,7 +98,7 @@
 </div>
 <p><strong>The tell:</strong> print each layer's gradient norm. If it falls by orders of magnitude from the last layer to the first, depth is the cause, not the step size. If the loss becomes NaN within a few steps, the same product is running the other way.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— gL</span></h2>
 <ol class="quiz">
   <li>A network has gain <code>g = 0.8</code> and 20 layers. What fraction of the gradient reaches layer 1?
     <details><summary>Answer</summary>

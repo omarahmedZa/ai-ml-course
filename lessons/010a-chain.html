@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>010.1 — The chain rule</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -75,7 +75,7 @@
   <p><strong>−4</strong>: multiply the loss slope −2 by the local slope x = 2. Note that the gradient shrank from −12 to −4 as the prediction approached the truth; slopes are local, not fixed properties of a weight.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— The chain rule</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The gradient for a weight is just 2(z − y), the same as the loss slope."</strong> It feels right because that is the number the loss node hands over, and it has the correct sign and rough size.</p>
@@ -83,7 +83,7 @@
 </div>
 <p><strong>The tell:</strong> double x from 2 to 4 with w, b and y unchanged. The loss and <code>∂L/∂z</code> are identical, but <code>∂L/∂w</code> must double. If your number does not move, a local slope went missing.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— The chain rule</span></h2>
 <ol class="quiz">
   <li>With x = 2, w = 3, b = 1, y = 10, what is <code>∂L/∂b</code>?
     <details><summary>Answer</summary>

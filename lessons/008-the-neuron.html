@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>008 — The neuron</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can prove that stacked linear layers collapse into one, so a nonlinearity is mandatory.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— the neuron</span></h2>
 <p class="lede">A neuron is the smallest trainable unit in every network here: one weighted sum, one bias, one bend. Embeddings, attention heads and output layers are stacks of it.</p>
 <p>Two failures make it worth an hour. In an exam, <em>"a 50-layer network with no activations — how much more can it represent than a single linear layer?"</em> has a one-line answer: nothing, because a product of matrices is a matrix. In a project, the same mistake shows up as a loss that drops to the level of logistic regression and sits there, because the ReLU was deleted during a cleanup. Neither symptom is visible unless you can point at the missing part.</p>
 
@@ -34,7 +34,7 @@
   <div><b>50</b><span>linear layers that still collapse into one matrix</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— the neuron</span></h2>
 <p>A neuron is a straight-line score with a gate on its output. The score says which side of a boundary the input falls on, and how far; the gate decides how much of that score survives into the next layer. Training changes only the score's weights — the gate is fixed and never learned.</p>
 <p>In one line: <strong>score first, then bend.</strong> With <code>w = [2, −3]</code> and <code>b = 1</code>, the input <code>[1, −1]</code> scores <code>2 + 3 + 1 = 6</code> and ReLU returns <code>6</code>; the input <code>[−2, 1]</code> scores <code>−4 − 3 + 1 = −6</code> and ReLU returns <code>0</code>.</p>
 
@@ -90,7 +90,7 @@
   <figcaption><strong>Score, then bend.</strong> Grey inputs meet red weights and the bias to form one score z; the fixed grey φ clamps negatives to zero, and the blue a is what the next layer receives. Training moves only the red numbers.</figcaption>
 </figure>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— the neuron</span></h2>
 
 <h3>Part 1 — The weighted sum is the score</h3>
 <p>A neuron holds a weight vector <code>w</code> and a bias <code>b</code>, and for one input <code>x</code> it computes <code>z = w·x + b</code>. That <code>z</code> is the <strong>pre-activation</strong>: the raw score before any bend, and exactly topic 1's dot product. For a 3-input neuron with <code>w = [2, −3, 0.5]</code> and <code>x = [1, 4, 2]</code>, the score is <code>2 − 12 + 1 = −9</code>.
@@ -131,7 +131,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— the neuron</span></h2>
 
 <h3>1. One neuron, three inputs</h3>
 <p><code>w = [2, −3, 0.5]</code>, <code>b = 1</code>. Do each multiplication explicitly; sign errors survive when you skip them.</p>
@@ -171,7 +171,7 @@
 
 <p><strong>What to notice.</strong> The ReLU network agrees with the straight line on two of the three inputs and breaks from it on the middle one. That disagreement is the whole gain: the function is now piecewise, flat on one region and sloped on another. No single matrix can produce <code>10</code>, <code>−2</code> and <code>2</code> at those inputs unless it is exactly <code>[4, 6]</code>, and <code>[4, 6]</code> gets the middle row wrong.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— the neuron</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"A neuron is a simplified brain cell."</strong> It feels right because the diagram — inputs, a cell body, one output — is the textbook picture, and the word is identical.</p>
@@ -184,7 +184,7 @@
   <tr><td>A neuron is a simplified brain cell that detects a concept.</td><td>It is <code>max(0, w·x + b)</code>: no memory, no timing, no spiking; training moves only weights and bias.</td></tr>
 </table>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— the neuron</span></h2>
 <ol class="quiz">
   <li>Why does removing all activation functions make a 50-layer network no stronger than logistic regression?
     <details><summary>Answer</summary>
@@ -203,7 +203,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— the neuron</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/008-the-neuron.ipynb">open the notebook in Colab</a> · <a href="../notebooks/008-the-neuron.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 W1 = np.array([[1., 2.], [3., 4.]])
@@ -213,7 +213,7 @@ for W2 in (np.array([[1., -1.]]), np.array([[1., 1.]])):
     collapsed = (W2 @ W1) @ x
     relu = W2 @ np.maximum(0, W1 @ x)</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— the neuron</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "Linear layers without activations compose into…", "o": ["One linear layer", "A quadratic", "A deeper net", "Nothing"], "a": 0, "why": "W₂W₁ is a matrix, so depth adds parameters but no power."}, {"q": "Parameters in 3→4→2 with biases?", "o": ["26", "24", "20", "14"], "a": 0, "why": "(3·4+4) + (4·2+2) = 16 + 10."}]</script></div>
 

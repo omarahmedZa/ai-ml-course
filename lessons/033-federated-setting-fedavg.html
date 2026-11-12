@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>033 — Federated setting and FedAvg</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can describe the round protocol, write the averaging rule, and justify data locality.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— FedAvg</span></h2>
 <p class="lede">Federated learning is how you train when the examples cannot be collected in one place: a phone keyboard that improves without uploading your messages, a hospital network that shares a tumour model but never the scans, a bank consortium that shares a fraud detector but never transactions. The data stays with its owner; only the model's numbers travel.</p>
 <p>In an exam the question is almost always one round of averaging — three clients hold 100, 200 and 700 examples, their local weights are 0.10, 0.50 and 0.90, so what is the new global weight? Equal averaging writes 0.50 and loses the marks; the weighted answer is 0.74. In a project the same mistake is one line, <code>np.mean(client_weights)</code>, sitting in the aggregation step. Training runs, the loss curve falls, and the client that owns 70% of the data quietly receives a model that has stopped listening to it.</p>
 
@@ -34,13 +34,13 @@
   <div><b>100 GB</b><span>moved over 100 rounds at 1,000 clients</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— FedAvg</span></h2>
 <p>Picture a class where the teacher may not collect the homework. Each student marks their own work at home, and the teacher averages the sheets into one master copy that everyone uses next week. The master copy is never exactly right for any single student, but it is close for the class, and no exercise book left the house.</p>
 <p>In one line: <strong>the model is a list of numbers, each client pulls those numbers toward what its own data prefers, and the server replaces them with the evidence-weighted average.</strong> Weights 0.10, 0.50 and 0.90 from clients holding 100, 200 and 700 examples give <code>0.1(0.10) + 0.2(0.50) + 0.7(0.90) = 0.74</code>.</p>
 
 <div class="keybox"><span class="sym">w_{t+1} = Σ_k (n_k/n) w_t^k</span><p>Each client trains locally, then the server replaces the weights with an example-weighted average: 700 examples speak seven times louder than 100.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— FedAvg</span></h2>
 <p>One round is six steps. Keep each client's example count in view throughout; it decides how loudly that client speaks.</p>
 
 <h3>Part 1 — Start from one shared model</h3>
@@ -129,7 +129,7 @@
   <figcaption><strong>The server never sees a row of data, only the averaged weights that come back.</strong></figcaption>
 </figure>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— FedAvg</span></h2>
 
 <h3>1. One aggregation round</h3>
 <p>Three clients hold 100, 200 and 700 examples and report one scalar parameter. Compute each share first, then multiply.</p>
@@ -170,7 +170,7 @@
 
 <p><strong>What to notice.</strong> Sampling a tenth of the clients cuts the bill by 90% without changing the algorithm's shape, which is why partial participation is standard rather than an optimisation. Centralised training moves the dataset once; this run moves 100 GB. Every extra local epoch is an attempt to buy back one of those rounds.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— FedAvg</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"FedAvg is the same as training on the pooled data."</strong> It feels right because the formula is what you would write for one model trained on the union of the datasets, and under identical client distributions with a single local step it is literally equivalent.</p>
@@ -183,7 +183,7 @@
 </table>
 <p><strong>The tell:</strong> a report showing federated accuracy just below centralised accuracy and calling the gap "implementation noise". If the gap widens as you raise <code>E</code> from 1 to 20, it is drift. The second tell is an aggregation line using <code>np.mean</code> while clients have wildly different example counts; check that the shares sum to 1 and ask whether the largest client dominates the result.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— FedAvg</span></h2>
 <ol class="quiz">
   <li>Two clients: 900 examples with local loss optimum 0.2, 100 examples with optimum 0.8. What does one FedAvg round produce?
     <details><summary>Answer</summary>
@@ -202,7 +202,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— FedAvg</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/033-federated-setting-fedavg.ipynb">open the notebook in Colab</a> · <a href="../notebooks/033-federated-setting-fedavg.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 clients = [(100, 0.10), (200, 0.50), (700, 0.90)]
@@ -212,7 +212,7 @@ equal = np.mean([w for _, w in clients])
 print(f&quot;weighted FedAvg: {weighted:.3f}  (equal weighting: {equal:.3f})&quot;)
 # simulate two rounds of local training on a quadratic</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— FedAvg</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "FedAvg weights each client by…", "o": ["n_k / n", "Equal share", "1/k", "Its loss"], "a": 0, "why": "Data quantity, not client count."}, {"q": "The server receives…", "o": ["Weights or updates", "Raw data", "Labels", "Nothing"], "a": 0, "why": "That is the defining constraint."}]</script></div>
 

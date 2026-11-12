@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>029.1 — softmax(z/T): temperature</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -75,7 +75,7 @@
   <p>e<sup>2</sup> = 7.389 against 1, total 8.389, so the weights are <strong>0.881 and 0.119</strong>. The gap doubled from 1 to 2, and the leader's share rose from 73% to 88%.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— softmax(z/T)</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Temperature 0 makes the model deterministic and more accurate."</strong> It makes decoding greedy: the same prompt on the same hardware usually gives the same text. It does not make the answer right, and batching or floating-point order can still change a near-tie.</p>
@@ -83,7 +83,7 @@
 </div>
 <p><strong>The tell:</strong> set T = 0.2 and sample a thousand times. The rare token still appears; it has simply become rare enough to look impossible. If a test depends on that, the test is flaky, not the model.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— softmax(z/T)</span></h2>
 <ol class="quiz">
   <li>Both logits are 0. What does T = 2 change?
     <details><summary>Answer</summary>

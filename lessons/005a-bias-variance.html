@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>005.1 — Bias², variance, noise</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -82,7 +82,7 @@
   <p>B = 4 + 9 + 1 = <strong>14</strong>. Same total, opposite disease: A is rigid with high bias, B is flexible with high variance. More rows attack B's 9, not A's 9.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— Bias², variance, noise</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>“More data will fix it.”</strong> Extra rows shrink variance and nothing else. If bias² is the biggest bar, a larger dataset buys almost nothing — the model still cannot represent the pattern. Noise never moves, so it sets a floor no dataset can go under.</p>
@@ -90,7 +90,7 @@
 </div>
 <p><strong>The tell:</strong> add rows and both training and validation error flatten at the same high value. When the two curves meet above the noise floor, the gap is gone and bias is what remains.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— Bias², variance, noise</span></h2>
 <ol class="quiz">
   <li>A model has bias² = 16, variance = 1, noise = 1. What is its expected error, and will ten times the data help?
     <details><summary>Answer</summary>

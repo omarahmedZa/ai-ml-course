@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>011 — The training loop</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can write the five-line loop and read a loss curve well enough to diagnose it.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— the training loop</span></h2>
 <p class="lede">The training loop is five moves repeated until the loss stops falling, and every model in the rest of this course runs it unchanged. Learn it once and experiments become edits to a single line.</p>
 <p>It is also where most first runs die, for four reasons that are all visible in the curve. The exam version is pure counting: "50,000 examples, batch 250, eight epochs — how many parameter updates?" The project version is a loss flat at <code>0.693</code> on a binary task, because the model outputs <code>0.5</code> for everything and has not moved at all. Neither question needs the architecture; both need the loop.</p>
 
@@ -34,13 +34,13 @@
   <div><b>1,600</b><span>updates for 50,000 examples at batch 250, 8 epochs</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— the training loop</span></h2>
 <p>The loop is a thermostat with a fixed routine: look at a batch, measure the error, find the slope, nudge every weight a little, clear the slate. Nothing clever happens here — the information is in the gradients, and the loop only decides how far to step.</p>
 <p>In one line: <strong>forward, loss, backward, step, zero.</strong> With <code>η = 0.05</code> and <code>∂L/∂w = −32</code>, the update is <code>w ← w − 0.05(−32) = w + 1.6</code>.</p>
 
 <div class="keybox"><span class="sym">w ← w − η·∂L/∂w</span><p>Forward, loss, backward, step, zero: the loop only decides how far.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— the training loop</span></h2>
 <pre class="formula" style="text-align:left"><code>for x, y in loader:          # one batch
     pred = model(x)          # forward
     loss = criterion(pred, y)
@@ -81,7 +81,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— the training loop</span></h2>
 
 <h3>1. Sizing a run</h3>
 <p>10,000 training examples, 20 epochs, three batch sizes. The update count is the number that actually governs learning.</p>
@@ -157,7 +157,7 @@
   <figcaption><strong>The shape tells you what to change.</strong> Both curves fall while the model learns. The dashed one turning back up is overfitting: stop at its minimum and regularise. A curve that never leaves its first value is not slow — it is stationary.</figcaption>
 </figure>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— the training loop</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The optimizer resets itself each step, so zeroing is cosmetic."</strong> It feels right because every iteration prints the same loss and the code looks symmetric: one backward, one step.</p>
@@ -170,7 +170,7 @@
   <tr><td>The optimizer resets itself each step, so zeroing is cosmetic.</td><td><code>.grad</code> is a buffer <code>backward()</code> adds into; skipping <code>zero_grad</code> sums gradients and grows the step.</td></tr>
 </table>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— the training loop</span></h2>
 <ol class="quiz">
   <li>50,000 examples, batch size 250, 8 epochs. How many parameter updates?
     <details><summary>Answer</summary>
@@ -189,7 +189,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— the training loop</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/011-training-loop.ipynb">open the notebook in Colab</a> · <a href="../notebooks/011-training-loop.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 rng = np.random.default_rng(0)
@@ -199,7 +199,7 @@ w, b, lr = np.zeros(2), 0., 0.05
 for epoch in range(60):
     for i in rng.permutation(len(X)):</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— the training loop</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "50,000 examples, batch 250, 8 epochs. Updates?", "o": ["1,600", "200", "400", "8"], "a": 0, "why": "200 steps/epoch × 8."}, {"q": "Loss flat at 0.693 on binary CE means the model outputs…", "o": ["0.5", "1.0", "0.0", "NaN"], "a": 0, "why": "−ln 0.5 = 0.693 is the uniform binary model."}]</script></div>
 

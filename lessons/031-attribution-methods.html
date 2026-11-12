@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>031 — Attribution methods</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,17 +24,17 @@
   <p class="objective">You can explain what saliency, LIME and SHAP compute, and their failure modes.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— attribution</span></h2>
 <p class="lede">Four attribution methods look at one prediction and return four different lists of important features. All four are defensible, and they disagree. Knowing the definition behind each is the difference between citing an attribution and being fooled by one, because the number on the chart is only as good as the procedure that produced it.</p>
 <div class="numstrip" role="group" aria-label="Key numbers"><div><b>20–300</b><span>passes for integrated gradients</span></div><div><b>0.42 → 0.05</b><span>LIME weight, two seeds</span></div><div><b>3,628,800</b><span>orderings, ten features</span></div></div>
 <p>A credit team shipped LIME explanations with a fixed seed. Auditing six months later with the library's default seed, the top feature moved from "missed payments" to "account age" for the same applicant and the same model. Nothing about the decision had changed; the random sample under the explainer had. That is the failure this topic prevents: four definitions of "important", and only one that must add up to the prediction.</p>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— attribution</span></h2>
 <p>Every attribution method apportions one output among the inputs. They differ in <strong>what counts as evidence</strong>: the slope right here, the average slope along a path from a neutral input, the weights of a simple model fitted nearby, or the average gain from adding a feature to a coalition. Same question in English, four different mathematical answers.</p>
 <p>In one line: <strong>saliency asks about a nudge, integrated gradients about a journey, LIME about a neighbourhood, and Shapley about a coalition.</strong> With two features where <code>v({1}) = 0.6</code>, <code>v({2}) = 0.4</code> and <code>v({1,2}) = 1.0</code>, Shapley returns <code>0.6</code> and <code>0.4</code> — and they sum to exactly <code>1.0</code>, the whole output.</p>
 <div class="keybox"><span class="sym">φᵢ = share of f(x) − f(x′) assigned to input i</span><p>Every method answers that one question; they differ in what evidence they accept — a slope here, a path, a neighbourhood, or a coalition.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— attribution</span></h2>
 <p>Seven parts, from one number to four procedures.</p>
 
 <h3>Part 1 — Credit is a gap, so it needs a zero point</h3>
@@ -75,7 +75,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— attribution</span></h2>
 
 <h3>1. Shapley by hand, two features</h3>
 <p><code>v(∅) = 0</code>, <code>v({1}) = 0.6</code>, <code>v({2}) = 0.4</code>, <code>v({1,2}) = 1.0</code>. Two features mean two orderings, each weighted <code>1/2</code>.</p>
@@ -132,7 +132,7 @@
 
 <p><strong>What to notice.</strong> The top feature flips, and the first feature's weight falls by a factor of <code>0.42 / 0.05 = 8.4</code>. Even the total changes, <code>0.62</code> to <code>0.55</code>, because a different surrogate was fitted. Run the explainer twice before publishing: if the ranking moves, it is sampling noise wearing a coefficient's confidence.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— attribution</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"SHAP values are causal."</strong> It feels right because Shapley comes from cooperative game theory, where the players really do produce the payout together. But the "payout" here is a model's output, and the value function is a conditional expectation under the training distribution — never an intervention in the world.</p>
@@ -145,7 +145,7 @@
   <tr><td>Shapley comes from game theory, so the number is causal.</td><td>It splits a model output under the training distribution; correlated inputs share credit but no intervention is performed.</td></tr>
 </table>
 <p><strong>The tell:</strong> a sentence with no zero point in it — "income is the most important feature" — or numbers that cannot be made to sum to anything. Ask which baseline the value is measured from, then re-run the explainer with a different seed and a slightly perturbed input. If the ranking survives both, you have evidence; if it moves, you have a screenshot.</p>
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— attribution</span></h2>
 <ol class="quiz">
   <li>Why does integrated gradients need a baseline, and what breaks if you choose a bad one?
     <details><summary>Answer</summary>
@@ -164,7 +164,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— attribution</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/031-attribution-methods.ipynb">open the notebook in Colab</a> · <a href="../notebooks/031-attribution-methods.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 # 1. gradient saliency on a tiny model
@@ -174,7 +174,7 @@ saliency = w                                  # d(w·x)/dx
 print(&quot;saliency:&quot;, saliency)
 # 2. Shapley values for two features</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— attribution</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "Shapley values sum to…", "o": ["f(x) − f(baseline)", "1", "0", "f(x)"], "a": 0, "why": "Efficiency: the parts add to the whole."}, {"q": "LIME fits a…", "o": ["Local linear surrogate", "Global tree", "Neural network", "Support vector machine"], "a": 0, "why": "It explains the surrogate, not the model."}]</script></div>
 

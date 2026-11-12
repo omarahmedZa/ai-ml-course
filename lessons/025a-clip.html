@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>025.1 — r: the ratio, clipped to 1 ± 0.2</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -74,7 +74,7 @@
   <p>Row 2: min(1.8, 2.4) = <strong>1.8</strong>. The min keeps the unclipped term, so clipping does not rescue a good action whose probability shrank. Row 3: min(6.0, 3.6) = <strong>3.6</strong>.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— r</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The clip guarantees the policy moves by at most 20%."</strong> It feels right because 0.2 sits in the formula and the objective stops rising. But the clip bounds the incentive, not the distance. Several epochs on one batch compound small steps, momentum carries direction across batches, and shared layers drag unrelated outputs along.</p>
@@ -82,7 +82,7 @@
 </div>
 <p><strong>The tell:</strong> after an epoch, the mean ratio on the same batch has drifted past 1.2, or KL spikes while every per-action loss looks capped. A run that improves for one epoch and then decays within the same batch points at epochs or learning rate, not at clipping.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— r</span></h2>
 <ol class="quiz">
   <li>A = +2, r = 1.25, ε = 0.2. What is the objective?
     <details><summary>Answer</summary>

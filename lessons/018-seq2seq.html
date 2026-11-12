@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>018 — Seq2seq</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can explain translation as encode-then-decode, and state the alignment problem attention solves.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— seq2seq</span></h2>
 <p class="lede">Encoder–decoder is the shape of every generative system you will use: translation, summarisation, speech-to-text, optical character reading, chat. One half reads, the other half writes, and they meet at a single vector. The decoder in a 2014 translation model and the decoder in a chat model are the same object with different plumbing.</p>
 <p>A summariser is trained on 100-token news snippets and deployed on 600-token reports. The output stays fluent and loses the headline, because the encoder compressed the first paragraph into the same 512 numbers it uses for everything else and the decoder never sees the input again. On an exam the same gap shows up as "what is teacher forcing, and what problem does it create?" — a question you cannot answer if you think generation works the way training does.</p>
 
@@ -34,13 +34,13 @@
   <div><b>512</b><span>numbers in the only context vector</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— seq2seq</span></h2>
 <p>A translator reads the whole page, closes the book, and writes the translation from memory. That is the architecture, not a simplification of it: the encoder's last state <em>is</em> the book, and everything written afterwards is reconstructing a page from a summary. A better translator is not allowed to reopen the book — only a longer memory would help.</p>
 <p>In one line: <strong>everything the decoder knows arrives through one vector, so a 40-token sentence gives it 12.8 numbers per token and a 400-token one gives it 1.28.</strong> The second case is not slower or less accurate in some vague sense; it is arithmetically short of room.</p>
 
 <div class="keybox"><span class="sym">x₁…x_n → h_n → y₁…y_m</span><p>Everything the decoder knows arrives through one fixed vector, so longer inputs get fewer numbers per token.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— seq2seq</span></h2>
 <p>Seven parts: three for reading, three for writing, one for the patch that arrives later.</p>
 
 <h3>Part 1 — Encode without emitting</h3>
@@ -111,7 +111,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— seq2seq</span></h2>
 
 <h3>1. The compression problem, by volume</h3>
 <table>
@@ -148,7 +148,7 @@
 
 <p><strong>What to notice.</strong> Training and inference have different shapes: teacher forcing scores all 200 positions in one pass, while generation needs 200 passes because step 201 needs token 200. The 200-token job takes twenty times the 10-token job for the same reason a loop does, and adding GPUs does not shorten a loop whose iterations depend on each other.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— seq2seq</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The decoder can look at the input while it writes."</strong> It feels right because the name says encoder–decoder, as if two halves share a workspace, and because attention in a modern transformer does exactly that.</p>
@@ -160,7 +160,7 @@
 </table>
 <p><strong>The tell:</strong> change only the beginning of the input and watch the first few output tokens. If they barely move, the model is writing from a summary that has already averaged the start away. A second tell is a summary that is fluent and vague in equal measure — correct grammar, no names, no numbers — which is what reconstruction from 512 numbers looks like when the source was 600 tokens. If your training loss is fine and your generations degrade after the first wrong word, the gap is exposure bias, not capacity.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— seq2seq</span></h2>
 <ol class="quiz">
   <li>Why does a longer input sentence hurt a vanilla seq2seq model more than a shorter one?
     <details><summary>Answer</summary>
@@ -179,7 +179,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— seq2seq</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/018-seq2seq.ipynb">open the notebook in Colab</a> · <a href="../notebooks/018-seq2seq.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 rng = np.random.default_rng(0)
@@ -189,7 +189,7 @@ def encode(tokens, dim=8):
 for n in (4, 16, 64):
     s = encode([&quot;w&quot;] * n)</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— seq2seq</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "Teacher forcing feeds…", "o": ["The true previous token", "The model's prediction", "No context", "A beam"], "a": 0, "why": "Fast training, but a train/test mismatch."}, {"q": "The seq2seq bottleneck is…", "o": ["One fixed vector", "The vocabulary", "The lr", "Depth"], "a": 0, "why": "Everything must pass through h_n."}]</script></div>
 

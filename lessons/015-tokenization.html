@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>015 — Tokenization</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can explain vocabularies, subwords, OOV, and why token count is not word count.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— tokenization</span></h2>
 <p class="lede">A tokenizer is the first component to touch text in any language model, and the last one most people check. It maps a string to a list of integers drawn from a fixed table. Everything downstream — the embedding lookup in topic 16, the attention window, the price on an API bill — is measured in those integers, so a tokenizer error surfaces as a modelling error three layers away.</p>
 <p>Here is the exam version of that failure. A corpus of 900,000 English words must fit a 1,000,000-token budget. Words are fewer than tokens, so the naive answer is yes, with room to spare. The real count is 900,000 × 1.3 = 1,170,000 tokens, and the last 130,000 words never reach the model. In a project the same arithmetic appears as a loader that chunks by character count and cuts a JSON object in half.</p>
 
@@ -34,13 +34,13 @@
   <div><b>4.0</b><span>tokens per word of base64</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— tokenization</span></h2>
 <p>Picture a shelf of 50,257 pre-printed labels. The tokenizer invents nothing: it chops text into pieces that already sit on the shelf, then hands back the label numbers. A shelf of whole words would need millions of slots and would still miss tomorrow's product name. A shelf of single letters is tiny, but each label says almost nothing on its own. Subwords are the compromise — common words get one label, rare words get assembled from two or three familiar ones.</p>
 <p>In one line: <strong>the vocabulary is frozen before training, and unseen text is decomposed rather than rejected.</strong> The word <code>playgrounds</code> can arrive as three pieces — <code>play</code>, <code>ground</code>, <code>s</code> — which is three integers out of a shelf of 50,257, and the model keeps a usable vector for each piece.</p>
 
 <div class="keybox"><span class="sym">text → subwords → IDs</span><p>The vocabulary is frozen before training; unseen words are decomposed into known pieces, never rejected.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— tokenization</span></h2>
 <p>Seven parts, in the order they were invented. Each one plugs a hole that the previous one leaves open.</p>
 
 <h3>Part 1 — Fix a vocabulary, then freeze it</h3>
@@ -108,7 +108,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— tokenization</span></h2>
 
 <h3>1. Three files with the same word count</h3>
 <p>Each file is 1,000 words. Only the token count changes, and the window is 4,000 tokens.</p>
@@ -142,7 +142,7 @@
 
 <p><strong>What to notice.</strong> Check the request count by multiplication rather than trust: 128,000 × 2 = 256,000, which is below 325,000, so three requests are the minimum for the prose row. The identical file costs three times more as base64, and nothing about the model changed — only the tokenizer did.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— tokenization</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"A token is a word."</strong> It feels right because for short, ordinary sentences it nearly holds: 1,000 words of prose is 1,300 tokens, and 0.75 words per token looks like rounding rather than a ratio.</p>
@@ -154,7 +154,7 @@
 </table>
 <p><strong>The tell:</strong> a chunker whose cut points drift as documents change, or a token budget that is fine in testing and 30% over in production once users paste code. The sharpest tell is behavioural: the model discusses a word fluently but cannot say how it is spelled, because the letters were never available to it. If two runs of the same prompt bill different token counts, the tokenizer configuration changed between them.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— tokenization</span></h2>
 <ol class="quiz">
   <li>Why does word-level tokenisation fail on medical text?
     <details><summary>Answer</summary>
@@ -173,7 +173,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— tokenization</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/015-tokenization.ipynb">open the notebook in Colab</a> · <a href="../notebooks/015-tokenization.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>from collections import Counter
 corpus = &quot;low lower lowest newer newest wider widest&quot;
@@ -183,7 +183,7 @@ vocab = Counter()
 for w in words:
     vocab.update(w.split())</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— tokenization</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "1,000 English words ≈ how many tokens?", "o": ["1,300", "1,000", "750", "4,000"], "a": 0, "why": "About 1.3 tokens per word."}, {"q": "BPE exists to fix…", "o": ["Out-of-vocabulary words", "Long context", "Attention cost", "Class imbalance"], "a": 0, "why": "Rare words decompose into known subwords."}]</script></div>
 

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>004.1 — θ: the numbers that move</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -88,7 +88,7 @@
   <p>1·0+1 = <strong>1</strong>, 1·2+1 = <strong>3</strong>, 1·4+1 = <strong>5</strong>. The misses are 0, 2 and 4. Notice that x = 0 still lands exactly: b never changed, so the crossing point is untouched.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— θ</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The model learned the data."</strong> It feels right because after training the predictions match the rows, so the rows seem to have been absorbed. That is the output of learning, not its content.</p>
@@ -96,7 +96,7 @@
 </div>
 <p><strong>The tell:</strong> add a row and no stored number changes on its own. The dataset is now bigger, so the average loss is a different number — yet θ stays exactly where it was until you run training again.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— θ</span></h2>
 <ol class="quiz">
   <li>For y = w·x + b, how many numbers are in θ?
     <details><summary>Answer</summary>

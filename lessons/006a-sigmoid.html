@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>006.1 — σ(z): from score to probability</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -78,7 +78,7 @@
   <p>Odds 7.39 means 7.39 yes for every 1 no, so p = 7.39 / (7.39 + 1) = 7.39 / 8.39 ≈ <strong>0.88</strong>.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— σ(z)</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>“z = 2 means twice the probability of z = 1.”</strong> No. Adding 1 to z multiplies the odds by e ≈ 2.72; it adds a fixed amount to the log-odds. Probability moves by different amounts depending on where you start.</p>
@@ -86,7 +86,7 @@
 </div>
 <p><strong>The tell:</strong> raise z by 1 from 0 and p rises by 0.23. Raise it by 1 from 2 and p rises by only 0.07. Equal steps in z give unequal steps in p — that is the squash at work.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— σ(z)</span></h2>
 <ol class="quiz">
   <li>What is σ(0), and why that value?
     <details><summary>Answer</summary>

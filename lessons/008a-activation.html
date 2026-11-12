@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>008.1 — Why φ cannot be removed</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -81,7 +81,7 @@
   <p>With W<sub>2</sub> = [1, 1] the collapse is [1·1 + 1·3, 1·2 + 1·4] = <strong>[4, 6]</strong>. Deep: W<sub>1</sub>x = [3, 7], then 3 + 7 = <strong>10</strong>. Collapsed: 4 + 6 = <strong>10</strong>. Both routes must agree; no bend sits between them.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— Why φ cannot be removed</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Depth adds power by itself; the activation only makes training faster."</strong> It feels right because deeper networks do perform better, and the activation looks like plumbing.</p>
@@ -89,7 +89,7 @@
 </div>
 <p><strong>The tell:</strong> count the nonlinearities, not the layers. Twelve layers with zero activation calls is a linear model wearing twelve coats.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— Why φ cannot be removed</span></h2>
 <ol class="quiz">
   <li>With W<sub>1</sub> = [[1, 2], [3, 4]] and W<sub>2</sub> = [1, 1], what single row replaces the two layers?
     <details><summary>Answer</summary>

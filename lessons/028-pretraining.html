@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>028 — Pretraining</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,19 +24,19 @@
   <p class="objective">You can contrast next-token and masked objectives, and explain what scale buys.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— pretraining</span></h2>
 <p class="lede">Pretraining is the stage where a model reads text at scale and learns one skill: predict the next token. No human labels are needed, because every document carries its own answer key, and the result is a probability distribution over text rather than a store of facts.</p>
 <p>That single sentence explains most of what a base model can and cannot do. It can continue a sentence in a style it has seen thousands of times; it cannot look anything up, and it has no notion of being right. In an exam, "a model reports loss 3.0 nats — what is its perplexity?" separates people who know the definition from people who compute <code>3^e</code> or <code>10³</code>; the answer is <code>e³ ≈ 20</code>, and the unit is "equally likely tokens". In a project, the classic evaluation bug is comparing perplexity between two models that use different tokenizers: 50,000-token and 100,000-token vocabularies score different units, so the smaller number may belong to the worse model. The second classic is averaging loss per batch rather than per token, which lets short sequences dominate.</p>
 
 <div class="numstrip" role="group" aria-label="Key numbers"><div><b>50,000</b><span>vocabulary entries the model chooses from</span></div><div><b>3.0</b><span>nats of loss for a trained model</span></div><div><b>20</b><span>perplexity, e³</span></div></div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— pretraining</span></h2>
 <p>Imagine a fill-in-the-blank worksheet where the answer key is printed on the same page, under a flap. You read the sentence so far, guess the next word, lift the flap, and adjust. Nobody has to write the answers, because the text already contains them — that is what <strong>self-supervision</strong> means: the labels come from the data itself.</p>
 <p>In one line: <strong>hide the next token, measure how much probability the model gave it, and push that probability up.</strong> With a 50,000-token vocabulary, a model that guesses uniformly has loss <code>ln(50,000) = 10.82</code> nats; a trained model at loss 3.0 has perplexity <code>e³ ≈ 20</code>, i.e. it is as unsure as a choice among 20 tokens.</p>
 
 <div class="keybox"><span class="sym">L = −(1/N) Σ log p(token_t | token_&lt;t)</span><p>Every position is a labelled example: hide the next token and raise the probability the model gives it.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— pretraining</span></h2>
 <p>Seven parts, following one document through one training step.</p>
 
 <span class="formula">perplexity = exp( −(1/N) Σ log p(token_t | token_&lt;t) )</span>
@@ -109,7 +109,7 @@
 <h3>Part 7 — Buy capability with scale</h3>
 <p>Loss falls as a power law in parameters, data and compute: a straight line on a log-log plot, with no cliff. Capability improvements follow that curve far more reliably than they follow architecture tweaks. <strong>Why this part exists:</strong> it tells you where the next unit of effort pays — more unique tokens, not a cleverer block.</p>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— pretraining</span></h2>
 
 <h3>1. Reading a loss number</h3>
 <p>Perplexity is <code>e</code> raised to the loss, so a loss of <code>L</code> nats means the model is about as uncertain as a uniform choice among <code>e^L</code> tokens.</p>
@@ -153,7 +153,7 @@
 
 <p><strong>What to notice.</strong> Over the eight "the" predictions the average loss is <code>(6 × 1.386 + 2 × 2.079) ÷ 8 = 12.474 ÷ 8 = 1.559</code> nats, so perplexity is <code>e¹·⁵⁵⁹ ≈ 4.75</code>. The zero for "sat → on" is not a triumph: with two observations the model assigns probability 1, and a third continuation would be punished without limit. Counting is all a bigram can do.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— pretraining</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Lower perplexity means a better assistant."</strong> It feels right because perplexity is the number printed on the training curve, it always goes down, and smaller feels like an objective improvement.</p>
@@ -165,7 +165,7 @@
 </table>
 <p><strong>The tell:</strong> the same model with a better perplexity score fails a two-line instruction test, or answers a riddle by reciting the dataset version of it. The other tell is a perplexity comparison across tokenizers or across languages — if the vocabulary or the token count per sentence changed, the number changed unit, and the comparison is meaningless.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— pretraining</span></h2>
 <ol class="quiz">
   <li>A model reports loss 2.3 nats. What is its perplexity, and what does that mean?
     <details><summary>Answer</summary>
@@ -184,7 +184,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— pretraining</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/028-pretraining.ipynb">open the notebook in Colab</a> · <a href="../notebooks/028-pretraining.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>from collections import Counter, defaultdict
 import numpy as np
@@ -194,7 +194,7 @@ bigram = defaultdict(Counter)
 for a, b in zip(text, text[1:]):
     bigram[a][b] += 1</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— pretraining</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "Loss 3.0 nats → perplexity…", "o": ["20", "3", "10", "1,000"], "a": 0, "why": "e³ ≈ 20.1."}, {"q": "BERT's objective is…", "o": ["Masked language modelling", "Next-token prediction", "RLHF", "DPO"], "a": 0, "why": "It fills gaps using both sides."}]</script></div>
 

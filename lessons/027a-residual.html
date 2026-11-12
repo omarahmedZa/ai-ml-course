@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>027.1 — x + MHA(LN(x)): the residual path</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -100,7 +100,7 @@
   <p>Zero branch: x′ = <strong>[2, 4, 6, 8]</strong>, the input unchanged. Unit branch: x′ = <strong>[3, 5, 7, 9]</strong>. Notice that the LayerNorm output never appears in x′ directly — it only shaped what the branch produced.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— x + MHA(LN(x))</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The residual keeps the input, so the block does nothing."</strong> The addition guarantees the input is <em>available</em>, not that the branch is ignored. A trained branch writes real changes into the stream; that is how the model learns anything at all.</p>
@@ -108,7 +108,7 @@
 </div>
 <p><strong>The tell:</strong> measure the norm of the branch output in a trained model. It is not near zero. If someone claims "the residual means extra layers are free", ask them for the parameter count and the attention cost of those layers.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— x + MHA(LN(x))</span></h2>
 <ol class="quiz">
   <li>x = [10, 10] and the branch returns [−2, 2]. What is x′?
     <details><summary>Answer</summary>

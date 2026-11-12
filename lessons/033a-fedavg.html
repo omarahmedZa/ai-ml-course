@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>033.1 — w ← Σ (nₖ/N) wₖ: the weighted average</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -102,7 +102,7 @@
   <p>0.3 × 0.4 = <strong>0.12</strong> and 0.6 × 0.8 = <strong>0.48</strong>. Total 0.02 + 0.12 + 0.48 = <strong>0.62</strong>. The equal average would be 0.47.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— w ← Σ (nₖ/N) wₖ</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"FedAvg is the mean of the client weights."</strong> It is the mean only when every client holds the same number of examples. With 100 / 200 / 700 the plain mean is 0.50, and the client holding 70% of the data has been outvoted by two clients holding 30% between them.</p>
@@ -110,7 +110,7 @@
 </div>
 <p><strong>The tell:</strong> the global weight sits near the midpoint of the three local weights while the largest client's own loss refuses to fall. The model is training, the curve is smooth, and the majority of the data is being ignored.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— w ← Σ (nₖ/N) wₖ</span></h2>
 <ol class="quiz">
   <li>Two clients hold 900 and 100 examples, with local weights 0.8 and 0.2. What does FedAvg return?
     <details><summary>Answer</summary>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>004.7 — argmin vs min</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -106,7 +106,7 @@
   <p>argmin = −1, min = 0.5. The squared term is zero at θ = −1; the 2 scales the height, it does not move the position.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— argmin vs min</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"argmin gives the smallest loss."</strong> That is <code>min</code>. <code>argmin</code> gives the input that produces the smallest loss. In this course the input is θ, so argmin hands you a set of weights, not a score.</p>
@@ -114,7 +114,7 @@
 </div>
 <p><strong>The tell:</strong> check the units. A loss value is measured in points; θ is a weight. If your answer to "what is θ*?" has the same units as the loss, you reported the min by mistake.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— argmin vs min</span></h2>
 <ol class="quiz">
   <li><code>J(θ) = (θ − 3)² + 4</code>. What are argmin and min?
     <details><summary>Answer</summary>

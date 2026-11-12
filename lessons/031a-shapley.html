@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>031.1 — φ: a fair share of the prediction</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -94,7 +94,7 @@
   <p>Feature 1 arriving second gains 1.0 − 0.5 = 0.5. So φ₁ = (0.3 + 0.5)/2 = <strong>0.4</strong> and φ₂ = (0.7 + 0.5)/2 = <strong>0.6</strong>. Sum 1.0, as it must be.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— φ</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"φ₁ = 0.6 means feature 1 caused 60% of the decision."</strong> It means feature 1 is worth 0.6 in this game, against this baseline, with this rule for what "present" means. Move the baseline and every φ shifts while the prediction stays put.</p>
@@ -102,7 +102,7 @@
 </div>
 <p><strong>The tell:</strong> add a duplicate column carrying the same feature. The prediction does not move, but the original column's φ falls by about half. Credit was divided, not earned — and no number tells you that happened.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— φ</span></h2>
 <ol class="quiz">
   <li>With v(∅) = 0, v({1}) = 0.2, v({2}) = 0.7 and v({1,2}) = 1.0, what are φ₁ and φ₂?
     <details><summary>Answer</summary>

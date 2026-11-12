@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>026.1 — softmax: scores into weights</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -79,7 +79,7 @@
   <p>2.718 ÷ 11.107 = <strong>0.245</strong>; 1.000 ÷ 11.107 = <strong>0.090</strong>. The three add to 1.000, which is the only thing the divisor guarantees.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— softmax</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"These weights are the model's confidence."</strong> They are relative shares inside one row, produced by whatever scale the scores happened to carry. Multiply the row 1, 0, −1 by three and the weights become 0.950, 0.047, 0.002. The tokens did not change; the units did.</p>
@@ -87,7 +87,7 @@
 </div>
 <p><strong>The tell:</strong> rescale the queries by two and watch the weights sharpen while the ranking stays fixed. If "confidence" moves without new evidence, it was never confidence.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— softmax</span></h2>
 <ol class="quiz">
   <li>Every score in a row is 0. What are the weights?
     <details><summary>Answer</summary>

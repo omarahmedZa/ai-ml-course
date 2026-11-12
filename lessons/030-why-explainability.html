@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>030 — Why explainability</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,12 +24,12 @@
   <p class="objective">You can distinguish intrinsic vs post-hoc and local vs global, and name the accountability use case.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— explainability</span></h2>
 <p class="lede">A model that outputs <code>0.31</code> has not given anyone a reason. Explainability is the practice of producing one: which inputs drove this output, how much each contributed, and what the model would have said without them. You need it whenever a number turns into a decision a human must defend — a loan declined, a scan flagged, a claim denied. It is also the fastest way to debug a model that scores well and behaves absurdly.</p>
 <div class="numstrip" role="group" aria-label="Key numbers"><div><b>0.96</b><span>AUC at the training hospital</span></div><div><b>0.61</b><span>AUC one hospital later</span></div><div><b>0.31</b><span>output, with no reason attached</span></div></div>
 <p>A pneumonia classifier reached AUC 0.96 (area under the ROC curve; 1.0 is perfect) at its training hospital and 0.61 at the next one. One local explanation showed why: the five highest-contributing pixels sat in the burned-in scanner label in the corner. Accuracy could never surface that, because on the training site the label correlated perfectly with pneumonia — the shortcut looked exactly like skill. One attribution map found it in ten seconds.</p>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— explainability</span></h2>
 <p>An explanation is an <strong>argument about why an output occurred</strong>, and every argument has an audience. The applicant wants the two facts they can change. The officer wants contributions plus a comparable case. The regulator wants error rates by group plus the rule itself. Same prediction, three arguments — and most explainable-AI failures are one audience being handed another audience's argument.</p>
 
 <figure class="fig">
@@ -66,7 +66,7 @@
 
 <p>In one line: <strong>an explanation is a claim about which inputs the model used, phrased for whoever has to act on it.</strong> For an applicant at <code>p = 0.31</code> against a <code>0.25</code> threshold, the applicant's version is four words — "two missed payments" — while the model's own version is six numbers that add to <code>−0.80</code> in log-odds.</p>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— explainability</span></h2>
 <p>Six parts: three of vocabulary, three of decisions.</p>
 <div class="keybox"><span class="sym">explanation = when × scope × form</span><p>When it is made (intrinsic or post-hoc), how much it covers (global or local), and what shape it takes (attribution or example). The use case fixes the position.</p></div>
 
@@ -94,7 +94,7 @@
 <p>Four uses pull differently. <em>Debugging</em> wants cheap local attribution across many rows, because you are hunting a shortcut. <em>Accountability</em> wants the actual reason for one decision, contestable — GDPR Art. 22 constrains purely automated decisions with significant effects. <em>Trust</em> wants a check a clinician can run in seconds. <em>Safety</em> wants the shortcut found before deployment, when the fix costs days rather than a recall.</p>
 <p><strong>Why this part exists:</strong> "we need explainability" is not a requirement you can build against; without a use case you cannot tell whether the deliverable is 5,000 rows or one paragraph.</p>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— explainability</span></h2>
 
 <h3>1. One rejection, three audiences</h3>
 <p>Applicant 4,182 is rejected at <code>p = 0.31</code> against a <code>0.25</code> threshold. The terms are log-odds (log of the odds), so they add like ordinary numbers.</p>
@@ -131,7 +131,7 @@
 
 <p><strong>What to notice.</strong> The global shares sum to <code>1.00</code>, so the column is a complete budget of attention. Missed payments holds 9% globally and <code>0.70 / 2.00 = 35%</code> of this applicant's total feature magnitude — nearly four times its portfolio weight. Income, first overall, pushes this decision down. Neither ranking is wrong; they answer different questions.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— explainability</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"An explanation tells you the cause."</strong> It feels right because the output moves when the feature moves, and that is what a cause does. But post-hoc methods describe the model's <em>function</em>, never the world's causal structure.</p>
@@ -144,7 +144,7 @@
   <tr><td>The output moved when the feature moved, so the explanation names the cause.</td><td>It names a dependence in the model's function, holding other inputs fixed — never an intervention in the world.</td></tr>
 </table>
 <p><strong>The tell:</strong> ask for one counterfactual with a number in it — "what would this applicant have had to change to score below 0.25?" If nobody can answer, you have a picture, not a reason. The second tell is a top feature no domain expert has mentioned; when the model's first reason surprises the people who know the problem, you have found a bug or the project's best insight, and only a check tells them apart.</p>
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— explainability</span></h2>
 <ol class="quiz">
   <li>A decision tree of depth 4 is used for credit scoring. Is it intrinsic or post-hoc, and local or global?
     <details><summary>Answer</summary>
@@ -163,7 +163,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— explainability</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/030-why-explainability.ipynb">open the notebook in Colab</a> · <a href="../notebooks/030-why-explainability.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 rng = np.random.default_rng(0)
@@ -173,7 +173,7 @@ debt = rng.normal(0.3, 0.15, n)
 y = ((income - 60 * debt) &gt; 20).astype(int)
 A = np.c_[income, debt, np.ones(n)]</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— explainability</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "An intrinsic explanation means…", "o": ["The model is interpretable by design", "It is computed after training", "It is global only", "It is causal"], "a": 0, "why": "No post-hoc step is needed."}, {"q": "GDPR Art. 22 concerns…", "o": ["Automated decisions with significant effects", "Cookie banners", "Copyright", "Advertising"], "a": 0, "why": "It constrains purely automated decision-making."}]</script></div>
 

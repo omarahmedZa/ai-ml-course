@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>010.2 — Fan-out: gradients add</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -100,7 +100,7 @@
   <p><strong>9</strong>: 3 + 4 + 2. The last row is the same rule with two silent branches — 3 + 0 + 0 is still 3, and the live branch is not reduced to a third of its value.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— Fan-out</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Two gradients for one value should be averaged, to be fair to both paths."</strong> It feels right because averaging is how you combine two estimates of the same quantity.</p>
@@ -108,7 +108,7 @@
 </div>
 <p><strong>The tell:</strong> switch one branch off and re-run. The total should fall by exactly that branch's number. If it falls by half of everything, someone averaged.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— Fan-out</span></h2>
 <ol class="quiz">
   <li>u feeds two branches that send −5 and +2. What is <code>∂L/∂u</code>?
     <details><summary>Answer</summary>

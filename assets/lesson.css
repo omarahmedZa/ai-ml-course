@@ -624,3 +624,13 @@ img, svg { max-width: 100%; }
 @media (max-width: 700px) {
   .numstrip { grid-template-columns: 1fr 1fr; }
 }
+
+/* ---------- section heading topic ---------- */
+.h2-topic {
+  margin-inline-start: .5em;
+  font-size: .78em;
+  font-weight: 400;
+  letter-spacing: .02em;
+  text-transform: none;
+  color: var(--ink-faint);
+}

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>004.4 — L(f_θ(xᵢ), yᵢ): the atom</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -89,7 +89,7 @@
   <p>Row 2: (−6)² = <strong>36</strong>. Row 3: residual <strong>−4</strong>, loss <strong>16</strong>. The sign never survives the square; the size always does.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— L(f_θ(xᵢ), yᵢ)</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The loss is computed on the average."</strong> No. The objective averages losses; the atom does not. Each ℓᵢ is computed from one row, alone, before any addition happens.</p>
@@ -97,7 +97,7 @@
 </div>
 <p><strong>The tell:</strong> if you cannot write one ℓᵢ for one row, you are computing the objective, not the atom. Try it on a single row, with no n in sight.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— L(f_θ(xᵢ), yᵢ)</span></h2>
 <ol class="quiz">
   <li>Truth 5, prediction 2. What is the loss?
     <details><summary>Answer</summary>

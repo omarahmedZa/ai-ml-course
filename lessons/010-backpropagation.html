@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>010 — Backpropagation</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can apply the chain rule to a small graph and say what each gradient means.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— backpropagation</span></h2>
 <p class="lede">Every "the model won't learn" bug is a gradient bug: wrong sign, vanished, exploded, or detached from the graph. Backprop is the one mechanism you must be able to inspect rather than trust.</p>
 <p>An exam will ask you to differentiate a small graph by hand, and there is no way to bluff it: either the local slopes are multiplied in the right order or the number is wrong. In a project the same skill explains a frozen loss — a ReLU that zeroed its own gradient, a tensor cut out of the graph with <code>.detach()</code>, or a learning rate that turned a slope of <code>−12</code> into a jump past the minimum. All three look identical from outside: the curve is flat.</p>
 
@@ -34,13 +34,13 @@
   <div><b>36</b><span>dL/dw for L = (3w)² at w = 2</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— backpropagation</span></h2>
 <p>Blame flows backwards through the graph. Each operation knows its own local slope — how much its output moves when its input moves by one — and the loss hands back a single number. A node multiplies what it received by its own slope and passes the product to its inputs.</p>
 <p>In one line: <strong>upstream times local, added at every fork.</strong> For <code>L = (3w)²</code> at <code>w = 2</code>, the outside slope is <code>2(6) = 12</code>, the inside slope is <code>3</code>, and the product is <code>36</code>.</p>
 
 <div class="keybox"><span class="sym">∂L/∂w = upstream × local slope, summed at forks</span><p>Blame flows backwards: multiply each local slope and add at forks.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— backpropagation</span></h2>
 
 <h3>Part 1 — Write the graph, not the formula</h3>
 <p>Every operation becomes a node: a multiply, an add, a ReLU, a matrix product, the loss. Values flow forward along the edges, and <code>L = (wx + b − y)²</code> is four nodes — multiply, add, subtract, square. Reading the same expression as a graph is what removes the ambiguity of "which derivative first".
@@ -92,7 +92,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— backpropagation</span></h2>
 
 <h3>1. One linear unit, by hand</h3>
 <p><code>z = wx + b</code> and <code>L = (z − y)²</code>, with <code>x = 2</code>, <code>w = 3</code>, <code>b = 1</code>, <code>y = 10</code>. The forward column comes first, then the backward column.</p>
@@ -140,7 +140,7 @@
 
 <p><strong>What to notice.</strong> The check is a finite difference, so it is always slightly off and always the same sign. Use it on one weight when a hand-derived gradient and the library disagree; a large gap means a missing term, a wrong sign, or a tensor that was detached before the graph noticed it.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— backpropagation</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"A big gradient means an important parameter."</strong> It feels right because the update is proportional to the gradient, so the big ones visibly move first.</p>
@@ -153,7 +153,7 @@
   <tr><td>A big gradient means an important parameter.</td><td>A gradient is a local slope; it depends on input scale and is recomputed every step.</td></tr>
 </table>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— backpropagation</span></h2>
 <ol class="quiz">
   <li><code>L = (3w)²</code>. What is <code>dL/dw</code> at <code>w = 2</code>?
     <details><summary>Answer</summary>
@@ -172,7 +172,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— backpropagation</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/010-backpropagation.ipynb">open the notebook in Colab</a> · <a href="../notebooks/010-backpropagation.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 x, w, b, y = 2., 3., 1., 10.
@@ -182,7 +182,7 @@ d_pred = 2 * (pred - y)
 d_w, d_b = d_pred * x, d_pred
 print(f&quot;pred={pred} loss={loss} dL/dw={d_w} dL/db={d_b}&quot;)</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— backpropagation</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "L=(3w)². dL/dw at w=2?", "o": ["36", "12", "18", "72"], "a": 0, "why": "L=9w², so 18w = 36."}, {"q": "Gradients from two branches combine by…", "o": ["Adding", "Multiplying", "Taking the max", "Averaging"], "a": 0, "why": "Total derivative is the sum over paths."}]</script></div>
 

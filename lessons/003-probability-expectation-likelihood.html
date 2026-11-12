@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>003 — Probability, expectation, likelihood</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can explain why a loss is a negative log-likelihood, and read mean and variance off a distribution.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— probability and likelihood</span></h2>
 <p class="lede">A classifier does not output a label; it outputs a distribution over labels, and that distribution is what gets scored. Softmax turns scores into probabilities, cross-entropy turns the probability of the true class into a loss, and both are likelihood arithmetic. The same move reappears in a language model (probability of the next token) and in RL (expected return over a policy).</p>
 <p>The failure this prevents is quiet. Compare total NLL on two test sets — 500 rows and 2,000 rows — and the larger set wins by default, because <code>−Σ log p</code> is a sum that grows with the row count. A team reporting the sum can "improve" a model by evaluating it on more data. Dividing by <code>N</code> makes the number per-row and comparable, which is the difference between a metric and a mood.</p>
 
@@ -34,7 +34,7 @@
   <div><b>N</b><span>divisor that makes NLL comparable</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— probability and likelihood</span></h2>
 <p>A model is a bookmaker. Before the result is known it quotes a probability for each outcome; afterwards you score the quote by how much probability it gave to what actually happened. A quote of 0.9 on the winner is good, 0.01 is embarrassing, and the score is just <code>−log</code> of the quoted probability. Probability asks what will happen; <strong>likelihood</strong> asks how good this quote was.</p>
 <p>In one line: <strong>loss is surprise, and surprise is <code>−log p</code>.</strong> A model that gave the truth 0.9 pays 0.105; one that gave it 0.1 pays 2.303; one that gave it 0.01 pays 4.605. Being confidently wrong costs about 44 times more than being confidently right, which is why the penalty tracks overconfidence rather than mere error.</p>
 
@@ -43,7 +43,7 @@
   <p>Surprise is the negative log of the probability you quoted.</p>
 </div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— probability and likelihood</span></h2>
 <p>Seven parts. Each one closes a gap the previous part leaves open.</p>
 
 <h3>Part 1 — A distribution is a list that sums to 1</h3>
@@ -86,7 +86,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— probability and likelihood</span></h2>
 
 <h3>1. Three hypotheses for one coin</h3>
 <p>Three heads in three tosses. Three candidate values of <code>p</code>, each scored against identical data.</p>
@@ -124,7 +124,7 @@
 
 <p><strong>What to notice.</strong> The total 3.101 depends on how many rows you have; the mean, <code>3.101 / 3 = 1.034</code>, does not, and 1.034 is the figure a framework reports. Undo the log and the average probability given to the truth is <code>e^−1.034 ≈ 0.356</code> — not the 0.5 you get by averaging 0.9, 0.5 and 0.1. Averages of probabilities and averages of log-probabilities answer different questions.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— probability and likelihood</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Likelihood is the probability that my model is correct."</strong> It feels right because both quantities are numbers between 0 and 1 attached to a model, "maximum likelihood" sounds like "most likely model", and the fitted value does end up high.</p>
@@ -136,7 +136,7 @@
 </table>
 <p><strong>The tell:</strong> someone says "the model is 70% likely" when they mean the true class averaged probability 0.7. The second tell is a metrics table where total NLL improves purely because the evaluation set grew — sums scale with row count, means do not.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— probability and likelihood</span></h2>
 <ol class="quiz">
   <li>A model says <code>p(heads) = 0.5</code>. Two tosses land heads. What is the NLL?
     <details><summary>Answer</summary>
@@ -155,7 +155,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— probability and likelihood</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/003-probability-expectation-likelihood.ipynb">open the notebook in Colab</a> · <a href="../notebooks/003-probability-expectation-likelihood.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 for p in (0.5, 0.7):
@@ -165,7 +165,7 @@ z = np.array([2., 1., 0.])
 probs = np.exp(z) / np.exp(z).sum()
 print(&quot;softmax:&quot;, probs.round(3))</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— probability and likelihood</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "Fair coin, two heads. NLL?", "o": ["1.386", "0.693", "2.079", "0.250"], "a": 0, "why": "L=0.25, −ln 0.25 = 1.386."}, {"q": "Softmax of [2,1,0] gives p₁ about?", "o": ["0.665", "0.500", "0.245", "0.090"], "a": 0, "why": "7.389/11.107 ≈ 0.665."}]</script></div>
 

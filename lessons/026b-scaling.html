@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>026.2 — 1/√d_k: keeping scores in range</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -76,7 +76,7 @@
   <p>e<sup>2</sup> = 7.389 against 1, total 8.389, so the weights are <strong>0.881 and 0.119</strong>. The same gap of 4 lands softly at width 4 and brutally at width 64 — that is why the divisor has to track the width.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— 1/√dk</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The √d<sub>k</sub> is a tuning constant — drop it, or replace it with d<sub>k</sub>."</strong> It is set by the width, not chosen by taste. Drop it and softmax saturates as width grows; use d<sub>k</sub> instead and softmax flattens as width grows. Both still run, which is why the bug survives a demo.</p>
@@ -84,7 +84,7 @@
 </div>
 <p><strong>The tell:</strong> log the standard deviation of your score matrix at initialisation. It should be near 1. Near 8 at d = 64 means the divisor is missing; near 0.1 means it is too large. A second tell is a gradient norm at the first block that is orders of magnitude below the last.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— 1/√dk</span></h2>
 <ol class="quiz">
   <li>A head is 100 numbers wide. What divisor keeps the score spread near 1?
     <details><summary>Answer</summary>

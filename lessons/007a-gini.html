@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>007.1 — Gini impurity: scoring a split</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -78,7 +78,7 @@
   <p>Weighted I = 0.5 × 0.42 + 0.5 × 0.02 = 0.21 + 0.01 = <strong>0.22</strong>. Drop = 0.50 − 0.22 = <strong>0.28</strong>. Split A wins, 0.32 against 0.28 — a cleaner child does not help if its sibling is dirtier.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— Gini impurity</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>“Pick the side with the lowest impurity.”</strong> A child can be perfectly pure because it holds one row. That says nothing about the other 99. Comparing children without weights rewards tiny, unrepresentative leaves.</p>
@@ -86,7 +86,7 @@
 </div>
 <p><strong>The tell:</strong> the winning split has one tiny perfect child and a large child almost as mixed as the parent. Check the weights: 0.99 × 0.5 ≈ 0.495, a drop of only 0.005.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— Gini impurity</span></h2>
 <ol class="quiz">
   <li>A parent has Gini 0.5. Two children each have Gini 0.18 and each holds half the rows. What is the weighted impurity?
     <details><summary>Answer</summary>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>023 — Function approximation</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can explain why tabular RL fails at scale, and why approximation removes the convergence guarantee.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— function approximation</span></h2>
 <p class="lede">Every deep RL result — Atari, Go, robot locomotion, RLHF — exists because someone replaced a table with a neural network. The price is the guarantee, and the exam will ask what was lost.</p>
 <p>You reach for it the moment a state stops being a small integer: pixels, joint angles, board positions, sentences. It blocks two specific losses. The exam loss: <em>"Tabular Q-learning converges to Q*. You swap the table for a network — does convergence survive?"</em> Two marks for no, four more for naming approximation, bootstrapping and off-policy data together. The project loss: you size a table for a 100×100 grid, see 40,000 entries, call that small, train overnight, and find the agent still walks into walls after filling a fraction of them. Approximation answers for states it never saw; that is the whole trade.</p>
 
@@ -34,7 +34,7 @@
   <div><b>320 KB</b><span>memory those values occupy</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— function approximation</span></h2>
 <p>A table is a notebook with one printed page per situation — and most pages stay blank forever. A network is a formula fitted to the pages you did fill, so an empty page still receives an answer, guessed from similar pages you did fill. The mental model is interpolation: nearby inputs get nearby outputs, even when only one of them was observed.</p>
 <p>In one line: <strong>stop storing one answer per state, start storing a function that produces answers.</strong> A 100×100 grid with 4 actions needs 40,000 stored numbers; a network with 4,096 weights answers all 40,000 questions and every question in between.</p>
 
@@ -43,7 +43,7 @@
   <p>Stop storing one answer per state; fit a function whose parameters θ answer every pair, seen or not.</p>
 </div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— function approximation</span></h2>
 <p>Seven parts follow. Each one is a mechanism, and each depends on the part above it.</p>
 
 <h3>Part 1 — One slot per state–action pair</h3>
@@ -105,7 +105,7 @@
 <h3>Part 7 — The deadly triad</h3>
 <p>Sutton and Barto's triad is function approximation, bootstrapping, and off-policy data. Any two are safe; all three can diverge, because the moving target is steered by data from a policy you no longer follow. <strong>Why this part exists:</strong> it says which two you may keep, and therefore which of the topic 24 fixes you need.</p>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— function approximation</span></h2>
 
 <h3>1. Counting what you cannot store</h3>
 <p>Four actions means one Q-value per action per state. Multiply, then multiply by 8 bytes per float.</p>
@@ -156,7 +156,7 @@
 
 <p><strong>What to notice.</strong> The loss keeps falling to 5.0 — the midpoint — and would rise again in either direction. Training has not failed; it found the exact optimum of an impossible request. Better parameters cannot fix it, because the input holds nothing that separates A from B. Only richer features can, and that is a design decision.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— function approximation</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"A neural network is just a big table with better memory."</strong> It feels right because both map a state to a number, and a network is bigger. But a table claims nothing about unvisited states; a network does, and that claim is an assumption of smoothness built into its architecture.</p>
@@ -170,7 +170,7 @@
   <tr><td>A network is just a bigger table with better memory.</td><td>A table claims nothing about unvisited states; a network assumes smoothness — and gives up the convergence guarantee.</td></tr>
 </table>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— function approximation</span></h2>
 <ol class="quiz">
   <li>Why is a table impossible for a camera-based robot?
     <details><summary>Answer</summary>
@@ -189,7 +189,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— function approximation</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/023-function-approximation.ipynb">open the notebook in Colab</a> · <a href="../notebooks/023-function-approximation.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 # state space growth
@@ -199,7 +199,7 @@ w = np.array([0.0])
 lr, gamma = 0.1, 0.9
 for s, a, r, s_next in [(1.0, 0, 1.0, 2.0), (2.0, 0, 1.0, 3.0)]:</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— function approximation</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "The deadly triad is…", "o": ["Approximation + bootstrapping + off-policy", "Replay + target + clip", "State + action + reward", "Bias + variance + noise"], "a": 0, "why": "Any two are safe; all three can diverge."}, {"q": "Tables die because…", "o": ["The state space is too large", "They are slow", "They leak memory", "They overfit"], "a": 0, "why": "One entry per state cannot exist for pixels."}]</script></div>
 

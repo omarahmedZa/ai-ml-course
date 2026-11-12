@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>007 — Trees and ensembles</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can explain axis-aligned splits, bagging vs boosting, and when trees beat linear models.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— trees and ensembles</span></h2>
 <p class="lede">On tabular data — spreadsheets, medical records, sensor tables — gradient-boosted trees are still the strongest default. Your project may well beat a neural network with 200 lines of XGBoost, and the exam will ask why. Trees win on tables because they ask questions instead of drawing lines: is income below 40k, is the account older than six months. Categories, missing values and wildly different scales all survive that treatment, which is why credit scoring and fraud review still run on boosted trees.</p>
 <p><strong>The failure it prevents.</strong> An exam question gives two candidate splits and asks which one the tree takes. Students compare the two children's impurity directly, pick the smaller, and lose the marks — the comparison has to be weighted by how many rows land on each side. In a project the same lesson arrives as a forest that memorises 500 noisy rows, because nobody capped depth and validation loss turned upward after the fourth tree.</p>
 
@@ -34,13 +34,13 @@
   <div><b>350k</b><span>flat prediction for a house beyond the observed range</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— trees and ensembles</span></h2>
 <p>A tree is a questionnaire. Each node asks one yes/no question about one feature, the answer routes the row left or right, and the leaf at the end hands back a single number — the average target of the training rows that landed there. Nothing is fitted globally: each question is chosen to make the two resulting groups as pure as possible, one question at a time.</p>
 <p>In one line: <strong>a tree cuts the feature space into boxes, then predicts one number per box.</strong> Start with 100 rows split 50 positive and 50 negative: impurity is <code>1 − (0.5² + 0.5²) = 0.5</code>. A cut producing 45/5 and 5/45 lowers it to 0.18, a drop of 0.32, so that is the cut taken.</p>
 
 <div class="keybox"><span class="sym">Δ = I(parent) − (n_L/n)I(L) − (n_R/n)I(R)</span><p>A tree cuts space into boxes; each split takes the largest weighted purity gain.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— trees and ensembles</span></h2>
 <p>Six parts: three build one tree, three explain how many trees are combined.</p>
 
 <h3>Part 1 — Score purity with Gini or entropy</h3>
@@ -106,7 +106,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— trees and ensembles</span></h2>
 
 <h3>1. Which split is better?</h3>
 <p>100 rows, 50 positive and 50 negative, so parent impurity is <code>1 − (0.5² + 0.5²) = 0.5</code>. Two candidate cuts are scored, each with 50 rows per side.</p>
@@ -142,7 +142,7 @@
 
 <p><strong>What to notice.</strong> The output is a mean of observed targets, so it can never pass the largest value in the leaf, 400k. Beyond the training range the model is flat by construction, not by choice — no amount of depth changes it, because there are no rows out there to average. A linear model would keep climbing instead.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— trees and ensembles</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Trees can learn any pattern, including trends."</strong> They cannot extrapolate: beyond the observed range the model repeats its edge value, however strong the trend looks. Ask it to forecast next year's growth and it flatlines.</p>
@@ -156,7 +156,7 @@
   <tr><td>A tree can learn any pattern, including a trend.</td><td>Past the observed range it repeats 350k and never exceeds 400k.</td></tr>
 </table>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— trees and ensembles</span></h2>
 <ol class="quiz">
   <li>A node has 40 samples, 30 positive and 10 negative. Compute its Gini impurity.
     <details><summary>Answer</summary>
@@ -175,7 +175,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— trees and ensembles</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/007-trees-and-ensembles.ipynb">open the notebook in Colab</a> · <a href="../notebooks/007-trees-and-ensembles.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 rng = np.random.default_rng(1)
@@ -185,7 +185,7 @@ def gini(labels):
     if len(labels) == 0:
         return 0.0</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— trees and ensembles</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "Bagging mainly reduces…", "o": ["Variance", "Bias", "Noise", "Parameters"], "a": 0, "why": "Averaging many high-variance trees cuts variance."}, {"q": "A tree asked to price a house above all training prices will…", "o": ["Predict the largest seen value", "Extrapolate linearly", "Raise an error", "Fit a line"], "a": 0, "why": "Leaves average training targets, so the output cannot exceed them."}]</script></div>
 

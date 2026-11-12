@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>016 — Embeddings</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can explain the distributional hypothesis and compute cosine similarity.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— embeddings</span></h2>
 <p class="lede">An embedding is a lookup table from token ID to a vector of learned numbers, and it sits between tokenization and every neural layer above it. Semantic search, duplicate detection, clustering, recommendation and the first layer of a transformer all run on it. One number per dimension, one row per token, and the table carries no interpretation beyond geometry.</p>
 <p>A support team builds "find similar tickets" with a raw dot product and cannot explain the results. The 900-word onboarding ticket comes back as similar to every query, because a long vector accumulates a big score no matter what it says; the actual duplicate, a 30-word ticket, ranks twentieth. Switching the scoring line to cosine similarity puts the duplicate first, and no model was retrained. In an exam the same confusion appears as "cosine is 0 — are the words opposites?", a question that already assumes the wrong thing about what zero means.</p>
 
@@ -34,13 +34,13 @@
   <div><b>0.96</b><span>cosine between cat and kitten</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— embeddings</span></h2>
 <p>Place every word at a point in space so that words used in similar company land near each other. Nothing about the coordinates is meaningful on its own; only the arrangement is. A word's position is its meaning, direction from the origin is what kind of word it is, and distance to another point is how interchangeable the two are. The map is learned from text, not drawn by hand.</p>
 <p>In one line: <strong>similarity is the angle between two arrows, not the distance between two points.</strong> With <code>cat = [0.8, 0.6]</code> and <code>car = [0.6, −0.8]</code>, the dot product is 0.48 − 0.48 = 0, so the cosine is 0.00: the arrows are perpendicular and share no direction at all.</p>
 
 <div class="keybox"><span class="sym">cos(a, b) = (a · b) / (‖a‖ ‖b‖)</span><p>Similarity is the angle between two arrows, not the distance: divide out both lengths.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— embeddings</span></h2>
 <p>Six parts, from raw counts to a usable geometry. The first two build the table; the rest decide how to read it.</p>
 
 <h3>Part 1 — Define context as a window of neighbours</h3>
@@ -96,7 +96,7 @@
 
 <span class="formula">a = [0.8, 0.6], b = [0.6, 0.8]  →  cos = 0.96 / (1 · 1) = 0.96</span>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— embeddings</span></h2>
 
 <h3>1. Four pairs, every term written out</h3>
 <table>
@@ -133,7 +133,7 @@
 
 <p><strong>What to notice.</strong> The answer is not queen; it is a point 11.5° away from queen, close enough to rank first and wrong enough to prove the mechanism is arithmetic rather than reasoning. The offset "man → woman" only exists as a direction because thousands of pairs share it. Ask the same question about a rare name pair and there is no shared direction to add, which is why the famous examples are always common nouns.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— embeddings</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Each dimension means something."</strong> It feels right because the vectors are numbered, the table is 300 columns wide, and it is tempting to read column 37 as the "royalty" axis and column 12 as "animal".</p>
@@ -145,7 +145,7 @@
 </table>
 <p><strong>The tell:</strong> a slide deck with a single axis labelled "gender" and three points on it. The test is to zero out one dimension and see what breaks: if removing axis 37 damages twenty unrelated words at once, the axis was not a concept. A second tell is a ranking dominated by one long vector — a frequent word with norm 8 beating a precise word with norm 0.9 — because that is the dot product reporting popularity, and the fix is a division by both norms.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— embeddings</span></h2>
 <ol class="quiz">
   <li>Two embeddings have cosine similarity 0. What does that say, and what does it not say?
     <details><summary>Answer</summary>
@@ -164,7 +164,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— embeddings</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/016-embeddings.ipynb">open the notebook in Colab</a> · <a href="../notebooks/016-embeddings.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 E = {
@@ -174,7 +174,7 @@ E = {
     &quot;dog&quot;: np.array([0.9, 0.7]),
 }</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— embeddings</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "Cosine 0 between two embeddings means…", "o": ["Orthogonal", "Identical", "Opposite", "Longer"], "a": 0, "why": "Perpendicular directions, no linear relation."}, {"q": "Why cosine over dot for retrieval?", "o": ["Norms vary for no reason", "It is faster", "It is exact", "It is differentiable"], "a": 0, "why": "Raw dot mixes length with relevance."}]</script></div>
 

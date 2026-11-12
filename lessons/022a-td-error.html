@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>022.1 — TD error: target − estimate</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -78,7 +78,7 @@
   <p>0.5 × 1.22 = <strong>0.61</strong>, and 0.5 + 0.61 = <strong>1.11</strong>. The same evidence now moves the estimate five times as far. With α = 1 it would land exactly on 1.72 and inherit every bit of that target's noise.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— TD error</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The TD error measures how wrong the reward was."</strong> The reward is observed and exact; the error is between two predictions. It measures surprise, not correctness.</p>
@@ -86,7 +86,7 @@
 </div>
 <p><strong>The tell:</strong> change only the next-state estimate and the error moves while no new reward has arrived. Nothing about the world changed — only the table's opinion of it.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— TD error</span></h2>
 <ol class="quiz">
   <li>Target 1.72, Q = 0.5. What is the sign of the TD error, and which way does Q move?
     <details><summary>Answer</summary>

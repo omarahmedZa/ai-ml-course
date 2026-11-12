@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>020 — Value functions and Bellman</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,17 +24,17 @@
   <p class="objective">You can write V and Q and explain the recursive expectation.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— value functions</span></h2>
 <p class="lede">A value function is a price tag on a situation: one number answering "if I am here, and behave like this from now on, how much reward is left?" Every algorithm in this unit uses one. Value iteration ranks states with it, Q-learning stores one per state–action pair, actor–critic trains a critic to score the actor, and policy gradient subtracts a state value to steady its updates.</p>
 <p>Two kinds of damage come from getting it wrong. In an exam it is a two-line backup — <code>r = 1</code>, <code>γ = 0.9</code>, <code>V(s′) = 2</code>, so <code>Q = 2.8</code> — and candidates lose the marks by adding the reward twice or forgetting the discount. In a project it is silent inflation: bootstrap past a terminal state and every finished episode is credited with a future that does not exist. With <code>γ = 0.9</code> and a phantom <code>V = 5</code>, each ending gains 4.5 of invented value, so the average return climbs, the training curve looks healthy, and the policy gets worse.</p>
 <div class="numstrip" role="group" aria-label="Key numbers"><div><b>2.8</b><span>Q from r = 1, γ = 0.9, V(s′) = 2</span></div><div><b>2.41</b><span>V under a 0.7 / 0.3 policy mix</span></div><div><b>0.39</b><span>price of that 0.3 chance of the worse action</span></div></div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— value functions</span></h2>
 <p>Treat a state's value as the price of a ticket entitling you to the rest of the trip. Today's price is today's reward plus the price of a ticket from wherever you land next. The far future never has to be enumerated, because it is already folded into the next state's price — the recursion does the bookkeeping.</p>
 <p>In one line: <strong><code>V(s) = r + γV(s′)</code>, a number defined in terms of a smaller copy of itself.</strong> With <code>r = 1</code>, <code>γ = 0.9</code> and <code>V(s′) = 2</code>, the value is <code>1 + 1.8 = 2.8</code>.</p>
 <div class="keybox"><span class="sym">V(s) = r + γV(s′)</span><p>Today's value is today's reward plus the discounted price of wherever you land next — the future is already inside V(s′).</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— value functions</span></h2>
 <p>Seven parts, from the quantity being predicted to the update that learns it from samples.</p>
 
 <h3>Part 1 — Expectation, because the future is random</h3>
@@ -96,7 +96,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— value functions</span></h2>
 
 <h3>1. One backup, two actions</h3>
 <p>Action <code>a</code> pays 1 and lands in <code>s′</code> with <code>V(s′) = 2</code>; <code>γ = 0.9</code>.</p>
@@ -136,7 +136,7 @@
 
 <p><strong>What to notice.</strong> The reward happened to be 1 in both branches, so the probabilities sum to 1 and it survives intact at 1.0; only the future is averaged, giving <code>1 + 0.9 × (1.6 − 0.2) = 2.26</code>. Make the pit pay 0 instead and the value falls to <code>2.24 − 0.18 = 2.06</code>, because now the branch-specific reward is being averaged too.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— value functions</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"V and Q are the same thing."</strong> It feels right because both are called value, both are estimated numbers, and in the example above <code>V*</code> does equal the best <code>Q</code>.</p>
@@ -149,7 +149,7 @@
   <tr><td>V and Q are the same thing.</td><td>V holds one number per state; Q holds one per state–action pair, and only Q names a move.</td></tr>
 </table>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— value functions</span></h2>
 <ol class="quiz">
   <li><code>r = 0</code>, <code>γ = 0.9</code>, <code>V(s′) = 5</code>. What is <code>Q(s,a)</code>?
     <details><summary>Answer</summary>
@@ -168,7 +168,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— value functions</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/020-value-functions-bellman.ipynb">open the notebook in Colab</a> · <a href="../notebooks/020-value-functions-bellman.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 # 4-state chain, action = go right, reward 0 except the last state
@@ -178,7 +178,7 @@ for sweep in range(50):
     for s in range(3):
         r = 1.0 if s == 2 else 0.0</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— value functions</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "r=0, γ=0.9, V(s′)=5. Q(s,a)?", "o": ["4.5", "5.0", "0.45", "5.9"], "a": 0, "why": "0 + 0.9 × 5."}, {"q": "V* relates to Q* as…", "o": ["max over a of Q*", "mean of Q*", "min of Q*", "sum of Q*"], "a": 0, "why": "The best action defines the state value."}]</script></div>
 

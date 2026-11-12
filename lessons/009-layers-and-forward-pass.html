@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>009 — Layers and the forward pass</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can trace shapes and values through a two-layer network by hand.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— the forward pass</span></h2>
 <p class="lede">A forward pass is the whole journey from input to loss: every matrix multiply, every bias, every bend, in order. Trace one on paper and debugging stops being guesswork.</p>
 <p>Shape mistakes are the most common failure in a first network, and they are cheap to prevent. An exam question — "layer 1 has 10 units, layer 2 has 5, batch of 32: what shape is <code>W²</code>?" — takes ten seconds with the rule and cannot be guessed without it. In a project the same gap appears as <code>mat1 and mat2 shapes cannot be multiplied</code>, reported on a line far from the cause, after a twenty-minute run has already died.</p>
 
@@ -34,13 +34,13 @@
   <div><b>4,160</b><span>parameters in one 64-unit layer</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— the forward pass</span></h2>
 <p>A forward pass is a relay of two moves, repeated: a layer rotates and stretches its input, then a bend curves each number separately. The rotation is learned; the bend is fixed. That is the entire architecture.</p>
 <p>In one line: <strong>affine (matrix plus bias), bend, affine, bend.</strong> On one example, 2 → 2 → 1 runs <code>(2×2)(2×1) → (2×1)</code> then <code>(1×2)(2×1) → (1×1)</code>. On a batch of 32 the same steps run as <code>(32×2)(2×2) → (32×2)</code> then <code>(32×2)(2×1) → (32×1)</code>, and the 32 is never touched.</p>
 
 <div class="keybox"><span class="sym">A = φ(XWᵀ + b)</span><p>Each layer mixes inputs with a matrix, adds a bias, then bends.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— the forward pass</span></h2>
 
 <h3>Part 1 — One layer is one affine map</h3>
 <p>Each layer computes <code>z = Wa + b</code>: a matrix product with the previous layer's output, then a bias added. <code>W</code> holds the weights and <code>a</code> is the incoming activations. For a 3-unit layer reading 4 numbers, <code>W</code> is <code>3×4</code>, and the product mixes all four inputs into each of the three outputs.
@@ -96,7 +96,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— the forward pass</span></h2>
 
 <h3>1. One example, two layers</h3>
 <p><code>x = [1, −1]</code>, <code>W¹ = [[1, 2], [−1, 0]]</code>, <code>b¹ = [0, 1]</code>, ReLU, then <code>W² = [1, 1]</code> and <code>b² = −0.5</code> with a sigmoid on the output. Take it in five rows.</p>
@@ -138,7 +138,7 @@
 
 <p><strong>What to notice.</strong> Almost every parameter sits in the first layer, because 784 inputs is a wide door. The hidden layer is only 128 units, so the second layer is 78 times smaller. If a model with this shape runs out of memory, the fix is a smaller first layer — not a smaller batch of classes.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— the forward pass</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"If the shapes work out, the layer is correct."</strong> It feels right because nothing errors: a square matrix makes <code>Wx</code> and <code>xW</code> identical in shape, and broadcasting silently stretches a length-5 bias across 32 rows — which is exactly what you wanted that one time.</p>
@@ -151,7 +151,7 @@
   <tr><td>If the shapes work out, the layer is correct.</td><td>Only the bias may broadcast; compare inner dimensions before multiplying, and print every shape.</td></tr>
 </table>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— the forward pass</span></h2>
 <ol class="quiz">
   <li>Layer 1: 10 units. Layer 2: 5 units. What are the shapes of <code>W²</code>, <code>b²</code>, and the output for a batch of 32?
     <details><summary>Answer</summary>
@@ -170,7 +170,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— the forward pass</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/009-layers-and-forward-pass.ipynb">open the notebook in Colab</a> · <a href="../notebooks/009-layers-and-forward-pass.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 x = np.array([1., -1.])
@@ -180,7 +180,7 @@ a1 = np.maximum(0, z1)
 W2, b2 = np.array([1., 1.]), -.5
 z2 = W2 @ a1 + b2</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— the forward pass</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "A 10→5 layer has W of shape…", "o": ["5×10", "10×5", "5×5", "10×10"], "a": 0, "why": "Output units × input units."}, {"q": "A batch of 32 through 5 outputs gives…", "o": ["32×5", "5×32", "32×10", "5"], "a": 0, "why": "The batch dimension stays first."}]</script></div>
 

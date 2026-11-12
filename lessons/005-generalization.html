@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>005 — Generalization</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can diagnose over- vs underfitting from train/test curves and pick the fix that matches the diagnosis.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— generalization</span></h2>
 <p class="lede">This is the single most examined idea in Unit 1, and the first thing that will go wrong in your project. A model that scores 99% on data it has seen is a memory; a model that scores 85% on data it has not seen is a product. Every shipping decision is a bet about rows nobody has collected yet: does this hold up next month, in another hospital, on another customer? Generalization is the word for that bet, and the train/validation/test split is the only honest way to price it. When a paper claims "state of the art", this is the machinery the claim rests on.</p>
 <p><strong>The failure it prevents.</strong> An exam question shows two curves, one flat and high, one diving on train while rising on validation, and asks which model to ship. Without the vocabulary you describe the shapes; with it you write "underfit at 0.95/0.94, so raise capacity" and collect the marks. In a project the same blind spot costs a release: tune 40 hyperparameter settings against the test set, report the best of 40, and the 91% you announce is really a 74% model that was measured until it flattered you.</p>
 
@@ -34,13 +34,13 @@
   <div><b>0.20</b><span>noise no model can remove, in every model's error</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— generalization</span></h2>
 <p>Think of two students preparing for an exam. One memorises the answers to last year's paper; the other learns the method. On the practice paper they tie. On the real paper the memoriser collapses, because the questions are new. A model is the memoriser unless you check: with enough parameters it reproduces every training label exactly, and that tells you nothing about the next row.</p>
 <p>In one line: <strong>generalization is the size of the gap between error on rows the model fit and error on rows it never saw.</strong> Numbers make it concrete: train error 0.02 and test error 0.34 give a gap of 0.32, while train 0.90 and test 0.95 give a gap of only 0.05 — and the second model, with the smaller gap, is the worse product.</p>
 
 <div class="keybox"><span class="sym">gap = test error − train error</span><p>Read the gap for the disease and the level for how sick; the smaller gap can still be the worse model.</p></div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— generalization</span></h2>
 <p>Six parts. The first three protect the measurement; the last three use it.</p>
 
 <h3>Part 1 — Split before you touch anything</h3>
@@ -97,7 +97,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— generalization</span></h2>
 
 <h3>1. The same 20 points, two models</h3>
 <p>One dataset, 20 noisy points from a smooth curve. Two polynomial degrees are fitted to the same 16 training points and scored on the same 4 held-out points.</p>
@@ -122,7 +122,7 @@
 
 <p><strong>What to notice.</strong> Model C has almost no bias, 0.05, and loses badly — its variance of 2.00 is over three times B's 0.60. Model A has low variance and still loses, because bias of 1.00 is squared into a full point. B wins at 0.84, and 0.20 of that is noise no model can touch, so the real headroom is 0.64. Adding rows attacks variance only: it would help C a lot, B a little, and A not at all.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— generalization</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"I'll tune until the test score is good."</strong> Do that and the test set has quietly become a validation set. Every configuration you reject because of its test score has taught you something about the test rows, so the number you finally publish describes a model selected <em>using</em> the very data it is reported on.</p>
@@ -136,7 +136,7 @@
   <tr><td>Tuning until the test score looks good.</td><td>Every peek turns test into validation; the best of 40 is optimistic.</td></tr>
 </table>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— generalization</span></h2>
 <ol class="quiz">
   <li>Train accuracy 0.99, validation 0.68. Name the diagnosis and two fixes that do not involve collecting more data.
     <details><summary>Answer</summary>
@@ -155,7 +155,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— generalization</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/005-generalization.ipynb">open the notebook in Colab</a> · <a href="../notebooks/005-generalization.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 rng = np.random.default_rng(0)
@@ -165,7 +165,7 @@ xt = np.linspace(0, 1, 200)
 yt = np.sin(2 * np.pi * xt)
 for d in (1, 3, 9):</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— generalization</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "Train and validation both high and flat. First move?", "o": ["More capacity", "More data", "Regularise", "Early stop"], "a": 0, "why": "Equal bad losses are bias, not variance; regularising makes it worse."}, {"q": "Scaling features before the split causes?", "o": ["Leakage", "Underfitting", "Bias", "Nothing"], "a": 0, "why": "Test statistics enter training through the scaler."}]</script></div>
 

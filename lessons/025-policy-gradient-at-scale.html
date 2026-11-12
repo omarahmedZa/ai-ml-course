@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>025 — Policy gradient at scale</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -24,7 +24,7 @@
   <p class="objective">You can trace REINFORCE → baseline → actor–critic → PPO and explain the variance problem.</p>
 </header>
 
-<h2>Why this matters</h2>
+<h2>Why this matters<span class="h2-topic">— policy gradient</span></h2>
 <p class="lede">PPO is the default algorithm behind robot control, game agents, and the RLHF step that made chat models usable. If you understand three upgrades to REINFORCE, you understand all of it.</p>
 <p>You need this the moment actions are continuous — a torque, a joint angle, a throttle — because "take the max over a discrete table" has nothing to maximise. Policy gradient instead moves the probabilities themselves, which is why it also powers the fine-tuning of language models, where the "action" is a token. Two failures it prevents. The exam failure: <em>"Subtract a baseline from the return. Prove the gradient is still unbiased, then say what did change."</em> The proof is one line of algebra; the answer is variance, and "bias" loses the mark. The project failure: you run REINFORCE on returns spanning 0 to 100, one lucky episode returns 100 instead of 40, and the next update moves the policy so far that it never recovers. The gradient was correct and the step size was not.</p>
 
@@ -34,7 +34,7 @@
   <div><b>0.2</b><span>PPO's clip range ε</span></div>
 </div>
 
-<h2>The one core idea</h2>
+<h2>The one core idea<span class="h2-topic">— policy gradient</span></h2>
 <p>Estimating a gradient from one rollout is an opinion poll of size one. The poll is unbiased — run it a million times and the average is right — but any single result can be wildly off, and you act on that single result. Every upgrade in this lesson leaves the average untouched and shrinks the spread around it.</p>
 <p>In one line: <strong>same expected gradient, smaller variance.</strong> A state where all actions return 100 contributes a weight of 100 and no information; subtract <code>V(s) = 100</code> and it contributes 0, while a state returning 0 or 40 contributes −50 or −10.</p>
 
@@ -43,7 +43,7 @@
   <p>A state-only baseline leaves the expected gradient unchanged and shrinks only the variance around it.</p>
 </div>
 
-<h2>How it actually works</h2>
+<h2>How it actually works<span class="h2-topic">— policy gradient</span></h2>
 <p>Seven parts follow, each one an upgrade stacked on the last.</p>
 
 <h3>Part 1 — Parameterise the policy itself</h3>
@@ -119,7 +119,7 @@
   </ul>
 </aside>
 
-<h2>Worked example</h2>
+<h2>Worked example<span class="h2-topic">— policy gradient</span></h2>
 
 <h3>1. What a baseline removes, in numbers</h3>
 <p>Two states, two actions each. In the easy state every action returns 100, so there is nothing to learn there. In the hard state the actions return 40 and 0. Use each state's own average as the baseline.</p>
@@ -161,7 +161,7 @@
 
 <p><strong>What to notice.</strong> λ = 0 trusts the critic completely and λ = 1 trusts the observed rewards completely, and every setting between is a weighted compromise — 1.90 is 45% of the way from 1.00 to 2.80. λ is not a learning rate and does not shrink the update; it decides how much of the future each advantage is allowed to see. Common values sit near 0.95, where the critic's bias is small next to the variance of a long return.</p>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— policy gradient</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"PPO's clip guarantees the policy moves by at most ε."</strong> It feels right because ε = 0.2 is right there in the formula, and a bound that appears in the objective looks like a bound on the result. But the clip acts on the <em>objective</em>, not on the parameters.</p>
@@ -175,7 +175,7 @@
   <tr><td>ε = 0.2 caps how far the policy can move.</td><td>The clip caps incentive, not parameter distance; epochs and Adam can push the ratio past 1.2.</td></tr>
 </table>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— policy gradient</span></h2>
 <ol class="quiz">
   <li>Why does subtracting a baseline not bias the policy gradient?
     <details><summary>Answer</summary>
@@ -194,7 +194,7 @@
   </li>
 </ol>
 
-<h2>Build it in Colab</h2>
+<h2>Build it in Colab<span class="h2-topic">— policy gradient</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/025-policy-gradient-at-scale.ipynb">open the notebook in Colab</a> · <a href="../notebooks/025-policy-gradient-at-scale.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
 ratio, adv, eps = 1.3, 2.0, 0.2
@@ -204,7 +204,7 @@ print(f&quot;ratio={ratio} adv={adv} -&gt; unclipped={unclipped} clipped={clippe
 for r in (0.5, 1.0, 1.3):
     print(f&quot;r={r}: objective={min(r * adv, np.clip(r, 1-eps, 1+eps) * adv):.2f}&quot;)</code></pre>
 
-<h2>Extra practice</h2>
+<h2>Extra practice<span class="h2-topic">— policy gradient</span></h2>
 <p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
 <div class="practice"><script type="application/json" class="practice-data">[{"q": "PPO, ε=0.2, ratio 1.3, A>0. Objective?", "o": ["1.2A", "1.3A", "0.8A", "1.0A"], "a": 0, "why": "min(1.3A, 1.2A) = 1.2A."}, {"q": "A baseline reduces…", "o": ["Variance", "Bias", "Parameters", "Reward"], "a": 0, "why": "It is zero in expectation."}]</script></div>
 

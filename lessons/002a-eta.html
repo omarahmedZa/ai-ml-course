@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>002.1 — η: how far one step goes</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -70,7 +70,7 @@
   <p>Row 3: 0.1 × 2 = 0.2, so w = 1 − 0.2 = <strong>0.8</strong>. Row 4: the slope is −2, so the step is −0.2, and subtracting a negative moves w up: −1 + 0.2 = <strong>−0.8</strong>. On the left side of the bowl the same rule walks uphill toward zero.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— η</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"A bigger η means faster learning."</strong> Up to a point, yes. Past it, a bigger η means bigger steps that miss the bottom, and the loss gets worse while the weights swing wildly.</p>
@@ -78,7 +78,7 @@
 </div>
 <p><strong>The tell:</strong> the loss prints 9, 9, 9 while the weights alternate in sign. That is not slow learning; that is a step that lands exactly as far on the far side every time.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— η</span></h2>
 <ol class="quiz">
   <li>At w = 2 the slope of f(w) = w² is 4. With η = 0.1, what is the new w?
     <details><summary>Answer</summary>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>004.9 — the whole objective</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=7">
+<link rel="stylesheet" href="../assets/lesson.css?v=8">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -76,7 +76,7 @@
   <p>The 1/n. Drop it and you are minimising a sum, which grows just by having more examples — so a bigger dataset would look worse.</p>
 </details>
 
-<h2>The trap</h2>
+<h2>The trap<span class="h2-topic">— The whole objective</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>“Minimising this guarantees good predictions on new data.”</strong> No. It minimises the loss on the data you already have. Whether that carries to data you have not seen is a separate question, answered by a separate test set — Topic 05.</p>
@@ -84,7 +84,7 @@
 </div>
 <p><strong>The tell:</strong> training loss falls while test loss rises. The walk is still going downhill on the map it was given, and the map has stopped matching the world.</p>
 
-<h2>Retrieval check</h2>
+<h2>Retrieval check<span class="h2-topic">— The whole objective</span></h2>
 <ol class="quiz">
   <li>Which symbol turns a sum into a rate per example?
     <details><summary>Answer</summary>
