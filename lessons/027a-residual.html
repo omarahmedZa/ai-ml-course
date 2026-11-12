@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>027.1 — x + MHA(LN(x)): the residual path</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Read x plus MHA of LN of x: what the residual copy carries, and why the added identity keeps gradients alive.">
+</head>
+<body data-page="lab" data-lesson="027a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Transformer · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="027-transformer-block.html#labs">Topic 27 · The Transformer block</a> — where the residual connection is introduced</p>
+
+<header class="masthead">
+  <p class="kicker">The block, one line at a time · Lab 1</p>
+  <h1>x + MHA(LN(x)) — the residual path</h1>
+  <p class="objective">You can read the line left to right, say what the addition preserves, and explain why the identity path keeps gradients alive in a deep stack.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">x′ =</span> <span class="hot">x + MHA( LN(x) )</span></p>
+<p class="eqn-note">Lab 1 · the addition is lit; the prime marks the block's output</p>
+<p>The block has two sub-layers, and each one is wrapped the same way. This lab reads the attention half. The feed-forward half repeats the shape with a different branch, so once this line is clear, the block is clear.</p>
+
+<h2>Three symbols in one line</h2>
+<p><strong>x</strong> is one token's vector: 512 numbers, say. <strong>LN</strong> is LayerNorm, which rescales those numbers to mean 0 and spread 1 and then applies a learned scale and shift. <strong>MHA</strong> is multi-head attention, the only part that moves information between tokens. The result is added back to x.</p>
+
+<h2>A highway beside the branch</h2>
+<p>The branch can shrink its output to almost nothing, or make it large. The copy of x does neither: it bypasses LN and attention entirely and arrives unchanged. So the block's output is always the input <em>plus a change</em>. Nothing is overwritten, and the original vector stays reachable at every depth.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-res-t f-res-d">
+    <title id="f-res-t">A residual block: x goes through LayerNorm and attention, and a copy of x skips straight to the addition</title>
+    <desc id="f-res-d">Token vector x enters at the left. One path runs up through LayerNorm and multi-head attention and down into a plus circle. A second path runs along the bottom, unmodified, into the same plus circle. The sum leaves on the right as x prime.</desc>
+    <rect x="40" y="175" width="100" height="62" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.8"/>
+    <text x="90" y="212" text-anchor="middle" font-size="20" fill="var(--sym-data)" font-family="ui-monospace, monospace">x</text>
+    <rect x="190" y="44" width="116" height="56" rx="8" fill="var(--card)" stroke="var(--sym-env)" stroke-width="1.6"/>
+    <text x="248" y="69" text-anchor="middle" font-size="16" fill="var(--sym-env)" font-family="ui-monospace, monospace">LN</text>
+    <text x="248" y="87" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">each token</text>
+    <rect x="360" y="44" width="116" height="56" rx="8" fill="var(--card)" stroke="var(--sym-param)" stroke-width="1.6"/>
+    <text x="418" y="69" text-anchor="middle" font-size="16" fill="var(--sym-param)" font-family="ui-monospace, monospace">MHA</text>
+    <text x="418" y="87" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">across tokens</text>
+    <polyline points="90,175 90,72 184,72" fill="none" stroke="var(--ink-faint)" stroke-width="1.6"/>
+    <path d="M192,72 l-9,-4 l0,8 z" fill="var(--ink-faint)"/>
+    <line x1="306" y1="72" x2="352" y2="72" stroke="var(--ink-faint)" stroke-width="1.6"/>
+    <path d="M360,72 l-9,-4 l0,8 z" fill="var(--ink-faint)"/>
+    <polyline points="418,100 418,212 526,212" fill="none" stroke="var(--ink-faint)" stroke-width="1.6"/>
+    <path d="M534,212 l-9,-4 l0,8 z" fill="var(--ink-faint)"/>
+    <polyline points="90,237 90,278 552,278 552,239" fill="none" stroke="var(--sym-data)" stroke-width="1.8"/>
+    <path d="M552,231 l-4,9 l8,0 z" fill="var(--sym-data)"/>
+    <circle cx="552" cy="212" r="20" fill="var(--card)" stroke="var(--ink-soft)" stroke-width="1.8"/>
+    <text x="552" y="219" text-anchor="middle" font-size="20" fill="var(--ink)" font-family="ui-monospace, monospace">+</text>
+    <line x1="572" y1="212" x2="602" y2="212" stroke="var(--ink-faint)" stroke-width="1.6"/>
+    <path d="M610,212 l-9,-4 l0,8 z" fill="var(--ink-faint)"/>
+    <rect x="612" y="175" width="80" height="62" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.8"/>
+    <text x="652" y="212" text-anchor="middle" font-size="20" fill="var(--sym-pred)" font-family="ui-monospace, monospace">x′</text>
+    <text x="262" y="296" text-anchor="middle" font-size="11" fill="var(--sym-data)" font-family="ui-monospace, monospace">copy of x, unchanged</text>
+    <text x="248" y="28" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">branch</text>
+  </svg>
+  <figcaption><strong>The branch may be noisy; the copy arrives intact.</strong> The output is the input plus what attention adds, which is why a deep stack can still carry a clean signal from block one to block ninety-six.</figcaption>
+</figure>
+
+<h2>Why gradients survive</h2>
+<p>Training multiplies local slopes backwards through the stack. Through the branch alone, that is a product of numbers below 1, which shrinks fast: 0.9 taken to the 96th power is 0.00004. Through the addition, the slope of x + f(x) is 1 + f′(x). Each factor carries that constant 1, so the product cannot decay geometrically.</p>
+
+<table>
+  <tr><th class="num">Blocks deep</th><th class="num">Branch only (0.9<sup>L</sup>)</th><th class="num">With residual (1 + f′)</th></tr>
+  <tr><td class="num">1</td><td class="num">0.90</td><td class="num">1.00</td></tr>
+  <tr><td class="num">12</td><td class="num">0.28</td><td class="num">1.00</td></tr>
+  <tr><td class="num">48</td><td class="num">0.006</td><td class="num">1.00</td></tr>
+  <tr><td class="num">96</td><td class="num">0.00004</td><td class="num">1.00</td></tr>
+</table>
+
+<h2>Why LayerNorm sits inside the branch</h2>
+<p>Pre-LN normalises the input to each sub-layer, so the highway stays a clean chain of additions. Post-LN normalises after the addition, which puts a division on the highway; very deep post-LN models then need a long learning-rate warmup to stay stable. Modern blocks use pre-LN for exactly this reason.</p>
+
+<h2>What the addition costs</h2>
+<p>No new parameters. It stores one extra d-wide vector per token per sub-layer for the backward pass and performs d additions. Next to the two matrix multiplies inside the branch, that is close to free.</p>
+
+<h2>Faded example</h2>
+<p>Take x = [2, 4, 6, 8]. LayerNorm subtracts the mean 5 and divides by the spread 2.236, giving [−1.34, −0.45, 0.45, 1.34]. Suppose the branch returns [0.5, −0.5, 0.5, −0.5].</p>
+<table>
+  <tr><th>x</th><th>Branch output</th><th>x′</th></tr>
+  <tr><td class="num">[2, 4, 6, 8]</td><td class="num">[0.5, −0.5, 0.5, −0.5]</td><td class="num">[2.5, 3.5, 6.5, 7.5]</td></tr>
+  <tr><td class="num">[2, 4, 6, 8]</td><td class="num">[0, 0, 0, 0]</td><td class="num">?</td></tr>
+  <tr><td class="num">[2, 4, 6, 8]</td><td class="num">[1, 1, 1, 1]</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last two rows</summary>
+  <p>Zero branch: x′ = <strong>[2, 4, 6, 8]</strong>, the input unchanged. Unit branch: x′ = <strong>[3, 5, 7, 9]</strong>. Notice that the LayerNorm output never appears in x′ directly — it only shaped what the branch produced.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The residual keeps the input, so the block does nothing."</strong> The addition guarantees the input is <em>available</em>, not that the branch is ignored. A trained branch writes real changes into the stream; that is how the model learns anything at all.</p>
+  <p><strong>Correction:</strong> the residual is a guarantee about the path, not a statement about the size of the change. Zero the branch's output weights and the block is exactly the identity — a useful test, not normal behaviour.</p>
+</div>
+<p><strong>The tell:</strong> measure the norm of the branch output in a trained model. It is not near zero. If someone claims "the residual means extra layers are free", ask them for the parameter count and the attention cost of those layers.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>x = [10, 10] and the branch returns [−2, 2]. What is x′?
+    <details><summary>Answer</summary>
+      <p>[8, 12]. The addition is element by element, so each number meets its own change.</p>
+    </details>
+  </li>
+  <li>Why does a constant 1 in the derivative matter more than its size?
+    <details><summary>Answer</summary>
+      <p>Because the backward pass multiplies one factor per block. A product of numbers all below 1 collapses; a product where every factor contains 1 does not, however small the branch term is.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>You have the wiring and the reason for it. Topic 28 asks what objective and what data turn a stack of these blocks into a language model — and why scale alone produced a step change.</p>
+
+<div class="labnav">
+  <a href="027-transformer-block.html#labs">← Back to the formula</a>
+  <a href="027-transformer-block.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

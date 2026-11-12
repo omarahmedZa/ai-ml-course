@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>002.1 — η: how far one step goes</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="η sets how much of the slope each step obeys — and decides whether the loss reaches the bottom.">
+</head>
+<body data-page="lab" data-lesson="002a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Equation · Lab 1 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="002-slope-to-gradient.html#labs">Topic 02 · Slope → gradient</a> — the size of a step</p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · the learning rate</p>
+  <h1>η — how far one step goes</h1>
+  <p class="objective">You can say what η controls, and tell a step that is too small from one that is too large.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">w ← w −</span> <span class="hot">η</span> <span class="dim">∇f(w)</span></p>
+<p class="eqn-note">Lab 1 of 2 · only η is lit; the slope and the weights stay dim</p>
+<p>η (eta) is the <strong>learning rate</strong>. The gradient ∇f says which way the ground rises; η says how much of that reading you act on. Training repeats w ← w − η∇f(w) until the loss stops falling.</p>
+
+<h2>A step size, not a speed</h2>
+<p>Take f(w) = w², the bowl used all through topic 2. Its slope is 2w. At w = 3 the slope is 6, so a rate of η = 0.1 moves w by 0.6 and lands on 2.4. The loss drops from 9 to 5.76.</p>
+<p>η is not a speed in time. It is a fraction of the slope, so the same η takes a big step where the ground is steep and a tiny step near the bottom, where the slope is small.</p>
+
+<h2>Three rates, three fates</h2>
+<p>Same start, w = 3. Same bowl, eight steps. Only η differs, and it decides whether the loss reaches the bottom or never moves at all.</p>
+
+<figure class="fig" data-graph="steps">
+  <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="f-eta-t f-eta-d">
+    <title id="f-eta-t">Three learning rates descending the same bowl over eight steps</title>
+    <desc id="f-eta-d">Three loss curves, all starting at a loss of 9 on the bowl w squared. With eta 0.05 the curve falls slowly and is still above 1.5 after eight steps. With eta 0.3 it collapses to almost zero by step five. With eta 1.0 the curve is a flat line at 9, because the weight flips between 3 and minus 3 on every step.</desc>
+    <g data-layer></g>
+  </svg>
+  <script type="application/json" class="steps-data">{"rates":[0.05,0.3,1.0],"start":3,"steps":8}</script>
+  <figcaption><strong>The rate decides the shape of the descent, not just its speed.</strong> η = 0.3 reaches the bottom in five steps, η = 0.05 is still crawling, and η = 1.0 never leaves the starting loss.</figcaption>
+</figure>
+
+<p>Each step multiplies the distance to zero by |1 − 2η|: that is 0.9 at 0.05, 0.4 at 0.3, and exactly 1 at 1.0.</p>
+<p>At η = 1.0 the factor is 1, so the distance never shrinks. The weight flips 3 → −3 → 3 and the loss sits at 9 forever. The step has the right direction and the wrong length.</p>
+
+<h2>Choosing η</h2>
+<p>A small η is not safer, only slower. At 0.05 the distance shrinks by 10% per step, so it takes roughly 40 steps to do what 0.3 does in five.</p>
+<p>A large η overshoots the bottom and climbs the opposite wall. On this bowl the dividing line is η = 1: below it the loss falls, at it the loss is stuck, above it the loss grows without bound.</p>
+
+<h2>Faded example</h2>
+<p>Start at w = 2, where the slope is 2w = 4. With η = 0.1 the step is 0.4, and w becomes 2 − 0.4 = 1.6. Fill in the last two rows.</p>
+<table>
+  <tr><th>Weight w</th><th class="num">Slope 2w</th><th class="num">Step η · slope</th><th class="num">New w</th></tr>
+  <tr><td class="num">3</td><td class="num">6</td><td class="num">0.6</td><td class="num">2.4</td></tr>
+  <tr><td class="num">2</td><td class="num">4</td><td class="num">0.4</td><td class="num">1.6</td></tr>
+  <tr><td class="num">1</td><td class="num">2</td><td class="num">?</td><td class="num">?</td></tr>
+  <tr><td class="num">−1</td><td class="num">−2</td><td class="num">?</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last two rows</summary>
+  <p>Row 3: 0.1 × 2 = 0.2, so w = 1 − 0.2 = <strong>0.8</strong>. Row 4: the slope is −2, so the step is −0.2, and subtracting a negative moves w up: −1 + 0.2 = <strong>−0.8</strong>. On the left side of the bowl the same rule walks uphill toward zero.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A bigger η means faster learning."</strong> Up to a point, yes. Past it, a bigger η means bigger steps that miss the bottom, and the loss gets worse while the weights swing wildly.</p>
+  <p><strong>Correction:</strong> judge the rate by the loss curve, not by the step size. A converging run shows a falling loss and shrinking steps; a diverging run shows the same loss repeating or climbing.</p>
+</div>
+<p><strong>The tell:</strong> the loss prints 9, 9, 9 while the weights alternate in sign. That is not slow learning; that is a step that lands exactly as far on the far side every time.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>At w = 2 the slope of f(w) = w² is 4. With η = 0.1, what is the new w?
+    <details><summary>Answer</summary>
+      <p>The step is 0.1 × 4 = 0.4, so w becomes 2 − 0.4 = <strong>1.6</strong>. The loss falls from 4 to 2.56.</p>
+    </details>
+  </li>
+  <li>Why does η = 1.0 leave the loss at 9 on this bowl?
+    <details><summary>Answer</summary>
+      <p>The distance is multiplied by |1 − 2η| = 1 each step, so it is preserved and only the sign flips. The weight bounces between 3 and −3, and both give w² = 9.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Lab 2 takes the minus sign apart: why the step goes against the slope rather than along it.</p>
+
+<div class="labnav">
+  <a href="002-slope-to-gradient.html#labs">← Back to the formula</a>
+  <a href="002b-update.html">Lab 02b · Why the update subtracts →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

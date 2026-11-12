@@ -55,6 +55,15 @@
 <h3>Part 7 — Cache the keys and values</h3>
 <p>Generation is one token at a time. Without a cache, each new token would recompute attention over the whole prefix; with a <strong>KV cache</strong>, the keys and values of past tokens are stored and only the new row is computed. <strong>Why this part exists:</strong> generation cost per token drops from growing with the prefix to constant, which is the difference between a usable chat model and an unusable one.</p>
 
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 1 · about 3 minutes each</p>
+  <h3 class="lab-title">Take this apart, one symbol at a time</h3>
+  <p class="lab-sub">Each lab isolates one symbol and gives you a figure you can drag. They use the same numbers as the lesson, so you can carry the result back here.</p>
+  <ul class="lab-list">
+    <li><a href="029a-temperature.html"><span class="lab-num">029a</span><span class="lab-body"><strong>softmax(z/T) — temperature</strong></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
+</aside>
+
 <h2>Worked example</h2>
 
 <h3>1. Temperature, numerically</h3>

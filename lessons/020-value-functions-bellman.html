@@ -57,6 +57,16 @@
 <h3>Part 7 — TD learning samples instead of averaging</h3>
 <p>In practice <code>P</code> is unknown, so take the one transition you observed and move partway toward it: <code>V(s) ← V(s) + α[r + γV(s′) − V(s)]</code>. With <code>V(s) = 2.0</code>, <code>r = 1</code>, <code>γ = 0.9</code>, <code>V(s′) = 2</code> and <code>α = 0.1</code>, the target is 2.8, the error is 0.8, and the new value is 2.08. Why this part exists: you cannot sum over next states you have never enumerated, and <code>α = 0.1</code> is why one sample moves the estimate by 10% rather than all the way.</p>
 
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 2 · about 3 minutes each</p>
+  <h3 class="lab-title">Take this apart, one symbol at a time</h3>
+  <p class="lab-sub">Each lab isolates one symbol and gives you a figure you can drag. They use the same numbers as the lesson, so you can carry the result back here.</p>
+  <ul class="lab-list">
+    <li><a href="020a-bootstrap.html"><span class="lab-num">020a</span><span class="lab-body"><strong>V(s) = r + γV(s′) — bootstrapping</strong></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="020b-optimality.html"><span class="lab-num">020b</span><span class="lab-body"><strong>max — the value of the best action</strong></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
+</aside>
+
 <h2>Worked example</h2>
 
 <h3>1. One backup, two actions</h3>

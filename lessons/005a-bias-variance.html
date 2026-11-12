@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>005.1 — Bias², variance, noise</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Split expected error into bias squared, variance and noise, and see which part more data can shrink.">
+</head>
+<body data-page="lab" data-lesson="005a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Generalization · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="005-generalization.html#labs">Topic 05 · Generalization</a></p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · generalization</p>
+  <h1>Bias², variance, noise — the three parts of a miss</h1>
+  <p class="objective">You can split an expected error into three parts and say which one more data can shrink.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">E[(y − f(x))²] =</span> <span class="hot">bias² + variance + noise</span></p>
+<p class="eqn-note">One error, three sources · the left side is what you measure, the right side is where it comes from</p>
+<p>E[·] means the average over many imagined datasets. y is the true answer on a fresh row, f(x) is the model's prediction, and the left side is the squared error you expect. The right side splits that error into three named parts.</p>
+<p>The three terms are not three different models. They are three sources inside one model's error, estimated by fitting that model on many resampled datasets and averaging the results.</p>
+
+<h2>Three sources of one miss</h2>
+<p>Bias is the miss that survives averaging over datasets. A rigid model — a straight line through a curve — keeps making the same kind of error, so its bias is large: bias² = 9 means an average miss of 3. Squaring makes bias a cost, not a direction.</p>
+<p>Variance is how much the fitted model jumps when the rows are resampled. A wiggly model chases individual points, so its prediction moves a lot; a rigid model barely moves. Variance is already squared, so it enters the sum unchanged.</p>
+<p>Noise is randomness in y itself: two identical rows can carry different labels. No model can predict it away. It is the floor under every model's error — here, 1 point that no amount of cleverness removes.</p>
+
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-bv-t f-bv-d">
+    <title id="f-bv-t">Expected error split into bias squared, variance and noise</title>
+    <desc id="f-bv-d">Three bars for one model. Bias squared is 9, variance is 4, noise is 1. Together they give an expected error of 14.</desc>
+    <g data-layer>
+      <line x1="64" y1="290" x2="700" y2="290" stroke="var(--ink-faint)"/>
+      <rect x="130" y="85" width="80" height="205" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="342" y="199" width="80" height="91" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="554" y="267" width="80" height="23" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <text x="170" y="77" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">9</text>
+      <text x="382" y="191" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">4</text>
+      <text x="594" y="259" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">1</text>
+      <text x="170" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">bias²</text>
+      <text x="382" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">variance</text>
+      <text x="594" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">noise</text>
+    </g>
+  </svg>
+  <script type="application/json" class="bars-data">{"values":[9,4,1],"labels":["bias²","variance","noise"],"max":11,"ylabel":"error"}</script>
+  <figcaption><strong>The bars add.</strong> 9 + 4 + 1 = 14. Only variance is a bar that more rows can shorten; bias and noise stay where they are.</figcaption>
+</figure>
+
+<h2>What more data can and cannot do</h2>
+<p>More rows make an average steadier, so variance falls. Bias does not: if the model cannot bend, ten times the data still fits the wrong shape. Noise does not move either, because it belongs to the world rather than the sample.</p>
+<p>That is why “collect more data” is a diagnosis, not a reflex. It is the right lever only when the variance bar dominates. When bias² dominates, the lever is a richer model or better features.</p>
+
+<table>
+  <tr><th>What you see</th><th>Dominant term</th><th>Lever that works</th></tr>
+  <tr><td>Train and test both high</td><td>bias²</td><td>More capacity, better features</td></tr>
+  <tr><td>Train low, test high</td><td>variance</td><td>More rows, regularisation</td></tr>
+  <tr><td>Both stuck above zero</td><td>noise</td><td>None — it is the floor</td></tr>
+</table>
+
+<h2>Faded example</h2>
+<p>Model A is 9 + 4 + 1 = 14. Model B swaps the first two terms. Fill in the total, then name which model more data would help.</p>
+<table>
+  <tr><th>Model</th><th class="num">Bias²</th><th class="num">Variance</th><th class="num">Noise</th><th class="num">Expected error</th></tr>
+  <tr><td>A</td><td class="num">9</td><td class="num">4</td><td class="num">1</td><td class="num">14</td></tr>
+  <tr><td>B</td><td class="num">4</td><td class="num">9</td><td class="num">1</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check model B</summary>
+  <p>B = 4 + 9 + 1 = <strong>14</strong>. Same total, opposite disease: A is rigid with high bias, B is flexible with high variance. More rows attack B's 9, not A's 9.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>“More data will fix it.”</strong> Extra rows shrink variance and nothing else. If bias² is the biggest bar, a larger dataset buys almost nothing — the model still cannot represent the pattern. Noise never moves, so it sets a floor no dataset can go under.</p>
+  <p><strong>Correction:</strong> diagnose first, then pull one lever. Bias: more capacity or better features. Variance: more rows or regularisation. Noise: report it and stop.</p>
+</div>
+<p><strong>The tell:</strong> add rows and both training and validation error flatten at the same high value. When the two curves meet above the noise floor, the gap is gone and bias is what remains.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>A model has bias² = 16, variance = 1, noise = 1. What is its expected error, and will ten times the data help?
+    <details><summary>Answer</summary>
+      <p>18. Barely: variance is only 1, so the floor from bias and noise is 17. More rows can remove at most 1 point.</p>
+    </details>
+  </li>
+  <li>Two models both score 14. One is 9/4/1, the other 4/9/1. Which one benefits from more rows?
+    <details><summary>Answer</summary>
+      <p>The 4/9/1 model: its variance is 9. Ten times the rows might push that toward 0, leaving a floor of 5; the rigid model's floor is 10.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Topic 06 fits the simplest model and prices its rigidity, then adds σ to turn the same weighted sum into a probability.</p>
+
+<div class="labnav">
+  <a href="005-generalization.html#labs">← Back to the formula</a>
+  <a href="005-generalization.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

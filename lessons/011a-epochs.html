@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>011.1 — Steps, batches, epochs</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Turn a dataset and a batch size into a count of weight updates, and see why epochs alone say nothing.">
+</head>
+<body data-page="lab" data-lesson="011a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Objective · Lab 1 / 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="011-training-loop.html#labs">Topic 11 · The training loop</a></p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · the training loop</p>
+  <h1>Steps, batches, epochs — three words, one division</h1>
+  <p class="objective">You can convert a dataset and a batch size into a count of weight updates, and say why an epoch count alone means nothing.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">updates = epochs ×</span> <span class="hot">n / batch</span> <span class="dim">= epochs × steps per epoch</span></p>
+<p class="eqn-note">Lab 1 of 1 · the division is lit; epochs only multiply what one pass already produced</p>
+<p>Three words get used as if they were one. A <em>step</em> is one weight update. A <em>batch</em> is the group of rows that produces it. An <em>epoch</em> is one full pass over the data. Only the step changes a weight, so only the step is a unit of learning.</p>
+
+<h2>The division</h2>
+<p>The dataset has 10,000 rows. Cut it into batches of 50 and you get 200 slices, so one epoch contains 200 steps. Batch 100 gives 100 steps; batch 500 gives 20. Bigger batches mean fewer, larger steps, because each step consumes more rows.</p>
+
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-bars-t f-bars-d">
+    <title id="f-bars-t">Steps per epoch falls as batch size grows</title>
+    <desc id="f-bars-d">Three bars for ten thousand rows: batch fifty gives two hundred steps, batch one hundred gives one hundred steps, batch five hundred gives twenty steps.</desc>
+    <g data-layer>
+      <line x1="64" y1="290" x2="700" y2="290" stroke="var(--ink-faint)"/>
+      <rect x="130" y="63" width="80" height="227" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="342" y="177" width="80" height="113" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="554" y="267" width="80" height="23" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <text x="170" y="55" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">200</text>
+      <text x="382" y="169" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">100</text>
+      <text x="594" y="259" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">20</text>
+      <text x="170" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">batch 50</text>
+      <text x="382" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">batch 100</text>
+      <text x="594" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">batch 500</text>
+    </g>
+  </svg>
+  <script type="application/json" class="bars-data">{"values":[200,100,20],"labels":["batch 50","batch 100","batch 500"],"max":220,"ylabel":"steps per epoch"}</script>
+  <figcaption><strong>Ten thousand rows, three batch sizes.</strong> The bar is the number of updates in one pass — a tenfold batch buys a tenth of the steps.</figcaption>
+</figure>
+
+<h2>Epochs multiply</h2>
+<p>One epoch is one pass, so the update count is the step count times the number of passes. Twenty epochs at batch 100 is 2,000 updates. The same twenty epochs at batch 500 is 400. Same data, same epochs, five times fewer chances to correct the weights.</p>
+
+<table>
+  <tr><th>Batch size</th><th class="num">Steps per epoch</th><th class="num">Updates in 20 epochs</th><th class="num">Rows per step</th></tr>
+  <tr><td class="num">50</td><td class="num">200</td><td class="num">4,000</td><td class="num">50</td></tr>
+  <tr><td class="num">100</td><td class="num">100</td><td class="num">2,000</td><td class="num">100</td></tr>
+  <tr><td class="num">500</td><td class="num">20</td><td class="num">400</td><td class="num">500</td></tr>
+</table>
+
+<h2>What the trade is</h2>
+<p>A small batch gives many noisy steps: few rows per gradient, so it jumps but corrects often. A large batch gives few smooth steps: a quieter average, more memory, fewer chances to fix a mistake. Neither is free, which is why batch size is a real decision and not a formatting detail.</p>
+
+<h2>One more example</h2>
+<p>The faded row used batch 250, which cuts 10,000 rows into 40 steps. Keep that batch and move only the epoch count: the division is already done, so each extra pass adds another 40 updates and nothing else in the run changes. The two operations stay in their order.</p>
+<table>
+  <tr><th class="num">Batch</th><th class="num">Steps per epoch</th><th class="num">Epochs</th><th class="num">Updates</th></tr>
+  <tr><td class="num">250</td><td class="num">40</td><td class="num">5</td><td class="num">200</td></tr>
+  <tr><td class="num">250</td><td class="num">40</td><td class="num">8</td><td class="num">320</td></tr>
+  <tr><td class="num">250</td><td class="num">40</td><td class="num">25</td><td class="num">1,000</td></tr>
+</table>
+<p>The table shows the step count frozen at 40 while the update total tracks the epoch count one for one, which is exactly what the multiplication half of the equation is doing: the division fixed the 40 once, and only the multiplication is left free to vary, which is why the same eight passes at batch 250 and at batch 100 land 320 and 800 updates apart.</p>
+
+<h2>Faded example</h2>
+<p>Same 10,000 rows, a batch size that is not in the table, and a shorter run. Fill in the number of updates.</p>
+<table>
+  <tr><th>Rows</th><th class="num">Batch size</th><th class="num">Steps per epoch</th><th class="num">Epochs</th><th class="num">Updates</th></tr>
+  <tr><td class="num">10,000</td><td class="num">100</td><td class="num">100</td><td class="num">20</td><td class="num">2,000</td></tr>
+  <tr><td class="num">10,000</td><td class="num">250</td><td class="num">40</td><td class="num">8</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the hidden count</summary>
+  <p><strong>320</strong>. First the division: 10,000 / 250 = 40 steps per epoch. Then the multiplication: 40 × 8 = 320 updates. Do them in that order; multiplying the epoch count first gives the wrong shape of answer.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Twenty epochs means twenty units of training, whatever the batch size."</strong> It feels right because the epoch is the word people report, and the loss curve is usually drawn against it.</p>
+  <p><strong>Correction:</strong> an epoch is a pass, not an update. Batch size decides how many updates fit inside that pass, so two runs with the same epoch count can differ tenfold in how often the weights moved.</p>
+</div>
+<p><strong>The tell:</strong> hold the epochs fixed and change the batch from 100 to 1,000. The update count falls tenfold and the curve has a tenth as many points. If the reported "training" is unchanged, the report is counting passes, not steps.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>10,000 rows, batch 250, eight epochs. How many updates?
+    <details><summary>Answer</summary>
+      <p><strong>320</strong>. 10,000 / 250 = 40 steps per epoch, then 40 × 8. Two operations, in this order.</p>
+    </details>
+  </li>
+  <li>Same 20 epochs, batch 50 or batch 500. Which run takes more steps?
+    <details><summary>Answer</summary>
+      <p>Batch 50: 4,000 updates against 400. The small batch takes ten times as many steps over the same number of passes.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Topic 12 asks when all those steps start to hurt: the point where more passes improve the training loss while the held-out loss gets worse.</p>
+
+<div class="labnav">
+  <a href="011-training-loop.html#labs">← Back to the formula</a>
+  <a href="011-training-loop.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

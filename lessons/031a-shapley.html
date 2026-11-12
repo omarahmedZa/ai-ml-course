@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>031.1 — φ: a fair share of the prediction</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Compute the Shapley value for two features by averaging their marginal gain over both orderings.">
+</head>
+<body data-page="lab" data-lesson="031a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Explainability · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="031-attribution-methods.html#labs">Topic 31 · Attribution methods</a> — where Shapley is defined</p>
+
+<header class="masthead">
+  <p class="kicker">Attribution, one symbol at a time · Lab 1</p>
+  <h1>φ — a fair share of the prediction</h1>
+  <p class="objective">You can compute a Shapley value for two features by averaging their marginal gain over every ordering.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">f(x) = φ<sub>0</sub> +</span> <span class="hot">φ<sub>1</sub> + φ<sub>2</sub></span> <span class="dim">= 1.0</span></p>
+<p class="eqn-note">Lab 1 of 3 · the shares are lit; the baseline and the total are dimmed</p>
+<p>SHAP asks one question about one prediction: how much of it belongs to each feature? φ (phi) is one feature's answer. The shares plus the baseline φ<sub>0</sub> must rebuild the output exactly, so φ is a split, never a score on its own.</p>
+
+<h2>The game</h2>
+<p>Write v(S) for the model's score when only the features in set S are switched on. v(∅) = 0 is the baseline — no features, no signal. With two features there are four coalitions to score.</p>
+
+<table>
+  <tr><th>Coalition S</th><th>Features present</th><th class="num">Score v(S)</th></tr>
+  <tr><td>∅</td><td>none</td><td class="num">0</td></tr>
+  <tr><td>{1}</td><td>feature 1 only</td><td class="num">0.6</td></tr>
+  <tr><td>{2}</td><td>feature 2 only</td><td class="num">0.4</td></tr>
+  <tr><td>{1,2}</td><td>both</td><td class="num">1.0</td></tr>
+</table>
+
+<p>Here the two singles happen to add to the pair. That is a coincidence of these numbers, and the faded example below breaks it on purpose.</p>
+
+<h2>Two orderings, one average</h2>
+<p>A feature's marginal gain depends on who arrived first. Add the features one at a time and read off what each addition was worth.</p>
+
+<table>
+  <tr><th>Ordering</th><th class="num">Gain for feature 1</th><th class="num">Gain for feature 2</th></tr>
+  <tr><td>1 then 2</td><td class="num">0.6 − 0 = 0.6</td><td class="num">1.0 − 0.6 = 0.4</td></tr>
+  <tr><td>2 then 1</td><td class="num">1.0 − 0.4 = 0.6</td><td class="num">0.4 − 0 = 0.4</td></tr>
+  <tr><td>average</td><td class="num">φ₁ = 0.6</td><td class="num">φ₂ = 0.4</td></tr>
+</table>
+
+<p>Both orderings agree here, so the average is easy: 0.6 and 0.4. The averaging is the point. Each ordering pays a feature for the moment it arrived, and no feature is punished for arriving late.</p>
+
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-shap-t f-shap-d">
+    <title id="f-shap-t">Shapley values of 0.6 and 0.4 for two features</title>
+    <desc id="f-shap-d">Two bars on a common scale from zero to 0.7. Feature 1 stands at 0.6 and feature 2 at 0.4; together the bars account for the whole prediction of 1.0.</desc>
+    <g data-layer>
+      <line x1="64" y1="290" x2="700" y2="290" stroke="var(--ink-faint)"/>
+      <rect x="183" y="76" width="80" height="214" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="501" y="147" width="80" height="143" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <text x="223" y="66" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.6</text>
+      <text x="541" y="137" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.4</text>
+      <text x="223" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">feature 1</text>
+      <text x="541" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">feature 2</text>
+      <text x="54" y="18" text-anchor="start" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">SHAP value</text>
+    </g>
+  </svg>
+  <div class="bars-data" hidden>{"values":[0.6,0.4],"labels":["feature 1","feature 2"],"max":0.7,"ylabel":"SHAP value"}</div>
+  <figcaption><strong>The two bars rebuild the prediction.</strong> φ₁ = 0.6 and φ₂ = 0.4 sum to v({1,2}) = 1.0, with a baseline of φ₀ = 0.</figcaption>
+</figure>
+
+<h2>Why average orderings</h2>
+<p>With two features there are only two orderings; with ten there are 3,628,800, which is why real SHAP is approximated by sampling. The average is worth remembering for three properties: a useless feature earns zero, identical features split evenly, and the shares always sum to the total.</p>
+
+<h2>Faded example</h2>
+<p>Same game, new scores: v(∅) = 0, v({1}) = 0.3, v({2}) = 0.5, v({1,2}) = 1.0. Now the singles add to 0.8, not 1.0, so the two orderings disagree and the average has real work to do.</p>
+
+<table>
+  <tr><th>Step</th><th class="num">Gain for feature 1</th><th class="num">Gain for feature 2</th></tr>
+  <tr><td>1 then 2</td><td class="num">0.3 − 0 = 0.3</td><td class="num">1.0 − 0.3 = 0.7</td></tr>
+  <tr><td>2 then 1</td><td class="num">1.0 − 0.5 = ?</td><td class="num">0.5 − 0 = 0.5</td></tr>
+  <tr><td>average φ</td><td class="num">?</td><td class="num">?</td></tr>
+</table>
+
+<details><summary>Check the last two rows</summary>
+  <p>Feature 1 arriving second gains 1.0 − 0.5 = 0.5. So φ₁ = (0.3 + 0.5)/2 = <strong>0.4</strong> and φ₂ = (0.7 + 0.5)/2 = <strong>0.6</strong>. Sum 1.0, as it must be.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"φ₁ = 0.6 means feature 1 caused 60% of the decision."</strong> It means feature 1 is worth 0.6 in this game, against this baseline, with this rule for what "present" means. Move the baseline and every φ shifts while the prediction stays put.</p>
+  <p><strong>Correction:</strong> read φ as a share of one prediction under stated assumptions. Two correlated features divide one effect between them, so both look harmless and the real driver disappears from the chart.</p>
+</div>
+<p><strong>The tell:</strong> add a duplicate column carrying the same feature. The prediction does not move, but the original column's φ falls by about half. Credit was divided, not earned — and no number tells you that happened.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>With v(∅) = 0, v({1}) = 0.2, v({2}) = 0.7 and v({1,2}) = 1.0, what are φ₁ and φ₂?
+    <details><summary>Answer</summary>
+      <p>Order 1 then 2 gives 0.2 and 0.8; order 2 then 1 gives 0.7 and 0.3. Averaging: φ₁ = 0.45, φ₂ = 0.55. They sum to 1.0.</p>
+    </details>
+  </li>
+  <li>Why must the two shares add to the output rather than to zero?
+    <details><summary>Answer</summary>
+      <p>Because φ₀ is the baseline, not zero credit. Baseline plus all shares reconstructs f(x); that property is what makes the list trustworthy as a decomposition.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>You can now price a coalition. The open question is whether an explanation can be trusted at all — stability under a re-run, and what a faithfulness test actually measures.</p>
+
+<div class="labnav">
+  <a href="031-attribution-methods.html#labs">← Back to the formula</a>
+  <a href="031-attribution-methods.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

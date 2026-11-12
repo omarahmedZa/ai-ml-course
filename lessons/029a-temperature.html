@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>029.1 — softmax(z/T): temperature</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Divide logits by a temperature before softmax: one dial, three distributions, no change in ranking.">
+</head>
+<body data-page="lab" data-lesson="029a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Inference · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="029-alignment-and-inference.html#labs">Topic 29 · Alignment &amp; inference</a> — where decoding is introduced</p>
+
+<header class="masthead">
+  <p class="kicker">Inference, one symbol at a time · Lab 1</p>
+  <h1>softmax(z/T) — temperature</h1>
+  <p class="objective">You can compute next-token probabilities at three temperatures, and say precisely what the dial does and does not change.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">p = softmax(</span> <span class="hot">z / T</span> <span class="dim">)</span></p>
+<p class="eqn-note">Lab 1 · z is the logit vector; T is the temperature</p>
+<p>The model's last layer produces one raw score per vocabulary item. That score is called a <strong>logit</strong>: any real number, positive or negative. Softmax turns the row into probabilities, and the sampler draws one token from them.</p>
+
+<h2>One dial before sampling</h2>
+<p>Temperature divides every logit by the same number before softmax. T = 1 leaves the model exactly as trained. T below 1 sharpens the row; T above 1 flattens it. No weight changes, no extra computation worth counting — the logits are simply rescaled first.</p>
+
+<table>
+  <tr><th class="num">T</th><th class="num">Scaled logits</th><th class="num">Weights</th></tr>
+  <tr><td class="num">0.5</td><td class="num">[4, 2, 0]</td><td class="num">0.867 / 0.117 / 0.016</td></tr>
+  <tr><td class="num">1</td><td class="num">[2, 1, 0]</td><td class="num">0.665 / 0.245 / 0.090</td></tr>
+  <tr><td class="num">2</td><td class="num">[1, 0.5, 0]</td><td class="num">0.506 / 0.307 / 0.186</td></tr>
+</table>
+
+<figure class="fig" data-graph="bars">
+  <script type="application/json" class="bars-data">{"values":[0.867,0.117,0.016],"labels":["token 1","token 2","token 3"],"max":0.95,"ylabel":"probability","highlight":0}</script>
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-temp-t f-temp-d">
+    <title id="f-temp-t">Next-token probabilities at temperature 0.5 for logits two, one and zero</title>
+    <desc id="f-temp-d">Three bars. Token one has probability 0.867, token two 0.117, token three 0.016. The first bar is highlighted; the row sums to one.</desc>
+    <g data-layer></g>
+  </svg>
+  <figcaption><strong>At T = 0.5 the leader holds 87% of the mass.</strong> The ranking is identical at T = 2; only the shares moved, which is why temperature changes style far more than knowledge.</figcaption>
+</figure>
+
+<h2>Dividing is raising to a power</h2>
+<p>Dividing logits by T is the same as raising each probability to the power 1/T and renormalising. At T = 0.5 that means squaring: 0.665² = 0.442, 0.245² = 0.060, 0.090² = 0.008. The total is 0.510, so the new shares are 0.867, 0.118, 0.016. Squaring punishes small numbers, so the leader gains.</p>
+<p>At T = 2 the same arithmetic takes square roots: 0.816, 0.495, 0.300, total 1.611, giving 0.506, 0.307 and 0.186.</p>
+
+<h2>The two limits</h2>
+<p>As T falls toward 0, the largest logit takes everything: with [2, 1, 0] at T = 0.1 the leader already holds 0.9999. As T rises, the row tends toward uniform 1/V. T = 0 cannot be computed — it divides by zero — so serving stacks special-case it as greedy pick-the-argmax.</p>
+
+<h2>What the dial is for</h2>
+<p>Near T = 1 the model samples in proportion to its trained distribution, which is what most chat products want. Lower values suit extraction and code, where one answer is right and variety is noise. Higher values suit brainstorming, where surprise is the point. None of these settings is more truthful; they trade repetition against variety.</p>
+
+<h2>Faded example</h2>
+<p>Two logits, three temperatures. The first two rows are done; fill the third.</p>
+<table>
+  <tr><th class="num">T</th><th class="num">Scaled logits [1, 0]</th><th class="num">Weights</th></tr>
+  <tr><td class="num">2</td><td class="num">[0.5, 0]</td><td class="num">0.622 / 0.378</td></tr>
+  <tr><td class="num">1</td><td class="num">[1, 0]</td><td class="num">0.731 / 0.269</td></tr>
+  <tr><td class="num">0.5</td><td class="num">[2, 0]</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last row</summary>
+  <p>e<sup>2</sup> = 7.389 against 1, total 8.389, so the weights are <strong>0.881 and 0.119</strong>. The gap doubled from 1 to 2, and the leader's share rose from 73% to 88%.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Temperature 0 makes the model deterministic and more accurate."</strong> It makes decoding greedy: the same prompt on the same hardware usually gives the same text. It does not make the answer right, and batching or floating-point order can still change a near-tie.</p>
+  <p><strong>Correction:</strong> temperature changes the <em>distribution</em>, never the ranking. Low temperature hides uncertainty rather than removing it, and it cannot add knowledge the weights do not hold.</p>
+</div>
+<p><strong>The tell:</strong> set T = 0.2 and sample a thousand times. The rare token still appears; it has simply become rare enough to look impossible. If a test depends on that, the test is flaky, not the model.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Both logits are 0. What does T = 2 change?
+    <details><summary>Answer</summary>
+      <p>Nothing. Zero divided by any positive T is still zero, so the row stays 0.5 / 0.5. Temperature can only widen or narrow an existing gap.</p>
+    </details>
+  </li>
+  <li>With logits [2, 1, 0], what happens to the smallest weight as T rises from 1 to 2?
+    <details><summary>Answer</summary>
+      <p>It rises from 0.090 to 0.186, more than double. Flattening helps the unlikely tokens most, which is why high temperature produces stranger continuations.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>You can now read softmax twice: over attention scores in topic 26, and over the vocabulary here with a temperature dial. Topic 30 turns to explaining a model that has already been trained.</p>
+
+<div class="labnav">
+  <a href="029-alignment-and-inference.html#labs">← Back to the formula</a>
+  <a href="029-alignment-and-inference.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

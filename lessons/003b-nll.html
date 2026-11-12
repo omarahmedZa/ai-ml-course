@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>003.2 — Σ: summing surprise over the data</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="NLL adds one −log p per row, then divides by the row count so two datasets can be compared.">
+</head>
+<body data-page="lab" data-lesson="003b">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Equation · Lab 2 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="003-probability-expectation-likelihood.html#labs">Topic 03 · Probability, expectation, likelihood</a> — from one row to a dataset</p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · summing surprise</p>
+  <h1>Σ — summing surprise over the data</h1>
+  <p class="objective">You can total the per-row surprises, then divide by the row count so two datasets can be compared.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">NLL(θ) =</span> <span class="hot">Σ<sub>i</sub></span> <span class="dim">−log p<sub>θ</sub>(y<sub>i</sub> | x<sub>i</sub>)</span></p>
+<p class="eqn-note">Lab 2 of 2 · only the sum is lit; the per-row term is dim</p>
+<p>Σ<sub>i</sub> (sigma) means "add this up over every row i". Each row contributes one number, −log p, the surprise of the answer the model gave little probability to. NLL is the total bill.</p>
+
+<h2>Three rows, one bill</h2>
+<p>Give the model three rows and let it put p = 0.5 on the true answer each time. Each row costs 0.693, so the total is 3 × 0.693 = 2.08. Adding is the whole content of Σ.</p>
+<p>The bars below are that total for three identical rows at three levels of confidence. Same model, same three rows; only the probability changes.</p>
+
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="f-nll-t f-nll-d">
+    <title id="f-nll-t">Total negative log-likelihood for three rows at three probabilities</title>
+    <desc id="f-nll-d">Three bars. Three rows scored at p equal to 0.5 give a total NLL of 2.08; at 0.7 the total is 1.07; at 0.9 it is 0.32. Every bar is three times that row's single surprise, because the same probability was used on all three rows.</desc>
+    <g data-layer></g>
+  </svg>
+  <script type="application/json" class="bars-data">{"values":[2.08,1.07,0.32],"labels":["p=0.5","p=0.7","p=0.9"],"max":2.4,"ylabel":"NLL"}</script>
+  <div class="fig-controls"></div>
+  <figcaption><strong>The total is three copies of one row's surprise.</strong> At p = 0.5 each row costs 0.693 and the bill is 2.08; at p = 0.9 each row costs 0.105 and the bill is 0.32.</figcaption>
+</figure>
+
+<p>Doubling the confidence roughly halves the bill here, but not exactly — the price is logarithmic, not proportional. That bend is why one mediocre row can outweigh several good ones: a single row at p = 0.05 costs 2.996, more than twenty rows at p = 0.9.</p>
+
+<h2>Sum then divide</h2>
+<p>A total grows with the number of rows, so it cannot compare two test sets of different size. Six good rows total 0.63; three mediocre ones total 1.16. The smaller bill belongs to the better model here, but only because the row counts are close.</p>
+<p>Divide by n, the number of rows, and the number becomes per-row. The objective writes that as (1/n) Σ<sub>i</sub>. The minimiser does not move: the same θ wins before and after the division.</p>
+
+<h2>One more example</h2>
+<p>The faded table keeps the row count fixed at three. Change the count instead and hold the three row costs — 0.105, 0.357 and 0.693 — exactly where they are. The addition never changes; only the number you divide by does, and that alone is enough to move the mean away from any single row.</p>
+<table>
+  <tr><th>Rows scored</th><th class="num">Total NLL</th><th class="num">Rows n</th><th class="num">Mean NLL</th></tr>
+  <tr><td class="num">0.105 + 0.357 + 0.693</td><td class="num">1.155</td><td class="num">3</td><td class="num">0.385</td></tr>
+  <tr><td class="num">0.105 + 0.693</td><td class="num">0.798</td><td class="num">2</td><td class="num">0.399</td></tr>
+  <tr><td class="num">0.693</td><td class="num">0.693</td><td class="num">1</td><td class="num">0.693</td></tr>
+</table>
+<p>The table shows the bill shrinking as the cheapest row is dropped while the mean climbs, because n falls faster than the total does — the same arithmetic that lets a big test set and a small one disagree.</p>
+
+<h2>Faded example</h2>
+<p>Row costs are 0.105, 0.357 and 0.693. Add them, then divide by the three rows. Finish the second and third rows of the table.</p>
+<table>
+  <tr><th>Row probabilities</th><th class="num">Total NLL</th><th class="num">Mean NLL</th></tr>
+  <tr><td class="num">0.5, 0.5, 0.5</td><td class="num">2.08</td><td class="num">0.693</td></tr>
+  <tr><td class="num">0.9, 0.7, 0.5</td><td class="num">1.16</td><td class="num">?</td></tr>
+  <tr><td class="num">0.9, 0.9, 0.9</td><td class="num">0.32</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last two rows</summary>
+  <p>Row 2: 0.105 + 0.357 + 0.693 = 1.155, and 1.155 / 3 = <strong>0.385</strong>. Row 3: 3 × 0.105 = 0.315, and 0.315 / 3 = <strong>0.105</strong> — exactly one row's surprise, as it must be when every row is the same.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A lower total NLL means a better model."</strong> Only on the same rows. Total is a sum, so a bigger test set always produces a bigger number, and a team can "improve" a score by evaluating on more data.</p>
+  <p><strong>Correction:</strong> compare mean NLL — total divided by n — or keep the row count fixed. Report n next to the number.</p>
+</div>
+<p><strong>The tell:</strong> double the test set, and the total doubles while the model is untouched. If a metric can be moved by changing how much data you looked at, it is a sum, not a score.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Three rows each get p = 0.9 on the truth. What is the total NLL, and the mean?
+    <details><summary>Answer</summary>
+      <p>Each row costs 0.105, so the total is <strong>0.32</strong> and the mean is <strong>0.105</strong>. The mean equals one row's surprise because all three rows are alike.</p>
+    </details>
+  </li>
+  <li>Model A totals 4.0 over 1,000 rows. Model B totals 2.0 over 100 rows. Which has the lower mean?
+    <details><summary>Answer</summary>
+      <p>A: 4.0 / 1,000 = 0.004 per row against B's 2.0 / 100 = 0.02. A's total is twice as large and its loss is five times smaller. Totals across different row counts say nothing.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>The sum is in place; topic 04 puts it under a loss and asks which θ makes the whole line smallest.</p>
+
+<div class="labnav">
+  <a href="003a-surprise.html">← 03a · −log p — the price of surprise</a>
+  <a href="003-probability-expectation-likelihood.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

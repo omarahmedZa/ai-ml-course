@@ -52,6 +52,15 @@
 <h3>Part 6 — Two policies, one network</h3>
 <p>The behaviour policy generates data: ε-greedy on <code>Q_θ</code>. The target policy is what you are learning: pure greedy max. ε decays 1.0 → 0.1 over the first million frames, and 4 stacked frames span 4 ÷ 60 ≈ 0.067 s so the network can see velocity. <strong>Why this part exists:</strong> one frame cannot tell "moving left" from "moving right", and greedy behaviour too early starves the buffer of variety.</p>
 
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 1 · about 3 minutes each</p>
+  <h3 class="lab-title">Take this apart, one symbol at a time</h3>
+  <p class="lab-sub">Each lab isolates one symbol and gives you a figure you can drag. They use the same numbers as the lesson, so you can carry the result back here.</p>
+  <ul class="lab-list">
+    <li><a href="024a-target.html"><span class="lab-num">024a</span><span class="lab-body"><strong>r + γ max Q(s′,a′) — the frozen answer key</strong></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
+</aside>
+
 <h2>Worked example</h2>
 
 <h3>1. What a correlated batch is worth</h3>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>035.1 — ε and δ: the shape of a privacy promise</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Read a differential privacy guarantee, set clipping and noise, and price the accuracy it costs.">
+</head>
+<body data-page="lab" data-lesson="035a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Privacy · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="035-privacy-and-threat-model.html#labs">Topic 35 · Privacy &amp; threat model</a> — where the guarantee is introduced</p>
+
+<header class="masthead">
+  <p class="kicker">Privacy, one symbol at a time · Lab 1</p>
+  <h1>ε and δ — the shape of a privacy promise</h1>
+  <p class="objective">You can read the guarantee aloud, set clip C and noise σC, and say what the noise costs in accuracy.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">Pr[ M(D) ∈ S ] ≤</span> <span class="hot">e<sup>ε</sup></span> <span class="dim">Pr[ M(D′) ∈ S ] + δ</span></p>
+<p class="eqn-note">Lab 1 of 1 · the multiplier is lit; the data, the mechanism and δ are dimmed</p>
+<p>D and D′ are two datasets that differ in exactly one person. M is whatever leaves the machine — an update, a sum, a trained model. The inequality says those two outputs look nearly the same, so the released number barely depends on any one person.</p>
+
+<h2>Reading the two symbols</h2>
+<p>ε (epsilon) caps the ratio between the two probabilities. ε of 0 means the outputs are statistically identical; larger ε allows a bigger difference and therefore a weaker promise. δ (delta) is the small probability that the cap fails at all — usually written as far smaller than 1/n.</p>
+
+<table>
+  <tr><th>Symbol</th><th>Say it</th><th>What it controls</th></tr>
+  <tr><td class="num">ε</td><td>epsilon</td><td>How much one person can shift the output</td></tr>
+  <tr><td class="num">δ</td><td>delta</td><td>The chance the bound does not hold</td></tr>
+  <tr><td class="num">C</td><td>clip norm</td><td>The largest an update is allowed to be</td></tr>
+  <tr><td class="num">σ</td><td>sigma</td><td>Noise, as a multiple of C</td></tr>
+</table>
+
+<h2>Clip first, then add noise</h2>
+<p>One record can move an update by an unbounded amount, so no noise level could cover it. Clipping to norm C caps how far any single record can push the result: the sensitivity is now C, a number you chose. Adding noise with standard deviation σC then hides that push.</p>
+
+<p>Raise σ and each record hides better, so ε falls. Lower σ and the model learns the data more sharply, at the price of a larger ε. There is no setting that wins on both sides; the pair (ε, δ) is a price list, not a quality score.</p>
+
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-dp-t f-dp-d">
+    <title id="f-dp-t">Test accuracy at three noise multipliers: 0.92, 0.88 and 0.81</title>
+    <desc id="f-dp-d">Three bars on a scale from zero to one. Accuracy is 0.92 at sigma 0.5, 0.88 at sigma 1.1, and 0.81 at sigma 4.0. More noise means a stronger guarantee and lower accuracy.</desc>
+    <g data-layer>
+      <line x1="64" y1="290" x2="700" y2="290" stroke="var(--ink-faint)"/>
+      <rect x="130" y="60" width="80" height="230" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="342" y="70" width="80" height="220" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="554" y="87" width="80" height="203" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <text x="170" y="50" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.92</text>
+      <text x="382" y="60" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.88</text>
+      <text x="594" y="77" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.81</text>
+      <text x="170" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">σ=0.5</text>
+      <text x="382" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">σ=1.1</text>
+      <text x="594" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">σ=4.0</text>
+      <text x="54" y="18" text-anchor="start" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">test accuracy</text>
+    </g>
+  </svg>
+  <div class="bars-data" hidden>{"values":[0.92,0.88,0.81],"labels":["σ=0.5","σ=1.1","σ=4.0"],"max":1,"ylabel":"test accuracy"}</div>
+  <figcaption><strong>Noise buys the guarantee and costs accuracy.</strong> Going from σ = 0.5 to σ = 4.0 drops accuracy from 0.92 to 0.81 — eleven points, paid for a much smaller ε.</figcaption>
+</figure>
+
+<h2>Spend a budget</h2>
+<p>ε is spent per release, and releases add up. Under basic composition, running 100 rounds at ε = 0.05 each leaves you with a total ε of about 5.0. That is why the budget is fixed before training starts, and why a per-round ε quoted alone is not a guarantee.</p>
+
+<h2>Faded example</h2>
+<p>A team sets ε = 0.05 per round and a total budget of 2.0. How many rounds can they run before the budget is gone, and what does the last row cost?</p>
+
+<table>
+  <tr><th class="num">ε per round</th><th class="num">Rounds</th><th class="num">Total ε (basic composition)</th></tr>
+  <tr><td class="num">0.05</td><td class="num">1</td><td class="num">0.05</td></tr>
+  <tr><td class="num">0.05</td><td class="num">20</td><td class="num">1.0</td></tr>
+  <tr><td class="num">0.05</td><td class="num">40</td><td class="num">?</td></tr>
+  <tr><td class="num">0.01</td><td class="num">100</td><td class="num">?</td></tr>
+</table>
+
+<details><summary>Check the last two rows</summary>
+  <p>40 × 0.05 = <strong>2.0</strong>, so forty rounds exhausts the budget exactly. 100 × 0.01 = <strong>1.0</strong>: smaller steps per round buy more rounds for the same total.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"ε is the probability that privacy leaks."</strong> It is a bound on how much the output distribution may shift when one person joins or leaves — a ratio of e<sup>ε</sup>, not a percentage. ε = 1 lets one record change the chance of an output by a factor of about 2.7.</p>
+  <p><strong>Correction:</strong> always read ε together with δ, with the composition rule, and with the sensitivity that C set. A number without those three is not a guarantee; it is a parameter of one step.</p>
+</div>
+<p><strong>The tell:</strong> the claim quotes ε = 0.1 and stops. No δ, no round count, no accountant. Ask for the total after composition, and for the clip norm — the same ε over 500 rounds is a different promise from ε over 5.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>With C = 1 and σ = 1.1, what is the noise standard deviation, and what happens to ε and accuracy as σ rises?
+    <details><summary>Answer</summary>
+      <p>The noise has standard deviation 1.1, since σC = 1.1 × 1. Raising σ lowers ε and lowers accuracy: 0.92 at σ = 0.5 against 0.81 at σ = 4.0.</p>
+    </details>
+  </li>
+  <li>Forty rounds at ε = 0.1 each. What total does basic composition give, and why does that matter?
+    <details><summary>Answer</summary>
+      <p>4.0. The budget is spent by the run, not by the last round, so a per-round figure understates the exposure by the number of releases.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>You can now read the guarantee and price it. What remains is the threat model around it: a clipped, noisy update still has to survive a malicious client, and secure aggregation has to keep the server from reading the sum.</p>
+
+<div class="labnav">
+  <a href="035-privacy-and-threat-model.html#labs">← Back to the formula</a>
+  <a href="035-privacy-and-threat-model.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

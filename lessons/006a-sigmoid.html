@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>006.1 — σ(z): from score to probability</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Read z as a log-odds, push it through the sigmoid, and find the logistic decision boundary.">
+</head>
+<body data-page="lab" data-lesson="006a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Linear &amp; logistic · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="006-linear-and-logistic-regression.html#labs">Topic 06 · Linear and logistic regression</a></p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · linear and logistic regression</p>
+  <h1>σ(z) — from score to probability</h1>
+  <p class="objective">You can turn a weighted sum into a probability and find where the model switches sides.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">p =</span> <span class="hot">σ(z)</span> <span class="dim">,  z = w·x + b</span></p>
+<p class="eqn-note">The logistic model · one weighted sum, pushed through one squashing function</p>
+<p>σ (sigma) is the sigmoid: σ(z) = 1 / (1 + e<sup>−z</sup>). It takes any number z and returns a value between 0 and 1. p is the predicted probability of the positive class; w is the weight, b the bias, and x the input.</p>
+<p>The dot product w·x adds up each feature times its weight; b shifts the total. That total is z, and it can be any real number — large, small, or negative. σ is the only step that makes it look like a probability.</p>
+
+<h2>z is a log-odds, not a score</h2>
+<p>Odds compare the chance of yes with the chance of no: p / (1 − p). The log-odds is the logarithm of that ratio, and z is exactly a log-odds. So z = 0 means odds of 1:1, which gives p = 0.5.</p>
+<p>Positive z favours yes; negative z favours no. z = 2 means odds of e² ≈ 7.39 to 1 (e ≈ 2.72), so p = 7.39 / 8.39 ≈ 0.88. The output is a probability; the input is not.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-sig-t f-sig-d">
+    <title id="f-sig-t">The sigmoid maps log-odds onto a probability between zero and one</title>
+    <desc id="f-sig-d">An S-shaped curve crossing the middle of the plot at z equals 0 and p equals 0.5. It approaches 0 on the left and 1 on the right. A steepness slider changes how quickly it saturates.</desc>
+    <g data-layer>
+      <line x1="64" y1="300" x2="700" y2="300" stroke="var(--ink-faint)"/>
+      <line x1="64" y1="24" x2="64" y2="300" stroke="var(--ink-faint)"/>
+      <line x1="64" y1="162" x2="700" y2="162" stroke="var(--rule)" stroke-dasharray="3 4"/>
+      <path d="M64,296 C240,296 280,270 340,220 C370,193 394,131 424,90 C474,30 560,28 700,28" fill="none" stroke="var(--sym-param)" stroke-width="2.6"/>
+      <circle cx="382" cy="162" r="5" fill="var(--sym-pred)"/>
+      <text x="392" y="154" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">z = 0, p = 0.5</text>
+      <text x="340" y="28" font-size="12" fill="var(--sym-param)" font-family="ui-monospace, monospace">σ(z)</text>
+      <text x="620" y="322" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">z</text>
+    </g>
+  </svg>
+  <script type="application/json" class="curve-data">{"kind":"sigmoid","x":[-6,6],"y":[0,1],"xlabel":"z (log-odds)","ylabel":"σ(z)","controls":[{"k":"k","label":"steepness k","min":0.5,"max":3,"step":0.1,"value":1}]}</script>
+  <div class="fig-controls"></div>
+  <figcaption><strong>At z = 0 the curve crosses 0.5 exactly.</strong> Steepness k changes how fast it saturates, never the crossing point.</figcaption>
+</figure>
+
+<h2>Where the boundary sits</h2>
+<p>The decision boundary is the set of x where p = 0.5. That happens when z = 0, so the boundary solves w·x + b = 0. For one input with w = 2 and b = 1: 2x + 1 = 0, so x = −0.5.</p>
+<p>On one side of −0.5 the model says yes; on the other it says no. σ changes the confidence, not the location. It is monotone, so it never moves which side wins.</p>
+
+<h2>Why not a straight line</h2>
+<p>A line fitted to 0/1 labels can predict 1.4 or −0.3, which are not probabilities. σ restricts the range to (0, 1) and makes the output readable as a rate. It also keeps the log-loss smooth, which is why training behaves well.</p>
+
+<h2>Faded example</h2>
+<p>z = 0 gives even odds and p = 0.5. The table turns log-odds into probabilities; the last probability is yours to finish.</p>
+<table>
+  <tr><th class="num">z (log-odds)</th><th class="num">Odds e<sup>z</sup></th><th class="num">p = σ(z)</th></tr>
+  <tr><td class="num">−2</td><td class="num">0.14</td><td class="num">0.12</td></tr>
+  <tr><td class="num">0</td><td class="num">1.00</td><td class="num">0.50</td></tr>
+  <tr><td class="num">1</td><td class="num">2.72</td><td class="num">0.73</td></tr>
+  <tr><td class="num">2</td><td class="num">7.39</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last row</summary>
+  <p>Odds 7.39 means 7.39 yes for every 1 no, so p = 7.39 / (7.39 + 1) = 7.39 / 8.39 ≈ <strong>0.88</strong>.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>“z = 2 means twice the probability of z = 1.”</strong> No. Adding 1 to z multiplies the odds by e ≈ 2.72; it adds a fixed amount to the log-odds. Probability moves by different amounts depending on where you start.</p>
+  <p><strong>Correction:</strong> read z on the odds scale and p on the probability scale. z = 2 is odds 7.4:1, p = 0.88; z = 4 is odds 54.6:1, p = 0.98.</p>
+</div>
+<p><strong>The tell:</strong> raise z by 1 from 0 and p rises by 0.23. Raise it by 1 from 2 and p rises by only 0.07. Equal steps in z give unequal steps in p — that is the squash at work.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>What is σ(0), and why that value?
+    <details><summary>Answer</summary>
+      <p>0.5. z = 0 is log-odds zero, which means odds 1:1 — an even chance, so the probability is one half.</p>
+    </details>
+  </li>
+  <li>With w = 2 and b = 1, where is the decision boundary?
+    <details><summary>Answer</summary>
+      <p>At x = −0.5, from 2x + 1 = 0. There p = 0.5 and the model is indifferent; the boundary is a point in one dimension.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Topic 07 replaces one straight boundary with axis-aligned cuts, and asks not which side a row falls on but which box it lands in.</p>
+
+<div class="labnav">
+  <a href="006-linear-and-logistic-regression.html#labs">← Back to the formula</a>
+  <a href="006-linear-and-logistic-regression.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

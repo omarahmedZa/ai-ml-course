@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>024.1 — r + γ max Q(s′,a′): the frozen target</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Compute a Q-learning target with frozen weights and explain why the target network stabilises training.">
+</head>
+<body data-page="lab" data-lesson="024a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Value-based RL · Lab 1 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="024-dqn.html#labs">Topic 24 · DQN</a> — where the target network is introduced</p>
+
+<header class="masthead">
+  <p class="kicker">DQN, one mechanism at a time · Lab 1</p>
+  <h1>r + γ max Q(s′,a′) — the frozen answer key</h1>
+  <p class="objective">You can compute a Q-learning target from frozen weights, and say why freezing it keeps the error meaningful.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">target for one transition =</span> <span class="hot">r + γ max<sub>a′</sub> Q<sub>θ⁻</sub>(s′, a′)</span></p>
+<p class="eqn-note">Lab 1 of 2 · θ⁻ is a frozen copy of θ; the tick is not a minus sign</p>
+<p>Q-learning does not learn a prediction directly. It learns a prediction that should match a target, and the target is built from the prediction itself. This lab is about the copy that stops that loop chasing its own tail.</p>
+
+<h2>One transition, one target</h2>
+<p>A transition is one row of experience: state s, action a, reward r, next state s′. Q<sub>θ</sub>(s,a) is the model's estimate of all reward still to come after taking a in s. The target is the number that estimate should have been.</p>
+<p>With r = 1, γ = 0.9 and the frozen network's best next-state value max Q(s′,a′) = 0.8, the target is 1 + 0.9 × 0.8 = 1.72. γ (gamma) is the discount: a reward one step away counts 90% as much as a reward now.</p>
+
+<figure class="fig" data-graph="pipeline">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-tgt-t f-tgt-d">
+    <title id="f-tgt-t">One transition passing through the model and the loss</title>
+    <desc id="f-tgt-d">Five boxes in a row: the input row x-i, the model f-theta, the prediction y-hat, the loss L, and the single loss value l-i. Arrows show the order. Here x-i is a transition, f-theta is the frozen copy, and y-hat is the target.</desc>
+    <g data-layer></g>
+  </svg>
+  <figcaption><strong>Same pipeline, relabelled.</strong> The input box holds a transition (s, a, r, s′); the model box is the frozen copy Q<sub>θ⁻</sub>; its output is the target r + γ max Q(s′,a′); the loss prices the gap between that target and Q<sub>θ</sub>(s,a); ℓᵢ is one transition's squared error.</figcaption>
+</figure>
+
+<h2>Why a moving target destabilises</h2>
+<p>If the same weights θ write both the guess and its target, every update moves the number being aimed at. The gap closes more slowly, and a learner that appears to improve can leave the error almost unchanged.</p>
+
+<table>
+  <tr><th>Step</th><th class="num">Target used</th><th class="num">Q(s,a) after</th><th class="num">Error left</th></tr>
+  <tr><td>Start</td><td class="num">1.72</td><td class="num">0.50</td><td class="num">1.22</td></tr>
+  <tr><td>Frozen, 3 updates</td><td class="num">1.72</td><td class="num">0.83</td><td class="num">0.89</td></tr>
+  <tr><td>Moving, 3 updates</td><td class="num">1.99</td><td class="num">0.86</td><td class="num">1.13</td></tr>
+</table>
+
+<p>Same three updates, same learning rate. Frozen, the error falls 1.22 → 0.89. Moving, it falls only to 1.13, because each step also lifted the target by 0.09.</p>
+
+<h2>Sync every 10,000 steps</h2>
+<p>Keep a second copy θ⁻ and copy θ into it every 10,000 steps. Between copies the target is a constant, so the update becomes ordinary regression: predict a fixed number and shrink the gap.</p>
+<p>The price is staleness. For up to 10,000 steps the key is out of date and may be wrong in one consistent direction. That is a bounded error you can measure; a target rewritten every step is not.</p>
+
+<h2>Faded example</h2>
+<p>Full solve: r = 1, γ = 0.9, max Q(s′,a′) = 0.8 gives 1 + 0.72 = 1.72. Now drop the last step.</p>
+<table>
+  <tr><th class="num">r</th><th class="num">γ</th><th class="num">max Q(s′,a′)</th><th class="num">Target</th></tr>
+  <tr><td class="num">1</td><td class="num">0.9</td><td class="num">0.8</td><td class="num">1.72</td></tr>
+  <tr><td class="num">2</td><td class="num">0.9</td><td class="num">0.5</td><td class="num">?</td></tr>
+  <tr><td class="num">0</td><td class="num">0.5</td><td class="num">4.0</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last two rows</summary>
+  <p>Row 2: 2 + 0.45 = <strong>2.45</strong>. Row 3: 0 + 0.5 × 4.0 = <strong>2.0</strong>. γ scales the future, never the reward in hand.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A target network stabilises training, so it must be the fix for any unstable run."</strong> It feels right because the loss visibly calms down once θ⁻ is added. But the frozen copy removes one fault: a target that moves with the weights. Correlated frames, an oversized learning rate, or a reward scale that dwarfs Q will still break the run, and freezing repairs none of them.</p>
+  <p><strong>Correction:</strong> name the fault first. Moving target → freeze it. Correlated data → shuffle a buffer. Large errors → cap the loss.</p>
+</div>
+<p><strong>The tell:</strong> loss falls smoothly, evaluation return rises, then collapses, and reloading an earlier checkpoint recovers the run. That signature is a target that outran its predictions, not a learning rate slightly too high.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>r = 2, γ = 0.5, max Q(s′,a′) = 4. Compute the target.
+    <details><summary>Answer</summary>
+      <p>2 + 0.5 × 4 = <strong>4.0</strong>. The reward is not discounted; only the future term is.</p>
+    </details>
+  </li>
+  <li>Why does the target network not make the update unbiased?
+    <details><summary>Answer</summary>
+      <p>θ⁻ is stale by up to 10,000 steps, so the target can be consistently wrong. Freezing trades bias for a stable, measurable error.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Read the target as a promise the network makes to itself, then checks. Topic 25 makes the same move for probabilities: PPO freezes the policy that collected the data and measures how far the new one has drifted.</p>
+
+<div class="labnav">
+  <a href="024-dqn.html#labs">← Back to the formula</a>
+  <a href="024-dqn.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

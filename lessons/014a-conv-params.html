@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>014.1 — k²·C_in·C_out: where convolution parameters come from</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Count the weights in a convolution from its filter size and channels, and see why sharing makes it thousands of times smaller than a dense layer.">
+</head>
+<body data-page="lab" data-lesson="014a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Architectures · Lab 1 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="014-architecture-families.html#labs">Topic 14 · Architecture families</a> — where the convolutional family is introduced</p>
+
+<header class="masthead">
+  <p class="kicker">Architectures, counted · Lab 1</p>
+  <h1>k²·C<sub>in</sub>·C<sub>out</sub> — where convolution parameters come from</h1>
+  <p class="objective">You can count the weights in a convolution from its filter size and channel counts, and say why sharing makes it thousands of times smaller than a dense layer.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">weights per filter =</span> <span class="hot">k² · C<sub>in</sub> · C<sub>out</sub></span> <span class="dim">= 3² · 64 · 64 = 36,864</span></p>
+<p class="eqn-note">Lab 1 of 2 · the three factors are lit; the image size is deliberately absent</p>
+<p>A dense layer needs one weight for every input–output pair, so its count depends on the image size. A convolution needs one small filter, reused at every position. <code>k</code> is the filter's side length, <code>C<sub>in</sub></code> the number of input channels, <code>C<sub>out</sub></code> the number of output channels.</p>
+
+<h2>A filter is a small learned window</h2>
+<p>Picture a 3×3 stencil sliding across an image, stopping at every pixel. At each stop it multiplies the nine numbers underneath by its nine weights and adds them up. The same nine numbers do the work everywhere — the stencil has no idea which pixel it is standing on.</p>
+
+<h2>Where the three factors come from</h2>
+<p><code>k²</code> counts positions inside the window: 9 for a 3×3 filter. <code>C<sub>in</sub></code> counts the input channels read at each position. <code>C<sub>out</sub></code> counts the filters, because each output channel needs its own. Multiply: 9 × 64 × 64 = 36,864 weights. Biases add another <code>C<sub>out</sub></code>.</p>
+
+<figure class="fig" data-graph="bars">
+  <script type="application/json" class="bars-data">{"values":[1,5575],"labels":["conv 3×3×64×64 = 36,864","dense = 205M"],"max":6000,"ylabel":"relative size (conv = 1)"}</script>
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-bar-t f-bar-d">
+    <title id="f-bar-t">Convolution weights against dense weights for the same 224 by 224 by 64 input</title>
+    <desc id="f-bar-d">Two bars on one scale. The convolution bar, one unit, is a thin sliver at the baseline with the label 36,864. The dense bar rises to 5,575 units and carries the label 205M.</desc>
+    <g data-layer>
+      <line x1="64" y1="290" x2="700" y2="290" stroke="var(--ink-faint)"/>
+      <rect x="183" y="289" width="80" height="1" rx="1" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="501" y="58" width="80" height="232" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <text x="223" y="280" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">1</text>
+      <text x="541" y="50" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">5575</text>
+      <text x="223" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">conv 3×3×64×64 = 36,864</text>
+      <text x="541" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">dense = 205M</text>
+      <text x="64" y="18" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">relative size (conv = 1)</text>
+    </g>
+  </svg>
+  <figcaption><strong>One unit against 5,575.</strong> Both layers turn the same 224×224×64 input into 64 channels; the convolution does it with 36,864 weights instead of 205,520,896.</figcaption>
+</figure>
+
+<h2>What sharing buys</h2>
+<p>Flatten that input and a dense layer must learn 3,211,264 × 64 = 205,520,896 weights — about 205 million, or 5,575 times the filter. Worse, it must relearn the same edge detector separately at every position. Double the image side and the dense count quadruples while the convolution stays at 36,864.</p>
+
+<h2>One more example</h2>
+<p>The equation fixes both channel counts at 64 and k at 3. Hold the channels there and move only the filter side: 64 × 64 = 4,096 weights for every position inside the window, so k² alone decides the total. Nothing about the image size enters the count.</p>
+<table>
+  <tr><th>Filter k</th><th class="num">k²</th><th class="num">Weights = k² × 64 × 64</th></tr>
+  <tr><td class="num">3×3</td><td class="num">9</td><td class="num">36,864</td></tr>
+  <tr><td class="num">5×5</td><td class="num">25</td><td class="num">102,400</td></tr>
+  <tr><td class="num">7×7</td><td class="num">49</td><td class="num">200,704</td></tr>
+</table>
+<p>The table shows the count growing with the square of the filter side while the two channel counts sit still, so widening k from 3 to 7 costs about 5.4 times the 36,864 of the original layer, and only the channel counts could push that number higher still.</p>
+
+<h2>Faded example</h2>
+<p>Multiply the three factors, in order: window positions, input channels, output channels. The first row is done.</p>
+<table>
+  <tr><th class="num">Filter k</th><th class="num">C<sub>in</sub></th><th class="num">C<sub>out</sub></th><th class="num">Weights</th></tr>
+  <tr><td class="num">3×3</td><td class="num">64</td><td class="num">64</td><td class="num">36,864</td></tr>
+  <tr><td class="num">5×5</td><td class="num">32</td><td class="num">128</td><td class="num">102,400</td></tr>
+  <tr><td class="num">3×3</td><td class="num">128</td><td class="num">128</td><td class="num">?</td></tr>
+  <tr><td class="num">5×5</td><td class="num">32</td><td class="num">64</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last two rows</summary>
+  <p>Row 3: 9 × 128 × 128 = <strong>147,456</strong>. Row 4: 25 × 32 × 64 = <strong>51,200</strong>. Notice that a 5×5 filter is not automatically bigger than a 3×3 one — the channel counts decide as much as the window does.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"36,864 weights means the convolution is 5,575 times weaker."</strong> Parameter count is a cost, not a capacity. The dense layer spends its weights relearning the same edge at every location; the convolution spends 36,864 once and reuses them, which is a statement that location should not matter.</p>
+  <p><strong>Correction:</strong> read the count as the price of the assumption, not as the power of the layer.</p>
+</div>
+<p><strong>The tell:</strong> shuffle the pixels inside every image and retrain. The convolution's parameter count is unchanged, yet its advantage disappears — so the count was never the reason it worked. The sharing was.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>A 3×3 filter takes 32 input channels to 64 output channels. How many weights?
+    <details><summary>Answer</summary>
+      <p>9 × 32 × 64 = <strong>18,432</strong>. Window positions first, then input channels, then output channels.</p>
+    </details>
+  </li>
+  <li>Why does the convolution's weight count contain no term for image size?
+    <details><summary>Answer</summary>
+      <p>Because the filter is reused at every position, and no weight records which position it was used at. The layer learns what to look for, not where to look.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Sharing across space is one prior; sharing across time is another, and attention gives up both to let every position read every other. The other lab in this topic goes back to depth: how a per-layer factor of 0.25 turns into <code>9.5 × 10<sup>−7</sup></code>.</p>
+<p><a href="013a-decay.html">Lab 2 · g<sup>L</sup> — how much gradient survives →</a></p>
+
+<div class="labnav">
+  <a href="014-architecture-families.html#labs">← Back to the formula</a>
+  <a href="014-architecture-families.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

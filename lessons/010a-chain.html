@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>010.1 — The chain rule</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Walk one gradient from loss to weight, multiplying the local slopes, and read what the sign means.">
+</head>
+<body data-page="lab" data-lesson="010a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Objective · Lab 1 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="010-backpropagation.html#labs">Topic 10 · Backpropagation</a></p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · backpropagation</p>
+  <h1>The chain rule — one slope at a time</h1>
+  <p class="objective">You can turn a slope measured at the loss into a slope at a weight by multiplying the local slopes along the path.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">∂L/∂w =</span> <span class="hot">∂L/∂z · ∂z/∂w</span> <span class="dim">= 2(z − y)·x</span></p>
+<p class="eqn-note">Lab 1 of 2 · the two local slopes are lit; the multiplication between them is the whole rule</p>
+<p>∂ means "a small change in". ∂L/∂w is the slope of the loss with respect to one weight: how much L moves when w moves a little. Backprop obtains it without a second forward pass, by reusing slopes already measured in the network.</p>
+
+<h2>Slopes in series multiply</h2>
+<p>Suppose z changes three times as fast as w, and L changes twice as fast as z. Then L changes six times as fast as w, because 3 × 2 = 6. Rates in series multiply. That sentence is the chain rule, and every backward pass is a long product of such rates.</p>
+<p>The network gives you each factor separately. The loss node knows <code>∂L/∂z = 2(z − y)</code>. The weighted-sum node knows <code>∂z/∂w = x</code> and <code>∂z/∂b = 1</code>. Neither node knows the whole answer.</p>
+
+<h2>The walk, with numbers</h2>
+<p>Take one example: <code>x = 2</code>, <code>w = 3</code>, <code>b = 1</code>, truth <code>y = 10</code>. The model predicts <code>z = wx + b = 7</code>, so the residual is 7 − 10 = −3.</p>
+
+<table>
+  <tr><th>Quantity</th><th class="num">Value</th><th>Why</th></tr>
+  <tr><td>z</td><td class="num">7</td><td>3·2 + 1</td></tr>
+  <tr><td>z − y</td><td class="num">−3</td><td>7 − 10</td></tr>
+  <tr><td>∂L/∂z</td><td class="num">−6</td><td>2 × (−3)</td></tr>
+  <tr><td>∂L/∂w</td><td class="num">−12</td><td>−6 × x = −6 × 2</td></tr>
+  <tr><td>∂L/∂b</td><td class="num">−6</td><td>−6 × 1</td></tr>
+</table>
+
+<figure class="fig" data-graph="pipeline">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-chain-t f-chain-d">
+    <title id="f-chain-t">The forward path a gradient walks back along</title>
+    <desc id="f-chain-d">Five boxes in a row: input x-i, model f-theta, prediction y-hat, loss L, and the single loss value l-i. The forward arrows show where the backward pass retraces from.</desc>
+    <g data-layer></g>
+  </svg>
+  <figcaption><strong>The backward pass retraces these arrows.</strong> Each arrow it crosses supplies one local slope, and the slopes multiply.</figcaption>
+</figure>
+
+<h2>Reading the two gradients</h2>
+<p>Both gradients are negative: raising either value raises the loss, so gradient descent subtracts and increases w and b. They start from the same −6, but w carries an extra factor of x = 2, so it moves twice as far. That factor is not importance; it is the input sitting in the path.</p>
+
+<h2>One step lands on the truth</h2>
+<p>With learning rate <code>η = 0.1</code>: <code>w ← 3 − 0.1(−12) = 4.2</code> and <code>b ← 1 − 0.1(−6) = 1.6</code>. The new prediction is 4.2·2 + 1.6 = 10, so the loss is zero. That exactness belongs to this quadratic, not to training in general.</p>
+
+<h2>Faded example</h2>
+<p>The first row is solved. In the second, w has moved to 4 while b stays at 1, so only the weight changed; fill in the missing derivative.</p>
+<table>
+  <tr><th class="num">w</th><th class="num">z</th><th class="num">z − y</th><th class="num">∂L/∂z</th><th class="num">∂L/∂w</th></tr>
+  <tr><td class="num">3</td><td class="num">7</td><td class="num">−3</td><td class="num">−6</td><td class="num">−12</td></tr>
+  <tr><td class="num">4</td><td class="num">9</td><td class="num">−1</td><td class="num">−2</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the hidden derivative</summary>
+  <p><strong>−4</strong>: multiply the loss slope −2 by the local slope x = 2. Note that the gradient shrank from −12 to −4 as the prediction approached the truth; slopes are local, not fixed properties of a weight.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The gradient for a weight is just 2(z − y), the same as the loss slope."</strong> It feels right because that is the number the loss node hands over, and it has the correct sign and rough size.</p>
+  <p><strong>Correction:</strong> the loss slope still has to cross the weighted sum, which multiplies it by x. Forget that factor and every weight gets the same gradient, so inputs stop mattering.</p>
+</div>
+<p><strong>The tell:</strong> double x from 2 to 4 with w, b and y unchanged. The loss and <code>∂L/∂z</code> are identical, but <code>∂L/∂w</code> must double. If your number does not move, a local slope went missing.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>With x = 2, w = 3, b = 1, y = 10, what is <code>∂L/∂b</code>?
+    <details><summary>Answer</summary>
+      <p><strong>−6</strong>: <code>∂L/∂z = −6</code> times <code>∂z/∂b = 1</code>. The bias has no input to scale it.</p>
+    </details>
+  </li>
+  <li>Why is <code>∂L/∂w</code> twice <code>∂L/∂b</code> here?
+    <details><summary>Answer</summary>
+      <p>Because <code>∂z/∂w = x = 2</code> while <code>∂z/∂b = 1</code>. The same incoming slope is multiplied by a different local slope on each path.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Lab 2 handles the case this one avoided: a value that feeds two branches at once, where the backward pass must combine two gradients instead of one.</p>
+
+<div class="labnav">
+  <a href="010-backpropagation.html#labs">← Back to the formula</a>
+  <a href="010b-fanout.html">Lab 10b · Fan-out — gradients add, they do not compete →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

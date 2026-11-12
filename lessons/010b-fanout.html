@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>010.2 — Fan-out: gradients add</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="When one value feeds two branches, the backward pass adds their gradients instead of choosing between them.">
+</head>
+<body data-page="lab" data-lesson="010b">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Objective · Lab 2 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="010-backpropagation.html#labs">Topic 10 · Backpropagation</a></p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · backpropagation</p>
+  <h1>Fan-out — gradients add, they do not compete</h1>
+  <p class="objective">You can combine the gradients arriving from two branches into one number for the value they share.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">∂L/∂u =</span> <span class="hot">∂L/∂a + ∂L/∂b</span> <span class="dim">= 3 + 4 = 7</span></p>
+<p class="eqn-note">Lab 2 of 2 · the sum is lit; each branch's own contribution is the dim part</p>
+<p><code>u</code> is a value used twice: once by branch A, once by branch B, and both branches reach the loss. When u moves, the loss moves for two reasons at once, so the backward pass must report both.</p>
+
+<figure class="fig" data-graph="pipeline">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-pass-t f-pass-d">
+    <title id="f-pass-t">A value's journey through prediction and loss</title>
+    <desc id="f-pass-d">Five boxes in a row: input x-i, model f-theta, prediction y-hat, loss L, and one loss value l-i. A fan-out can occur inside any box, wherever one value is read twice.</desc>
+    <g data-layer></g>
+  </svg>
+  <figcaption><strong>The row shows the order, not the wiring.</strong> Inside the model box, a single value can feed several branches — that is where fan-out lives.</figcaption>
+</figure>
+
+<h2>Two paths, one nudge</h2>
+<p>Forward, the same array leaves u along two edges. Backward, each edge returns a gradient, and the node that owns u receives two numbers rather than one. Only the last step changes: what to do with the pair.</p>
+<p>Change u by a tiny amount. Branch A's output shifts, and branch B's output shifts. The loss moves by A's contribution plus B's contribution. Nothing is shared out and nothing is averaged: each branch reports the full effect of the nudge along its own route.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-fan-t f-fan-d">
+    <title id="f-fan-t">One value feeding two branches, with gradients returning from both</title>
+    <desc id="f-fan-d">The value u sits on the left. Solid arrows run forward to branch A, labelled plus three, and branch B, labelled plus four, then on to the loss. Dashed arrows return from both branches to u, where the sum seven is written.</desc>
+    <g>
+      <defs>
+        <marker id="fan-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--ink-faint)"/></marker>
+        <marker id="fan-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--sym-param)"/></marker>
+      </defs>
+      <line x1="132" y1="132" x2="294" y2="96" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#fan-f)"/>
+      <line x1="132" y1="170" x2="294" y2="246" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#fan-f)"/>
+      <line x1="422" y1="96" x2="534" y2="168" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#fan-f)"/>
+      <line x1="422" y1="246" x2="534" y2="194" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#fan-f)"/>
+
+      <line x1="296" y1="118" x2="146" y2="166" stroke="var(--sym-param)" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#fan-g)"/>
+      <line x1="296" y1="228" x2="146" y2="184" stroke="var(--sym-param)" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#fan-g)"/>
+
+      <circle cx="110" cy="150" r="34" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+      <rect x="300" y="60" width="120" height="54" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+      <rect x="300" y="228" width="120" height="54" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+      <rect x="540" y="153" width="110" height="54" rx="8" fill="var(--card)" stroke="var(--sym-loss)" stroke-width="1.6"/>
+
+      <text x="110" y="158" text-anchor="middle" font-size="20" fill="var(--sym-data)" font-family="ui-monospace, monospace">u</text>
+      <text x="360" y="92" text-anchor="middle" font-size="13" fill="var(--sym-pred)" font-family="ui-monospace, monospace">branch A +3</text>
+      <text x="360" y="260" text-anchor="middle" font-size="13" fill="var(--sym-pred)" font-family="ui-monospace, monospace">branch B +4</text>
+      <text x="595" y="185" text-anchor="middle" font-size="13" fill="var(--sym-loss)" font-family="ui-monospace, monospace">L</text>
+
+      <text x="110" y="206" text-anchor="middle" font-size="12" fill="var(--sym-param)" font-family="ui-monospace, monospace">sum 7</text>
+    </g>
+  </svg>
+  <figcaption><strong>Two dashed returns, one total.</strong> Three and four arrive at the same value, so the gradient written on it is seven — the sum, not either branch alone.</figcaption>
+</figure>
+
+<h2>The numbers</h2>
+<p>Branch A sends 3 and branch B sends 4, so <code>∂L/∂u = 7</code>. With <code>η = 0.1</code> the update is <code>u ← u − 0.1 × 7</code>. A branch sending zero — a ReLU clamped shut, a masked path — adds zero and changes nothing, while the surviving branches still report their full amounts.</p>
+
+<h2>Why not multiply</h2>
+<p>Multiplication belongs to slopes in series, where one quantity feeds the next. Here the branches are parallel: two routes from the same u to the same loss. Serial slopes multiply; parallel contributions add.</p>
+
+<h2>Where it shows up</h2>
+<p>A weight used at two positions in a sentence, a residual connection that bypasses a block, an embedding shared by two output heads, the same parameter appearing twice in one expression. In each case one value feeds several branches, and a dropped branch shrinks the gradient with no error message.</p>
+
+<h2>Faded example</h2>
+<p>The first row is solved. The second adds a third branch; fill in the total.</p>
+<table>
+  <tr><th class="num">Branch A</th><th class="num">Branch B</th><th class="num">Branch C</th><th class="num">∂L/∂u</th></tr>
+  <tr><td class="num">3</td><td class="num">4</td><td class="num">—</td><td class="num">7</td></tr>
+  <tr><td class="num">3</td><td class="num">4</td><td class="num">2</td><td class="num">?</td></tr>
+  <tr><td class="num">3</td><td class="num">0</td><td class="num">0</td><td class="num">3</td></tr>
+</table>
+<details><summary>Check the hidden total</summary>
+  <p><strong>9</strong>: 3 + 4 + 2. The last row is the same rule with two silent branches — 3 + 0 + 0 is still 3, and the live branch is not reduced to a third of its value.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Two gradients for one value should be averaged, to be fair to both paths."</strong> It feels right because averaging is how you combine two estimates of the same quantity.</p>
+  <p><strong>Correction:</strong> these are not two estimates of one effect; they are two separate effects that both really happen. Averaging halves the step for that value alone, which behaves like a lower learning rate on some weights and not others.</p>
+</div>
+<p><strong>The tell:</strong> switch one branch off and re-run. The total should fall by exactly that branch's number. If it falls by half of everything, someone averaged.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>u feeds two branches that send −5 and +2. What is <code>∂L/∂u</code>?
+    <details><summary>Answer</summary>
+      <p><strong>−3</strong>. Signs are kept while adding; a branch pushing the loss down can cancel one pushing it up.</p>
+    </details>
+  </li>
+  <li>Why is the answer not 3 × 4 = 12?
+    <details><summary>Answer</summary>
+      <p>Because the paths are parallel, not serial. Multiplication combines slopes along one route; addition combines separate routes to the same value.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Topic 11 wraps the forward pass, the loss and these gradients in a loop, and shows how batch size turns epochs into a countable number of steps.</p>
+
+<div class="labnav">
+  <a href="010a-chain.html">← 10a · The chain rule — one slope at a time</a>
+  <a href="010-backpropagation.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>019.2 — 1/(1−γ): how far the agent looks</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="The effective horizon 1/(1−γ) counts the steps a discount still pays attention to.">
+</head>
+<body data-page="lab" data-lesson="019b">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 19 · Lab 2 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="019-rl-frame.html#labs">Topic 19 · The RL frame</a> — where the discount sets the horizon</p>
+
+<header class="masthead">
+  <p class="kicker">The RL frame, one symbol at a time · Lab 2</p>
+  <h1>1/(1−γ) — how far the agent looks</h1>
+  <p class="objective">You can convert any γ into a number of steps, and say why 0.99 → 0.999 is a tenfold change.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">effective horizon ≈</span> <span class="hot">1 / (1 − γ)</span></p>
+<p class="eqn-note">Topic 19 · γ is now the denominator, so small changes near 1 move the answer a long way</p>
+<p>γ sets how fast a reward fades. This lab turns that fade rate into something you can say out loud at a design meeting: the number of steps the agent is still, in effect, looking ahead.</p>
+
+<h2>A count of steps</h2>
+<p>Add up every discount weight, 1 + γ + γ² + …, and the total is 1/(1−γ). That total is the count of future steps that still carry weight. At γ = 0.9 it is 10 steps; at γ = 0.99 it is 100. Nothing random is involved — this is arithmetic on the weights alone.</p>
+<p>Why that sum works: multiply 1/(1−γ) by (1−γ) and every power cancels except the first. You do not need the algebra to use the formula, but it explains why nothing enters it except γ.</p>
+
+<table>
+  <tr><th class="num">γ</th><th class="num">1 − γ</th><th class="num">1/(1−γ)</th></tr>
+  <tr><td class="num">0.9</td><td class="num">0.1</td><td class="num">10 steps</td></tr>
+  <tr><td class="num">0.99</td><td class="num">0.01</td><td class="num">100 steps</td></tr>
+  <tr><td class="num">0.999</td><td class="num">0.001</td><td class="num">1,000 steps</td></tr>
+</table>
+
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-hor-t f-hor-d">
+    <title id="f-hor-t">Effective horizon for three discounts</title>
+    <desc id="f-hor-d">Three bars on a scale from zero to one thousand steps. The gamma equals 0.9 bar is ten steps and appears as a sliver, the 0.99 bar is one hundred steps, and the 0.999 bar fills the chart at one thousand steps.</desc>
+    <g data-layer></g>
+  </svg>
+  <script type="application/json" class="bars-data">{"values":[10,100,1000],"labels":["γ=0.9","γ=0.99","γ=0.999"],"max":1000,"ylabel":"effective horizon (steps)"}</script>
+  <figcaption><strong>The third bar is a hundred times the first.</strong> γ moved by 0.099 and the planning window moved by 990 steps — which is why the top of the γ range deserves its own decision, not a default.</figcaption>
+</figure>
+
+<h2>What a long horizon costs</h2>
+<p>A long horizon is not free. Every step of delay counts at nearly full value, so one lucky or unlucky episode swings the estimate. The spread of sampled returns grows with the horizon, which is why γ = 0.999 needs far more data than γ = 0.9 before two policies can be ranked reliably.</p>
+
+<h2>Choosing γ</h2>
+<p>Pick γ from the task, not from a library default. If the payoff arrives about 20 steps out, you want 1/(1−γ) comfortably above 20: γ = 0.95 gives 20, and 0.99 gives 100. Too small and the goal is invisible; too large and each update is mostly noise.</p>
+<p>A quick rule: convert the candidate γ to a step count, then compare it with the number of steps your payoff actually needs. A ratio near 1 is a fragile setting.</p>
+
+<h2>One more example</h2>
+<p>The horizon counts steps, but γ also sets how much of a reward survives each one. Hold the step count at ten and read the discount straight off: at γ = 0.9 only about a third of the value is left after ten steps, while at γ = 0.999 almost all of it is.</p>
+<table>
+  <tr><th class="num">γ</th><th class="num">1/(1−γ)</th><th class="num">Weight left after 10 steps</th></tr>
+  <tr><td class="num">0.9</td><td class="num">10</td><td class="num">0.35</td></tr>
+  <tr><td class="num">0.99</td><td class="num">100</td><td class="num">0.90</td></tr>
+  <tr><td class="num">0.999</td><td class="num">1,000</td><td class="num">0.99</td></tr>
+</table>
+<p>The table shows the two readings agreeing: the longer the horizon, the more of a ten-step-away reward is still counted, and both columns move together because both are computed from the same γ, which is why the horizon works as a shorthand for how much future a run can still see.</p>
+
+<h2>Faded example</h2>
+<p>Four discounts, one division each. Fill the last two rows with the final step removed.</p>
+<table>
+  <tr><th class="num">γ</th><th class="num">1 − γ</th><th class="num">Horizon</th></tr>
+  <tr><td class="num">0.9</td><td class="num">0.1</td><td class="num">10</td></tr>
+  <tr><td class="num">0.99</td><td class="num">0.01</td><td class="num">100</td></tr>
+  <tr><td class="num">0.8</td><td class="num">?</td><td class="num">?</td></tr>
+  <tr><td class="num">0.95</td><td class="num">?</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last two rows</summary>
+  <p>For 0.8: 1 − 0.8 = 0.2, and 1 / 0.2 = <strong>5 steps</strong>. For 0.95: 1 − 0.95 = 0.05, and 1 / 0.05 = <strong>20 steps</strong>. The extra 0.15 of γ bought fifteen more steps, because the denominator fell to a quarter of its size.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"γ = 0.99 is basically γ = 1, so the difference is cosmetic."</strong> It does round to 1.00 at two decimals, and that is exactly the trap. The horizon is a reciprocal, so a change in the third decimal is a change in scale, not a rounding detail.</p>
+  <p><strong>Correction:</strong> never compare two γ values directly. Convert both to 1/(1−γ) first, then compare the step counts.</p>
+</div>
+<p><strong>The tell:</strong> nudge γ from 0.99 to 0.999 and your agent goes from looking 100 steps ahead to 1,000. If a knob changes the planning window by a factor of ten while appearing to move by 0.009, it is the most consequential number in the configuration.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>What horizon does γ = 0.98 give?
+    <details><summary>Answer</summary>
+      <p>1 / 0.02 = 50 steps. Notice that 0.98 sits much closer to 0.99 (100 steps) than to 0.9 (10 steps) — the scale is not linear in γ.</p>
+    </details>
+  </li>
+  <li>Which agent still counts a reward 50 steps out: γ = 0.9 or γ = 0.99?
+    <details><summary>Answer</summary>
+      <p>γ = 0.99. That reward keeps 0.99⁵⁰ ≈ 0.61 of face value, while at γ = 0.9 it keeps 0.9⁵⁰ ≈ 0.005. The horizon of 100 against 10 predicted that gap before you computed it.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Lab 1 of topic 20 takes the discounted future and folds it into one number per state — the Bellman backup.</p>
+
+<div class="labnav">
+  <a href="019a-gamma.html">← 19a · γ — the price of waiting</a>
+  <a href="019-rl-frame.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

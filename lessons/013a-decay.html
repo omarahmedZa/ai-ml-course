@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>013.1 — g^L: how much gradient survives</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Compute how a gradient shrinks or explodes across L layers, and name the fix for each direction.">
+</head>
+<body data-page="lab" data-lesson="013a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Optimization · Lab 1 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="013-optimization-failure-modes.html#labs">Topic 13 · Optimization failure modes</a> — where depth starts to hurt</p>
+
+<header class="masthead">
+  <p class="kicker">Depth, one multiplication at a time · Lab 1</p>
+  <h1>g<sup>L</sup> — how much gradient survives</h1>
+  <p class="objective">You can compute how much of a gradient reaches layer 1 after L layers, and say which fix applies to which direction.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">gradient at layer 1 =</span> <span class="hot">g<sup>L</sup></span> <span class="dim">× gradient at the last layer</span></p>
+<p class="eqn-note">Lab 1 of 2 · the product is lit; everything else is one factor per layer</p>
+<p>Training sends a correction signal backwards from the loss. It passes through every layer on the way, and each layer multiplies it by a number. <code>g</code> is that per-layer number — the gain. <code>L</code> is the number of layers it must cross. Nothing is added along the path, so only the product matters.</p>
+
+<h2>One multiplication per layer</h2>
+<p>Call the gain <code>g</code>. Ten layers give <code>g<sup>10</sup></code>, fifty give <code>g<sup>50</sup></code>. If <code>g</code> is a little below 1 the signal fades; a little above 1 it grows; exactly 1 it survives unchanged. Drag the slider and watch the same curve change character.</p>
+
+<figure class="fig" data-graph="curve">
+  <script type="application/json" class="curve-data">{"kind":"expdecay","x":[0,50],"y":[0,1],"xlabel":"layer index","ylabel":"gradient magnitude","xticks":[0,10,20,30,40,50],"yticks":[0,0.5,1],"controls":[{"k":"base","label":"per-layer gain g","min":0.8,"max":0.99,"step":0.01,"value":0.9}]}</script>
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-gain-t f-gain-d">
+    <title id="f-gain-t">Gradient magnitude after L layers for a per-layer gain g</title>
+    <desc id="f-gain-d">A curve falling from one at layer zero toward zero by layer fifty, drawn for a gain of 0.9. Raising the gain toward 0.99 flattens the curve; lowering it to 0.8 makes it collapse before layer twenty.</desc>
+    <g data-layer>
+      <line x1="64" y1="300" x2="700" y2="300" stroke="var(--ink-faint)"/>
+      <line x1="64" y1="24" x2="64" y2="300" stroke="var(--ink-faint)"/>
+      <line x1="64" y1="162" x2="700" y2="162" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+      <line x1="191" y1="24" x2="191" y2="300" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+      <line x1="318" y1="24" x2="318" y2="300" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+      <line x1="446" y1="24" x2="446" y2="300" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+      <line x1="573" y1="24" x2="573" y2="300" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+      <text x="56" y="28" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1</text>
+      <text x="56" y="166" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.5</text>
+      <text x="56" y="304" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0</text>
+      <text x="64" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0</text>
+      <text x="191" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">10</text>
+      <text x="318" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">20</text>
+      <text x="446" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">30</text>
+      <text x="573" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">40</text>
+      <text x="700" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">50</text>
+      <text x="700" y="334" text-anchor="end" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">layer index</text>
+      <text x="64" y="18" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">gradient magnitude</text>
+      <polyline points="64,24 89,76 115,119 140,153 166,181 191,204 217,222 242,237 268,249 293,259 318,266 344,273 369,278 395,282 420,286 446,288 471,291 496,292 522,294 547,295 573,296 598,297 624,297 649,298 675,298 700,299" fill="none" stroke="var(--sym-param)" stroke-width="2.5"/>
+    </g>
+  </svg>
+  <div class="fig-controls">
+    <label>per-layer gain g <input type="range" data-k="base" min="0.8" max="0.99" step="0.01" value="0.9"></label>
+    <output data-out="val" aria-live="polite">base = 0.90</output>
+    <button type="reset">Reset</button>
+  </div>
+  <figcaption><strong>A gain of 0.9 leaves 0.5% of the signal after 50 layers; a gain of 0.99 leaves 61%.</strong> One hundredth of a per-layer difference decides whether the early layers learn at all.</figcaption>
+</figure>
+
+<h2>The two numbers to remember</h2>
+<p>A sigmoid layer's derivative never exceeds 0.25, so ten sigmoid layers pass <code>0.25<sup>10</sup> ≈ 9.5 × 10<sup>−7</sup></code> — below what a 32-bit float resolves usefully. In the other direction, a badly scaled stack with <code>g = 1.5</code> passes <code>1.5<sup>10</sup> ≈ 58</code> after ten layers and <code>1.5<sup>30</sup> ≈ 191,751</code> after thirty.</p>
+
+<h2>Five fixes, one product</h2>
+<p>ReLU keeps the factor at 1 for positive inputs. He initialisation spreads each weight by <code>√(2/fan_in)</code>, steadying activation scale. Normalisation re-centres every layer to mean 0, variance 1. Those three hold the factor near 1. Residuals add an identity path instead, so the factor becomes <code>1 + g</code>. Clipping rescales gradients above a threshold, capping the exploding side.</p>
+
+<h2>Faded example</h2>
+<p>Multiply the gain by itself once per layer. The first row is done; fill the rest.</p>
+<table>
+  <tr><th class="num">Gain g</th><th class="num">Layers L</th><th class="num">Signal left, g<sup>L</sup></th><th>Verdict</th></tr>
+  <tr><td class="num">0.9</td><td class="num">10</td><td class="num">0.349</td><td>35% survives</td></tr>
+  <tr><td class="num">0.9</td><td class="num">30</td><td class="num">?</td><td>?</td></tr>
+  <tr><td class="num">1.5</td><td class="num">10</td><td class="num">57.7</td><td>explodes</td></tr>
+  <tr><td class="num">1.5</td><td class="num">20</td><td class="num">?</td><td>?</td></tr>
+</table>
+<details><summary>Check the last two rows</summary>
+  <p>Row 2: <code>0.9<sup>30</sup> ≈ 0.042</code>, so 96% of the signal is gone. Row 4: <code>1.5<sup>20</sup> ≈ 3,325</code>. The asymmetry is the lesson: thirty gentle layers lose almost everything while twenty aggressive ones multiply by thousands.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Vanishing gradients mean the learning rate is too small."</strong> The learning rate scales one step; it cannot repair a product. At <code>g = 0.25</code> the first layer receives a millionth of the signal, so a rate a thousand times larger is still a thousand times too small — and it destabilises the layers that were healthy.</p>
+  <p><strong>Correction:</strong> measure the gradient size at each layer before touching the learning rate.</p>
+</div>
+<p><strong>The tell:</strong> print each layer's gradient norm. If it falls by orders of magnitude from the last layer to the first, depth is the cause, not the step size. If the loss becomes NaN within a few steps, the same product is running the other way.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>A network has gain <code>g = 0.8</code> and 20 layers. What fraction of the gradient reaches layer 1?
+    <details><summary>Answer</summary>
+      <p><code>0.8<sup>20</sup> ≈ 0.012</code>, about 1%. Ninety-nine percent of the correction is spent before it arrives, so the first layers barely move.</p>
+    </details>
+  </li>
+  <li>Your first five layers have gradients near <code>10<sup>−9</sup></code> while the last layer is healthy. What single change do you try first?
+    <details><summary>Answer</summary>
+      <p>Replace sigmoid with ReLU: the per-layer factor rises from at most 0.25 to 1. Initialisation and normalisation come next. The learning rate is not the cause, because it scales one step rather than the product.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Depth fails in two directions and both are the same arithmetic. The other lab in this topic changes subject: where the parameters of a convolution come from, and why a 3×3 filter needs 36,864 weights instead of 205 million.</p>
+<p><a href="014a-conv-params.html">Lab 2 · k²·C<sub>in</sub>·C<sub>out</sub> — where convolution parameters come from →</a></p>
+
+<div class="labnav">
+  <a href="013-optimization-failure-modes.html#labs">← Back to the formula</a>
+  <a href="013-optimization-failure-modes.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

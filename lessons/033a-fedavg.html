@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>033.1 — w ← Σ (nₖ/N) wₖ: the weighted average</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Weight three client models by their example counts and see why FedAvg gives 0.74 rather than 0.50.">
+</head>
+<body data-page="lab" data-lesson="033a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Federated · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="033-federated-setting-fedavg.html#labs">Topic 33 · Federated setting &amp; FedAvg</a> — where the round protocol is defined</p>
+
+<header class="masthead">
+  <p class="kicker">Federated learning, one symbol at a time · Lab 1</p>
+  <h1>w ← Σ (nₖ/N) wₖ — the weighted average</h1>
+  <p class="objective">You can turn three client models into one global model, and say why the example counts decide the answer.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">w ← Σ<sub>k</sub></span> <span class="hot">( n<sub>k</sub> / N )</span> <span class="dim">w<sub>k</sub> = 0.74</span></p>
+<p class="eqn-note">Lab 1 of 2 · the share is lit; the sum, the local weights and the result are dimmed</p>
+<p>FedAvg is one line of arithmetic repeated every round. w<sub>k</sub> is the weight list client k sends back; n<sub>k</sub> is how many examples that client trained on; N is the total across all clients. The bracket is that client's share of the vote.</p>
+
+<h2>Who speaks, and how loudly</h2>
+<p>Three clients report after one round: 100, 200 and 700 examples. Total N = 1000, so the shares are 0.1, 0.2 and 0.7. The client with seven times the data gets seven times the vote.</p>
+
+<table>
+  <tr><th>Client</th><th class="num">Examples n<sub>k</sub></th><th class="num">Share n<sub>k</sub>/N</th><th class="num">Local w<sub>k</sub></th></tr>
+  <tr><td>A</td><td class="num">100</td><td class="num">0.1</td><td class="num">0.10</td></tr>
+  <tr><td>B</td><td class="num">200</td><td class="num">0.2</td><td class="num">0.50</td></tr>
+  <tr><td>C</td><td class="num">700</td><td class="num">0.7</td><td class="num">0.90</td></tr>
+</table>
+
+<p>Multiply each local weight by its share and add: 0.1 × 0.10 = 0.01, 0.2 × 0.50 = 0.10, 0.7 × 0.90 = 0.63. The new global weight is 0.74.</p>
+
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-fed-t f-fed-d">
+    <title id="f-fed-t">Each client's contribution to the new global weight, 0.74 in total</title>
+    <desc id="f-fed-d">Three bars on a scale from zero to 0.7. Client A with 100 examples contributes 0.01, client B with 200 contributes 0.1, and client C with 700 contributes 0.63.</desc>
+    <g data-layer>
+      <line x1="64" y1="290" x2="700" y2="290" stroke="var(--ink-faint)"/>
+      <rect x="130" y="286" width="80" height="4" rx="2" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="342" y="254" width="80" height="36" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="554" y="65" width="80" height="225" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <text x="170" y="276" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.01</text>
+      <text x="382" y="244" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.1</text>
+      <text x="594" y="55" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.63</text>
+      <text x="170" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">client A 100</text>
+      <text x="382" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">client B 200</text>
+      <text x="594" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">client C 700</text>
+      <text x="54" y="18" text-anchor="start" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">contribution to global w</text>
+    </g>
+  </svg>
+  <div class="bars-data" hidden>{"values":[0.01,0.1,0.63],"labels":["client A 100","client B 200","client C 700"],"max":0.7,"ylabel":"contribution to global w"}</div>
+  <figcaption><strong>The bars are the terms of the sum.</strong> They add to 0.74, not to the 0.50 an unweighted mean would report.</figcaption>
+</figure>
+
+<h2>Why weight by examples</h2>
+<p>Each client's local step is already an average over its own rows. Client C averaged 700 gradients, client A averaged 100. Re-weighting the returned weights by n<sub>k</sub>/N restores the single average you would have computed over all 1,000 examples at once.</p>
+
+<table>
+  <tr><th>Rule</th><th class="num">Arithmetic</th><th class="num">Result</th></tr>
+  <tr><td>Weighted (FedAvg)</td><td class="num">0.1(0.10) + 0.2(0.50) + 0.7(0.90)</td><td class="num">0.74</td></tr>
+  <tr><td>Equal average</td><td class="num">(0.10 + 0.50 + 0.90) / 3</td><td class="num">0.50</td></tr>
+</table>
+
+<p>The gap is 0.24 — a quarter of the whole parameter range, in the direction of the two smaller clients. That is not a rounding difference; it is a different model.</p>
+
+<h2>One more example</h2>
+<p>Keep the same three local weights, 0.10, 0.50 and 0.90, and move the examples around instead. Give the two small clients more rows and the third loses its majority; the local weights never change, only the shares do. The bracket in the equation is what pays attention.</p>
+<table>
+  <tr><th>Counts A / B / C</th><th class="num">Shares</th><th class="num">Contributions</th><th class="num">Global w</th></tr>
+  <tr><td class="num">100 / 200 / 700</td><td class="num">0.1 / 0.2 / 0.7</td><td class="num">0.01 / 0.10 / 0.63</td><td class="num">0.74</td></tr>
+  <tr><td class="num">200 / 200 / 600</td><td class="num">0.2 / 0.2 / 0.6</td><td class="num">0.02 / 0.10 / 0.54</td><td class="num">0.66</td></tr>
+  <tr><td class="num">300 / 300 / 400</td><td class="num">0.3 / 0.3 / 0.4</td><td class="num">0.03 / 0.15 / 0.36</td><td class="num">0.54</td></tr>
+</table>
+<p>The table shows the global weight sliding from 0.74 toward the unweighted 0.50 as client C's 700 rows become 400, with every local weight held fixed the whole way, while the shares keep summing to 1 and the contributions keep adding to the last column.</p>
+
+<h2>Faded example</h2>
+<p>Next round the counts change: 100, 300 and 600 examples, with local weights 0.2, 0.4 and 0.8. Fill in the contributions.</p>
+
+<table>
+  <tr><th>Client</th><th class="num">Share</th><th class="num">Local w<sub>k</sub></th><th class="num">Contribution</th></tr>
+  <tr><td>A (100)</td><td class="num">0.1</td><td class="num">0.2</td><td class="num">0.02</td></tr>
+  <tr><td>B (300)</td><td class="num">0.3</td><td class="num">0.4</td><td class="num">?</td></tr>
+  <tr><td>C (600)</td><td class="num">0.6</td><td class="num">0.8</td><td class="num">?</td></tr>
+</table>
+
+<details><summary>Check the answer</summary>
+  <p>0.3 × 0.4 = <strong>0.12</strong> and 0.6 × 0.8 = <strong>0.48</strong>. Total 0.02 + 0.12 + 0.48 = <strong>0.62</strong>. The equal average would be 0.47.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"FedAvg is the mean of the client weights."</strong> It is the mean only when every client holds the same number of examples. With 100 / 200 / 700 the plain mean is 0.50, and the client holding 70% of the data has been outvoted by two clients holding 30% between them.</p>
+  <p><strong>Correction:</strong> the averaging weight is a data share, not a client count. Write n<sub>k</sub>/N and check that the shares sum to 1 before you add anything.</p>
+</div>
+<p><strong>The tell:</strong> the global weight sits near the midpoint of the three local weights while the largest client's own loss refuses to fall. The model is training, the curve is smooth, and the majority of the data is being ignored.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Two clients hold 900 and 100 examples, with local weights 0.8 and 0.2. What does FedAvg return?
+    <details><summary>Answer</summary>
+      <p>Shares 0.9 and 0.1, so 0.9(0.8) + 0.1(0.2) = 0.72 + 0.02 = <strong>0.74</strong>. The equal average would be 0.50.</p>
+    </details>
+  </li>
+  <li>Why is weighting by examples better than weighting by client?
+    <details><summary>Answer</summary>
+      <p>Because one weighted step should match one pass over the pooled data. Each local weight already averaged its own rows, so counting a 100-row client equal to a 700-row client counts those rows seven times over.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>This rule is exact only when every client's data looks like everyone else's. When the clients are non-IID, the same weighted average drifts, and the fix is no longer in the arithmetic.</p>
+
+<div class="labnav">
+  <a href="033-federated-setting-fedavg.html#labs">← Back to the formula</a>
+  <a href="033-federated-setting-fedavg.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>008.1 — Why φ cannot be removed</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Two layers without a bend are one matrix. Multiply W2 by W1 and watch depth buy nothing.">
+</head>
+<body data-page="lab" data-lesson="008a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Objective · Lab 1 / 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="008-the-neuron.html#labs">Topic 08 · The neuron</a></p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · the neuron</p>
+  <h1>Why φ cannot be removed</h1>
+  <p class="objective">You can show, with one small multiplication, that deleting the bend collapses a stack of layers into a single linear map.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">ŷ = W<sub>2</sub></span> <span class="hot">φ( W<sub>1</sub>x + b<sub>1</sub> )</span> <span class="dim">+ b<sub>2</sub></span></p>
+<p class="eqn-note">Lab 1 of 1 · only the bend is lit; the two matrix products around it are ordinary linear layers</p>
+<p>A neuron computes a weighted sum, then bends it. The bend is written φ (phi, say "fee"). This lab asks what happens to a whole network when φ is removed.</p>
+
+<h2>The bend is the only nonlinear part</h2>
+<p><code>W<sub>1</sub>x + b<sub>1</sub></code> is linear: double every input and the sum doubles, scale one input and only its own term moves. φ is applied entry by entry, and it is not linear. Every departure from a straight line that a deep network can express enters through φ. Nothing else in the diagram can supply one.</p>
+
+<h2>Two layers, one matrix</h2>
+<p>Take <code>W<sub>1</sub> = [[1, 2], [3, 4]]</code> and <code>W<sub>2</sub> = [1, −1]</code>, both biases zero. The deep model computes <code>W<sub>2</sub>(W<sub>1</sub>x)</code>; multiply the matrices once and the brackets disappear.</p>
+<p><code>W<sub>2</sub>W<sub>1</sub> = [1·1 + (−1)·3, 1·2 + (−1)·4] = [−2, −2]</code>. The pair of layers is the single row <code>[−2, −2]</code>: two sets of weights, one straight line.</p>
+
+<table>
+  <tr><th>Route</th><th class="num">First step</th><th class="num">Second step</th><th class="num">Output at x = [1, 1]</th></tr>
+  <tr><td>Deep, two layers</td><td class="num">W<sub>1</sub>x = [3, 7]</td><td class="num">[1, −1]·[3, 7] = −4</td><td class="num">−4</td></tr>
+  <tr><td>Collapsed, one row</td><td class="num">W<sub>2</sub>W<sub>1</sub> = [−2, −2]</td><td class="num">[−2, −2]·[1, 1] = −4</td><td class="num">−4</td></tr>
+</table>
+
+<p>Matrix multiplication is associative, so <code>W<sub>2</sub>(W<sub>1</sub>x) = (W<sub>2</sub>W<sub>1</sub>)x</code>. The second layer sees only a linear function of x, so it can rescale that function and nothing more. The two rows agree because one expression is the other, bracketed differently.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-relu-t f-relu-d">
+    <title id="f-relu-t">ReLU is flat below zero and straight above it</title>
+    <desc id="f-relu-d">A curve that stays at zero for every negative input, then rises as a straight line for positive input. The kink sits exactly at zero, at the left of the rise.</desc>
+    <g data-layer>
+      <line x1="64" y1="300" x2="700" y2="300" stroke="var(--ink-faint)"/>
+      <line x1="64" y1="24" x2="64" y2="300" stroke="var(--ink-faint)"/>
+      <polyline points="64,300 382,300 700,24" fill="none" stroke="var(--sym-param)" stroke-width="2.6"/>
+      <text x="74" y="288" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">flat: φ(z) = 0</text>
+      <text x="470" y="120" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">φ(z) = z</text>
+    </g>
+  </svg>
+  <script type="application/json" class="curve-data">{"kind":"relu","x":[-3,3],"y":[0,3],"xlabel":"z","ylabel":"φ(z)","controls":[]}</script>
+  <figcaption><strong>The kink is the capability.</strong> One flat region and one sloped region cannot be written as a single straight line, so no matrix product reproduces this shape.</figcaption>
+</figure>
+
+<h2>What the bend buys</h2>
+<p>With φ in place the model is piecewise: flat on one side of zero, sloped on the other. The weights decide which side an input lands on, so the network can switch behaviour by region. Squaring instead gives a curve rather than a corner — still one no single matrix imitates.</p>
+
+<h2>Depth without a bend</h2>
+<p>Fifty layers without φ still equal one matrix W. You pay for fifty multiplications, carry fifty layers of parameters, and own the power of one linear layer. Nothing errors; the loss simply settles where logistic regression would.</p>
+
+<h2>Faded example</h2>
+<p>The first row is solved. In the second, W<sub>2</sub> changes; fill in the collapse and both outputs.</p>
+<table>
+  <tr><th>W<sub>2</sub></th><th class="num">W<sub>2</sub>W<sub>1</sub></th><th class="num">Deep output</th><th class="num">Collapsed output</th></tr>
+  <tr><td class="num">[1, −1]</td><td class="num">[−2, −2]</td><td class="num">−4</td><td class="num">−4</td></tr>
+  <tr><td class="num">[1, 1]</td><td class="num">?</td><td class="num">?</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the hidden row</summary>
+  <p>With W<sub>2</sub> = [1, 1] the collapse is [1·1 + 1·3, 1·2 + 1·4] = <strong>[4, 6]</strong>. Deep: W<sub>1</sub>x = [3, 7], then 3 + 7 = <strong>10</strong>. Collapsed: 4 + 6 = <strong>10</strong>. Both routes must agree; no bend sits between them.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Depth adds power by itself; the activation only makes training faster."</strong> It feels right because deeper networks do perform better, and the activation looks like plumbing.</p>
+  <p><strong>Correction:</strong> depth adds power only when something between the layers is nonlinear. Remove φ and the product of matrices is a matrix; the depth buys parameters and nothing else.</p>
+</div>
+<p><strong>The tell:</strong> count the nonlinearities, not the layers. Twelve layers with zero activation calls is a linear model wearing twelve coats.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>With W<sub>1</sub> = [[1, 2], [3, 4]] and W<sub>2</sub> = [1, 1], what single row replaces the two layers?
+    <details><summary>Answer</summary>
+      <p><strong>[4, 6]</strong>: 1·1 + 1·3 = 4, and 1·2 + 1·4 = 6. One row, one linear map.</p>
+    </details>
+  </li>
+  <li>Why does a ReLU between the layers stop the collapse?
+    <details><summary>Answer</summary>
+      <p>Because <code>max(0, z)</code> is not of the form <code>c·z</code>: it is zero below and equal to z above. No single matrix reproduces that split, so the product rule no longer applies.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Topic 09 takes the bend for granted and asks a duller, more practical question: what shape is every array at each step of the forward pass?</p>
+
+<div class="labnav">
+  <a href="008-the-neuron.html#labs">← Back to the formula</a>
+  <a href="008-the-neuron.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

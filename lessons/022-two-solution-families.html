@@ -57,6 +57,15 @@
 <h3>Part 7 — Actor–critic swaps the return for an advantage</h3>
 <p>Replace <code>G_t</code> with <code>Q(s,a) − V(s)</code>, the advantage: how much better this action was than the state's average. With <code>Q = 2.8</code> and <code>V = 2.41</code>, the advantage is 0.39. Why this part exists: a raw return mixes "this state is good" with "this action was good", so every action in a lucky episode gets pushed up. Subtracting the baseline isolates the action and removes most of the noise.</p>
 
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 1 · about 3 minutes each</p>
+  <h3 class="lab-title">Take this apart, one symbol at a time</h3>
+  <p class="lab-sub">Each lab isolates one symbol and gives you a figure you can drag. They use the same numbers as the lesson, so you can carry the result back here.</p>
+  <ul class="lab-list">
+    <li><a href="022a-td-error.html"><span class="lab-num">022a</span><span class="lab-body"><strong>TD error — target minus estimate</strong></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
+</aside>
+
 <h2>Worked example</h2>
 
 <h3>1. Two Q-learning updates on the same transition</h3>

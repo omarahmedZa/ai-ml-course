@@ -57,6 +57,15 @@
 <h3>Part 7 — Choose where the norm goes</h3>
 <p>Pre-LN normalises the input to each sub-layer, inside the branch: <code>x + MHA(LN(x))</code>. Post-LN normalises after the addition instead. Modern models use pre-LN because the residual path stays a clean chain of additions from the loss back to the first block. <strong>Why this part exists:</strong> post-LN puts a normalisation on that path at every block, so very deep post-LN models need a long learning-rate warmup.</p>
 
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 1 · about 3 minutes each</p>
+  <h3 class="lab-title">Take this apart, one symbol at a time</h3>
+  <p class="lab-sub">Each lab isolates one symbol and gives you a figure you can drag. They use the same numbers as the lesson, so you can carry the result back here.</p>
+  <ul class="lab-list">
+    <li><a href="027a-residual.html"><span class="lab-num">027a</span><span class="lab-body"><strong>x + MHA(LN(x)) — the residual path</strong></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
+</aside>
+
 <h2>Worked example</h2>
 
 <h3>1. Parameter count for one block</h3>

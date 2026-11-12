@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>002.2 — Why the update subtracts</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="The gradient points uphill, so training subtracts it. The minus is a direction, and the gradient's sign decides which way the weights move.">
+</head>
+<body data-page="lab" data-lesson="002b">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Equation · Lab 2 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="002-slope-to-gradient.html#labs">Topic 02 · Slope → gradient</a> — the direction of a step</p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · the direction of the step</p>
+  <h1>Why the update subtracts</h1>
+  <p class="objective">You can explain why w ← w − η∇f walks downhill, and why a minus sign does not mean the weights shrink.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">w ← w</span> <span class="hot">− η∇f(w)</span></p>
+<p class="eqn-note">Lab 2 of 2 · the slope and the rate are dim; the subtraction is lit</p>
+<p>∇f(w) is the gradient: the slope of the loss with respect to the weight. It points in the direction that makes the loss <em>larger</em>. Training wants the loss smaller, so it moves the other way — and that is the whole job of the minus sign.</p>
+
+<h2>The gradient points uphill</h2>
+<p>On f(w) = w² at w = 3 the slope is 6. A positive slope means: increase w, and the loss increases. To lose less, decrease w. The gradient told you the uphill direction; the update does the opposite.</p>
+<p>Below the bottom the slope turns negative. At w = −2 the slope is −4, so decreasing w now increases the loss, and the same rule pushes w up instead.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="f-bowl-t f-bowl-d">
+    <title id="f-bowl-t">A loss bowl whose minimum sits at mu equals 2</title>
+    <desc id="f-bowl-d">A parabola opening upward, the loss J of w equals w minus mu squared plus one. The lowest point is at w equals 2 with a loss of 1, marked by a blue dot. To the right of the dot the curve rises, so the slope is positive there; to the left it also rises, so the slope is negative there.</desc>
+    <g data-layer></g>
+  </svg>
+  <script type="application/json" class="curve-data">{"kind":"quadratic","x":[-1,5],"y":[0,20],"xlabel":"weight w","ylabel":"loss J(w)","controls":[{"k":"mu","label":"bottom μ","min":-1,"max":5,"step":0.1,"value":2},{"k":"floor","label":"floor c","min":0,"max":3,"step":0.1,"value":1}],"marker":"mu"}</script>
+  <div class="fig-controls"></div>
+  <figcaption><strong>Every step crosses the slope and heads for the dot.</strong> Right of the bottom the slope is positive and w falls; left of it the slope is negative and w rises. Both are the same subtraction.</figcaption>
+</figure>
+
+<p>Move μ and the whole bowl slides, floor and all. The dot is always the point where the slope is zero — the one place the update stops doing anything.</p>
+
+<h2>One step, with numbers</h2>
+<p>Take J(w) = (w − 2)² + 1 and start at w = 4. The slope there is 2(w − 2) = 4, and the loss is 5. With η = 0.1 the step is 0.4: w becomes 4 − 0.4 = 3.6 and the loss becomes 3.56.</p>
+<p>Now add instead: 4 + 0.4 = 4.4, loss 6.76. Same size step, opposite direction, and the loss climbs. The sign is not decoration; it is the difference between training and anti-training.</p>
+
+<h2>Why subtracting is not shrinking</h2>
+<p>Every parameter in the model is a w, not just the weights on features. Take the canonical example: w = 2, b = 1, input 3, so the prediction is 7 against a truth of 10. The squared loss is 9.</p>
+<p>The loss falls if the prediction rises, so the slope with respect to w is negative. Subtracting a negative adds: w ← 2 − 0.1(−18) = 3.8. Here the minus sign makes w <em>bigger</em>.</p>
+
+<h2>Faded example</h2>
+<p>J(w) = (w − 2)² + 1, so the slope is 2(w − 2). With η = 0.1, start at w = 5 and take one step. Then finish the table.</p>
+<table>
+  <tr><th>Weight w</th><th class="num">Slope ∇J</th><th class="num">Step η∇J</th><th class="num">New w</th><th class="num">New loss</th></tr>
+  <tr><td class="num">5</td><td class="num">6</td><td class="num">0.6</td><td class="num">4.4</td><td class="num">6.76</td></tr>
+  <tr><td class="num">4</td><td class="num">4</td><td class="num">0.4</td><td class="num">3.6</td><td class="num">3.56</td></tr>
+  <tr><td class="num">1</td><td class="num">−2</td><td class="num">?</td><td class="num">?</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last row</summary>
+  <p>Slope 2(1 − 2) = −2, so the step is 0.1 × (−2) = −0.2. Subtracting it gives 1 + 0.2 = <strong>1.2</strong>, with loss (1.2 − 2)² + 1 = <strong>1.64</strong>. The weight grew and the loss fell, because the slope was negative.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The minus sign makes the weights smaller."</strong> No. It makes the loss smaller, which sometimes means bigger weights. The gradient's sign decides which way w travels; the minus only guarantees you travel against it.</p>
+  <p><strong>Correction:</strong> read the update as "opposite the slope, scaled by η", never as "subtract from w".</p>
+</div>
+<p><strong>The tell:</strong> if every weight decreases on every step, the gradient can never be negative, and something is wrong with the derivative or its sign. A healthy run has weights moving both ways.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>At w = 4 the slope of (w − 2)² + 1 is 4. Which way does the update move w, and why?
+    <details><summary>Answer</summary>
+      <p>Down, to 3.6. The slope is positive, meaning w = 4 sits on the right wall of the bowl where increasing w raises the loss. Subtracting moves left, toward the bottom at 2.</p>
+    </details>
+  </li>
+  <li>A weight has a negative gradient. Does it grow or shrink?
+    <details><summary>Answer</summary>
+      <p>It grows: w − η(negative) = w + something. The negative slope says the loss falls as w rises, so the update obeys it.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Topic 03 swaps the squared error for a probability: the loss becomes −log p, and the update still subtracts the slope of that.</p>
+
+<div class="labnav">
+  <a href="002a-eta.html">← 02a · η — how far one step goes</a>
+  <a href="002-slope-to-gradient.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

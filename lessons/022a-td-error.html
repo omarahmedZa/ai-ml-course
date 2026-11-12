@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>022.1 — TD error: target − estimate</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="A TD update moves the current estimate a fraction α of the way toward the target r + γ max Q′.">
+</head>
+<body data-page="lab" data-lesson="022a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 22 · Lab 1 / 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="022-two-solution-families.html#labs">Topic 22 · Two solution families</a> — where value learning gets its update</p>
+
+<header class="masthead">
+  <p class="kicker">Two solution families, one symbol at a time · Lab 1</p>
+  <h1>TD error — target minus estimate</h1>
+  <p class="objective">You can compute a TD error and the new Q value, and say why α rarely equals 1.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">Q(s,a) ← Q(s,a) +</span> <span class="hot">α[ target − Q(s,a) ]</span></p>
+<p class="eqn-note">Topic 22 · the update term is lit; the estimate being nudged stays dim</p>
+<p>An update has two numbers: where the estimate is, and where the evidence says it should be. The target is r + γ max Q(s′,a′). The bracket is the TD error — the gap between them, signed.</p>
+<p>TD stands for temporal difference: the difference between a prediction made now and a slightly better prediction made one step later.</p>
+
+<h2>A nudge, not a replacement</h2>
+<p>α (alpha) sits between 0 and 1 and is the fraction of the gap you close in one update. α = 1 jumps straight to the target; α = 0 learns nothing at all. Values like 0.1 are chosen so one sample moves the estimate a little, not all the way.</p>
+
+<h2>The arithmetic of one update</h2>
+<p>Take Q = 0.5, r = 1, γ = 0.9, max Q′ = 0.8 and α = 0.1. The target is 1 + 0.9 × 0.8 = 1.72. The error is 1.72 − 0.5 = 1.22, and the move is 0.1 × 1.22 = 0.122. New Q: 0.622.</p>
+
+<table>
+  <tr><th>Step</th><th class="num">Arithmetic</th><th class="num">Value</th></tr>
+  <tr><td>discounted next value</td><td class="num">0.9 × 0.8</td><td class="num">0.72</td></tr>
+  <tr><td>target</td><td class="num">1 + 0.72</td><td class="num">1.72</td></tr>
+  <tr><td>TD error</td><td class="num">1.72 − 0.5</td><td class="num">1.22</td></tr>
+  <tr><td>update</td><td class="num">0.1 × 1.22</td><td class="num">0.122</td></tr>
+  <tr><td>new Q</td><td class="num">0.5 + 0.122</td><td class="num">0.622</td></tr>
+</table>
+
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-td-t f-td-d">
+    <title id="f-td-t">One update moves the estimate a tenth of the way to the target</title>
+    <desc id="f-td-d">Three bars: the current estimate at 0.5, the target at 1.72, and the updated estimate at 0.622. The update closes one tenth of the gap, not all of it.</desc>
+    <g data-layer></g>
+  </svg>
+  <script type="application/json" class="bars-data">{"values":[0.5,1.72,0.622],"labels":["Q now 0.5","target 1.72","Q after 0.622"],"max":2,"ylabel":"Q value","highlight":2}</script>
+  <figcaption><strong>The estimate lands a tenth of the way along the gap.</strong> The remaining 1.098 is not forgotten; it becomes the error the next update works on. Repeat, and the estimate walks toward the target instead of jumping.</figcaption>
+</figure>
+
+<h2>Why not jump all the way</h2>
+<p>The target is itself an estimate, built from another estimate that is also wrong. Jumping to it copies its noise whole. A small α averages many noisy targets, which is the same trade you made with the learning rate in topic 2: speed against stability.</p>
+
+<h2>The error is not the reward</h2>
+<p>A zero TD error does not mean the value is right. It means the two estimates agree. Two wrong numbers can agree perfectly, and no further update will separate them — which is why exploration and a slow α both matter.</p>
+
+<h2>Faded example</h2>
+<p>Same transition, but α = 0.5. The target is still 1.72 and the error still 1.22. Fill the update and the new estimate.</p>
+<table>
+  <tr><th>Quantity</th><th class="num">Arithmetic</th><th class="num">Value</th></tr>
+  <tr><td>target</td><td class="num">1 + 0.9 × 0.8</td><td class="num">1.72</td></tr>
+  <tr><td>TD error</td><td class="num">1.72 − 0.5</td><td class="num">1.22</td></tr>
+  <tr><td>update at α = 0.5</td><td class="num">?</td><td class="num">?</td></tr>
+  <tr><td>new Q</td><td class="num">?</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last two rows</summary>
+  <p>0.5 × 1.22 = <strong>0.61</strong>, and 0.5 + 0.61 = <strong>1.11</strong>. The same evidence now moves the estimate five times as far. With α = 1 it would land exactly on 1.72 and inherit every bit of that target's noise.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The TD error measures how wrong the reward was."</strong> The reward is observed and exact; the error is between two predictions. It measures surprise, not correctness.</p>
+  <p><strong>Correction:</strong> a large positive error says the outcome was better than expected, not that the outcome was good. The sign tells you which way to move; the size tells you how far.</p>
+</div>
+<p><strong>The tell:</strong> change only the next-state estimate and the error moves while no new reward has arrived. Nothing about the world changed — only the table's opinion of it.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Target 1.72, Q = 0.5. What is the sign of the TD error, and which way does Q move?
+    <details><summary>Answer</summary>
+      <p>Positive: 1.72 − 0.5 = +1.22, so Q rises. A negative error would mean the estimate was too optimistic and gets pulled down.</p>
+    </details>
+  </li>
+  <li>What happens to the TD error as the estimate converges?
+    <details><summary>Answer</summary>
+      <p>It shrinks toward zero, because the target is built from estimates of the same table. At the fixed point every update is target = Q, so further samples change nothing.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>That fixed point assumes a table small enough to hold every state. Topic 23 replaces the table with a function, and the same update survives with a gradient in place of a cell.</p>
+
+<div class="labnav">
+  <a href="022-two-solution-families.html#labs">← Back to the formula</a>
+  <a href="022-two-solution-families.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

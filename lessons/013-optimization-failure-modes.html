@@ -62,6 +62,15 @@
 <p>Start at a small learning rate, often 1/100 of the target, and raise it linearly over the first few hundred steps. Early gradients are large and the weights are still random, which makes step 1 the most dangerous step of the run.</p>
 <p><strong>Why this part exists:</strong> clipping bounds the gradient but not gradient times learning rate; warmup bounds the distance the weights actually travel.</p>
 
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 1 · about 3 minutes each</p>
+  <h3 class="lab-title">Take this apart, one symbol at a time</h3>
+  <p class="lab-sub">Each lab isolates one symbol and gives you a figure you can drag. They use the same numbers as the lesson, so you can carry the result back here.</p>
+  <ul class="lab-list">
+    <li><a href="013a-decay.html"><span class="lab-num">013a</span><span class="lab-body"><strong>gL — how much gradient survives</strong></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
+</aside>
+
 <h2>Worked example</h2>
 
 <h3>1. How fast the signal dies</h3>

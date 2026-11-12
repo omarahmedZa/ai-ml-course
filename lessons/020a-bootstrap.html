@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>020.1 — V(s) = r + γV(s′): bootstrapping</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Bootstrapping writes a state's value as its reward plus the discounted value of the next state.">
+</head>
+<body data-page="lab" data-lesson="020a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 20 · Lab 1 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="020-value-functions-bellman.html#labs">Topic 20 · Value functions &amp; the Bellman equation</a> — where a state gets a price</p>
+
+<header class="masthead">
+  <p class="kicker">Value functions, one symbol at a time · Lab 1</p>
+  <h1>V(s) = r + γV(s′) — bootstrapping</h1>
+  <p class="objective">You can price a state from one reward and one estimate of the next state, without ever finishing an episode.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">V(s) = E[</span> <span class="hot">r + γ V(s′)</span> <span class="dim">]</span></p>
+<p class="eqn-note">Topic 20 · the backup is lit; the expectation wrapped around it stays dim</p>
+<p>V(s) is the expected return from state s: one number standing in for every future you might live through. The backup builds it from two pieces you already have — today's reward, and the value of wherever you land next.</p>
+<p>Bootstrapping means using a guess to improve a guess. V(s′) is not known either. It is the current estimate, and it is good enough to move V(s) closer to the truth.</p>
+
+<h2>Value now, value next</h2>
+<p>Read the strip as: what I collect now, plus what the rest of the trip is worth, discounted once. The endless sum from topic 19 is never written out. The tail is folded into a single table lookup, which is what makes the arithmetic finite.</p>
+<p>The expectation E[·] is there because the next state can be random; with one known successor the average drops away and the bracket on its own is the backup.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-chain-t f-chain-d">
+    <title id="f-chain-t">Three states in a chain, each valued from the next</title>
+    <desc id="f-chain-d">Three boxes left to right labelled s, s prime and s double prime. Arrows between them carry a reward of one. Under the boxes the values read 3.52, 2.8 and 2.0, each one built from the box to its right with a discount of 0.9.</desc>
+    <g data-layer>
+      <text x="360" y="62" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">γ = 0.9 · reward 1 at every step</text>
+
+      <rect x="45" y="130" width="150" height="70" rx="8" fill="var(--card)" stroke="var(--sym-env)" stroke-width="1.6"/>
+      <text x="120" y="163" text-anchor="middle" font-size="20" fill="var(--sym-env)" font-family="ui-monospace, monospace">s</text>
+      <text x="120" y="186" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">now</text>
+      <text x="120" y="228" text-anchor="middle" font-size="13" fill="var(--sym-opt)" font-family="ui-monospace, monospace">V = 3.52</text>
+
+      <line x1="198" y1="165" x2="277" y2="165" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="285,165 272,160 272,170" fill="var(--ink-faint)"/>
+      <text x="241" y="154" text-anchor="middle" font-size="11" fill="var(--sym-loss)" font-family="ui-monospace, monospace">r = 1</text>
+
+      <rect x="285" y="130" width="150" height="70" rx="8" fill="var(--card)" stroke="var(--sym-env)" stroke-width="1.6"/>
+      <text x="360" y="163" text-anchor="middle" font-size="20" fill="var(--sym-env)" font-family="ui-monospace, monospace">s′</text>
+      <text x="360" y="186" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">one step on</text>
+      <text x="360" y="228" text-anchor="middle" font-size="13" fill="var(--sym-opt)" font-family="ui-monospace, monospace">V = 2.8</text>
+
+      <line x1="438" y1="165" x2="517" y2="165" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="525,165 512,160 512,170" fill="var(--ink-faint)"/>
+      <text x="481" y="154" text-anchor="middle" font-size="11" fill="var(--sym-loss)" font-family="ui-monospace, monospace">r = 1</text>
+
+      <rect x="525" y="130" width="150" height="70" rx="8" fill="var(--card)" stroke="var(--sym-env)" stroke-width="1.6"/>
+      <text x="600" y="163" text-anchor="middle" font-size="20" fill="var(--sym-env)" font-family="ui-monospace, monospace">s″</text>
+      <text x="600" y="186" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">two steps on</text>
+      <text x="600" y="228" text-anchor="middle" font-size="13" fill="var(--sym-opt)" font-family="ui-monospace, monospace">V = 2.0</text>
+
+      <text x="360" y="278" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">each box = own reward + 0.9 × the box to its right</text>
+    </g>
+  </svg>
+  <figcaption><strong>One number per state, built from one number to the right.</strong> The chain is valued right to left, and no box ever needs to know how the episode ends — only what its neighbour is currently worth.</figcaption>
+</figure>
+
+<h2>A chain of three states</h2>
+<p>Take γ = 0.9 and a reward of 1 at each step. The last state is worth 2. Then V(s′) = 1 + 0.9 × 2 = 2.8, and V(s) = 1 + 0.9 × 2.8 = 3.52. Each box inherits its neighbour's number, discounted, plus its own reward.</p>
+
+<table>
+  <tr><th>State</th><th class="num">Arithmetic</th><th class="num">V</th></tr>
+  <tr><td class="num">s″</td><td class="num">given</td><td class="num">2.00</td></tr>
+  <tr><td class="num">s′</td><td class="num">1 + 0.9 × 2</td><td class="num">2.80</td></tr>
+  <tr><td class="num">s</td><td class="num">1 + 0.9 × 2.8</td><td class="num">3.52</td></tr>
+</table>
+<p>Notice the shape of the numbers: 3.52 is not 3, and it is not unbounded. Discounting pulls the whole chain toward the horizon of 10 steps from lab 019b.</p>
+
+<h2>The recursion is the algorithm</h2>
+<p>You do not need a finished episode. One transition and one current estimate are enough to improve V(s). Sweep every state, again and again, and the numbers settle; that loop is policy evaluation. The same backup run on samples instead of a known table is TD learning.</p>
+
+<h2>Faded example</h2>
+<p>Same chain: V(s″) = 2, γ = 0.9, reward 1 per step. Fill the two missing values, with the final arithmetic step removed.</p>
+<table>
+  <tr><th>State</th><th class="num">Arithmetic</th><th class="num">V</th></tr>
+  <tr><td class="num">s″</td><td class="num">given</td><td class="num">2.00</td></tr>
+  <tr><td class="num">s′</td><td class="num">?</td><td class="num">?</td></tr>
+  <tr><td class="num">s</td><td class="num">?</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the chain</summary>
+  <p>s′: 1 + 0.9 × 2 = <strong>2.8</strong>. s: 1 + 0.9 × 2.8 = <strong>3.52</strong>. Start every value at 0 instead and sweep the same rule: 1, then 1.9, then 2.71 — the sequence climbs toward 3.52 without anyone supplying it.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Bootstrapping is circular, so it cannot be computed."</strong> The equation does refer to itself one step later, and that is the point: it is a system of simultaneous equations, not a dead end.</p>
+  <p><strong>Correction:</strong> each sweep multiplies the error by γ, so from any starting guess the values converge. γ &lt; 1 is what guarantees the correction shrinks rather than amplifies.</p>
+</div>
+<p><strong>The tell:</strong> initialise every V at 0 and run the sweep. The numbers climb to 3.52 and stop moving. A genuinely circular definition would never settle, because nothing would break the loop.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>r = 2, γ = 0.5, V(s′) = 4. What is V(s)?
+    <details><summary>Answer</summary>
+      <p>2 + 0.5 × 4 = 4.0. Half of the next state's value plus the reward — the discount is applied once, not twice.</p>
+    </details>
+  </li>
+  <li>Why can V(s) be updated before the episode ends?
+    <details><summary>Answer</summary>
+      <p>Because the unobserved tail is carried by V(s′), which is already in the table. The backup never asks what happens after s′; it asks what s′ is currently worth.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Lab 2 asks which action to take once the values exist: V*(s) = max over actions of Q(s,a).</p>
+
+<div class="labnav">
+  <a href="020-value-functions-bellman.html#labs">← Back to the formula</a>
+  <a href="020b-optimality.html">Lab 20b · max — the value of the best action →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>025.1 — r: the ratio, clipped to 1 ± 0.2</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Compute PPO's probability ratio and clipped objective, and say what the clip does and does not guarantee.">
+</head>
+<body data-page="lab" data-lesson="025a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Policy gradient · Lab 1 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="025-policy-gradient-at-scale.html#labs">Topic 25 · Policy gradient at scale</a> — where the clip is introduced</p>
+
+<header class="masthead">
+  <p class="kicker">Policy gradient, one symbol at a time · Lab 1</p>
+  <h1>r — the ratio, clipped to 1 ± 0.2</h1>
+  <p class="objective">You can compute PPO's clipped objective for any ratio, and say which side of the band the clip protects.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">maximise</span> <span class="hot">min( r·A , clip(r, 1−ε, 1+ε)·A )</span></p>
+<p class="eqn-note">Lab 1 of 2 · r = π<sub>new</sub> / π<sub>old</sub> · A is the advantage · ε = 0.2</p>
+<p>PPO changes the policy in small steps because on-policy data is used once. A step that is too large wastes the rollout that produced it, and the policy may not recover. The ratio measures the size of that step.</p>
+
+<h2>What the ratio measures</h2>
+<p>r = π<sub>new</sub>(a|s) / π<sub>old</sub>(a|s). π (pi) is the probability the policy gives an action in a state. The old policy collected the data; the new policy is what the current weights would do.</p>
+<p>r = 1 means nothing changed. r = 1.3 means the action is 30% more likely than when it was taken; r = 0.5 means half as likely. The ratio is per action, so one update moves thousands of ratios at once.</p>
+
+<h2>The clip</h2>
+<p>With ε = 0.2 the allowed band is 0.8 to 1.2. PPO maximises min(rA, clip(r)A). Inside the band the two terms are equal, so the ordinary policy gradient runs. Above it, for a positive advantage, the clipped term stops moving and the objective goes flat.</p>
+<p>Take A = +1. At r = 1.3 the unclipped term is 1.3, the clipped term is 1.2, and the min is 1.2. At r = 1.5 it is still 1.2. A good action 50% more likely earns no more than one 20% more likely.</p>
+
+<table>
+  <tr><th class="num">Ratio r</th><th class="num">rA</th><th class="num">clip(r)A</th><th class="num">Objective</th></tr>
+  <tr><td class="num">0.5</td><td class="num">0.5</td><td class="num">0.8</td><td class="num">0.5</td></tr>
+  <tr><td class="num">1.0</td><td class="num">1.0</td><td class="num">1.0</td><td class="num">1.0</td></tr>
+  <tr><td class="num">1.3</td><td class="num">1.3</td><td class="num">1.2</td><td class="num">1.2</td></tr>
+  <tr><td class="num">2.0</td><td class="num">2.0</td><td class="num">1.2</td><td class="num">1.2</td></tr>
+</table>
+
+<figure class="fig" data-graph="bars">
+  <script type="application/json" class="bars-data">{"values":[0.5,1.0,1.2],"labels":["r=0.5","r=1.0","r=1.3"],"max":1.5,"ylabel":"clipped objective"}</script>
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-clip-t f-clip-d">
+    <title id="f-clip-t">PPO objective for three ratios when the advantage is positive</title>
+    <desc id="f-clip-d">Three bars for advantage one. Ratio 0.5 scores 0.5, ratio 1.0 scores 1.0, and ratio 1.3 scores 1.2. The third bar is capped, so it is shorter than its ratio would suggest.</desc>
+    <g data-layer></g>
+  </svg>
+  <figcaption><strong>A higher ratio stops paying past 1.2.</strong> With A = 1 the objective rises 0.5 → 1.0 and only 1.0 → 1.2 at r = 1.3; a ratio of 2.0 would score exactly the same 1.2.</figcaption>
+</figure>
+
+<h2>Why the reward side stops</h2>
+<p>For a bad action, A is negative. At r = 2.0 with A = −1, min(−2.0, −1.2) = −2.0, so making a bad action twice as likely is still punished in full. The min takes whichever term is worse for the policy, which is why the cap binds on good actions but not on bad ones.</p>
+
+<h2>Faded example</h2>
+<p>A = +3, ε = 0.2. The first row is solved; finish the other two.</p>
+<table>
+  <tr><th class="num">r</th><th class="num">rA</th><th class="num">clip(r)A</th><th class="num">Objective</th></tr>
+  <tr><td class="num">1.5</td><td class="num">4.5</td><td class="num">3.6</td><td class="num">3.6</td></tr>
+  <tr><td class="num">0.6</td><td class="num">1.8</td><td class="num">2.4</td><td class="num">?</td></tr>
+  <tr><td class="num">2.0</td><td class="num">6.0</td><td class="num">3.6</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last two rows</summary>
+  <p>Row 2: min(1.8, 2.4) = <strong>1.8</strong>. The min keeps the unclipped term, so clipping does not rescue a good action whose probability shrank. Row 3: min(6.0, 3.6) = <strong>3.6</strong>.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The clip guarantees the policy moves by at most 20%."</strong> It feels right because 0.2 sits in the formula and the objective stops rising. But the clip bounds the incentive, not the distance. Several epochs on one batch compound small steps, momentum carries direction across batches, and shared layers drag unrelated outputs along.</p>
+  <p><strong>Correction:</strong> measure the change you actually made — the mean ratio and the KL between old and new policies — rather than trusting the formula.</p>
+</div>
+<p><strong>The tell:</strong> after an epoch, the mean ratio on the same batch has drifted past 1.2, or KL spikes while every per-action loss looks capped. A run that improves for one epoch and then decays within the same batch points at epochs or learning rate, not at clipping.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>A = +2, r = 1.25, ε = 0.2. What is the objective?
+    <details><summary>Answer</summary>
+      <p>min(2.5, 2.4) = <strong>2.4</strong>. The ratio is past 1.2, so the clipped term wins.</p>
+    </details>
+  </li>
+  <li>Why is r = 1 the reference point?
+    <details><summary>Answer</summary>
+      <p>At r = 1 the new and old policies agree, so the objective equals A. The ratio measures drift from the policy that produced the data.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>The clip is one line inside a larger loop: collect a rollout, compute advantages, take a few epochs, then discard the data. Topic 25's worked example runs the same numbers for A = +2 and A = −2, including the row where the min chooses the clipped term.</p>
+
+<div class="labnav">
+  <a href="025-policy-gradient-at-scale.html#labs">← Back to the formula</a>
+  <a href="025-policy-gradient-at-scale.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

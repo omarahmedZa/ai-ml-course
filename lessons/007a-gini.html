@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>007.1 — Gini impurity: scoring a split</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Compute Gini impurity for a node and for a split, and see why a useless cut leaves it unchanged.">
+</head>
+<body data-page="lab" data-lesson="007a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Trees · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="007-trees-and-ensembles.html#labs">Topic 07 · Trees and ensembles</a></p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · trees and ensembles</p>
+  <h1>Gini impurity — scoring a split</h1>
+  <p class="objective">You can compute a node's impurity and use the drop to decide whether a split is worth taking.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">Δ = I(parent) − (n<sub>L</sub>/n) I(L) − (n<sub>R</sub>/n) I(R),  where</span> <span class="hot">I = 1 − Σ<sub>k</sub> p<sub>k</sub><sup>2</sup></span></p>
+<p class="eqn-note">I is Gini; n is the total row count; p<sub>k</sub> is the share of class k</p>
+<p>I is impurity: how mixed a node's labels are. p<sub>k</sub> is the fraction of rows in class k, and the sum runs over the classes. With two classes, shares p and 1 − p, the formula collapses to I = 2p(1 − p).</p>
+
+<h2>Impurity is a mixing score</h2>
+<p>A node that is all one class has p = 1, so I = 0: pure. A 50/50 node has I = 1 − (0.25 + 0.25) = 0.5, the maximum for two classes. The score is highest when you know least.</p>
+<p>Gini is not the only impurity. Entropy plays the same role, and trees often use either. What matters here is that a split is judged by how much impurity it removes, not by how small one child looks.</p>
+
+<h2>Score a split by the drop</h2>
+<p>A cut sends rows left or right. Score each child with I, then weight by its share of rows: n<sub>L</sub>/n for the left, n<sub>R</sub>/n for the right. Subtract both from the parent. That difference, Δ, is the split criterion.</p>
+<p>Take 100 rows, 50 positive and 50 negative: I(parent) = 0.5. A cut puts 45 positive and 5 negative on the left, and 5 positive and 45 negative on the right. Each child has I = 1 − (0.9² + 0.1²) = 0.18.</p>
+<p>The children hold half the rows each, so the weighted impurity is 0.5 × 0.18 + 0.5 × 0.18 = 0.18. The drop is 0.5 − 0.18 = 0.32. That 0.32 is what the tree records for this cut.</p>
+
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-gini-t f-gini-d">
+    <title id="f-gini-t">Parent and child Gini impurity for one split</title>
+    <desc id="f-gini-d">Three bars. The parent has Gini 0.5. The left child and right child each have Gini 0.18, so the size-weighted average is 0.18.</desc>
+    <g data-layer>
+      <line x1="64" y1="290" x2="700" y2="290" stroke="var(--ink-faint)"/>
+      <rect x="130" y="82" width="80" height="208" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="342" y="215" width="80" height="75" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <rect x="554" y="215" width="80" height="75" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <text x="170" y="74" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.50</text>
+      <text x="382" y="207" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.18</text>
+      <text x="594" y="207" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.18</text>
+      <text x="170" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">parent</text>
+      <text x="382" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">left</text>
+      <text x="594" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">right</text>
+    </g>
+  </svg>
+  <script type="application/json" class="bars-data">{"values":[0.5,0.18,0.18],"labels":["parent","left","right"],"max":0.6,"ylabel":"Gini"}</script>
+  <figcaption><strong>The weighted average is 0.18, down from 0.50.</strong> Both children are cleaner than the parent, and the drop of 0.32 is the reason this cut is taken.</figcaption>
+</figure>
+
+<h2>A useless split changes nothing</h2>
+<p>Cut the same 100 rows at random and each child stays near 50/50. Both impurities are about 0.5, the weighted average is 0.5, and Δ is 0. A tree searches many cuts and keeps the largest Δ; a cut with no drop is not taken.</p>
+<p>The search is greedy: take the best cut now, then repeat inside each child. Depth limits and minimum leaf sizes stop it before every row becomes its own pure, useless leaf.</p>
+
+<h2>Faded example</h2>
+<p>Split A is the cut above. Split B has the same 50/50 weights but messier children. Fill in B's weighted impurity and drop, then say which cut the tree takes.</p>
+<table>
+  <tr><th>Split</th><th class="num">Left I</th><th class="num">Right I</th><th class="num">Left share</th><th class="num">Right share</th><th class="num">Weighted I</th><th class="num">Drop</th></tr>
+  <tr><td>A</td><td class="num">0.18</td><td class="num">0.18</td><td class="num">0.5</td><td class="num">0.5</td><td class="num">0.18</td><td class="num">0.32</td></tr>
+  <tr><td>B</td><td class="num">0.42</td><td class="num">0.02</td><td class="num">0.5</td><td class="num">0.5</td><td class="num">?</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check split B</summary>
+  <p>Weighted I = 0.5 × 0.42 + 0.5 × 0.02 = 0.21 + 0.01 = <strong>0.22</strong>. Drop = 0.50 − 0.22 = <strong>0.28</strong>. Split A wins, 0.32 against 0.28 — a cleaner child does not help if its sibling is dirtier.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>“Pick the side with the lowest impurity.”</strong> A child can be perfectly pure because it holds one row. That says nothing about the other 99. Comparing children without weights rewards tiny, unrepresentative leaves.</p>
+  <p><strong>Correction:</strong> always weight each child by its share and compare the result with the parent. A 0.00 child with 1% of the rows contributes 0, but the other 99% still decides the score.</p>
+</div>
+<p><strong>The tell:</strong> the winning split has one tiny perfect child and a large child almost as mixed as the parent. Check the weights: 0.99 × 0.5 ≈ 0.495, a drop of only 0.005.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>A parent has Gini 0.5. Two children each have Gini 0.18 and each holds half the rows. What is the weighted impurity?
+    <details><summary>Answer</summary>
+      <p>0.5 × 0.18 + 0.5 × 0.18 = 0.18. The drop is 0.32, and that is the number the tree compares against other cuts.</p>
+    </details>
+  </li>
+  <li>A cut isolates 1 row in 100 and leaves it pure; the other 99 rows stay at Gini 0.5. Is it a good split?
+    <details><summary>Answer</summary>
+      <p>No. Weighted impurity is 0.01 × 0 + 0.99 × 0.5 = 0.495, a drop of 0.005. The perfect child is too small to matter.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Topic 07 carries this cut into depth limits and ensembles: one tree is high variance, and averaging many trees is how that variance comes down.</p>
+
+<div class="labnav">
+  <a href="007-trees-and-ensembles.html#labs">← Back to the formula</a>
+  <a href="007-trees-and-ensembles.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>026.1 — softmax: scores into weights</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Turn raw attention scores into weights that are positive and sum to one, by hand, for two and three tokens.">
+</head>
+<body data-page="lab" data-lesson="026a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Attention · Lab 1 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="026-attention.html#labs">Topic 26 · Attention</a> — where the scores are computed</p>
+
+<header class="masthead">
+  <p class="kicker">Attention, one symbol at a time · Lab 1</p>
+  <h1>softmax — scores into weights</h1>
+  <p class="objective">You can turn a row of attention scores into weights that are positive and add to one, and say what those weights do and do not mean.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">Attention(Q,K,V) =</span> <span class="hot">softmax( QK<sup>T</sup> / √d<sub>k</sub> )</span> <span class="dim">V</span></p>
+<p class="eqn-note">Lab 1 of 2 · the scores already exist; only their conversion into weights is lit</p>
+<p>The previous step produced one score for every pair of tokens. A score is any real number: 3.2, 0, −1.4. Attention cannot use those numbers directly. It needs <em>weights</em> — positives that sum to 1 across the row.</p>
+
+<h2>Scores are not weights</h2>
+<p>A score of 3.2 means "more relevant than a score of 1.0". It does not mean 3.2 of anything. Used raw, a long row would produce a bigger output than a short one, and negative scores would subtract content. Weights fix both faults: each lies between 0 and 1, and the row totals exactly 1.</p>
+
+<h2>Exponentiate, then divide</h2>
+<p>Two moves. Raise <em>e</em> (about 2.718) to each score. This makes every number positive and keeps the order: a bigger score still gives a bigger result. Then divide each result by the row total. Softmax has no parameters — it is a fixed reshaping of numbers the layer already had.</p>
+
+<table>
+  <tr><th>Score z</th><th class="num">e<sup>z</sup></th><th class="num">Weight</th></tr>
+  <tr><td class="num">1</td><td class="num">2.718</td><td class="num">0.665</td></tr>
+  <tr><td class="num">0</td><td class="num">1.000</td><td class="num">0.245</td></tr>
+  <tr><td class="num">−1</td><td class="num">0.368</td><td class="num">0.090</td></tr>
+  <tr><td class="num">sum</td><td class="num">4.086</td><td class="num">1.000</td></tr>
+</table>
+
+<figure class="fig" data-graph="bars">
+  <script type="application/json" class="bars-data">{"values":[0.67,0.25,0.09],"labels":["token 1","token 2","token 3"],"max":0.8,"ylabel":"attention weight","highlight":0}</script>
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-sm-t f-sm-d">
+    <title id="f-sm-t">Softmax weights for three tokens with scores one, zero and minus one</title>
+    <desc id="f-sm-d">Three bars. Token one has weight 0.67, token two 0.25, token three 0.09. The first bar is highlighted and all three sum to one.</desc>
+    <g data-layer></g>
+  </svg>
+  <figcaption><strong>The leader takes two thirds, not all of it.</strong> Softmax shares the row, so the output is a blend of every value rather than a copy of one.</figcaption>
+</figure>
+
+<h2>What the weights then do</h2>
+<p>The weights are used at once: the output is 0.67 × v<sub>1</sub> + 0.25 × v<sub>2</sub> + 0.09 × v<sub>3</sub>, where each v is that token's value vector. The result is the same width as one value, because it is a weighted average of values rather than a longer list of them.</p>
+
+<h2>Two tokens, by hand</h2>
+<p>Raw scores 1 and 0 are divided by √2 first, giving 0.707 and 0. Exponentiating gives 2.028 and 1.000; the total is 3.028. Then 2.028 ÷ 3.028 = 0.67 and 1.000 ÷ 3.028 = 0.33. Add the same constant to both scores and nothing changes — only the gap decides the split.</p>
+
+<h2>Why subtract the maximum</h2>
+<p>Implementations subtract the row maximum before exponentiating. Scores 1, 0, −1 become 0, −1, −2; the exponentials become 1, 0.368, 0.135; the weights are identical. The shift is housekeeping: e<sup>1000</sup> overflows a float, and the answer must not depend on how large the scores happen to be.</p>
+
+<h2>Faded example</h2>
+<p>The same three steps on a fresh row. The first weight is done; the other two are yours.</p>
+<table>
+  <tr><th>Score</th><th class="num">e<sup>z</sup></th><th class="num">Weight</th></tr>
+  <tr><td class="num">2</td><td class="num">7.389</td><td class="num">0.665</td></tr>
+  <tr><td class="num">1</td><td class="num">2.718</td><td class="num">?</td></tr>
+  <tr><td class="num">0</td><td class="num">1.000</td><td class="num">?</td></tr>
+  <tr><td class="num">sum</td><td class="num">11.107</td><td class="num">1.000</td></tr>
+</table>
+<details><summary>Check the two missing weights</summary>
+  <p>2.718 ÷ 11.107 = <strong>0.245</strong>; 1.000 ÷ 11.107 = <strong>0.090</strong>. The three add to 1.000, which is the only thing the divisor guarantees.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"These weights are the model's confidence."</strong> They are relative shares inside one row, produced by whatever scale the scores happened to carry. Multiply the row 1, 0, −1 by three and the weights become 0.950, 0.047, 0.002. The tokens did not change; the units did.</p>
+  <p><strong>Correction:</strong> a weight says how much of the output comes from that token, not how sure the model is about anything. Calibration is a separate question, taken up in topic 29.</p>
+</div>
+<p><strong>The tell:</strong> rescale the queries by two and watch the weights sharpen while the ranking stays fixed. If "confidence" moves without new evidence, it was never confidence.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Every score in a row is 0. What are the weights?
+    <details><summary>Answer</summary>
+      <p>Equal: 1/n each. Equal scores give equal exponentials, and dividing equal parts by their total always gives the uniform share.</p>
+    </details>
+  </li>
+  <li>Why can no weight be exactly 1 when the scores are finite?
+    <details><summary>Answer</summary>
+      <p>Because e<sup>z</sup> is positive for every finite z. Every token keeps some mass; only an infinite gap would push the others to zero.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>You can turn scores into weights. Lab 2 asks why those scores are divided by √d<sub>k</sub> before softmax — and what breaks when the divisor is missing. Topic 27 then builds the rest of the block around this step.</p>
+
+<div class="labnav">
+  <a href="026-attention.html#labs">← Back to the formula</a>
+  <a href="026b-scaling.html">Lab 26b · 1/√dk — keeping scores in range →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

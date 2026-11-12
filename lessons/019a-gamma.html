@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>019.1 — γ: the price of waiting</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="γ shrinks a reward once more for every step of delay, and γ = 0 makes an agent myopic.">
+</head>
+<body data-page="lab" data-lesson="019a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 19 · Lab 1 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="019-rl-frame.html#labs">Topic 19 · The RL frame</a> — where the discount is introduced</p>
+
+<header class="masthead">
+  <p class="kicker">The RL frame, one symbol at a time · Lab 1</p>
+  <h1>γ — the price of waiting</h1>
+  <p class="objective">You can predict what a change in γ does to a return, and name the behaviour γ = 0 produces.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">G<sub>t</sub> = r<sub>t+1</sub> +</span> <span class="hot">γ</span> <span class="dim">r<sub>t+2</sub> + γ² r<sub>t+3</sub> + …</span></p>
+<p class="eqn-note">Topic 19 · the return is dimmed; only the discount is lit</p>
+<p>A reward is paid at one moment. A return is the whole stream of rewards, and γ (gamma) is the number that shrinks each one once more for every step you wait. It always sits between 0 and 1.</p>
+<p>Only γ is lit in the strip above. Everything around it is the return that γ is quietly rewriting.</p>
+
+<h2>What the discount does</h2>
+<p>At γ = 0.9, a reward one step away counts 0.9 of face value; two steps away 0.81; ten steps away 0.35. The same coin, collected later, buys less. Move the slider and watch the staircase flatten — the curve is γ<sup>k</sup>, the fraction of a reward surviving k steps of delay.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-gam-t f-gam-d">
+    <title id="f-gam-t">The fraction of a reward that survives k steps of delay</title>
+    <desc id="f-gam-d">A decaying curve from one at zero steps toward zero at twenty steps. Raising the discount holds the curve higher for longer; lowering it makes the curve collapse within a few steps.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls"></div>
+  <script type="application/json" class="curve-data">{"kind":"expdecay","x":[0,20],"y":[0,1.05],"xlabel":"steps ahead k","ylabel":"γ^k","xticks":[0,5,10,15,20],"yticks":[0,0.25,0.5,0.75,1],"controls":[{"k":"base","label":"γ","min":0.5,"max":0.99,"step":0.01,"value":0.9}]}</script>
+  <figcaption><strong>Every extra step multiplies the reward by γ again.</strong> At γ = 0.9 the twentieth step still pays 0.12 of face value; at γ = 0.5 it pays less than one thousandth — same reward, different patience.</figcaption>
+</figure>
+
+<h2>Two limits</h2>
+<p>γ = 0 is total myopia: only the next reward counts, so every action with a delayed payoff looks like doing nothing at all. Push γ toward 1 and the agent grows patient. At exactly 1 in a task that never ends, the return can grow without bound. Most training sits between 0.9 and 0.99.</p>
+
+<table>
+  <tr><th>Steps of delay k</th><th class="num">γ = 0.9</th><th class="num">γ = 0.5</th></tr>
+  <tr><td class="num">1</td><td class="num">0.90</td><td class="num">0.50</td></tr>
+  <tr><td class="num">5</td><td class="num">0.59</td><td class="num">0.03</td></tr>
+  <tr><td class="num">10</td><td class="num">0.35</td><td class="num">0.001</td></tr>
+  <tr><td class="num">20</td><td class="num">0.12</td><td class="num">0.000001</td></tr>
+</table>
+
+<h2>One episode, three discounts</h2>
+<p>Ten unit rewards, one per step, and nothing else changes. Undiscounted they total 10. At γ = 0.9 the return is 6.5; at 0.99 it is 9.6; at 0.999 the bar sits within a hair of 10. The rewards never move — only the discount does.</p>
+
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-gbar-t f-gbar-d">
+    <title id="f-gbar-t">Return rises as the discount rises</title>
+    <desc id="f-gbar-d">Three bars labelled gamma equals 0.9, 0.99 and 0.999, with heights 6.5, 9.6 and 9.9 on a scale that runs to 11. The tallest bar belongs to the most patient discount, and the undiscounted total would be 10.</desc>
+    <g data-layer></g>
+  </svg>
+  <script type="application/json" class="bars-data">{"values":[6.5,9.6,9.9],"labels":["γ=0.9","γ=0.99","γ=0.999"],"max":11,"ylabel":"return"}</script>
+  <figcaption><strong>A patient agent counts rewards a myopic one has already discarded.</strong> Same ten rewards at three discounts: the return climbs from 6.5 to 9.9 as γ climbs from 0.9 to 0.999.</figcaption>
+</figure>
+
+<h2>Reward is not return</h2>
+<p>A reward is one number at one moment. A return already contains the whole future, discounted. "The agent maximises reward" is shorthand for maximising return, and the shorthand hides the only part γ controls: how much the future is allowed to vote.</p>
+
+<h2>Faded example</h2>
+<p>Two rewards, γ = 0.5. Take 4 now and 4 one step later: 4 + 0.5 × 4 = 6. Now do the next two rows with the final step removed.</p>
+<table>
+  <tr><th>Reward now</th><th>Reward next</th><th class="num">γ</th><th class="num">Return</th></tr>
+  <tr><td class="num">4</td><td class="num">4</td><td class="num">0.5</td><td class="num">6.0</td></tr>
+  <tr><td class="num">2</td><td class="num">8</td><td class="num">0.5</td><td class="num">?</td></tr>
+  <tr><td class="num">2</td><td class="num">8</td><td class="num">0</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last two rows</summary>
+  <p>Row 2: 2 + 0.5 × 8 = <strong>6</strong>. Row 3: γ = 0 deletes the second reward entirely, so the return is <strong>2</strong>. Discounting is not a tie-breaker; at γ = 0 it removes the future from the sum.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"γ is a technicality for making the infinite sum converge."</strong> Convergence is a side effect, not the job. γ is a design statement about urgency: it decides how large a delayed payoff must be before the agent prefers it to a small reward now.</p>
+  <p><strong>Correction:</strong> treat γ as part of the task, written next to the reward. Two agents with identical rewards and different γ learn visibly different behaviour, and both are correct for their own objective.</p>
+</div>
+<p><strong>The tell:</strong> at γ = 0.9, a reward of 11 arriving after 100 steps is worth about 0.0003. An agent maximising that return takes 1 now, every time — and a report that blames the reward function has missed the discount.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>A reward of 1 at each of three steps, γ = 0.5. What is the return?
+    <details><summary>Answer</summary>
+      <p>1 + 0.5 + 0.25 = 1.75. Undiscounted it would be 3, so the two steps of delay cost 1.25.</p>
+    </details>
+  </li>
+  <li>What behaviour does γ = 0 produce?
+    <details><summary>Answer</summary>
+      <p>Myopic: only the next reward matters. Any delayed payoff is multiplied by zero, so planning disappears and the agent grabs whatever pays immediately.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Lab 2 turns this into one number: the effective horizon 1/(1−γ), the distance the agent actually looks ahead.</p>
+
+<div class="labnav">
+  <a href="019-rl-frame.html#labs">← Back to the formula</a>
+  <a href="019b-horizon.html">Lab 19b · 1/(1−γ) — how far the agent looks →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

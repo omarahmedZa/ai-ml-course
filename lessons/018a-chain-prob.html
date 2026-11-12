@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>018.1 — p(y|x): the chain rule</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Multiply per-token probabilities into one sequence probability, and see what teacher forcing hides.">
+</head>
+<body data-page="lab" data-lesson="018a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Sequence models · Lab 4</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="018-seq2seq.html#labs">Topic 18 · Seq2seq</a> — where generation is introduced</p>
+
+<header class="masthead">
+  <p class="kicker">Sequence models, one symbol at a time · Lab 4</p>
+  <h1>p(y|x) — the chain rule</h1>
+  <p class="objective">You can multiply per-token probabilities into one sequence probability, and say what teacher forcing hides.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="hot">p(y | x) = Π<sub>t=1</sub><sup>m</sup> p( y<sub>t</sub> | y<sub>&lt;t</sub>, x )</span></p>
+<p class="eqn-note">Lab 4 · one probability per position, multiplied across the output</p>
+<p><code>p(y|x)</code> is the probability the model gives to the whole output sequence <code>y</code> given the input <code>x</code>. <code>y<sub>t</sub></code> is the token at position <code>t</code>, and <code>y<sub>&lt;t</sub></code> means every token before it. The symbol <code>Π</code> means multiply all <code>m</code> terms.</p>
+
+<h2>One number for a whole sentence</h2>
+<p>Probability has a chain rule: the chance of three tokens in order is the chance of the first, times the chance of the second given the first, times the chance of the third given both. Here that is 0.4 × 0.5 × 0.6 = 0.12. No independence is assumed; each factor is conditioned on the prefix.</p>
+
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-chain-t f-chain-d">
+    <title id="f-chain-t">Per-token probabilities for a three-token output</title>
+    <desc id="f-chain-d">Three bars for the tokens the, cat and sat, with heights 0.4, 0.5 and 0.6. Each token is fairly likely on its own; their product is 0.12.</desc>
+    <g data-layer>
+      <line x1="64" y1="290" x2="700" y2="290" stroke="var(--ink-faint)"/>
+      <rect x="130" y="147" width="80" height="143" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <text x="170" y="139" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.4</text>
+      <text x="170" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">the</text>
+      <rect x="342" y="111" width="80" height="179" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <text x="382" y="103" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.5</text>
+      <text x="382" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">cat</text>
+      <rect x="554" y="76" width="80" height="214" rx="4" fill="var(--sym-loss)" opacity=".7"/>
+      <text x="594" y="68" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.6</text>
+      <text x="594" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">sat</text>
+    </g>
+  </svg>
+  <script type="application/json" class="bars-data">{"values":[0.4,0.5,0.6],"labels":["the","cat","sat"],"max":0.7,"ylabel":"p(chosen token)"}</script>
+  <figcaption><strong>Each bar is healthy; the sentence is the product.</strong> 0.4 × 0.5 × 0.6 = 0.12, so a confident-sounding output is still only about one in eight.</figcaption>
+</figure>
+
+<h2>Each term is one softmax</h2>
+<p>At position <code>t</code> the decoder produces one score per vocabulary entry. A softmax turns those scores into probabilities that sum to 1 over the vocabulary. The chosen token's probability is one number, and it depends on the prefix, so the same word is likelier after one context than another.</p>
+
+<table>
+  <tr><th class="num">t</th><th>Prefix</th><th>Token</th><th class="num">p(y<sub>t</sub> | prefix)</th><th class="num">Running product</th></tr>
+  <tr><td class="num">1</td><td><code>&lt;bos&gt;</code></td><td><code>the</code></td><td class="num">0.40</td><td class="num">0.40</td></tr>
+  <tr><td class="num">2</td><td><code>the</code></td><td><code>cat</code></td><td class="num">0.50</td><td class="num">0.20</td></tr>
+  <tr><td class="num">3</td><td><code>the cat</code></td><td><code>sat</code></td><td class="num">0.60</td><td class="num">0.12</td></tr>
+</table>
+
+<h2>The product punishes length</h2>
+<p>Every factor is at most 1, so every extra token multiplies the total by something smaller than 1. A three-token output at 0.12 and a ten-token output at 0.006 may come from the same per-token quality. Raw sequence probability is therefore not a fair comparison across lengths.</p>
+
+<h2>Teacher forcing</h2>
+<p>During training the prefix is the true text, not the model's guess. Every position can be scored at once, because the input at step 3 is known before step 1 runs. At inference the true prefix does not exist, so the model reads its own output. That mismatch is exposure bias: training never practises recovery from a wrong word.</p>
+
+<h2>Faded example</h2>
+<p>Full solve. A four-token output has per-token probabilities 0.8, 0.5, 0.5 and 0.5. Multiply left to right: 0.8 → 0.40 → 0.20 → 0.10. The sentence probability is 0.10, and no single token was unlikely.</p>
+
+<table>
+  <tr><th class="num">t</th><th>Token</th><th class="num">p(y<sub>t</sub> | y<sub>&lt;t</sub>)</th><th class="num">Running product</th></tr>
+  <tr><td class="num">1</td><td><code>a</code></td><td class="num">0.8</td><td class="num">0.8</td></tr>
+  <tr><td class="num">2</td><td><code>dog</code></td><td class="num">0.5</td><td class="num">0.4</td></tr>
+  <tr><td class="num">3</td><td><code>runs</code></td><td class="num">0.5</td><td class="num">0.2</td></tr>
+  <tr><td class="num">4</td><td><code>fast</code></td><td class="num">0.5</td><td class="num">?</td></tr>
+  <tr><td class="num">5</td><td><code>today</code></td><td class="num">?</td><td class="num">0.05</td></tr>
+</table>
+
+<details><summary>Check the last two rows</summary>
+  <p>Row 4: 0.2 × 0.5 = <strong>0.10</strong>. Row 5 must multiply by 0.5 again to reach 0.05, so its probability is <strong>0.5</strong>. Each extra token halves the total even when the model is equally confident.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A sequence probability of 0.12 means the model is 12% accurate."</strong> It feels right because 0.12 looks like a percentage, and because the number came from the model.</p>
+  <p><strong>Correction:</strong> 0.12 is the probability of this exact sequence under the model's own distribution. Many other sequences are possible, and the factors were computed with true prefixes during training, so the number is optimistic about generation. Accuracy and likelihood are different measurements.</p>
+</div>
+<p><strong>The tell:</strong> per-token confidence of 0.9 across a 90-token output gives 0.9⁹⁰ ≈ 0.00008. If a report calls that "90% accurate", the per-token number and the sequence number have been quietly swapped. Compare whole sequences only at the same length, or divide by length.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Three tokens with probabilities 0.5, 0.5 and 0.5. What is <code>p(y|x)</code>?
+    <details><summary>Answer</summary>
+      <p>0.5 × 0.5 × 0.5 = <strong>0.125</strong>. One in eight, from three coin-flip-level guesses.</p>
+    </details>
+  </li>
+  <li>Why can teacher forcing score every position in one pass?
+    <details><summary>Answer</summary>
+      <p>Because each prefix is ground truth, already known. No position waits for the model's previous output, so the whole target can be fed at once.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>You can price a whole output now. The remaining weakness is upstream: everything the decoder knows about the input still passes through one fixed vector, which is the problem attention reopens.</p>
+
+<div class="labnav">
+  <a href="018-seq2seq.html#labs">← Back to the formula</a>
+  <a href="018-seq2seq.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

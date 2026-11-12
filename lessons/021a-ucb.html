@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>021.1 — UCB: the optimism bonus</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="UCB adds a bonus that shrinks with the number of pulls, so untried actions get tried.">
+</head>
+<body data-page="lab" data-lesson="021a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 21 · Lab 1 / 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="021-exploration-vs-exploitation.html#labs">Topic 21 · Exploration vs exploitation</a> — where a count becomes a bonus</p>
+
+<header class="masthead">
+  <p class="kicker">Exploration, one symbol at a time · Lab 1</p>
+  <h1>UCB — the optimism bonus</h1>
+  <p class="objective">You can compute a UCB score for three arms and explain why the least-tried one wins.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">a = argmax<sub>a</sub></span> <span class="hot">Q(a) + c √( ln t / N(a) )</span></p>
+<p class="eqn-note">Topic 21 · the score is lit; the choice it drives stays dim</p>
+<p>Every Q is an average of a handful of samples, so it carries an error bar. Greedy selection ignores the bar and keeps whichever action happened to start well. That action's estimate never gets the data that would correct it.</p>
+<p>UCB fixes this without rolling dice. It adds the error bar to the score and takes the largest total, so doubt itself becomes a reason to act.</p>
+
+<h2>The bonus is a width</h2>
+<p>√(ln t / N(a)) is roughly the width of the interval around Q(a): few pulls make it wide, many pulls make it narrow. c sets how many widths of doubt you add. c = 2 is a common default, and c = 0 collapses the rule back to greedy. Total pulls can keep climbing while every interval still narrows.</p>
+
+<h2>Three arms, one decision</h2>
+<p>At t = 100 pulls, ln t ≈ 4.61 and c = 2. Arm A has the best average and almost no bonus. Arm C has the worst average and the widest bonus — and it wins the round.</p>
+
+<table>
+  <tr><th>Arm</th><th class="num">Q</th><th class="num">pulls N</th><th class="num">bonus</th><th class="num">UCB</th></tr>
+  <tr><td class="num">A</td><td class="num">6.0</td><td class="num">50</td><td class="num">+0.61</td><td class="num">6.61</td></tr>
+  <tr><td class="num">B</td><td class="num">5.0</td><td class="num">10</td><td class="num">+1.36</td><td class="num">6.36</td></tr>
+  <tr><td class="num">C</td><td class="num">4.0</td><td class="num">2</td><td class="num">+3.03</td><td class="num">7.04</td></tr>
+</table>
+
+<figure class="fig" data-graph="bars">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-ucb-t f-ucb-d">
+    <title id="f-ucb-t">Three arms scored by upper confidence bound</title>
+    <desc id="f-ucb-d">Three bars for arms A, B and C with scores 6.61, 6.36 and 7.04. Arm C has the lowest average reward but the fewest pulls, and its tall bar wins the round.</desc>
+    <g data-layer></g>
+  </svg>
+  <script type="application/json" class="bars-data">{"values":[6.61,6.36,7.04],"labels":["A · N=50","B · N=10","C · N=2"],"max":8,"ylabel":"UCB score","highlight":2}</script>
+  <figcaption><strong>The lowest average wins the round.</strong> Arm C is 2 points behind on Q and still wins once its uncertainty is priced in. That is optimism as arithmetic, not as a mood.</figcaption>
+</figure>
+
+<h2>What happens over time</h2>
+<p>t counts every pull, so ln t grows slowly and identically for all arms. N(a) grows only for the arm you actually pull. An untried arm keeps its wide bonus; a well-sampled arm must win on Q alone. Certainty is penalised, ignorance is subsidised — and the subsidy shrinks as it is spent.</p>
+<p>The bonus never disappears entirely, so no arm is ever abandoned for good. That is what stops the rule freezing on an early winner.</p>
+
+<h2>Faded example</h2>
+<p>Same round: t = 100, c = 2. Arm D has Q = 5.5 and N = 25. Fill the bonus and the total with the last step removed.</p>
+<table>
+  <tr><th>Arm</th><th class="num">Q</th><th class="num">N</th><th class="num">bonus</th><th class="num">UCB</th></tr>
+  <tr><td class="num">D</td><td class="num">5.5</td><td class="num">25</td><td class="num">?</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check arm D</summary>
+  <p>4.61 / 25 = 0.184; its square root is 0.429; times c = 2 gives <strong>0.86</strong>. The score is 5.5 + 0.86 = <strong>6.36</strong>, level with B. D reached that total from more pulls and a better average, so the two effects cancelled exactly here — a coincidence, not a rule.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The bonus is a hack that forces exploration."</strong> It is a confidence bound with a stated width, computed from counts. No randomness is injected and nothing is tuned per task beyond c.</p>
+  <p><strong>Correction:</strong> read the score as an optimistic guess of the arm's true mean. You are not adding noise; you are adding the distance between the estimate and the best value still consistent with the data.</p>
+</div>
+<p><strong>The tell:</strong> set c = 0 and every trace of exploration vanishes — the rule becomes argmax Q. If exploration survives c = 0, it came from somewhere else, such as ε-greedy noise or arbitrary tie-breaking.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Why does the bonus shrink as N grows?
+    <details><summary>Answer</summary>
+      <p>Because N sits in the denominator: more samples means a narrower interval around the average, so less doubt needs to be added. The estimate has earned the right to be taken at face value.</p>
+    </details>
+  </li>
+  <li>An arm has N = 1 at t = 100, with c = 2. Roughly how large is its bonus?
+    <details><summary>Answer</summary>
+      <p>2 × √4.61 ≈ 4.3. A single pull leaves enormous doubt, so the bonus alone can lift an arm above a well-sampled one with a much better average.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Lab 022a takes the same estimates and asks a narrower question: once you have a target, how far should one update move toward it?</p>
+
+<div class="labnav">
+  <a href="021-exploration-vs-exploitation.html#labs">← Back to the formula</a>
+  <a href="021-exploration-vs-exploitation.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

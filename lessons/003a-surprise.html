@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>003.1 — −log p: the price of surprise</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="A model's loss is the surprise of the answer it gave little probability to: −log p, flat near 1 and steep near 0.">
+</head>
+<body data-page="lab" data-lesson="003a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Equation · Lab 1 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="003-probability-expectation-likelihood.html#labs">Topic 03 · Probability, expectation, likelihood</a> — one row's surprise</p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · surprise</p>
+  <h1>−log p — the price of surprise</h1>
+  <p class="objective">You can turn a probability into a loss and say why a confident miss costs so much more than a hesitant one.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">NLL(θ) = Σ<sub>i</sub></span> <span class="hot">−log p<sub>θ</sub>(y<sub>i</sub> | x<sub>i</sub>)</span></p>
+<p class="eqn-note">Lab 1 of 2 · only the per-row term is lit; the sum over rows is dim</p>
+<p>p is the probability the model gave to the answer that actually happened. Not the top guess — the true label. If the model said 0.9 and the label is right, p = 0.9; if it said 0.05, p = 0.05.</p>
+
+<h2>From probability to price</h2>
+<p>A probability is a number between 0 and 1. Its logarithm is therefore zero or negative, and the minus sign flips that into a price you can add up: −log p = 0 when the model was certain and right, and it grows as p shrinks.</p>
+<p>The log is base e, so the unit is the nat. It does not matter for comparisons; only the shape of the curve does.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="f-logp-t f-logp-d">
+    <title id="f-logp-t">Surprise minus log p against the probability given to the true answer</title>
+    <desc id="f-logp-d">A curve falling steeply from a loss near 3 at a probability of 0.05 and flattening toward zero as the probability approaches 1. A blue dot marks the current probability, with a dashed drop to the axis. At p equal to 0.7 the loss is about 0.36.</desc>
+    <g data-layer></g>
+  </svg>
+  <script type="application/json" class="curve-data">{"kind":"logp","x":[0.05,1],"y":[0,5],"xlabel":"predicted probability p","ylabel":"−log p","controls":[{"k":"p","label":"probability p","min":0.05,"max":1,"step":0.01,"value":0.7}],"marker":"p"}</script>
+  <div class="fig-controls"></div>
+  <figcaption><strong>Surprise is cheap near 1 and brutal near 0.</strong> Going from p = 1 to p = 0.5 costs 0.693; going from 0.5 to 0.05 costs another 2.3 — the same probability points, five times the price.</figcaption>
+</figure>
+
+<p>Notice the asymmetry. The curve is almost flat over the right half and nearly vertical on the left. Halving a good probability is affordable; halving a bad one is not.</p>
+
+<h2>Confident and wrong</h2>
+<p>A wrong answer is not one price. It is priced by the probability the model had assigned to the right one.</p>
+<table>
+  <tr><th class="num">p on the true answer</th><th class="num">−log p</th><th>In words</th></tr>
+  <tr><td class="num">0.90</td><td class="num">0.105</td><td>right, and fairly sure</td></tr>
+  <tr><td class="num">0.50</td><td class="num">0.693</td><td>a coin flip</td></tr>
+  <tr><td class="num">0.10</td><td class="num">2.303</td><td>wrong, and fairly sure</td></tr>
+  <tr><td class="num">0.01</td><td class="num">4.605</td><td>certain, and wrong</td></tr>
+</table>
+<p>From 0.9 to 0.01 the loss grows about 44 times. The model made one mistake in both rows; only its confidence changed. −log p punishes overconfidence, which is exactly what you want a forecaster scored on.</p>
+<p>Read the table as a scoring rule, not a verdict: it rewards probability placed on the truth, and it charges nothing for probability placed anywhere else.</p>
+
+<h2>Faded example</h2>
+<p>A model gives the true label p = 0.7, so the row costs −log 0.7 ≈ 0.36. Read down the same curve for the next two rows.</p>
+<table>
+  <tr><th class="num">p</th><th class="num">−log p</th></tr>
+  <tr><td class="num">0.90</td><td class="num">0.105</td></tr>
+  <tr><td class="num">0.70</td><td class="num">0.357</td></tr>
+  <tr><td class="num">0.25</td><td class="num">?</td></tr>
+  <tr><td class="num">0.05</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last two rows</summary>
+  <p>−log 0.25 = <strong>1.386</strong> and −log 0.05 = <strong>2.996</strong>. Both rows are wrong; the second one is wrong <em>and</em> dismissive, so it pays about twice as much.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Every wrong answer costs the same."</strong> It does not. Cross-entropy scores the quote, not the label. Two models can both be wrong on the same row and pay 0.7 and 4.6.</p>
+  <p><strong>Correction:</strong> the loss asks how much probability you gave to the truth. A miss you saw coming is cheap; a miss you ruled out is expensive.</p>
+</div>
+<p><strong>The tell:</strong> a model whose accuracy is flat while its loss climbs is not getting worse at answering — it is getting more confident and staying wrong. Look at the probabilities, not just the labels.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>The true label gets p = 0.5 from the model. What is the row's loss, and why is it not zero?
+    <details><summary>Answer</summary>
+      <p>−log 0.5 = <strong>0.693</strong>. The model left half the probability elsewhere, so even the right answer was only a coin flip. Only p = 1 pays nothing.</p>
+    </details>
+  </li>
+  <li>Which is worse: p = 0.4 on the truth, or p = 0.04?
+    <details><summary>Answer</summary>
+      <p>p = 0.04, by a lot: 3.22 against 0.92. The loss is not linear in p, so a tenfold drop in probability adds roughly 2.3 to the bill.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>One row has a price. Lab 2 adds those prices over a whole dataset — and shows why you divide afterwards.</p>
+
+<div class="labnav">
+  <a href="003-probability-expectation-likelihood.html#labs">← Back to the formula</a>
+  <a href="003b-nll.html">Lab 03b · Σ — summing surprise over the data →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

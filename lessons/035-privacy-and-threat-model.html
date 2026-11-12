@@ -58,6 +58,15 @@
 <p>Composition is brutal: 1,000 rounds at <code>ε = 0.01</code> is around 10 under basic composition, not 0.01. Separately, a plain mean is linear, so with 100 clients any single update moves the result by 1% of whatever it sends — and what it sends has no ceiling; median or trimmed-mean aggregation removes that lever.</p>
 <p><strong>Why this part exists:</strong> a per-round budget is a per-round promise, and an aggregation rule with no robustness is an open door for exactly the adversary named in part 1.</p>
 
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 1 · about 3 minutes each</p>
+  <h3 class="lab-title">Take this apart, one symbol at a time</h3>
+  <p class="lab-sub">Each lab isolates one symbol and gives you a figure you can drag. They use the same numbers as the lesson, so you can carry the result back here.</p>
+  <ul class="lab-list">
+    <li><a href="035a-dp.html"><span class="lab-num">035a</span><span class="lab-body"><strong>ε and δ — the shape of a privacy promise</strong></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
+</aside>
+
 <h2>Worked example</h2>
 
 <h3>1. Clipping one gradient</h3>

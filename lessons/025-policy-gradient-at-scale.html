@@ -55,6 +55,15 @@
 <h3>Part 7 — Clip the ratio</h3>
 <p>PPO maximises <code>min(rA, clip(r, 1−ε, 1+ε)A)</code> with <code>r = π_new/π_old</code> and <code>ε = 0.2</code>. Inside the band this is the ordinary policy gradient; outside, the objective goes flat and further movement buys nothing. <strong>Why this part exists:</strong> on-policy data is used once, so a single destructive step wastes the whole rollout that produced it.</p>
 
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 1 · about 3 minutes each</p>
+  <h3 class="lab-title">Take this apart, one symbol at a time</h3>
+  <p class="lab-sub">Each lab isolates one symbol and gives you a figure you can drag. They use the same numbers as the lesson, so you can carry the result back here.</p>
+  <ul class="lab-list">
+    <li><a href="025a-clip.html"><span class="lab-num">025a</span><span class="lab-body"><strong>r — the ratio, clipped to 1 ± 0.2</strong></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
+</aside>
+
 <h2>Worked example</h2>
 
 <h3>1. What a baseline removes, in numbers</h3>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>015.1 — BPE: the merge rule</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Run four BPE merges by hand and see why token count is not word count.">
+</head>
+<body data-page="lab" data-lesson="015a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Tokenization · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="015-tokenization.html#labs">Topic 15 · Tokenization</a> — where text becomes integers</p>
+
+<header class="masthead">
+  <p class="kicker">Tokenization, one rule at a time · Lab 1</p>
+  <h1>BPE — merge the most frequent pair</h1>
+  <p class="objective">You can run four BPE merges by hand, and say why 1,000 words become about 1,300 tokens.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">repeat until the vocabulary is full:</span> <span class="hot">(a, b) = the most frequent adjacent pair</span> <span class="dim">→ add ab</span></p>
+<p class="eqn-note">Lab 1 · the whole algorithm is one line, run again and again</p>
+<p>BPE means byte-pair encoding. A <em>symbol</em> is any string already in the vocabulary — at the start, one character. The rule scans adjacent pairs, counts each, and replaces the winner with one new symbol. Nothing about words is consulted.</p>
+
+<h2>Start from characters</h2>
+<p>Training starts with the corpus characters. In the toy words below that is six symbols: <code>b</code>, <code>g</code>, <code>h</code>, <code>n</code>, <code>p</code>, <code>u</code>. Each already has an ID, so no input is ever unrepresentable.</p>
+
+<table>
+  <tr><th>Word</th><th class="num">Copies</th><th>As characters</th></tr>
+  <tr><td><code>hug</code></td><td class="num">10</td><td><code>h u g</code></td></tr>
+  <tr><td><code>pug</code></td><td class="num">5</td><td><code>p u g</code></td></tr>
+  <tr><td><code>pun</code></td><td class="num">5</td><td><code>p u n</code></td></tr>
+  <tr><td><code>bun</code></td><td class="num">5</td><td><code>b u n</code></td></tr>
+  <tr><td><code>hugs</code></td><td class="num">5</td><td><code>h u g s</code></td></tr>
+</table>
+
+<h2>Count, then merge</h2>
+<p>Count each adjacent pair across every copy of every word. The pair <code>u+g</code> appears 20 times: ten inside <code>hug</code>, five in <code>pug</code>, five in <code>hugs</code>. It wins, so every <code>u</code> followed by <code>g</code> becomes the single symbol <code>ug</code>. Two symbols become one; no character is deleted.</p>
+<p>Then count again. Four merges, in order:</p>
+
+<table>
+  <tr><th class="num">Merge</th><th>Pair</th><th class="num">Count</th><th>New symbol</th><th>Example after</th></tr>
+  <tr><td class="num">1</td><td><code>u + g</code></td><td class="num">20</td><td><code>ug</code></td><td><code>h ug</code></td></tr>
+  <tr><td class="num">2</td><td><code>h + ug</code></td><td class="num">15</td><td><code>hug</code></td><td><code>hug</code></td></tr>
+  <tr><td class="num">3</td><td><code>u + n</code></td><td class="num">10</td><td><code>un</code></td><td><code>p un</code></td></tr>
+  <tr><td class="num">4</td><td><code>p + un</code></td><td class="num">5</td><td><code>pun</code></td><td><code>pun</code></td></tr>
+</table>
+
+<p>Merge 4 is a tie: <code>b+un</code>, <code>p+ug</code> and <code>hug+s</code> also count 5. A fixed rule breaks ties; the saved artifact is the order.</p>
+
+<h2>The merge list is the algorithm</h2>
+<p>Encoding new text means replaying these merges in this order, left to right. Counts are never taken again. The ordered list is the tokenizer's entire state, which is why two releases with the same vocabulary size can still split one word differently.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-bpe-t f-bpe-d">
+    <title id="f-bpe-t">The four stages of one BPE merge, with a loop back to counting</title>
+    <desc id="f-bpe-d">Five boxes in a row: text, characters, pair counts, the winning pair, and the new merged symbol. An arrow runs along the row and a second arrow loops from the merged symbol back to pair counts, labelled repeat.</desc>
+    <text x="360" y="78" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">one rule, run until the vocabulary is full</text>
+    <g font-family="ui-monospace, monospace">
+      <rect x="32" y="132" width="104" height="78" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+      <text x="84" y="166" text-anchor="middle" font-size="16" fill="var(--sym-data)">text</text>
+      <text x="84" y="190" text-anchor="middle" font-size="11" fill="var(--ink-faint)">hug pug pun</text>
+
+      <rect x="170" y="132" width="104" height="78" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+      <text x="222" y="166" text-anchor="middle" font-size="16" fill="var(--sym-data)">chars</text>
+      <text x="222" y="190" text-anchor="middle" font-size="11" fill="var(--ink-faint)">h u g</text>
+
+      <rect x="308" y="132" width="104" height="78" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+      <text x="360" y="166" text-anchor="middle" font-size="16" fill="var(--sym-pred)">count</text>
+      <text x="360" y="190" text-anchor="middle" font-size="11" fill="var(--ink-faint)">u+g 20</text>
+
+      <rect x="446" y="132" width="104" height="78" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+      <text x="498" y="166" text-anchor="middle" font-size="16" fill="var(--sym-pred)">winner</text>
+      <text x="498" y="190" text-anchor="middle" font-size="11" fill="var(--ink-faint)">u+g</text>
+
+      <rect x="584" y="132" width="104" height="78" rx="8" fill="var(--card)" stroke="var(--sym-param)" stroke-width="1.6"/>
+      <text x="636" y="166" text-anchor="middle" font-size="16" fill="var(--sym-param)">merge</text>
+      <text x="636" y="190" text-anchor="middle" font-size="11" fill="var(--ink-faint)">ug</text>
+
+      <line x1="139" y1="171" x2="164" y2="171" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="170,171 160,166 160,176" fill="var(--ink-faint)"/>
+      <line x1="277" y1="171" x2="302" y2="171" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="308,171 298,166 298,176" fill="var(--ink-faint)"/>
+      <line x1="415" y1="171" x2="440" y2="171" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="446,171 436,166 436,176" fill="var(--ink-faint)"/>
+      <line x1="553" y1="171" x2="578" y2="171" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="584,171 574,166 574,176" fill="var(--ink-faint)"/>
+
+      <path d="M636,213 L636,244 L360,244 L360,218" fill="none" stroke="var(--sym-param)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <polygon points="360,210 354,222 366,222" fill="var(--sym-param)"/>
+      <text x="498" y="264" text-anchor="middle" font-size="11" fill="var(--sym-param)">repeat</text>
+    </g>
+  </svg>
+  <figcaption><strong>One merge is a loop, not a step.</strong> The output pair is appended to the merge list, then the same counting rule runs again on the new symbols.</figcaption>
+</figure>
+
+<h2>Tokens are not words</h2>
+<p>After four merges the toy corpus holds 45 tokens where it started with 95 characters and 30 words. The vocabulary is 6 characters plus 4 merges, so 10 symbols. Real English settles near 1.3 tokens per word: 1,000 words ≈ 1,300 tokens. Code and hashes run higher, because their character pairs are rarer and merge less often.</p>
+
+<h2>Faded example</h2>
+<p>Full solve. Encode <code>hugs</code>. Start with <code>h, u, g, s</code>. Merge 1 turns <code>u+g</code> into <code>ug</code>: <code>h, ug, s</code>. Merge 2 turns <code>h+ug</code> into <code>hug</code>: <code>hug, s</code>. Two tokens; no listed merge applies to <code>s</code>.</p>
+
+<table>
+  <tr><th>Word</th><th>Characters</th><th>After replaying the merges</th><th class="num">Tokens</th></tr>
+  <tr><td><code>hugs</code></td><td><code>h u g s</code></td><td><code>hug · s</code></td><td class="num">2</td></tr>
+  <tr><td><code>bunny</code></td><td><code>b u n n y</code></td><td><code>b · un · n · y</code></td><td class="num">4</td></tr>
+  <tr><td><code>pugging</code></td><td><code>p u g g i n g</code></td><td>?</td><td class="num">?</td></tr>
+</table>
+
+<details><summary>Check the last row</summary>
+  <p><code>pugging</code> becomes <code>p · ug · g · i · n · g</code>, which is <strong>6 tokens</strong>. Merge 3 needs a <code>u</code> before an <code>n</code>; that <code>u</code> was already consumed by merge 1. One character belongs to exactly one symbol.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"BPE finds meaningful pieces — roots, prefixes, suffixes."</strong> It feels right because merges usually land on familiar chunks, and a 50,000-token vocabulary does contain whole words.</p>
+  <p><strong>Correction:</strong> the rule counts characters, not meaning. In a corpus where <code>w+est</code> is frequent, <code>lowest</code> can become <code>lo + west</code>, cutting straight through the word. That is not a bug; frequency is the only signal.</p>
+</div>
+<p><strong>The tell:</strong> the same word splits differently in two models that both report a 50,000-token vocabulary. Vocabulary size says how many labels exist, never which strings they cover. If a pipeline checks only the size, a mismatched split passes silently.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>In the toy corpus, why is <code>u+g</code> the first merge and not <code>h+u</code>?
+    <details><summary>Answer</summary>
+      <p><code>u+g</code> occurs 20 times; <code>h+u</code> occurs 15. The merge takes the largest count, regardless of where the pair sits inside a word.</p>
+    </details>
+  </li>
+  <li>A nine-character word encodes to three tokens. Did the tokenizer throw away six characters?
+    <details><summary>Answer</summary>
+      <p>No. Each token is a symbol that stands for a string. Three symbols can spell nine characters; replaying the merges recovers all nine.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>You can build a vocabulary now. The next lab leaves text and enters the sequence model: one vector, rewritten at every step, with no way to grow.</p>
+
+<div class="labnav">
+  <a href="015-tokenization.html#labs">← Back to the formula</a>
+  <a href="015-tokenization.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

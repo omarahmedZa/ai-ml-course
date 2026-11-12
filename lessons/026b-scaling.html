@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>026.2 — 1/√d_k: keeping scores in range</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Why attention scores are divided by the square root of the head width, and what saturation costs.">
+</head>
+<body data-page="lab" data-lesson="026b">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Attention · Lab 2 / 2</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="026-attention.html#labs">Topic 26 · Attention</a> — where the scale factor is introduced</p>
+
+<header class="masthead">
+  <p class="kicker">Attention, one symbol at a time · Lab 2</p>
+  <h1>1/√d<sub>k</sub> — keeping scores in range</h1>
+  <p class="objective">You can explain why scores are divided by the square root of the head width, and what a missing divisor does to learning.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">Attention(Q,K,V) = softmax( QK<sup>T</sup></span> <span class="hot">/ √d<sub>k</sub></span> <span class="dim">) V</span></p>
+<p class="eqn-note">Lab 2 of 2 · every part is dimmed except the divisor</p>
+<p>A score is a dot product: multiply matching positions of a query and a key, then add. With head width d<sub>k</sub>, that is d<sub>k</sub> products. This lab is about the one number that controls how large such a sum becomes.</p>
+
+<h2>A sum of d terms wanders</h2>
+<p>Each product is roughly ±1. They do not cancel neatly, so the sum drifts: its standard deviation grows like the square root of the count. Width 4 gives a spread near 2; width 64 gives 8; width 512 gives about 22.6. Nothing is wrong — a wider head simply adds more terms.</p>
+
+<table>
+  <tr><th class="num">Head width d<sub>k</sub></th><th class="num">√d<sub>k</sub></th><th class="num">Typical score spread</th></tr>
+  <tr><td class="num">4</td><td class="num">2.0</td><td class="num">2.0</td></tr>
+  <tr><td class="num">16</td><td class="num">4.0</td><td class="num">4.0</td></tr>
+  <tr><td class="num">64</td><td class="num">8.0</td><td class="num">8.0</td></tr>
+  <tr><td class="num">512</td><td class="num">22.6</td><td class="num">22.6</td></tr>
+</table>
+
+<h2>What a spread of 8 does</h2>
+<p>Take eight tokens whose scores are spread by about 8. The exponentials differ by thousands, so at width 64 the largest weight in the row is already 0.99; at width 512 it is 0.999 and every other token rounds to noise. Softmax has stopped sharing anything.</p>
+
+<figure class="fig" data-graph="bars">
+  <script type="application/json" class="bars-data">{"values":[0.62,0.99,0.999],"labels":["d = 4","d = 64","d = 512"],"max":1.1,"ylabel":"largest weight"}</script>
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-sc-t f-sc-d">
+    <title id="f-sc-t">Largest attention weight grows with head width when scores are unscaled</title>
+    <desc id="f-sc-d">Three bars for head widths 4, 64 and 512. The largest weight in the row rises from about 0.62 to 0.99 and then 0.999 as width grows.</desc>
+    <g data-layer></g>
+  </svg>
+  <figcaption><strong>Wider heads make attention more decisive without new evidence.</strong> At d = 512 the row is effectively one-hot, so the layer returns one value and learns almost nothing.</figcaption>
+</figure>
+
+<h2>Divide by the square root</h2>
+<p>If each product has variance 1, a sum of d of them has variance d, so its spread is √d. Dividing by √d restores a spread of 1 at every width. Dividing by d over-corrects: at d = 64 a gap of 8 becomes 0.125, giving weights 0.531 and 0.469, and every head averages nearly everything.</p>
+
+<h2>Why saturation stops learning</h2>
+<p>Learning needs the slope of weight with respect to score, which is p(1 − p) for a weight p. At p = 0.9997 the slope is 0.0003; at p = 0.67 it is 0.22. Multiply a few hundred such slopes through the backward pass and early layers get nothing to update. In 32-bit floats, 1 − 0.9997 may even round to zero.</p>
+
+<h2>Faded example</h2>
+<p>One gap, two widths. The first pair is worked; complete the second.</p>
+<table>
+  <tr><th>Version</th><th class="num">Scores</th><th class="num">Weights</th></tr>
+  <tr><td>No scaling, d = 64, gap 8</td><td class="num">[8, 0]</td><td class="num">0.9997 / 0.0003</td></tr>
+  <tr><td>Scaled by √64 = 8</td><td class="num">[1, 0]</td><td class="num">0.731 / 0.269</td></tr>
+  <tr><td>No scaling, d = 4, gap 4</td><td class="num">[4, 0]</td><td class="num">0.982 / 0.018</td></tr>
+  <tr><td>Scaled by √4 = 2</td><td class="num">[2, 0]</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last row</summary>
+  <p>e<sup>2</sup> = 7.389 against 1, total 8.389, so the weights are <strong>0.881 and 0.119</strong>. The same gap of 4 lands softly at width 4 and brutally at width 64 — that is why the divisor has to track the width.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The √d<sub>k</sub> is a tuning constant — drop it, or replace it with d<sub>k</sub>."</strong> It is set by the width, not chosen by taste. Drop it and softmax saturates as width grows; use d<sub>k</sub> instead and softmax flattens as width grows. Both still run, which is why the bug survives a demo.</p>
+  <p><strong>Correction:</strong> the divisor exists to keep the score spread near 1, so one softmax behaves the same at width 64 and width 512.</p>
+</div>
+<p><strong>The tell:</strong> log the standard deviation of your score matrix at initialisation. It should be near 1. Near 8 at d = 64 means the divisor is missing; near 0.1 means it is too large. A second tell is a gradient norm at the first block that is orders of magnitude below the last.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>A head is 100 numbers wide. What divisor keeps the score spread near 1?
+    <details><summary>Answer</summary>
+      <p>√100 = 10. The spread grows like the square root of the width, so the correction is the same root.</p>
+    </details>
+  </li>
+  <li>Why does a one-hot attention row block learning?
+    <details><summary>Answer</summary>
+      <p>Because the slope p(1 − p) goes to zero as p goes to 1. The layer still produces an output, but almost no gradient reaches the weights that made the scores.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Lab 1 converted scores into weights; this lab kept those scores in a usable range. Topic 27 puts the whole step inside a block and adds the part that carries the signal around it — the residual path.</p>
+
+<div class="labnav">
+  <a href="026a-softmax.html">← 26a · softmax — scores into weights</a>
+  <a href="026-attention.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>

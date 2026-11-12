@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>009.1 — Shape algebra</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Name every shape in a two-layer forward pass and use the inner-dimension rule to predict the output.">
+</head>
+<body data-page="lab" data-lesson="009a">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Objective · Lab 1 / 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="009-layers-and-forward-pass.html#labs">Topic 09 · Layers and the forward pass</a></p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · the forward pass</p>
+  <h1>Shape algebra — the inner dimensions must meet</h1>
+  <p class="objective">You can write the shape of every array in a two-layer forward pass, and predict the output shape before running anything.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">ŷ =</span> <span class="hot">(4×2)(2×2) → (4×2)</span> <span class="dim">then</span> <span class="hot">(4×2)(2×1) → (4×1)</span></p>
+<p class="eqn-note">Lab 1 of 1 · only the shape changes are lit; the numbers inside the arrays are not the subject</p>
+<p>Every array in a network is a rectangle of numbers with two counts: rows and columns. This lab reads those counts the way a compiler does, before any arithmetic happens.</p>
+
+<h2>Rows are examples, columns are features</h2>
+<p><code>X</code> is 4×2: four examples, two features each. The row count is the batch, and every layer must preserve it — four examples in, four predictions out. The column count is what a layer may change, by mixing features into new ones.</p>
+<p>The weights hold the mixing. <code>W<sub>1</sub></code> is 2×2 because it reads two features and writes two hidden values. <code>W<sub>2</sub></code> is 1×2 because it reads those two and writes one.</p>
+
+<h2>The rule: inner dimensions meet</h2>
+<p>To multiply A×B, the columns of A must equal the rows of B. Those two matching numbers cancel; the outer two survive as the result. So <code>(4×2)(2×2)</code> leaves <code>4×2</code>, and <code>(4×2)(2×1)</code> leaves <code>4×1</code>. A <code>(4×2)(3×2)</code> is an error, not a warning: 2 and 3 are not the same number.</p>
+
+<table>
+  <tr><th>Array</th><th>What it holds</th><th class="num">Shape</th></tr>
+  <tr><td><code>X</code></td><td>4 examples, 2 features</td><td class="num">4×2</td></tr>
+  <tr><td><code>W<sub>1</sub></code></td><td>2 inputs to 2 hidden units</td><td class="num">2×2</td></tr>
+  <tr><td><code>A<sub>1</sub></code></td><td>4 examples, 2 hidden values each</td><td class="num">4×2</td></tr>
+  <tr><td><code>W<sub>2</sub></code></td><td>2 hidden values to 1 output</td><td class="num">1×2</td></tr>
+  <tr><td>output</td><td>4 examples, 1 prediction each</td><td class="num">4×1</td></tr>
+</table>
+
+<h2>The whole pass, left to right</h2>
+<p><code>X</code> (4×2) times the transpose of <code>W<sub>1</sub></code> (2×2) gives <code>z<sub>1</sub></code> at 4×2. The bend φ changes no shape. Then <code>W<sub>2</sub></code> transposed is 2×1, so (4×2)(2×1) gives 4×1. The four rows survive every step; only the columns move 2 → 2 → 1.</p>
+
+<figure class="fig" data-graph="pipeline">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-shape-t f-shape-d">
+    <title id="f-shape-t">One example moving through the model and the loss</title>
+    <desc id="f-shape-d">Five boxes in a row: the input row x-i, the model f-theta, the prediction y-hat, the loss L, then the single loss value l-i. Arrows show the order of the pass.</desc>
+    <g data-layer></g>
+  </svg>
+  <figcaption><strong>The row count is carried, not recomputed.</strong> Four rows enter at the left and four predictions leave at the right; every box in between is a shape you can name.</figcaption>
+</figure>
+
+<h2>Where the bias fits</h2>
+<p><code>b<sub>1</sub></code> has length 2 and is added to a 4×2 array. It is repeated down all four rows, which is called broadcasting. That is the intended behaviour, and it is also why a bias of the wrong length can run silently: the addition succeeds, and the shape rule alone will not catch it.</p>
+
+<h2>Faded example</h2>
+<p>The same network, now fed eight examples instead of four. Fill in the one missing shape. The weights do not change, because their shapes describe the layer, not the batch.</p>
+<table>
+  <tr><th>Array</th><th class="num">Shape</th></tr>
+  <tr><td><code>X</code></td><td class="num">8×2</td></tr>
+  <tr><td><code>W<sub>1</sub></code></td><td class="num">2×2</td></tr>
+  <tr><td><code>A<sub>1</sub></code></td><td class="num">?</td></tr>
+  <tr><td><code>W<sub>2</sub></code></td><td class="num">1×2</td></tr>
+  <tr><td>output</td><td class="num">8×1</td></tr>
+</table>
+<details><summary>Check the missing shape</summary>
+  <p><code>A<sub>1</sub></code> is <strong>8×2</strong>. The batch of 8 meets <code>W<sub>1</sub></code>'s inner 2, and the hidden count of 2 survives; then (8×2)(2×1) gives 8×1. Only the leading number moved.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"If the code runs, the shapes are right."</strong> It feels right because shape errors are the ones that do raise an exception, so a silent run seems like confirmation.</p>
+  <p><strong>Correction:</strong> broadcasting and square weights make wrong code run. A 2×2 weight applied on the wrong side of the input still produces a number — just not the one you meant.</p>
+</div>
+<p><strong>The tell:</strong> write the four shapes on paper before running. If the output is 4×2 when you expected 2×4, you have a transpose, not a mistake in the arithmetic.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li><code>X</code> is 4×2 and <code>W<sub>1</sub></code> is 3×2. What is the shape of <code>XW<sub>1</sub><sup>T</sup></code>?
+    <details><summary>Answer</summary>
+      <p><strong>4×3</strong>. The inner 2s meet and cancel; 4 rows and 3 hidden units survive.</p>
+    </details>
+  </li>
+  <li>A batch of 32 examples, two features, one output. What shape is the prediction?
+    <details><summary>Answer</summary>
+      <p><strong>32×1</strong>. (32×2)(2×1). The batch never shrinks — one prediction per row.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Topic 10 asks where the numbers come from: the gradients that say which way each weight should move.</p>
+
+<div class="labnav">
+  <a href="009-layers-and-forward-pass.html#labs">← Back to the formula</a>
+  <a href="009-layers-and-forward-pass.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=4" defer></script>
+<script src="../assets/course.js?v=11" defer></script>
+</body>
+</html>
