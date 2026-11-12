@@ -46,6 +46,16 @@
     return { sx: sx, sy: sy };
   }
 
+  function clipId(svg) {
+    var id = svg.id || (svg.id = "fig" + Math.random().toString(36).slice(2, 8));
+    if (!svg.querySelector("defs")) {
+      var defs = mk("defs", {}, svg);
+      var cp = mk("clipPath", { id: id + "-clip" }, defs);
+      mk("rect", { x: P.l, y: P.t, width: P.r - P.l, height: P.b - P.t }, cp);
+    }
+    return id + "-clip";
+  }
+
   function arrow(g, x1, y1, x2, y2, color, width) {
     var dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
     var ux = dx / len, uy = dy / len, head = 9;
@@ -351,19 +361,25 @@
     function draw() {
       var g = clearLayer(svg);
       var m = axes(g, { x0: -1, x1: 7, y0: 0, y1: 14, xticks: [0, 2, 4, 6], yticks: [0, 5, 10], xlabel: "θ  (parameter)", ylabel: "J(θ)" });
+      var cg = mk("g", { "clip-path": "url(#" + clipId(svg) + ")" }, g);
       SETS.forEach(function (set, i) {
         var pts = [];
         for (var t = -1; t <= 7.001; t += 0.05) pts.push(m.sx(t) + "," + m.sy(J(t, set)));
         mk("polyline", {
           points: pts.join(" "), fill: "none",
-          stroke: i === cur ? "var(--sym-param)" : "var(--rule)",
-          "stroke-width": i === cur ? 2.6 : 1.6,
-          "stroke-dasharray": i === cur ? "none" : "5 4"
-        }, g);
+          stroke: i === cur ? "var(--sym-param)" : "var(--ink-faint)",
+          "stroke-width": i === cur ? 2.6 : 1.8,
+          "stroke-dasharray": i === cur ? "none" : "5 4",
+          opacity: i === cur ? 1 : 0.55
+        }, cg);
       });
       var set = SETS[cur];
       mk("circle", { cx: m.sx(set.mu), cy: m.sy(set.floor), r: 6, fill: "var(--sym-opt)" }, g);
-      label(g, m.sx(set.mu) + 10, m.sy(set.floor) - 10, set.name + ": θ* = " + set.mu + ", J* = " + set.floor, "var(--sym-opt)", 11);
+
+      var legend = set.name + ":  θ* = " + set.mu + "   J* = " + set.floor;
+      mk("rect", { x: P.l + 10, y: P.t + 8, width: 210, height: 26, rx: 4, fill: "var(--card)", opacity: .94, stroke: "var(--rule)" }, g);
+      mk("circle", { cx: P.l + 24, cy: P.t + 21, r: 4.5, fill: "var(--sym-opt)" }, g);
+      label(g, P.l + 36, P.t + 25, legend, "var(--sym-opt)", 11);
       if (out) out.textContent = set.name + " · θ = " + set.mu + " → J = " + set.floor;
     }
 
