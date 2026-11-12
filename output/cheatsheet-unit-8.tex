@@ -1,0 +1,82 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1.05cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.55cm}
+\setlist[itemize]{leftmargin=1.1em,itemsep=0.05em,topsep=0.15em,parsep=0pt}
+\definecolor{ink}{HTML}{111418}
+\definecolor{accent}{HTML}{A3231F}
+\titleformat{\section}{\normalfont\bfseries\color{accent}\small}{}{0em}{}[\vspace{-0.55em}\textcolor{accent}{\rule{\linewidth}{0.4pt}}]
+\titlespacing*{\section}{0pt}{0.55em}{0.25em}
+\newcommand{\sect}[1]{\section*{#1}}
+\newcommand{\hd}[2]{\begin{center}{\large\bfseries #1}\\[-0.1em]{\small\color{gray}#2}\end{center}\vspace{-0.6em}}
+\begin{document}
+\hd{Explainable AI}{Unit 8 \textperiodcentered\ reference sheet \textperiodcentered\ AI/ML in 35 topics}
+\begin{multicols}{2}
+\normalsize
+
+\sect{Axes}
+intrinsic (by design) vs post-hoc (after training)\\
+global (model) vs local (one prediction)\\
+audience decides: applicant, operator, regulator
+
+\sect{Attribution}
+Saliency: $\partial f/\partial x_i$ --- one pass, saturates, not complete.\\
+Integrated gradients: $\int_0^1 \partial f(\alpha x)/\partial x_i\,d\alpha$; complete vs baseline.\\
+LIME: sparse linear surrogate on perturbations; unstable across seeds.\\
+SHAP: $\phi_i=\sum_{S\subseteq F\setminus i}\dfrac{|S|!(|F|-|S|-1)!}{|F|!}[v(S\cup i)-v(S)]$\\
+Efficiency: $\sum_i\phi_i=f(x)-f(\text{baseline})$.
+
+\sect{Faithfulness tests}
+Deletion: remove top-$k$ attributed features $\Rightarrow$ output must drop.\\
+Insertion: add least-to-most $\Rightarrow$ recovery speed.\\
+Randomisation: shuffle weights $\Rightarrow$ map must change (else it is an edge detector).\\
+Stability: re-run explainer $\Rightarrow$ same ranking?
+
+\sect{Gotchas}
+\begin{itemize}
+\item Correlation $\neq$ causation: attribution is about the function, not the world.
+\item SHAP splits credit between correlated features; neither is ``the cause''.
+\item Plausible $\neq$ faithful. Humans reward smooth maps.
+\end{itemize}
+
+\sect{This unit at a glance}
+\begin{tabular}{@{}p{0.05\linewidth}p{0.40\linewidth}p{0.47\linewidth}@{}}
+\toprule
+\# & Topic & You can\\
+\midrule
+30 & Why explainability & distinguish intrinsic vs post-hoc, local vs global; state the accountability u\\
+31 & Attribution methods & explain what gradient saliency, LIME and SHAP actually compute, and their fail\\
+32 & Evaluating explanations & test faithfulness; explain the correlation ≠ causation trap\\
+\bottomrule
+\end{tabular}
+
+\sect{If you see this $\rightarrow$ do that}
+\begin{tabular}{@{}p{0.52\linewidth}p{0.42\linewidth}@{}}
+\toprule
+Signal & Move\\
+\midrule
+Model trusted blindly & local attribution\\
+Regulated domain & intrinsic or SHAP + audit\\
+Image model & saliency / IG\\
+Tabular model & SHAP / permutation\\
+Suspect a shortcut & deletion + randomisation\\
+\bottomrule
+\end{tabular}
+
+
+\sect{Numbers worth memorising}
+Shapley 2 features: $\phi_1=0.6,\phi_2=0.4$, sum $=1.0$\\
+Deletion top 10\%: faithful $\Rightarrow$ AUC $0.94\to0.71$\\
+Random 3 of 20 features: accuracy $\approx0.49$ (chance)\\
+Saliency cost: 1 backward pass; IG: 20--300
+
+\end{multicols}
+\end{document}

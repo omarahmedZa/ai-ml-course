@@ -1,0 +1,83 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1.05cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.55cm}
+\setlist[itemize]{leftmargin=1.1em,itemsep=0.05em,topsep=0.15em,parsep=0pt}
+\definecolor{ink}{HTML}{111418}
+\definecolor{accent}{HTML}{A3231F}
+\titleformat{\section}{\normalfont\bfseries\color{accent}\small}{}{0em}{}[\vspace{-0.55em}\textcolor{accent}{\rule{\linewidth}{0.4pt}}]
+\titlespacing*{\section}{0pt}{0.55em}{0.25em}
+\newcommand{\sect}[1]{\section*{#1}}
+\newcommand{\hd}[2]{\begin{center}{\large\bfseries #1}\\[-0.1em]{\small\color{gray}#2}\end{center}\vspace{-0.6em}}
+\begin{document}
+\hd{Deep reinforcement learning}{Unit 6 \textperiodcentered\ reference sheet \textperiodcentered\ AI/ML in 35 topics}
+\begin{multicols}{2}
+\normalsize
+
+\sect{Why tables die}
+$|S|\times|A|$: grid 25, chess $\sim10^{44}$, Atari $256^{100800}$
+
+\sect{Deadly triad}
+function approximation $+$ bootstrapping $+$ off-policy $\Rightarrow$ divergence\\
+Any two are safe. All three is where DQN lives.
+
+\sect{DQN}
+Replay: sample random minibatches $\Rightarrow$ breaks temporal correlation.\\
+Target net: $\theta^-\leftarrow\theta$ every $\sim10^4$ steps $\Rightarrow$ fixed target.\\
+$L=\big(r+\gamma\max_{a'}Q_{\theta^-}(s',a')-Q_\theta(s,a)\big)^2$ (Huber)\\
+Double DQN: select with $\theta$, evaluate with $\theta^-$.
+
+\sect{Policy gradient}
+$\nabla J=E[\nabla_\theta\log\pi_\theta(a\mid s)\,A(s,a)]$\\
+Baseline $b(s)$: unbiased, lower variance; $A=Q-V$\\
+PPO: $\min(rA,\ \mathrm{clip}(r,1-\varepsilon,1+\varepsilon)A)$, $\varepsilon=0.2$\\
+$r=\pi_{new}/\pi_{old}$; clip bounds the objective, not the weights.
+
+\sect{Gotchas}
+\begin{itemize}
+\item Replay $+$ on-policy method $=$ invalid gradient.
+\item PPO is sample-inefficient by design (on-policy).
+\item Overestimation comes from $\max$ over noisy $Q$; Double reduces, not removes.
+\end{itemize}
+
+\sect{This unit at a glance}
+\begin{tabular}{@{}p{0.05\linewidth}p{0.40\linewidth}p{0.47\linewidth}@{}}
+\toprule
+\# & Topic & You can\\
+\midrule
+23 & Function approximation & explain why tables die and why approximation kills convergence guarantees\\
+24 & DQN & explain replay buffer + target network as fixes for correlated data and moving\\
+25 & Policy gradient at scale & trace REINFORCE $\rightarrow$ baseline $\rightarrow$ A2C/PPO and explain the variance problem\\
+\bottomrule
+\end{tabular}
+
+\sect{If you see this $\rightarrow$ do that}
+\begin{tabular}{@{}p{0.52\linewidth}p{0.42\linewidth}@{}}
+\toprule
+Signal & Move\\
+\midrule
+Variance too high & baseline / GAE\\
+Updates destroy policy & clip (PPO)\\
+Continuous control & PPO / SAC\\
+Sparse reward & shaping / curriculum\\
+Need replay & off-policy only\\
+\bottomrule
+\end{tabular}
+
+
+\sect{Numbers worth memorising}
+Replay $\sim10^6$; target sync $\sim10^4$ steps; batch 32\\
+PPO $\varepsilon=0.2$; ratio $1.3\to$ clipped $1.2$\\
+Advantage $A=Q-V$; GAE $\lambda\in[0.9,0.95]$\\
+DQN frame stack 4 (velocity is not in one frame)
+
+\end{multicols}
+\end{document}

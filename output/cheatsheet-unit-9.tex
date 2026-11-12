@@ -1,0 +1,85 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1.05cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.55cm}
+\setlist[itemize]{leftmargin=1.1em,itemsep=0.05em,topsep=0.15em,parsep=0pt}
+\definecolor{ink}{HTML}{111418}
+\definecolor{accent}{HTML}{A3231F}
+\titleformat{\section}{\normalfont\bfseries\color{accent}\small}{}{0em}{}[\vspace{-0.55em}\textcolor{accent}{\rule{\linewidth}{0.4pt}}]
+\titlespacing*{\section}{0pt}{0.55em}{0.25em}
+\newcommand{\sect}[1]{\section*{#1}}
+\newcommand{\hd}[2]{\begin{center}{\large\bfseries #1}\\[-0.1em]{\small\color{gray}#2}\end{center}\vspace{-0.6em}}
+\begin{document}
+\hd{Federated learning}{Unit 9 \textperiodcentered\ reference sheet \textperiodcentered\ AI/ML in 35 topics}
+\begin{multicols}{2}
+\normalsize
+
+\sect{Protocol}
+1. broadcast $w_t$ \ 2. local SGD $\times E$ \ 3. upload $w_t^k$ \ 4. aggregate\\
+$w_{t+1}=\sum_k\dfrac{n_k}{n}w_t^k$ \quad $n=\sum_k n_k$\\
+Communication is the bottleneck: rounds $\times$ clients $\times$ model size.
+
+\sect{Non-IID}
+Client drift: local optima diverge; the average fits nobody.\\
+FedProx: $F_k(w)+\dfrac{\mu}{2}\|w-w_t\|^2$ \ (larger $\mu$ $\Rightarrow$ stronger leash)\\
+$E\uparrow$ $\Rightarrow$ fewer rounds, more drift. Not monotone.\\
+Report per-client accuracy; a high mean can hide a small client.
+
+\sect{Privacy}
+DP: $P(M(D)\in S)\le e^\varepsilon P(M(D')\in S)+\delta$\\
+DP-SGD: clip per-example gradient to $C$, add $\mathcal{N}(0,\sigma^2C^2)$\\
+Budget composes over rounds (10 $\times$ 0.1 $\approx$ 1.0 basic).\\
+Secure aggregation: server sees only the sum; no protection from malicious clients.
+
+\sect{Threats}
+membership inference, gradient inversion, poisoning, backdoor\\
+Defences: clipping + noise, robust aggregation (median/trimmed), update inspection
+
+\sect{Gotchas}
+\begin{itemize}
+\item Federated $\neq$ private. Gradients are a fingerprint.
+\item FedAvg $\neq$ pooled training unless clients are IID.
+\item More local epochs is not free: drift grows with $E$.
+\end{itemize}
+
+\sect{This unit at a glance}
+\begin{tabular}{@{}p{0.05\linewidth}p{0.40\linewidth}p{0.47\linewidth}@{}}
+\toprule
+\# & Topic & You can\\
+\midrule
+33 & Federated setting \& FedAvg & describe the round protocol, write the averaging rule, justify data locality\\
+34 & Non-IID data \& convergence & explain client drift and name the fixes; state the local-steps trade-off\\
+35 & Privacy \& threat model & explain DP noise, secure aggregation, and poisoning/backdoor attacks\\
+\bottomrule
+\end{tabular}
+
+\sect{If you see this $\rightarrow$ do that}
+\begin{tabular}{@{}p{0.52\linewidth}p{0.42\linewidth}@{}}
+\toprule
+Signal & Move\\
+\midrule
+Data cannot move & federated\\
+Clients differ & FedProx / personalise\\
+Privacy claim & DP + secure agg\\
+Malicious clients & robust aggregation\\
+Too many rounds & more local epochs (drift!)\\
+\bottomrule
+\end{tabular}
+
+
+\sect{Numbers worth memorising}
+FedAvg weights $100/200/700\Rightarrow0.1/0.2/0.7$\\
+Weighted mean of $0.1,0.5,0.9\to0.74$ (equal: $0.50$)\\
+DP: clip $C$; noise $\sigma C$; $10\times0.1$ budget $\approx1.0$\\
+$E$ local epochs: rounds $\downarrow$, drift $\uparrow$
+
+\end{multicols}
+\end{document}

@@ -1,0 +1,93 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1.05cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.55cm}
+\setlist[itemize]{leftmargin=1.1em,itemsep=0.05em,topsep=0.15em,parsep=0pt}
+\definecolor{ink}{HTML}{111418}
+\definecolor{accent}{HTML}{A3231F}
+\titleformat{\section}{\normalfont\bfseries\color{accent}\small}{}{0em}{}[\vspace{-0.55em}\textcolor{accent}{\rule{\linewidth}{0.4pt}}]
+\titlespacing*{\section}{0pt}{0.55em}{0.25em}
+\newcommand{\sect}[1]{\section*{#1}}
+\newcommand{\hd}[2]{\begin{center}{\large\bfseries #1}\\[-0.1em]{\small\color{gray}#2}\end{center}\vspace{-0.6em}}
+\begin{document}
+\hd{Reinforcement learning}{Unit 5 \textperiodcentered\ reference sheet \textperiodcentered\ AI/ML in 35 topics}
+\begin{multicols}{2}
+\normalsize
+
+\sect{MDP}
+$(S,A,P,R,\gamma)$; \ $\pi(a\mid s)$; \ $G_t=\sum_{k\ge0}\gamma^k r_{t+k+1}$\\
+Horizon $1/(1-\gamma)$: $\gamma{=}0.9\Rightarrow10$, $0.99\Rightarrow100$
+
+\sect{Values}
+$V^\pi(s)=\sum_a\pi(a\mid s)\sum_{s'}P(s'\mid s,a)[R+\gamma V^\pi(s')]$\\
+$Q^\pi(s,a)=\sum_{s'}P[R+\gamma V^\pi(s')]$ \quad $V^*=\max_a Q^*$\\
+TD: $V\leftarrow V+\alpha[r+\gamma V(s')-V(s)]$; bracket $=$ TD error\\
+Terminal state: $V=0$, never bootstrap off it.
+
+\sect{Exploration}
+$\varepsilon$-greedy: $P(\text{best})=1-\varepsilon+\varepsilon/k$\\
+UCB: $\arg\max_a\left[Q(a)+c\sqrt{\ln t/N(a)}\right]$\\
+Regret $=T\cdot r^*-\sum_t r_t$; good algorithms $O(\log T)$
+
+\sect{Two families}
+\begin{tabular}{@{}p{0.26\linewidth}p{0.34\linewidth}p{0.32\linewidth}@{}}
+\toprule
+ & Value & Policy\\
+\midrule
+Learns & $Q(s,a)$ & $\pi_\theta(a\mid s)$\\
+Data & off-policy & on-policy\\
+Actions & discrete & continuous OK\\
+Failure & instability & variance\\
+\bottomrule
+\end{tabular}\\
+$Q\leftarrow Q+\alpha[r+\gamma\max_{a'}Q(s',a')-Q]$
+
+\sect{Gotchas}
+\begin{itemize}
+\item Reward is the spec: agents optimise exactly what you wrote.
+\item Greedy on noisy estimates locks onto the wrong arm forever.
+\item $\gamma{=}0$ is myopia, not efficiency.
+\end{itemize}
+
+\sect{This unit at a glance}
+\begin{tabular}{@{}p{0.05\linewidth}p{0.40\linewidth}p{0.47\linewidth}@{}}
+\toprule
+\# & Topic & You can\\
+\midrule
+19 & The RL frame & formalize a task as (S, A, P, R, γ) and define return\\
+20 & Value functions \& the Bellman equation & write V and Q and explain the recursive expectation\\
+21 & Exploration vs exploitation & run ε-greedy by hand; explain regret on a bandit\\
+22 & Two solution families & contrast Q-learning (value) vs policy gradient (policy) on what they learn and\\
+\bottomrule
+\end{tabular}
+
+\sect{If you see this $\rightarrow$ do that}
+\begin{tabular}{@{}p{0.52\linewidth}p{0.42\linewidth}@{}}
+\toprule
+Signal & Move\\
+\midrule
+No labels & RL or self-supervision\\
+Reward is delayed & discount $γ$\\
+Continuous actions & policy gradient\\
+Discrete actions & DQN\\
+Samples expensive & off-policy\\
+\bottomrule
+\end{tabular}
+
+
+\sect{Numbers worth memorising}
+$\gamma{=}0.9$: 10-step return $=6.51$; horizon 10\\
+$\gamma{=}0.99$: horizon 100; reward 11 at $t{=}100$ $\to 4.03$\\
+$\varepsilon{=}0.1$, $k{=}4$: best arm chosen 92.5\%\\
+TD example: $r{=}1,\gamma{=}0.9,V'{=}0.8\Rightarrow Q{=}1.72$
+
+\end{multicols}
+\end{document}

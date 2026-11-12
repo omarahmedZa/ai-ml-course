@@ -1,0 +1,85 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1.05cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.55cm}
+\setlist[itemize]{leftmargin=1.1em,itemsep=0.05em,topsep=0.15em,parsep=0pt}
+\definecolor{ink}{HTML}{111418}
+\definecolor{accent}{HTML}{A3231F}
+\titleformat{\section}{\normalfont\bfseries\color{accent}\small}{}{0em}{}[\vspace{-0.55em}\textcolor{accent}{\rule{\linewidth}{0.4pt}}]
+\titlespacing*{\section}{0pt}{0.55em}{0.25em}
+\newcommand{\sect}[1]{\section*{#1}}
+\newcommand{\hd}[2]{\begin{center}{\large\bfseries #1}\\[-0.1em]{\small\color{gray}#2}\end{center}\vspace{-0.6em}}
+\begin{document}
+\hd{Mathematical floor}{Unit 0 \textperiodcentered\ reference sheet \textperiodcentered\ AI/ML in 35 topics}
+\begin{multicols}{2}
+\normalsize
+
+\sect{Multiplication: the only operation}
+$x\cdot w=\sum_i x_i w_i=\|x\|\|w\|\cos\theta$
+$\cos\theta=\dfrac{x\cdot w}{\|x\|\|w\|}\in[-1,1]$
+$(m\times n)(n\times k)\to(m\times k)$ \quad inner dims must match\\
+$Wx$ = $m$ dot products at once; \ $xW\neq Wx$
+
+\sect{Derivatives}
+$\dfrac{d}{dw}w^n=nw^{n-1}$ \quad $\dfrac{d}{dw}(aw+b)=a$\\
+Chain: $\dfrac{d}{dw}f(g(w))=f'(g(w))g'(w)$\\
+Update: $w\leftarrow w-\eta\nabla f$ \ (minus: gradient is uphill)
+
+\sect{Probability}
+$E[X]=\sum_x x\,p(x)$ \quad $\mathrm{Var}=E[(X-EX)^2]$\\
+$L(\theta)=p(\text{data}\mid\theta)$ \quad $\mathrm{NLL}=-\sum_i\log p_\theta(y_i\mid x_i)$\\
+$\mathrm{softmax}(z)_i=\dfrac{e^{z_i}}{\sum_j e^{z_j}}$ \quad $\text{perplexity}=e^{\mathrm{loss}}$
+
+\sect{Gotchas}
+\begin{tabular}{@{}p{0.44\linewidth}p{0.5\linewidth}@{}}
+\toprule
+Symptom & Correction\\
+\midrule
+Big dot $\Rightarrow$ similar & Length leaks in. Use cosine when norms are noise.\\
+Gradient points downhill & It points uphill; subtract it.\\
+$\eta$ too large & Oscillates: $w=3,\eta=1$ on $w^2$ gives $-3$ forever.\\
+Likelihood $=P(\theta\mid D)$ & It is $P(D\mid\theta)$.\\
+\bottomrule
+\end{tabular}
+
+\sect{This unit at a glance}
+\begin{tabular}{@{}p{0.05\linewidth}p{0.40\linewidth}p{0.47\linewidth}@{}}
+\toprule
+\# & Topic & You can\\
+\midrule
+1 & Vectors, matrices, dot product & read any score function as a dot product and check shapes mechanically\\
+2 & Slope $\rightarrow$ gradient & compute a gradient and explain why training steps against it\\
+3 & Probability, expectation, likelihood & explain why a loss is a negative log-likelihood; read mean/variance off a dist\\
+\bottomrule
+\end{tabular}
+
+\sect{If you see this $\rightarrow$ do that}
+\begin{tabular}{@{}p{0.52\linewidth}p{0.42\linewidth}@{}}
+\toprule
+Signal & Move\\
+\midrule
+Compare two vectors, norms vary & cosine\\
+Need a probability & sigmoid / softmax\\
+Predict a number & squared error\\
+Predict a class & BCE / cross-entropy\\
+Shapes disagree & write inner dims\\
+\bottomrule
+\end{tabular}
+
+
+\sect{Numbers worth memorising}
+$\cos\in[-1,1]$; perpendicular $\Rightarrow 0$; $45^\circ\Rightarrow0.707$\\
+$0.25^{10}=9.5\times10^{-7}$ \quad $1.5^{10}=58$\\
+$e^{3}\approx20.1$ \quad $\ln 2\approx0.693$\\
+$a^\top a=\|a\|^2$ \quad $(AB)^\top=B^\top A^\top$
+
+\end{multicols}
+\end{document}

@@ -1,0 +1,86 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1.05cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.55cm}
+\setlist[itemize]{leftmargin=1.1em,itemsep=0.05em,topsep=0.15em,parsep=0pt}
+\definecolor{ink}{HTML}{111418}
+\definecolor{accent}{HTML}{A3231F}
+\titleformat{\section}{\normalfont\bfseries\color{accent}\small}{}{0em}{}[\vspace{-0.55em}\textcolor{accent}{\rule{\linewidth}{0.4pt}}]
+\titlespacing*{\section}{0pt}{0.55em}{0.25em}
+\newcommand{\sect}[1]{\section*{#1}}
+\newcommand{\hd}[2]{\begin{center}{\large\bfseries #1}\\[-0.1em]{\small\color{gray}#2}\end{center}\vspace{-0.6em}}
+\begin{document}
+\hd{Attention and LLMs}{Unit 7 \textperiodcentered\ reference sheet \textperiodcentered\ AI/ML in 35 topics}
+\begin{multicols}{2}
+\normalsize
+
+\sect{Attention}
+$\mathrm{Attn}(Q,K,V)=\mathrm{softmax}\!\left(\dfrac{QK^\top}{\sqrt{d_k}}\right)V$\\
+$Q$ asks, $K$ advertises, $V$ delivers. Cost $O(n^2d)$.\\
+Scale by $\sqrt{d_k}$: score std grows like $\sqrt{d_k}$; unscaled softmax saturates.\\
+Causal mask: set $j>i$ to $-\infty$ before softmax.
+
+\sect{Block}
+$x\leftarrow x+\mathrm{MHA}(\mathrm{LN}(x))$; \ $x\leftarrow x+\mathrm{FFN}(\mathrm{LN}(x))$\\
+Params/block at $d$: $4d^2$ (attention) $+8d^2$ (FFN) $=12d^2$\\
+Position must be injected; attention alone is permutation-invariant.
+
+\sect{Pretraining}
+$\mathrm{NLL}=-\sum_t\log p_\theta(t_t\mid t_{<t})$; \ perplexity $=e^{\mathrm{NLL}}$\\
+GPT causal (generation) \ vs \ BERT masked 15\% (encoding)\\
+loss 3.0 nats $\Rightarrow$ perplexity 20.
+
+\sect{Alignment}
+SFT $\to$ reward model (Bradley--Terry) $\to$ PPO $+\,\beta\,\mathrm{KL}$\\
+DPO: same preference optimum, no reward model, no RL.\\
+Sampling: $p=\mathrm{softmax}(z/T)$; $T\downarrow$ sharpens, adds no knowledge.
+
+\sect{Gotchas}
+\begin{itemize}
+\item Attention weights $\neq$ explanation.
+\item Higher temperature $\neq$ creativity; it raises rare tokens.
+\item Perplexity $\neq$ instruction following.
+\end{itemize}
+
+\sect{This unit at a glance}
+\begin{tabular}{@{}p{0.05\linewidth}p{0.40\linewidth}p{0.47\linewidth}@{}}
+\toprule
+\# & Topic & You can\\
+\midrule
+26 & Attention & compute scaled dot-product attention by hand for 2 tokens; explain Q/K/V roles\\
+27 & The Transformer block & name every sub-layer, its purpose, and why residual + LayerNorm are required\\
+28 & Pretraining & contrast next-token (GPT) vs masked (BERT) objectives; explain what scale buys\\
+29 & Alignment \& inference & explain SFT $\rightarrow$ RLHF/DPO; how context window and temperature shape output\\
+\bottomrule
+\end{tabular}
+
+\sect{If you see this $\rightarrow$ do that}
+\begin{tabular}{@{}p{0.52\linewidth}p{0.42\linewidth}@{}}
+\toprule
+Signal & Move\\
+\midrule
+Order matters & positional encoding\\
+Must generate & causal mask\\
+Must classify & encoder (BERT-style)\\
+Context too long & sparse/linear attention\\
+Inference too slow & KV cache / distill\\
+\bottomrule
+\end{tabular}
+
+
+\sect{Numbers worth memorising}
+$d{=}512$, 8 heads $\Rightarrow d_k=64$\\
+Block params: $12d^2=3.15$M at $d{=}512$\\
+$T{=}0.5$: top prob $0.87$; $T{=}2$: $0.51$\\
+perplexity $=e^{\text{loss}}$; loss $3\Rightarrow20$
+
+\end{multicols}
+\end{document}

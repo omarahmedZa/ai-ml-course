@@ -1,0 +1,86 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1.05cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.55cm}
+\setlist[itemize]{leftmargin=1.1em,itemsep=0.05em,topsep=0.15em,parsep=0pt}
+\definecolor{ink}{HTML}{111418}
+\definecolor{accent}{HTML}{A3231F}
+\titleformat{\section}{\normalfont\bfseries\color{accent}\small}{}{0em}{}[\vspace{-0.55em}\textcolor{accent}{\rule{\linewidth}{0.4pt}}]
+\titlespacing*{\section}{0pt}{0.55em}{0.25em}
+\newcommand{\sect}[1]{\section*{#1}}
+\newcommand{\hd}[2]{\begin{center}{\large\bfseries #1}\\[-0.1em]{\small\color{gray}#2}\end{center}\vspace{-0.6em}}
+\begin{document}
+\hd{Natural language processing}{Unit 4 \textperiodcentered\ reference sheet \textperiodcentered\ AI/ML in 35 topics}
+\begin{multicols}{2}
+\normalsize
+
+\sect{Text to IDs}
+Token $\neq$ word. English $\approx$ 4 chars/token $\approx$ 0.75 words.\\
+Code $\approx$ 1.7 tokens/word; base64 far worse.\\
+BPE: start from characters, merge the most frequent adjacent pair.
+
+\sect{Embeddings}
+$E\in\mathbb{R}^{V\times d}$; token $i\mapsto E[i]$ (a lookup, not a matmul)\\
+$\cos(u,v)=\dfrac{u\cdot v}{\|u\|\|v\|}$ \quad length is not meaning\\
+Static (Word2Vec) vs contextual (transformer): one vector per \emph{occurrence}
+
+\sect{Recurrence}
+$h_t=\tanh(W_h h_{t-1}+W_x x_t+b)$ \quad state is fixed size\\
+BPTT $=$ product of $T$ Jacobians: $0.9^{20}=0.12$\\
+LSTM: $c_t=f\odot c_{t-1}+i\odot g$, \ $h_t=o\odot\tanh(c_t)$\\
+Additive cell path $\Rightarrow$ gradient near identity.
+
+\sect{Seq2seq}
+encoder $x_{1:n}\to h_n$; \ decoder $p(y_t\mid h_n,y_{<t})$\\
+Teacher forcing at train, free-running at test $\Rightarrow$ exposure bias\\
+Bottleneck: 600 tokens into 512 floats $=0.85$ floats/token.
+
+\sect{Gotchas}
+\begin{itemize}
+\item Truncating by characters can split a token.
+\item Attention weights are not causal explanations.
+\item LSTM mitigates decay; it does not remove the bottleneck.
+\end{itemize}
+
+\sect{This unit at a glance}
+\begin{tabular}{@{}p{0.05\linewidth}p{0.40\linewidth}p{0.47\linewidth}@{}}
+\toprule
+\# & Topic & You can\\
+\midrule
+15 & Tokenization & explain vocab, subwords, OOV, and why token count ≠ word count\\
+16 & Embeddings & explain the distributional hypothesis and compute cosine similarity\\
+17 & RNN $\rightarrow$ LSTM & explain the fixed-vector bottleneck and how gates address it\\
+18 & Seq2seq \& encoder–decoder & explain translation as encode-then-decode and state the alignment problem\\
+\bottomrule
+\end{tabular}
+
+\sect{If you see this $\rightarrow$ do that}
+\begin{tabular}{@{}p{0.52\linewidth}p{0.42\linewidth}@{}}
+\toprule
+Signal & Move\\
+\midrule
+Vocabulary too large & subwords (BPE)\\
+Rare or unseen words & BPE, never UNK\\
+One vector per word fails & contextual encoder\\
+Long input & attention\\
+Must generate text & decoder\\
+\bottomrule
+\end{tabular}
+
+
+\sect{Numbers worth memorising}
+English: 1 token $\approx$ 4 chars $\approx$ 0.75 words\\
+1k words $\approx$ 1.3k tokens; code $\approx$ 1.7k\\
+$512$ floats for $600$ tokens $=0.85$ floats/token\\
+$0.9^{20}=0.12$ \quad $0.99^{100}=0.366$
+
+\end{multicols}
+\end{document}

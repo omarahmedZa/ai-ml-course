@@ -1,0 +1,94 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1.05cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.55cm}
+\setlist[itemize]{leftmargin=1.1em,itemsep=0.05em,topsep=0.15em,parsep=0pt}
+\definecolor{ink}{HTML}{111418}
+\definecolor{accent}{HTML}{A3231F}
+\titleformat{\section}{\normalfont\bfseries\color{accent}\small}{}{0em}{}[\vspace{-0.55em}\textcolor{accent}{\rule{\linewidth}{0.4pt}}]
+\titlespacing*{\section}{0pt}{0.55em}{0.25em}
+\newcommand{\sect}[1]{\section*{#1}}
+\newcommand{\hd}[2]{\begin{center}{\large\bfseries #1}\\[-0.1em]{\small\color{gray}#2}\end{center}\vspace{-0.6em}}
+\begin{document}
+\hd{Neural network mechanics}{Unit 2 \textperiodcentered\ reference sheet \textperiodcentered\ AI/ML in 35 topics}
+\begin{multicols}{2}
+\normalsize
+
+\sect{Forward pass}
+$z^\ell=W^\ell a^{\ell-1}+b^\ell$ \quad $a^\ell=\varphi(z^\ell)$\\
+$W^\ell\in\mathbb{R}^{n_\ell\times n_{\ell-1}}$ \quad params $=n_\ell n_{\ell-1}+n_\ell$\\
+Batch: $Z^\ell=A^{\ell-1}(W^\ell)^\top+b^\ell$, shape $B\times n_\ell$
+
+\sect{Why the bend is mandatory}
+$W_2(W_1x+b_1)+b_2=(W_2W_1)x+(W_2b_1+b_2)$\\
+$\Rightarrow$ any depth collapses to one matrix without $\varphi$.
+
+\sect{Backprop}
+$\dfrac{\partial L}{\partial w}=\dfrac{\partial L}{\partial \text{out}}\cdot\dfrac{\partial \text{out}}{\partial z}\cdot\dfrac{\partial z}{\partial w}$\\
+Fan-out: gradients \textbf{add}. Reverse topological order, one sweep.
+
+\sect{Training loop}
+\texttt{pred = model(x); loss = crit(pred,y)}\\
+\texttt{loss.backward(); opt.step(); opt.zero\_grad()}\\
+steps $=$ epochs $\times N/B$ \quad horizon: lr low $\to$ plateau
+
+\sect{Loss curve decoder}
+\begin{tabular}{@{}p{0.34\linewidth}p{0.30\linewidth}p{0.30\linewidth}@{}}
+\toprule
+Shape & Cause & Action\\
+\midrule
+flat at $-\log(1/C)$ & uniform output & lr, labels, zero\_grad\\
+falls then rises & overfit & early stop\\
+NaN & lr too high & $\div 10$, warmup\\
+\bottomrule
+\end{tabular}
+
+\sect{Gotchas}
+\begin{itemize}
+\item Skip \texttt{zero\_grad} $\Rightarrow$ gradients accumulate.
+\item Eval with dropout on $\Rightarrow$ noisy, wrong metric.
+\item Dead ReLU: gradient 0 forever. LeakyReLU/GELU or lower lr.
+\end{itemize}
+
+\sect{This unit at a glance}
+\begin{tabular}{@{}p{0.05\linewidth}p{0.40\linewidth}p{0.47\linewidth}@{}}
+\toprule
+\# & Topic & You can\\
+\midrule
+8 & The neuron & prove that stacked linear layers collapse to one linear layer, so nonlinearity\\
+9 & Layers \& the forward pass & trace shapes and values through a 2-layer net by hand\\
+10 & Backpropagation & apply the chain rule to a small graph and say what each gradient means\\
+11 & The training loop & write the 5-line loop; explain learning rate, batch, epoch, and read a loss cu\\
+\bottomrule
+\end{tabular}
+
+\sect{If you see this $\rightarrow$ do that}
+\begin{tabular}{@{}p{0.52\linewidth}p{0.42\linewidth}@{}}
+\toprule
+Signal & Move\\
+\midrule
+Add depth & activation + residual + norm\\
+Loss NaN & clip, lower lr\\
+Unit outputs 0 always & LeakyReLU / lower lr\\
+Params explode & weight sharing\\
+Output must be a distribution & softmax\\
+\bottomrule
+\end{tabular}
+
+
+\sect{Numbers worth memorising}
+Params $512\to512$: $262{,}656$\\
+2-layer net $2\to2\to1$: $9$\\
+Dead network: output $=\sigma(b_2)$, independent of input\\
+$-\ln(0.5)=0.693$: loss of a uniform binary model
+
+\end{multicols}
+\end{document}

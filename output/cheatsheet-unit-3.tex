@@ -1,0 +1,86 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1.05cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.55cm}
+\setlist[itemize]{leftmargin=1.1em,itemsep=0.05em,topsep=0.15em,parsep=0pt}
+\definecolor{ink}{HTML}{111418}
+\definecolor{accent}{HTML}{A3231F}
+\titleformat{\section}{\normalfont\bfseries\color{accent}\small}{}{0em}{}[\vspace{-0.55em}\textcolor{accent}{\rule{\linewidth}{0.4pt}}]
+\titlespacing*{\section}{0pt}{0.55em}{0.25em}
+\newcommand{\sect}[1]{\section*{#1}}
+\newcommand{\hd}[2]{\begin{center}{\large\bfseries #1}\\[-0.1em]{\small\color{gray}#2}\end{center}\vspace{-0.6em}}
+\begin{document}
+\hd{Making deep learning work}{Unit 3 \textperiodcentered\ reference sheet \textperiodcentered\ AI/ML in 35 topics}
+\begin{multicols}{2}
+\normalsize
+
+\sect{Regularisers}
+Dropout: zero w.p. $p$, rescale $\frac{1}{1-p}$; \textbf{identity at inference}\\
+Weight decay: $L+\lambda\|w\|^2$ \quad Early stop: keep best val\\
+Augmentation must preserve the label (flip 6 $\leftrightarrow$ 9: no)
+
+\sect{Signal through depth}
+gain $g$ over $L$ layers $\Rightarrow g^L$\\
+$0.25^{10}=9.5\times10^{-7}$ \quad $1.5^{10}=58$ \quad $1.5^{50}=6.4\times10^{8}$\\
+Fixes: He/Xavier init, LayerNorm, residual $y=x+f(x)$, clip, warmup
+
+\sect{Architecture priors}
+\begin{tabular}{@{}p{0.2\linewidth}p{0.36\linewidth}p{0.34\linewidth}@{}}
+\toprule
+Family & Assumes & Cost\\
+\midrule
+MLP & no structure & $n_\ell n_{\ell-1}$\\
+CNN & locality + translation & $k^2C_{in}C_{out}$\\
+RNN & order, shared dynamics & sequential, $O(T)$\\
+\bottomrule
+\end{tabular}\\
+Conv $3\times3\times64\times64=36{,}864$ vs dense $205$M on $224^2$.
+
+\sect{Gotchas}
+\begin{itemize}
+\item BatchNorm at inference uses running stats: call \texttt{eval()}.
+\item Depth without residuals can \emph{reduce} trainability.
+\item CNN on tabular data: adjacency is arbitrary, prior is false.
+\end{itemize}
+
+\sect{This unit at a glance}
+\begin{tabular}{@{}p{0.05\linewidth}p{0.40\linewidth}p{0.47\linewidth}@{}}
+\toprule
+\# & Topic & You can\\
+\midrule
+12 & Overfitting in DL & pick among dropout, weight decay, augmentation, early stopping for a given sym\\
+13 & Optimization failure modes & diagnose vanishing/exploding gradients; name the fix (init, norm, residual, cl\\
+14 & Architecture families & state what MLP / CNN / RNN each assume about data, and choose one\\
+\bottomrule
+\end{tabular}
+
+\sect{If you see this $\rightarrow$ do that}
+\begin{tabular}{@{}p{0.52\linewidth}p{0.42\linewidth}@{}}
+\toprule
+Signal & Move\\
+\midrule
+Few images & pretrained CNN\\
+Short sequences & 1-D CNN / GRU\\
+Long-range dependency & attention\\
+Tabular data & GBM first\\
+Tight latency & distil / quantise\\
+\bottomrule
+\end{tabular}
+
+
+\sect{Numbers worth memorising}
+$0.25^{50}=7.9\times10^{-31}$ (below float32)\\
+$1.5^{50}=6.4\times10^{8}$\\
+Conv $3\times3$, 64 in/out: $36{,}864$ \ vs dense $205$M\\
+Dropout $p=0.4$ $\Rightarrow$ rescale by $1/0.6=1.67$
+
+\end{multicols}
+\end{document}
