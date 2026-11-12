@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>004.7 — argmin vs min</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Argmin returns the parameter that minimises the loss, not the minimum value.">
+</head>
+<body data-page="lab">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Objective · Lab 7 / 9</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">The objective, one symbol at a time · Lab 7</p>
+  <h1>argmin vs min</h1>
+  <p class="objective">You can say which one returns a <em>position</em>, which returns a <em>height</em>, and why training needs the position.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">θ* =</span> <span class="hot">argmin<sub>θ</sub></span> <span class="dim">(1/n) Σ<sub>i</sub> L( f<sub>θ</sub>(x<sub>i</sub>), y<sub>i</sub> )</span></p>
+<p class="eqn-note">Lab 7 of 9 · argmin takes the whole average as its input and returns a θ</p>
+<p>Five labs built the thing being minimised. This lab reads the operator in front of it. It answers one question: <em>what exactly does training hand back?</em></p>
+
+<h2>Two questions, two answers</h2>
+<p>Take a bowl-shaped loss. You can ask how low it goes, or where it is lowest. They are different numbers, with different units.</p>
+
+<table>
+  <tr><th>Question</th><th>Operator</th><th class="num">Answer for J(θ) = (θ−2)² + 1</th><th>Units</th></tr>
+  <tr><td>How low does it get?</td><td><code>min</code></td><td class="num">1</td><td>loss (points)</td></tr>
+  <tr><td>Where is it lowest?</td><td><code>argmin</code></td><td class="num">2</td><td>θ (a weight)</td></tr>
+</table>
+
+<figure class="fig" data-graph="argmin">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-arg-t f-arg-d">
+    <title id="f-arg-t">A bowl-shaped loss with its lowest point marked</title>
+    <desc id="f-arg-d">A parabola opening upward over theta from minus two to six. The lowest point sits at theta equals two, at a loss of one. A blue marker at theta equals four sits higher, at a loss of five.</desc>
+    <g data-layer>
+      <path d="M64,300 Q382,-240 700,300" fill="none" stroke="var(--sym-param)" stroke-width="2.5"/>
+      <circle cx="541" cy="231" r="6" fill="var(--sym-pred)"/>
+      <circle cx="382" cy="286" r="5" fill="var(--sym-opt)"/>
+      <text x="392" y="300" font-size="12" fill="var(--sym-opt)" font-family="ui-monospace, monospace">θ* = 2, J* = 1</text>
+      <text x="549" y="228" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">θ = 4</text>
+    </g>
+  </svg>
+  <div class="fig-controls">
+    <label>θ <input type="range" data-k="theta" min="-2" max="6" step="0.1" value="4"></label>
+    <output data-out="pair" aria-live="polite">θ = 4.0 → J = 5.00</output>
+    <button type="reset">Reset</button>
+  </div>
+  <figcaption><strong>Slide θ and the height changes; the position is what you are choosing.</strong> At θ = 4 the loss is 5. At θ = 2 it is 1. argmin reports 2, not 1.</figcaption>
+</figure>
+
+<h2>Watching a search land</h2>
+<p>Training does not try every θ. It steps downhill. Press play: each dot is one update, and the step size shrinks as the slope flattens.</p>
+
+<figure class="fig" data-anim="descent">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-desc-t f-desc-d">
+    <title id="f-desc-t">Gradient descent stepping down a parabola to the optimal parameter</title>
+    <desc id="f-desc-d">A parabola over theta. A path of points starts high on the right and moves left and down, converging at theta equals two where the loss is one.</desc>
+    <g data-layer>
+      <path d="M64,300 Q382,-240 700,300" fill="none" stroke="var(--sym-param)" stroke-width="2.5"/>
+      <circle cx="382" cy="286" r="5" fill="var(--sym-opt)"/>
+      <text x="392" y="302" font-size="12" fill="var(--sym-opt)" font-family="ui-monospace, monospace">θ* = 2</text>
+      <polyline points="607,194 574,215 545,228 519,239 495,248 474,255 455,260 438,265 422,269 408,272 395,275 384,277 374,279 365,281 357,282 350,283 344,284 338,285 333,285 328,286 324,286" fill="none" stroke="var(--sym-pred)" stroke-width="2" stroke-dasharray="3 3"/>
+    </g>
+  </svg>
+  <div class="fig-controls">
+    <button type="button" data-play data-playing="false">Play</button>
+    <label>step <input type="range" data-scrub min="0" max="100" value="0"></label>
+    <output data-out="step" aria-live="polite">step 0 / 24</output>
+    <button type="button" data-reset>Restart</button>
+  </div>
+  <figcaption><strong>The answer is the position it stops at, not the height it reaches.</strong> Gradient descent converges to θ*, and the final loss is the min — a by-product, not the goal.</figcaption>
+</figure>
+
+<h2>Faded example</h2>
+<p>Take <code>J(θ) = (θ − 3)² + 4</code>. The lowest point is where the squared part is zero, at θ = 3. The height there is 4.</p>
+<table>
+  <tr><th>Function</th><th class="num">argmin</th><th class="num">min</th></tr>
+  <tr><td class="num">(θ − 3)² + 4</td><td class="num">3</td><td class="num">4</td></tr>
+  <tr><td class="num">2(θ + 1)² + 0.5</td><td class="num">?</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the second row</summary>
+  <p>argmin = −1, min = 0.5. The squared term is zero at θ = −1; the 2 scales the height, it does not move the position.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"argmin gives the smallest loss."</strong> That is <code>min</code>. <code>argmin</code> gives the input that produces the smallest loss. In this course the input is θ, so argmin hands you a set of weights, not a score.</p>
+  <p><strong>Correction:</strong> read it as "argument of the minimum" — the argument is the thing you plug in.</p>
+</div>
+<p><strong>The tell:</strong> check the units. A loss value is measured in points; θ is a weight. If your answer to "what is θ*?" has the same units as the loss, you reported the min by mistake.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li><code>J(θ) = (θ − 3)² + 4</code>. What are argmin and min?
+    <details><summary>Answer</summary>
+      <p>argmin = 3 (the position), min = 4 (the height). Two questions, two answers, different units.</p>
+    </details>
+  </li>
+  <li>Model A has minimum loss 2 at θ = 5. Model B has minimum loss 3 at θ = 1. Which is better, and what is its θ*?
+    <details><summary>Answer</summary>
+      <p>A, because 2 &lt; 3. Its θ* is 5. You compare models by <code>min</code>, then deploy the winner's <code>argmin</code>.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>You can now name the position training returns. Lab 8 asks what "optimal" is allowed to mean when the data or the loss changes.</p>
+
+<div class="labnav">
+  <a href="004.3-loss.html">← Lab 3 · the loss</a>
+  <a href="004-supervised-learning.html">Topic 04 · the four objects →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=1" defer></script>
+<script src="../assets/anim.js?v=1" defer></script>
+<script src="../assets/course.js?v=8" defer></script>
+</body>
+</html>

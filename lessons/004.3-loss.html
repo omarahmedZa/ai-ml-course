@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>004.3 — L(·,·): the price of being wrong</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Compute squared error for one prediction and see why the square matters.">
+</head>
+<body data-page="lab">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Objective · Lab 3 / 9</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">The objective, one symbol at a time · Lab 3</p>
+  <h1>L(·,·) — the price of being wrong</h1>
+  <p class="objective">You can compute the squared error for one prediction, and say what the square buys you.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">θ* = argmin<sub>θ</sub> (1/n) Σ<sub>i</sub></span> <span class="hot">L( f<sub>θ</sub>(x<sub>i</sub>), y<sub>i</sub> )</span> <span class="dim">…</span></p>
+<p class="eqn-note">Lab 3 of 9 · the whole expression is dimmed; only the loss is lit</p>
+<p>A prediction is a number. A loss turns that number into a <em>price</em>: one number saying how bad the prediction was. Every later symbol in the objective is just bookkeeping over these prices.</p>
+
+<h2>One prediction, one price</h2>
+<p>The truth is 10. The model says 7. The gap is 3, and the price is 3² = 9. Slide the prediction and watch both the gap and the price move.</p>
+
+<figure class="fig" data-graph="loss">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-loss-t f-loss-d">
+    <title id="f-loss-t">Squared error for a prediction of 7 against a truth of 10</title>
+    <desc id="f-loss-d">A number line of predictions from 0 to 20. A grey marker sits at the truth, 10, and a blue marker at the prediction. The distance between them is the residual; a square above it has area equal to the squared residual, 9.</desc>
+    <g data-layer>
+      <line x1="64" y1="250" x2="700" y2="250" stroke="var(--ink-faint)"/>
+      <line x1="382" y1="160" x2="382" y2="250" stroke="var(--sym-data)" stroke-width="2"/>
+      <line x1="286" y1="160" x2="286" y2="250" stroke="var(--sym-pred)" stroke-width="2"/>
+      <rect x="286" y="211" width="39" height="39" fill="var(--sym-loss)" opacity=".18" stroke="var(--sym-loss)"/>
+      <text x="392" y="150" font-size="12" fill="var(--sym-data)" font-family="ui-monospace, monospace">y = 10</text>
+      <text x="292" y="150" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">ŷ = 7</text>
+    </g>
+  </svg>
+  <div class="fig-controls">
+    <label>prediction ŷ <input type="range" data-k="pred" min="0" max="20" step="0.5" value="7"></label>
+    <output data-out="res" aria-live="polite">residual = 3</output>
+    <output data-out="loss" aria-live="polite">L = (y − ŷ)² = 9</output>
+    <button type="reset">Reset</button>
+  </div>
+  <figcaption><strong>The square's area is the loss.</strong> Move the prediction away and the area grows faster than the gap: a gap of 6 costs 36, not 18.</figcaption>
+</figure>
+
+<h2>What the square does</h2>
+<p>Keep the truth fixed at 10 and change only the prediction. The residual changes linearly; the price does not.</p>
+
+<table>
+  <tr><th>Prediction ŷ</th><th class="num">Residual y − ŷ</th><th class="num">Loss (residual)²</th></tr>
+  <tr><td class="num">10</td><td class="num">0</td><td class="num">0</td></tr>
+  <tr><td class="num">9</td><td class="num">1</td><td class="num">1</td></tr>
+  <tr><td class="num">7</td><td class="num">3</td><td class="num">9</td></tr>
+  <tr><td class="num">4</td><td class="num">6</td><td class="num">36</td></tr>
+  <tr><td class="num">0</td><td class="num">10</td><td class="num">100</td></tr>
+</table>
+
+<figure class="fig" data-graph="loss-curve">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-curve-t f-curve-d">
+    <title id="f-curve-t">Squared loss versus absolute loss</title>
+    <desc id="f-curve-d">Two curves over residual from minus five to five. The squared loss is a parabola, flat near zero and rising steeply at the edges. The absolute loss is a V shape, rising at a constant rate.</desc>
+    <g data-layer>
+      <path d="M64,24 Q382,576 700,24" fill="none" stroke="var(--sym-loss)" stroke-width="2.8"/>
+      <polyline points="64,24 382,300 700,24" fill="none" stroke="var(--sym-data)" stroke-width="1.8" stroke-dasharray="5 4"/>
+    </g>
+  </svg>
+  <figcaption><strong>Squared loss is flat near zero and steep far from it.</strong> That is a design choice: small misses are forgiven, large ones are punished hard.</figcaption>
+</figure>
+
+<h2>Why not absolute error</h2>
+<p>Absolute error is a legitimate loss, and it is more robust to outliers. Squaring is chosen for three reasons — each one matters later in the course.</p>
+<ul>
+  <li><strong>Signs cancel.</strong> Without squaring, a +3 miss and a −3 miss add to 0 when summed (lab 5). The model would look perfect while being wrong in both directions.</li>
+  <li><strong>Large misses dominate.</strong> A miss twice as large costs four times as much, which pushes the model to fix its worst predictions first.</li>
+  <li><strong>Smooth everywhere.</strong> The derivative is 2 × residual; absolute error has a kink at 0, which breaks the gradient steps from topic 2.</li>
+</ul>
+
+<h2>Faded example</h2>
+<p>Truth 10, prediction 7: residual 3, loss 3² = 9. Now do the next one with the last step removed.</p>
+<table>
+  <tr><th>Truth y</th><th>Prediction ŷ</th><th class="num">Residual</th><th class="num">Loss</th></tr>
+  <tr><td class="num">10</td><td class="num">7</td><td class="num">3</td><td class="num">9</td></tr>
+  <tr><td class="num">5</td><td class="num">11</td><td class="num">−6</td><td class="num">?</td></tr>
+  <tr><td class="num">0</td><td class="num">4</td><td class="num">?</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the last two rows</summary>
+  <p>Row 2: (−6)² = <strong>36</strong>. Row 3: residual −4, loss 16. The sign of the residual never survives the square.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A low loss means the model is right."</strong> Loss is a price, not a verdict. It is unbounded — one wildly wrong prediction can outweigh a hundred good ones — and it depends on the units you measured in.</p>
+  <p><strong>Correction:</strong> report loss and accuracy separately. Loss tells you how badly wrong; accuracy tells you how often.</p>
+</div>
+<p><strong>The tell:</strong> convert your targets from metres to centimetres and the loss grows 10,000× while the model predicts exactly the same thing. If a metric can do that, it is a scale-sensitive price, not a correctness measure.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Truth 10, prediction 4. What is the squared loss?
+    <details><summary>Answer</summary>
+      <p>Residual 6, loss 36. The gap is 6 but the price is 36 — that is the square at work.</p>
+    </details>
+  </li>
+  <li>Why does one outlier dominate the average loss?
+    <details><summary>Answer</summary>
+      <p>Because the price grows with the square. A residual of 10 contributes 100, which is more than a hundred residuals of 1. The mean is pulled toward the worst example.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>You have the price of one prediction. Lab 4 combines prediction and price into a single term; lab 7 asks the question that turns prices into training — <em>which θ makes the total smallest?</em></p>
+
+<div class="labnav">
+  <a href="004-supervised-learning.html">← Topic 04 · the four objects</a>
+  <a href="004.7-argmin.html">Lab 7 · argmin vs min →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=1" defer></script>
+<script src="../assets/course.js?v=8" defer></script>
+</body>
+</html>

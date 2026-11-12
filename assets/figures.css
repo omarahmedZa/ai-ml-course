@@ -1,0 +1,115 @@
+/* Figures, controls, equation strip. Loaded after lesson.css. */
+
+:root {
+  --sym-data: #5a626d;
+  --sym-param: #a3231f;
+  --sym-pred: #1f5f7a;
+  --sym-loss: #9a6b00;
+  --sym-opt: #1f7a4d;
+  --sym-env: #6b4a8a;
+}
+html[data-theme="dark"] {
+  --sym-data: #a8aeb8;
+  --sym-param: #ef8d7f;
+  --sym-pred: #7fc4dd;
+  --sym-loss: #e0b355;
+  --sym-opt: #6fd39a;
+  --sym-env: #b79bd6;
+}
+
+/* ---------- figure shell ---------- */
+.fig { margin: 1.7rem 0 1.9rem; }
+.fig svg {
+  display: block; width: 100%; height: auto;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  overflow: visible;
+}
+.fig figcaption {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .72rem; line-height: 1.55; color: var(--ink-soft);
+  margin-top: .55rem; text-align: left;
+  border-left: 2px solid var(--rule); padding-left: .6rem;
+}
+.fig figcaption strong { color: var(--ink); }
+
+/* ---------- controls ---------- */
+.fig-controls {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .55rem .9rem;
+  margin-top: .6rem;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .7rem; letter-spacing: .03em; color: var(--ink-soft);
+}
+.fig-controls label { display: inline-flex; align-items: center; gap: .45rem; }
+.fig-controls input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 10rem; height: 1.4rem; background: transparent; cursor: pointer;
+}
+.fig-controls input[type="range"]::-webkit-slider-runnable-track {
+  height: 3px; background: var(--rule); border-radius: 999px;
+}
+.fig-controls input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; margin-top: -6.5px;
+  border-radius: 50%; background: var(--accent); border: 2px solid var(--paper);
+}
+.fig-controls input[type="range"]::-moz-range-track {
+  height: 3px; background: var(--rule); border-radius: 999px;
+}
+.fig-controls input[type="range"]::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--accent); border: 2px solid var(--paper);
+}
+.fig-controls output {
+  color: var(--ink); font-variant-numeric: tabular-nums;
+  background: var(--code-bg); padding: .18rem .45rem; border-radius: 4px;
+}
+.fig-controls button {
+  font: inherit; color: var(--ink-soft); cursor: pointer;
+  border: 1px solid var(--rule); background: none;
+  padding: .35rem .7rem; border-radius: 999px; min-height: 32px;
+}
+.fig-controls button:hover { color: var(--accent); border-color: var(--accent); }
+.fig-controls button[data-playing="true"] { color: var(--accent); border-color: var(--accent); }
+
+/* ---------- equation strip ---------- */
+.eqn {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 1rem; line-height: 1.9;
+  background: var(--code-bg); border: 1px solid var(--rule);
+  border-radius: var(--radius); padding: .9rem 1rem; margin: 1.2rem 0;
+  overflow-x: auto; white-space: nowrap;
+}
+.eqn .dim { opacity: .3; }
+.eqn .hot {
+  color: var(--accent); font-weight: 700;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-radius: 4px; padding: .08em .22em;
+}
+.eqn-note {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .7rem; letter-spacing: .05em; color: var(--ink-faint);
+  margin: -.6rem 0 1.4rem;
+}
+
+/* ---------- lab page bits ---------- */
+.labnav {
+  display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  margin: 2rem 0 0; padding-top: 1rem; border-top: 1px solid var(--rule);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: .72rem; letter-spacing: .06em; text-transform: uppercase;
+}
+.labnav a { text-decoration: none; }
+.labnav a:hover { text-decoration: underline; }
+.shape-table td:first-child { white-space: nowrap; }
+
+@media (max-width: 700px) {
+  .fig-controls input[type="range"] { width: 8rem; }
+  .eqn { font-size: .82rem; }
+  .fig figcaption { font-size: .68rem; }
+}
+
+@media print {
+  .fig-controls { display: none; }
+  .fig svg { border: 1px solid #bbb; background: #fff; }
+}

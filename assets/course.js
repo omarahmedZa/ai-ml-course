@@ -91,6 +91,20 @@
     });
   }
 
+  function bindTheme(btn) {
+    if (!btn) return;
+    btn.textContent = label();
+    btn.addEventListener("click", function () {
+      applyTheme(!store.theme ? "dark" : store.theme === "dark" ? "light" : "auto");
+    });
+  }
+
+  /* ---------- lab page (no grading, just chrome) ---------- */
+  function initLab() {
+    readbar();
+    bindTheme(document.querySelector("[data-theme-toggle]"));
+  }
+
   /* ---------- lesson page ---------- */
   function initLesson() {
     var body = document.body;
@@ -559,6 +573,8 @@
   }
 
   /* ---------- boot ---------- */
-  if (document.body.getAttribute("data-page") === "index") initIndex();
+  var page = document.body.getAttribute("data-page");
+  if (page === "index") initIndex();
+  else if (page === "lab") initLab();
   else initLesson();
 })();
