@@ -141,7 +141,7 @@
     var h2s = [].slice.call(document.querySelectorAll("main h2"));
     h2s.forEach(function (h2, i) {
       var text = h2.textContent.toLowerCase();
-      if (text.indexOf("retrieval") !== -1 || text.indexOf("next") !== -1 || text.indexOf("colab") !== -1) return;
+      if (text.indexOf("retrieval") !== -1 || text.indexOf("next") !== -1 || text.indexOf("colab") !== -1 || text.indexOf("practice") !== -1) return;
 
       /* find the last element belonging to this section */
       var node = h2.nextElementSibling;
