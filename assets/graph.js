@@ -233,6 +233,202 @@
     label(g, m.sx(2.4), m.sy(2.2), "absolute", "var(--sym-data)", 12);
   };
 
+
+  /* line fit: data fixed, parameters move the line */
+  R.linefit = function (fig) {
+    var svg = fig.querySelector("svg");
+    var wIn = fig.querySelector('[data-k="w"]');
+    var bIn = fig.querySelector('[data-k="b"]');
+    var out = fig.querySelector('[data-out="fit"]');
+    var XS = [0, 2, 4], YS = [1, 5, 9];
+
+    function draw() {
+      var g = clearLayer(svg);
+      var w = Number(wIn.value), b = Number(bIn.value);
+      var m = axes(g, { x0: -0.5, x1: 4.5, y0: -2, y1: 11, xticks: [0, 1, 2, 3, 4], yticks: [0, 5, 10], xlabel: "x  (feature)", ylabel: "y  (target)" });
+
+      var pts = [];
+      for (var x = -0.5; x <= 4.501; x += 0.1) pts.push(m.sx(x) + "," + m.sy(w * x + b));
+      mk("polyline", { points: pts.join(" "), fill: "none", stroke: "var(--sym-pred)", "stroke-width": 2.5 }, g);
+
+      var hi = fig.getAttribute("data-point");
+      XS.forEach(function (x, i) {
+        var on = hi !== null && Number(hi) === i;
+        mk("circle", { cx: m.sx(x), cy: m.sy(YS[i]), r: on ? 9 : 6, fill: on ? "var(--sym-pred)" : "var(--sym-data)" }, g);
+        if (on) label(g, m.sx(x) + 12, m.sy(YS[i]) + 22, "x" + String.fromCharCode(7522), "var(--sym-pred)", 11);
+      });
+      label(g, m.sx(0) + 8, m.sy(YS[0]) + 18, "data (fixed)", "var(--sym-data)", 11);
+      label(g, m.sx(3.2), m.sy(w * 3.2 + b) - 12, "ŷ = wx + b", "var(--sym-pred)", 12);
+      if (out) out.textContent = "ŷ = " + fmt(w, 1) + "x + " + fmt(b, 1);
+    }
+
+    [wIn, bIn].forEach(function (i) { i.addEventListener("input", draw); });
+    fig.querySelector("button[type=reset]").addEventListener("click", function () {
+      wIn.value = 2; bIn.value = 1; draw();
+    });
+    draw();
+  };
+
+  /* sum: toggle examples, watch the total */
+  R.sum = function (fig) {
+    var svg = fig.querySelector("svg");
+    var out = fig.querySelector('[data-out="total"]');
+    var boxes = [].slice.call(fig.querySelectorAll('[data-k="row"]'));
+    var LOSSES = [9, 4, 1, 16];
+
+    function draw() {
+      var g = clearLayer(svg);
+      var base = 280, unit = 12, x = 120;
+      var total = 0;
+      mk("line", { x1: 80, x2: 660, y1: base, y2: base, stroke: "var(--ink-faint)", "stroke-width": 1 }, g);
+      LOSSES.forEach(function (v, i) {
+        var on = boxes[i].checked;
+        if (on) total += v;
+        var h = v * unit;
+        mk("rect", { x: x, y: base - (on ? h : 0), width: 70, height: on ? h : 0, fill: "var(--sym-loss)", opacity: on ? .75 : .12, rx: 3 }, g);
+        mk("text", { x: x + 35, y: base + 18, "text-anchor": "middle", "font-size": 11, fill: "var(--ink-faint)", "font-family": "ui-monospace, monospace" }, g).textContent = "x" + (i + 1);
+        if (on) {
+          mk("text", { x: x + 35, y: base - h - 8, "text-anchor": "middle", "font-size": 12, fill: "var(--sym-loss)", "font-family": "ui-monospace, monospace" }, g).textContent = v;
+        }
+        x += 130;
+      });
+      if (out) out.textContent = "Σ = " + total;
+    }
+
+    boxes.forEach(function (b) { b.addEventListener("change", draw); });
+    fig.querySelector("button[type=reset]").addEventListener("click", function () {
+      boxes.forEach(function (b) { b.checked = true; }); draw();
+    });
+    draw();
+  };
+
+  /* average: sum grows with n, the mean does not */
+  R.average = function (fig) {
+    var svg = fig.querySelector("svg");
+    var nIn = fig.querySelector('[data-k="n"]');
+    var outSum = fig.querySelector('[data-out="sum"]');
+    var outAvg = fig.querySelector('[data-out="avg"]');
+
+    function draw() {
+      var g = clearLayer(svg);
+      var n = Number(nIn.value), mean = 1.5;
+      var base = 290, avgH = 46, sumH = 14 + (n / 100) * 210;
+      mk("line", { x1: 90, x2: 650, y1: base, y2: base, stroke: "var(--ink-faint)" }, g);
+
+      mk("rect", { x: 170, y: base - sumH, width: 90, height: sumH, fill: "var(--sym-loss)", opacity: .65, rx: 3 }, g);
+      label(g, 215, base + 20, "sum", "var(--ink-soft)", 12);
+      label(g, 215, base - sumH - 10, (mean * n).toFixed(1), "var(--sym-loss)", 12);
+
+      mk("rect", { x: 420, y: base - avgH, width: 90, height: avgH, fill: "var(--sym-opt)", opacity: .65, rx: 3 }, g);
+      label(g, 465, base + 20, "mean", "var(--ink-soft)", 12);
+      label(g, 465, base - avgH - 10, mean.toFixed(2), "var(--sym-opt)", 12);
+
+      mk("line", { x1: 380, x2: 380, y1: 40, y2: base, stroke: "var(--rule)", "stroke-dasharray": "3 4" }, g);
+      label(g, 392, 58, "same data, n rows", "var(--ink-faint)", 11);
+
+      if (outSum) outSum.textContent = "Σ = " + (mean * n).toFixed(1);
+      if (outAvg) outAvg.textContent = "mean = " + mean.toFixed(2);
+    }
+
+    nIn.addEventListener("input", draw);
+    fig.querySelector("button[type=reset]").addEventListener("click", function () { nIn.value = 10; draw(); });
+    draw();
+  };
+
+  /* optimal: the bottom moves with the data */
+  R.optimal = function (fig) {
+    var svg = fig.querySelector("svg");
+    var btns = [].slice.call(fig.querySelectorAll('[data-k="dataset"]'));
+    var out = fig.querySelector('[data-out="opt"]');
+    var SETS = [
+      { mu: 2, floor: 1, name: "dataset A" },
+      { mu: 4, floor: 2.5, name: "dataset B" }
+    ];
+    var cur = 0;
+
+    function J(t, set) { return (t - set.mu) * (t - set.mu) + set.floor; }
+
+    function draw() {
+      var g = clearLayer(svg);
+      var m = axes(g, { x0: -1, x1: 7, y0: 0, y1: 14, xticks: [0, 2, 4, 6], yticks: [0, 5, 10], xlabel: "θ  (parameter)", ylabel: "J(θ)" });
+      SETS.forEach(function (set, i) {
+        var pts = [];
+        for (var t = -1; t <= 7.001; t += 0.05) pts.push(m.sx(t) + "," + m.sy(J(t, set)));
+        mk("polyline", {
+          points: pts.join(" "), fill: "none",
+          stroke: i === cur ? "var(--sym-param)" : "var(--rule)",
+          "stroke-width": i === cur ? 2.6 : 1.6,
+          "stroke-dasharray": i === cur ? "none" : "5 4"
+        }, g);
+      });
+      var set = SETS[cur];
+      mk("circle", { cx: m.sx(set.mu), cy: m.sy(set.floor), r: 6, fill: "var(--sym-opt)" }, g);
+      label(g, m.sx(set.mu) + 10, m.sy(set.floor) - 10, set.name + ": θ* = " + set.mu + ", J* = " + set.floor, "var(--sym-opt)", 11);
+      if (out) out.textContent = set.name + " · θ = " + set.mu + " → J = " + set.floor;
+    }
+
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        cur = Number(b.getAttribute("data-v"));
+        btns.forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+        draw();
+      });
+      b.setAttribute("aria-pressed", String(Number(b.getAttribute("data-v")) === cur));
+    });
+    draw();
+  };
+
+  /* contour: the landscape of the whole objective */
+  R.contour = function (fig) {
+    var svg = fig.querySelector("svg");
+    var g = clearLayer(svg);
+    var m = axes(g, { x0: 0, x1: 4, y0: -1, y1: 3, xticks: [0, 1, 2, 3, 4], yticks: [-1, 0, 1, 2, 3], xlabel: "w  (weight)", ylabel: "b  (bias)" });
+    var cx = m.sx(2), cy = m.sy(1), rx = 60, ry = 45;
+    [0.6, 1, 1.6, 2.4].forEach(function (k, i) {
+      var rxx = rx * k, ryy = ry * k;
+      var path = "M" + (cx - rxx) + "," + cy + " a" + rxx + "," + ryy + " 0 1,0 " + (2 * rxx) + ",0 a" + rxx + "," + ryy + " 0 1,0 " + (-2 * rxx) + ",0";
+      mk("path", { d: path, fill: "none", stroke: "var(--sym-loss)", "stroke-width": 1, opacity: .5 - i * 0.09 }, g);
+    });
+    var path = [];
+    var w = 0.6, b = 2.7;
+    for (var i = 0; i < 30; i++) {
+      path.push(m.sx(w) + "," + m.sy(b));
+      w += 0.22 * (2 - w);
+      b += 0.22 * (1 - b);
+    }
+    mk("polyline", { points: path.join(" "), fill: "none", stroke: "var(--sym-pred)", "stroke-width": 2, "stroke-dasharray": "4 4" }, g);
+    mk("circle", { cx: m.sx(2), cy: m.sy(1), r: 6, fill: "var(--sym-opt)" }, g);
+    label(g, m.sx(2) + 10, m.sy(1) - 12, "θ* = (2, 1)", "var(--sym-opt)", 12);
+    label(g, m.sx(0.55), m.sy(2.75) - 10, "start", "var(--sym-pred)", 11);
+  };
+
+
+  /* pipeline: one example through prediction and loss */
+  R.pipeline = function (fig) {
+    var svg = fig.querySelector("svg");
+    var g = clearLayer(svg);
+    var boxes = [
+      { t: "xᵢ", c: "var(--sym-data)", s: "one row" },
+      { t: "f_θ", c: "var(--sym-pred)", s: "model" },
+      { t: "ŷᵢ", c: "var(--sym-pred)", s: "prediction" },
+      { t: "L", c: "var(--sym-loss)", s: "price" },
+      { t: "ℓᵢ", c: "var(--sym-loss)", s: "one loss" }
+    ];
+    var w = 104, gap = 34, x = (720 - (boxes.length * w + (boxes.length - 1) * gap)) / 2;
+    boxes.forEach(function (b, i) {
+      mk("rect", { x: x, y: 132, width: w, height: 78, rx: 8, fill: "var(--card)", stroke: b.c, "stroke-width": 1.6 }, g);
+      var t = mk("text", { x: x + w / 2, y: 168, "text-anchor": "middle", "font-size": 20, fill: b.c, "font-family": "ui-monospace, monospace" }, g);
+      t.textContent = b.t;
+      var s2 = mk("text", { x: x + w / 2, y: 192, "text-anchor": "middle", "font-size": 11, fill: "var(--ink-faint)", "font-family": "ui-monospace, monospace" }, g);
+      s2.textContent = b.s;
+      if (i < boxes.length - 1) {
+        arrow(g, x + w + 5, 171, x + w + gap - 6, 171, "var(--ink-faint)", 1.6);
+      }
+      x += w + gap;
+    });
+    label(g, 360, 78, "one example in, one number out", "var(--ink-faint)", 12);
+  };
+
   window.FIG = { mk: mk, clearLayer: clearLayer, axes: axes, arrow: arrow, label: label, fmt: fmt, P: P, reduced: reduced, renderers: R };
 
   document.addEventListener("DOMContentLoaded", function () {

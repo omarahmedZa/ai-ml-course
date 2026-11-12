@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>004.9 — the whole objective</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=2">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Read the complete training objective left to right and see it as a landscape.">
+</head>
+<body data-page="lab">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Objective · Lab 9 / 9</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="004-supervised-learning.html#labs">Topic 04 · Supervised learning</a></p>
+
+<header class="masthead">
+  <p class="kicker">The objective, one symbol at a time · Lab 9</p>
+  <h1>The whole objective</h1>
+  <p class="objective">You can read the full expression left to right and say what training does to the landscape.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn">θ* = argmin<sub>θ</sub> (1/n) Σ<sub>i</sub> L( f<sub>θ</sub>(x<sub>i</sub>), y<sub>i</sub> )</p>
+<p>Each symbol has had its own lab. θ is every number the model learns — here the pair (w, b). x<sub>i</sub> is one fixed example, f<sub>θ</sub>(x<sub>i</sub>) the model's prediction for it, L the price of being wrong about y<sub>i</sub>, Σ the adding, 1/n the averaging, argmin the search, θ* the answer.</p>
+
+<h2>Read it left to right</h2>
+<p>Nine symbols, nine jobs. Read the table down and the expression stops being a wall.</p>
+
+<table>
+  <tr><th>Symbol</th><th>Its one job</th></tr>
+  <tr><td><code>θ</code></td><td>Name every number the model learns — here w and b.</td></tr>
+  <tr><td><code>x<sub>i</sub></code></td><td>Point at one example: its inputs, fixed.</td></tr>
+  <tr><td><code>f<sub>θ</sub>(x<sub>i</sub>)</code></td><td>Produce the prediction that the current θ gives for that example.</td></tr>
+  <tr><td><code>L</code></td><td>Price that prediction against the true answer y<sub>i</sub>.</td></tr>
+  <tr><td>the per-example term</td><td>Hold one example's whole story as a single number: prediction, then price.</td></tr>
+  <tr><td><code>Σ<sub>i</sub></code></td><td>Add those numbers across all n examples.</td></tr>
+  <tr><td><code>1/n</code></td><td>Divide the total by n, turning a sum into an average.</td></tr>
+  <tr><td><code>argmin<sub>θ</sub></code></td><td>Ask which θ makes that average smallest — and return the θ, not the value.</td></tr>
+  <tr><td><code>θ*</code></td><td>Name the winner: the parameters you keep.</td></tr>
+</table>
+
+<p>Try it as a sentence: <em>pick the θ whose average price per example is lowest.</em> That is the entire objective, spoken.</p>
+
+<h2>The landscape</h2>
+<p>With two parameters the objective has a shape you can draw. Put w on one axis, b on the other, and loss as height. Every ring in the figure is one loss value, so the centre — w = 2, b = 1 — is the bottom of the bowl.</p>
+
+<figure class="fig" data-graph="contour">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-full-t f-full-d">
+    <title id="f-full-t">Contour map of the loss over two parameters</title>
+    <desc id="f-full-d">Rings of equal loss over weight w and bias b, centred on the optimal pair at w equals 2 and b equals 1. A dashed path steps from a high-loss start point toward the centre.</desc>
+    <g data-layer></g>
+  </svg>
+  <figcaption><strong>Every ring is one loss value; θ* is the centre.</strong> Training walks downhill one step at a time instead of reading the whole map.</figcaption>
+</figure>
+
+<h2>What training does</h2>
+<p>Training never sees the whole landscape. It stands at one point, measures the local slope — the direction in which loss rises fastest — and takes a small step the other way. Then it measures again. The map is not read; it is felt, one point at a time.</p>
+<p>The dashed path is one such walk: it starts high, near w = 0.6 and b = 2.7, and each step lands closer to the centre. Nothing in the step knows where θ* is. The walk simply keeps going downhill until the slope flattens.</p>
+
+<h2>Faded example</h2>
+<p>Fill the blanks: “Training finds the <strong>?</strong> that makes the <strong>?</strong> loss smallest.”</p>
+<details><summary>Check the blanks</summary>
+  <p>θ, and average. Training returns parameters; the thing being minimised is the averaged loss, not the parameters.</p>
+</details>
+<p>Then the sharper question: which part of the expression makes it an average rather than a total?</p>
+<details><summary>Answer</summary>
+  <p>The 1/n. Drop it and you are minimising a sum, which grows just by having more examples — so a bigger dataset would look worse.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>“Minimising this guarantees good predictions on new data.”</strong> No. It minimises the loss on the data you already have. Whether that carries to data you have not seen is a separate question, answered by a separate test set — Topic 05.</p>
+  <p><strong>Correction:</strong> the objective describes fit, not foresight. It can be driven to zero by memorising.</p>
+</div>
+<p><strong>The tell:</strong> training loss falls while test loss rises. The walk is still going downhill on the map it was given, and the map has stopped matching the world.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Which symbol turns a sum into a rate per example?
+    <details><summary>Answer</summary>
+      <p>1/n. Ten examples with prices 2 each sum to 20, an average of 2. The average is comparable across dataset sizes; the sum is not.</p>
+    </details>
+  </li>
+  <li>What does argmin return — a loss or a θ?
+    <details><summary>Answer</summary>
+      <p>A θ. It answers “where is the bottom”, not “how low is it”. The height is min; the position is argmin, and the position is what you deploy.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Topic 04 gave you this expression and the shape behind it; the next topic asks how the walk is actually run — gradient descent is the rule that picks each step's direction and size.</p>
+
+<div class="labnav">
+  <a href="004h-optimal.html">← Lab 08 · θ* — optimal for what?</a>
+  <a href="004-supervised-learning.html#labs">Back to the formula →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=2" defer></script>
+<script src="../assets/course.js?v=8" defer></script>
+</body>
+</html>

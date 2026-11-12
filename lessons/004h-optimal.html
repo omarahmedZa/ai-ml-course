@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>004.8 — θ*: optimal for what?</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=2">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="θ* is the best fit for one dataset and one loss — not the true parameters of the world.">
+</head>
+<body data-page="lab">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Objective · Lab 8 / 9</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="004-supervised-learning.html#labs">Topic 04 · Supervised learning</a></p>
+
+<header class="masthead">
+  <p class="kicker">The objective, one symbol at a time · Lab 8</p>
+  <h1>θ* — optimal for what?</h1>
+  <p class="objective">You can say what θ* is relative to, and why it is not the true parameters.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="hot">θ*</span> <span class="dim">= argmin<sub>θ</sub> (1/n) Σ<sub>i</sub> L( f<sub>θ</sub>(x<sub>i</sub>), y<sub>i</sub> )</span></p>
+<p class="eqn-note">Lab 8 of 9 · the whole expression is dimmed; only the answer is lit</p>
+<p>θ* (theta-star) is the θ that makes the average loss smallest. It is an answer to a question, not a fact about the world. Change the question and the same symbol points somewhere else.</p>
+<p>The pieces: θ is every number the model learns, L is the price of one wrong prediction, and J(θ) is that price averaged over all rows. Training searches the θ axis for the lowest point of J.</p>
+
+<h2>Best is a relationship</h2>
+<p>θ* is not a property of the model sitting alone. It is the point where one loss, applied to one set of rows, bottoms out. Two inputs, one output.</p>
+<table>
+  <tr><th>What θ* depends on</th><th>What it does not</th></tr>
+  <tr><td>The data — the fixed pairs (x<sub>i</sub>, y<sub>i</sub>) you were given</td><td>The truth — whatever weights the world actually uses</td></tr>
+  <tr><td>The loss L — the rule that prices each miss</td><td>Another dataset — collect new rows and the bottom moves</td></tr>
+  <tr><td>The shape of f<sub>θ</sub> — what the model is allowed to express</td><td>How long you trained — that finds θ*, it does not define it</td></tr>
+</table>
+<p>Notice what the left column never mentions: being right about reality. θ* is defined entirely inside the learning problem you wrote down, using the rows you happened to have.</p>
+
+<h2>Change the data, move the bottom</h2>
+<p>Two datasets, one model, one loss. Press a button: the curve is J(θ), the total loss at each candidate θ. The lowest point of the curve is θ*.</p>
+
+<figure class="fig" data-graph="optimal">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-opt-t f-opt-d">
+    <title id="f-opt-t">Two datasets produce two different optimal parameters</title>
+    <desc id="f-opt-d">Two parabolas. Dataset A bottoms at theta equals 2 with a loss of 1; dataset B bottoms at theta equals 4 with a loss of 2.5. The selected curve is solid and the other is faint.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls">
+    <button type="button" data-k="dataset" data-v="0">dataset A</button>
+    <button type="button" data-k="dataset" data-v="1">dataset B</button>
+    <output data-out="opt" aria-live="polite">dataset A · θ = 2 → J = 1</output>
+  </div>
+  <figcaption><strong>Same model, same loss, different data — and the bottom moves.</strong> Dataset A bottoms at θ = 2; dataset B bottoms at θ = 4. θ* names a relationship, not a fact about the world.</figcaption>
+</figure>
+
+<p>Note the floor as well as the position. Even at its lowest the curve sits above zero: J* = 1 for A and J* = 2.5 for B. The best θ still pays something, and that residue is what this model cannot explain.</p>
+
+<h2>Change the loss, move it again</h2>
+<p>Hold the data still and swap the loss. Squared loss chases the mean, because squaring gives a far-off row a huge vote. Absolute loss chases the median: it counts distance, so an extreme row gets one vote like any other.</p>
+<p>Take the rows 1, 2, 3, 4, 100. The mean is 22, the median is 3. With squared loss θ* = 22. With absolute loss θ* = 3. Same rows, same model, and θ* moves by 19.</p>
+
+<h2>Faded example</h2>
+<p>Dataset A has J(θ) = (θ − 2)² + 1. A square is smallest at zero, so θ* = 2 and J* = 1. Do dataset B the same way, with the last step removed.</p>
+<table>
+  <tr><th></th><th>Dataset A</th><th>Dataset B</th></tr>
+  <tr><td>J(θ)</td><td>(θ − 2)² + 1</td><td>(θ − 4)² + 2.5</td></tr>
+  <tr><td>θ*</td><td>2</td><td>?</td></tr>
+  <tr><td>J*</td><td class="num">1</td><td>?</td></tr>
+</table>
+<details><summary>Check dataset B</summary>
+  <p>The bracket is zero at θ = 4, so θ* = 4, and the leftover constant is J* = 2.5. The position came from the data; the height came from how well this model can fit it.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"θ* is the true parameter."</strong> No. θ* is the best fit for this data and this loss — the argmin of a function you chose, over rows you happened to collect.</p>
+  <p><strong>Correction:</strong> θ* minimises your stated objective. A different objective, or a larger sample, can hand you a different θ*, and both answers were optimal for their own problem.</p>
+</div>
+<p><strong>The tell:</strong> if adding rows changes θ*, it was never "the truth." Truth does not move when you collect more evidence; a sample mean does.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Dataset B bottoms at θ = 4. What is θ*?
+    <details><summary>Answer</summary>
+      <p>4. The bottom is the definition: θ* is wherever J is smallest, and dataset B's smallest point sits at θ = 4.</p>
+    </details>
+  </li>
+  <li>You add one huge outlier and keep squared loss. Does θ* move?
+    <details><summary>Answer</summary>
+      <p>Yes, toward the outlier. Squaring gives that row a large vote, so the mean — and θ* — slides its way. Switch to absolute loss and θ* barely budges.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Lab 9 puts every symbol back on one line — θ* = argmin<sub>θ</sub> (1/n) Σ<sub>i</sub> L(f<sub>θ</sub>(x<sub>i</sub>), y<sub>i</sub>) — and reads it as a whole.</p>
+
+<div class="labnav">
+  <a href="004g-argmin.html">← Lab 07 · argmin vs min</a>
+  <a href="004i-objective.html">Lab 09 · The whole objective →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=2" defer></script>
+<script src="../assets/course.js?v=8" defer></script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>004.1 — θ: the numbers that move</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=2">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Separate the numbers a model learns from the data it is given, using a straight line through three fixed points.">
+</head>
+<body data-page="lab">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Objective · Lab 1 / 9</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="004-supervised-learning.html#labs">Topic 04 · Supervised learning</a></p>
+
+<header class="masthead">
+  <p class="kicker">The objective, one symbol at a time · Lab 1</p>
+  <h1>θ — the numbers that move</h1>
+  <p class="objective">You can say which numbers training changes and which it can never touch.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">θ* = argmin</span> <span class="hot">θ</span> <span class="dim">(1/n) Σ<sub>i</sub> L( f<sub>θ</sub>(x<sub>i</sub>), y<sub>i</sub> )</span></p>
+<p class="eqn-note">Lab 1 of 9 · the whole expression is dimmed; only θ is lit</p>
+<p>θ (theta) is one symbol standing for a whole list of numbers a model learns. The formula says: try every candidate θ, and keep the one whose average loss is smallest. Nothing else in that expression can move.</p>
+
+<h2>Two kinds of number</h2>
+<p>An equation mixes two things that look identical on the page: quantities you supply, and quantities the model works out. Training only touches the second kind.</p>
+
+<table>
+  <tr><th>Number</th><th>Who sets it</th><th>Changes in training?</th></tr>
+  <tr><td>x<sub>i</sub></td><td>The dataset. You collect it: here 0, 2, 4.</td><td>No</td></tr>
+  <tr><td>y<sub>i</sub></td><td>The dataset. You label it: here 1, 5, 9.</td><td>No</td></tr>
+  <tr><td>θ (w and b)</td><td>Training. It starts as a guess and is nudged.</td><td>Yes</td></tr>
+</table>
+
+<p>x<sub>i</sub> (x-sub-i) is the i-th example, the input you measured. y<sub>i</sub> (y-sub-i) is its true answer, the number you want predicted. Both arrive with the dataset and stay put. θ is the only mover: the weight w (slope) and the bias b (where the line crosses the y-axis).</p>
+
+<h2>The line is θ; the dots are data</h2>
+<p>Three points, one line through them. Slide the two numbers and watch which of the two moves.</p>
+
+<figure class="fig" data-graph="linefit">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-theta-t f-theta-d">
+    <title id="f-theta-t">The fitted line moves when the parameters change; the data points do not</title>
+    <desc id="f-theta-d">Three data points at x equals 0, 2 and 4 sit fixed. A straight line with slope w and intercept b moves as the two sliders change.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls">
+    <label>weight w <input type="range" data-k="w" min="-2" max="4" step="0.1" value="2"></label>
+    <label>bias b <input type="range" data-k="b" min="-4" max="4" step="0.1" value="1"></label>
+    <output data-out="fit" aria-live="polite">ŷ = 2.0x + 1.0</output>
+    <button type="reset">Reset</button>
+  </div>
+  <figcaption><strong>The dots never move; only the line does.</strong> θ is the line: two numbers, w and b. The three points are data and are fixed before training starts.</figcaption>
+</figure>
+
+<p>The sliders are θ. Drag w away from 2 and the line tilts; drag b away from 1 and the line lifts or sinks. Nothing else on the plot is under your control.</p>
+
+<h2>Faded example</h2>
+<p>Prediction is ŷ = w·x + b. With w = 2 and b = 1 the line hits all three points: 2·0+1 = 1, 2·2+1 = 5, 2·4+1 = 9. Now change only θ.</p>
+
+<table>
+  <tr><th></th><th class="num">x = 0</th><th class="num">x = 2</th><th class="num">x = 4</th></tr>
+  <tr><td>True y</td><td class="num">1</td><td class="num">5</td><td class="num">9</td></tr>
+  <tr><td>ŷ with w = 2, b = 1</td><td class="num">1</td><td class="num">5</td><td class="num">9</td></tr>
+  <tr><td>ŷ with w = 1, b = 1</td><td class="num">?</td><td class="num">?</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the faded row</summary>
+  <p>1·0+1 = <strong>1</strong>, 1·2+1 = <strong>3</strong>, 1·4+1 = <strong>5</strong>. The misses are 0, 2 and 4. Notice that x = 0 still lands exactly: b never changed, so the crossing point is untouched.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The model learned the data."</strong> It feels right because after training the predictions match the rows, so the rows seem to have been absorbed. That is the output of learning, not its content.</p>
+  <p><strong>Correction:</strong> training stored θ and nothing else. The rows were read, scored and then left where they were. With w = 2, b = 1 the model reproduces 1, 5, 9 without holding any of them.</p>
+</div>
+<p><strong>The tell:</strong> add a row and no stored number changes on its own. The dataset is now bigger, so the average loss is a different number — yet θ stays exactly where it was until you run training again.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>For y = w·x + b, how many numbers are in θ?
+    <details><summary>Answer</summary>
+      <p>Two: w and b. The symbol θ is a bag holding both, which is why it is bolded or written as a list whenever the count matters.</p>
+    </details>
+  </li>
+  <li>You add ten rows to the dataset and do not retrain. What changes?
+    <details><summary>Answer</summary>
+      <p>The loss changes, because the average now runs over more examples. θ does not change: w and b are untouched until training runs again.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Now that θ is a fixed list of numbers, the next question is what the model emits from them: the prediction f<sub>θ</sub>(x<sub>i</sub>).</p>
+
+<div class="labnav">
+  <a href="004-supervised-learning.html#labs">← Back to the formula</a>
+  <a href="004b-prediction.html">Lab 02 · f_θ(xᵢ) — one prediction →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=2" defer></script>
+<script src="../assets/course.js?v=8" defer></script>
+</body>
+</html>

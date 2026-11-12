@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>004.2 — f_θ(xᵢ): one prediction</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=2">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Read f-theta of x-i correctly: the model with weights theta applied to one fixed row, producing one number.">
+</head>
+<body data-page="lab">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Objective · Lab 2 / 9</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="004-supervised-learning.html#labs">Topic 04 · Supervised learning</a></p>
+
+<header class="masthead">
+  <p class="kicker">The objective, one symbol at a time · Lab 2</p>
+  <h1>f_θ(xᵢ) — one prediction</h1>
+  <p class="objective">You can read the subscript correctly and turn one row into one number.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">θ* = argmin<sub>θ</sub> (1/n) Σ<sub>i</sub> L(</span><span class="hot">f<sub>θ</sub>(x<sub>i</sub>)</span><span class="dim">, y<sub>i</sub>)</span></p>
+<p class="eqn-note">Lab 2 of 9 · the whole expression is dimmed; only the prediction is lit</p>
+<p>The objective compares a prediction against a truth, once per row, then adds up the prices. This lab is only the first half of that comparison: the number the model produces before anyone grades it.</p>
+<p>Notice that θ carries no i. The weights are shared by every row, which is why the sum can walk from row to row while the model stays the same.</p>
+
+<h2>Read it out loud</h2>
+<p>Say it as three pieces. <strong>f</strong> is the model — here, a straight line. <strong>θ</strong> (theta) is everything the model learned: the weight w and the bias b. <strong>xᵢ</strong> (x-sub-i) is one row of data, the i-th example, fixed before training starts.</p>
+<p>So f takes two things: a row, and the weights it is currently carrying. f<sub>θ</sub>(x<sub>i</sub>) reads as "the model, with parameters θ, applied to row i". The θ is a subscript on f because it belongs to f.</p>
+<p>That ordering is the whole point. The row is the input; the weights are the machine doing the reading. A different machine reads the same row differently.</p>
+
+<table>
+  <tr><th>What changes</th><th>What stays</th><th>Result</th></tr>
+  <tr><td>θ — the weights</td><td>the row xᵢ</td><td>a different prediction</td></tr>
+  <tr><td>the row xᵢ</td><td>θ</td><td>a different prediction</td></tr>
+  <tr><td>nothing</td><td>everything</td><td>the same prediction</td></tr>
+</table>
+
+<h2>One row, one number</h2>
+<p>With w = 2 and b = 1, the model is f<sub>θ</sub>(x) = 2x + 1. Feed it the middle row, xᵢ = 2, and it answers 5. That single number is f<sub>θ</sub>(x<sub>i</sub>) — not the loss, not the truth, just the prediction.</p>
+<p class="eqn">f<sub>θ</sub>(x<sub>i</sub>) = w·x<sub>i</sub> + b = 2(2) + 1 = 5</p>
+
+<figure class="fig" data-graph="linefit" data-point="1">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-pred-t f-pred-d">
+    <title id="f-pred-t">One highlighted row and the prediction the line gives it</title>
+    <desc id="f-pred-d">Three data points with the middle one highlighted. A straight line fitted by w and b passes near them; the highlighted point shows the single prediction f of x-i.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls">
+    <label>weight w <input type="range" data-k="w" min="-2" max="4" step="0.1" value="2"></label>
+    <label>bias b <input type="range" data-k="b" min="-4" max="4" step="0.1" value="1"></label>
+    <output data-out="fit" aria-live="polite">ŷ = 2.0x + 1.0</output>
+    <button type="reset">Reset</button>
+  </div>
+  <figcaption><strong>The highlighted point is one xᵢ; the line's height there is f_θ(xᵢ).</strong> Move the sliders and that height changes, while the point stays where it is.</figcaption>
+</figure>
+
+<p>The point does not move when you drag a slider. Only the line does, and the prediction is the line's height above that point. Nothing you do to w or b edits the data.</p>
+<p>That vertical gap between point and line is what a loss will later price. For now, watch only the height.</p>
+
+<h2>Faded example</h2>
+<p>Keep w = 2 and b = 1. For each row, substitute the row for x, multiply by w, add b.</p>
+
+<table>
+  <tr><th class="num">Row xᵢ</th><th>Substitute</th><th class="num">f<sub>θ</sub>(x<sub>i</sub>)</th></tr>
+  <tr><td class="num">0</td><td>2(0) + 1</td><td class="num">1</td></tr>
+  <tr><td class="num">2</td><td>2(2) + 1</td><td class="num">5</td></tr>
+  <tr><td class="num">4</td><td>2(4) + 1</td><td class="num">9</td></tr>
+  <tr><td class="num">10</td><td>2(10) + 1</td><td class="num">?</td></tr>
+</table>
+
+<p>Three rows, three numbers, one unchanged θ. Now the last row is yours — same two operations, and the final step is hidden.</p>
+
+<details><summary>Check the last row</summary>
+  <p>f<sub>θ</sub>(10) = 2(10) + 1 = <strong>21</strong>. The weights never changed between rows; only the input did.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The subscript applies to x."</strong> It does not. The symbol is f<sub>θ</sub> — the model carrying parameters θ — applied to xᵢ. The row is data: measured, fixed, and unaware of θ.</p>
+  <p><strong>Correction:</strong> read outward from f. The θ hangs off f. The row sits inside the parentheses.</p>
+</div>
+<p><strong>The tell:</strong> if changing the data seemed to change θ, you are reading the notation backwards. θ stays put until a training step moves it.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>With w = 3 and b = 0, what is f<sub>θ</sub>(2)?
+    <details><summary>Answer</summary>
+      <p>6. The model is 3x + 0, and 3 × 2 = 6. The weights did the work; the row only supplied the 2.</p>
+    </details>
+  </li>
+  <li>You replace the row but keep θ. What changes?
+    <details><summary>Answer</summary>
+      <p>The prediction changes. θ is untouched — same weight, same bias, a different number out because a different row went in.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>You have the prediction; the next lab prices it — L(f<sub>θ</sub>(x<sub>i</sub>), y<sub>i</sub>) measures how far that one number landed from the truth.</p>
+
+<div class="labnav">
+  <a href="004a-theta.html">← Lab 01 · θ — the numbers that move</a>
+  <a href="004c-loss.html">Lab 03 · L(·,·) — the price of being wrong →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=2" defer></script>
+<script src="../assets/course.js?v=8" defer></script>
+</body>
+</html>

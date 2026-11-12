@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>004.6 — 1/n: turn a total into a rate</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=2">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Why the objective divides by the number of examples: totals grow with dataset size, rates do not.">
+</head>
+<body data-page="lab">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Objective · Lab 6 / 9</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="004-supervised-learning.html#labs">Topic 04 · Supervised learning</a></p>
+
+<header class="masthead">
+  <p class="kicker">The objective, one symbol at a time · Lab 6</p>
+  <h1>1/n — turn a total into a rate</h1>
+  <p class="objective">You can explain why dividing by n makes two datasets comparable.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">θ* = argmin<sub>θ</sub></span> <span class="hot">(1/n)</span> <span class="dim">Σ<sub>i</sub> L( f<sub>θ</sub>(x<sub>i</sub>), y<sub>i</sub> )</span></p>
+<p class="eqn-note">Lab 6 of 9 · a total is divided by the number of examples that produced it</p>
+<p>Read the inner part first. <code>Σ<sub>i</sub></code> means add up, and it runs over every example. <code>n</code> is how many examples there are. <code>1/n</code> divides the total by that count, so the objective reports one number per example instead of one number per dataset.</p>
+
+<h2>A sum grows with the dataset</h2>
+<p>Hold one model fixed and score it on more rows. Suppose it is off by 1.5 points per example — the mean, or average price of a single row. The total is just that price times the number of rows.</p>
+
+<table>
+  <tr><th class="num">Examples n</th><th class="num">Mean loss per example</th><th class="num">Total Σ</th></tr>
+  <tr><td class="num">10</td><td class="num">1.5</td><td class="num">15</td></tr>
+  <tr><td class="num">100</td><td class="num">1.5</td><td class="num">150</td></tr>
+  <tr><td class="num">1000</td><td class="num">1.5</td><td class="num">1500</td></tr>
+</table>
+
+<p>Same model in all three rows. Nothing improved; nothing got worse. Yet the total moved by a factor of a hundred. A number that changes when you merely collect more data cannot tell you whether the model is any good.</p>
+
+<h2>Divide and the size disappears</h2>
+<p>The figure holds the mean at 1.5 and turns n from 10 up to 100. Watch which of the two columns moves.</p>
+
+<figure class="fig" data-graph="average">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-avg-t f-avg-d">
+    <title id="f-avg-t">Total loss grows with the number of examples while the mean stays flat</title>
+    <desc id="f-avg-d">Two bars: the total loss on the left grows as the number of examples rises, while the mean loss on the right stays at 1.5.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls">
+    <label>examples n <input type="range" data-k="n" min="10" max="100" step="10" value="10"></label>
+    <output data-out="sum" aria-live="polite">Σ = 15.0</output>
+    <output data-out="avg" aria-live="polite">mean = 1.50</output>
+    <button type="reset">Reset</button>
+  </div>
+  <figcaption><strong>The total column grows; the mean column does not.</strong> That is the whole job of 1/n: it reports loss per example, so 10 rows and 1,000 rows can be compared.</figcaption>
+</figure>
+
+<p>The left bar is a total, and it climbs with every row you add. The right bar is a rate, and it does not budge. Dividing by n removes the size of the dataset and leaves the part you actually wanted: the price of a typical example.</p>
+
+<h2>Why it matters</h2>
+<p>Two models, each scored on its own dataset. The totals are in the third column and the rates in the fourth. Do not read the third column.</p>
+
+<table>
+  <tr><th>Dataset</th><th class="num">n</th><th class="num">Total Σ</th><th class="num">Mean Σ/n</th></tr>
+  <tr><td>A</td><td class="num">10</td><td class="num">20</td><td class="num">2.0</td></tr>
+  <tr><td>B</td><td class="num">100</td><td class="num">150</td><td class="num">1.5</td></tr>
+</table>
+
+<p>Which model is better? B, because 1.5 &lt; 2.0 — its typical mistake is smaller. Now read the totals and you get the opposite verdict: 20 &lt; 150, so A looks better. It is not. A was graded on a shorter exam and still missed by more per question.</p>
+
+<h2>Faded example</h2>
+<p>Same idea, one step removed. Use mean = total ÷ n in both directions.</p>
+
+<table>
+  <tr><th class="num">n</th><th class="num">Total Σ</th><th class="num">Mean Σ/n</th></tr>
+  <tr><td class="num">50</td><td class="num">?</td><td class="num">1.5</td></tr>
+  <tr><td class="num">60</td><td class="num">90</td><td class="num">?</td></tr>
+</table>
+
+<details><summary>Check both blanks</summary>
+  <p>Row 1: 1.5 × 50 = <strong>75</strong>. Row 2: 90 ÷ 60 = <strong>1.5</strong>. The totals differ by 15; the rates agree exactly.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A smaller total means a better model."</strong> No. A total is a count-weighted quantity, so it is only comparable to another total from the same dataset, with the same n and the same units.</p>
+  <p><strong>Correction:</strong> compare means. Compare totals only when n is identical on both sides.</p>
+</div>
+<p><strong>The tell:</strong> if adding duplicate rows doubles your loss, you forgot the division. Duplicating a row raises n and the total together, so the mean — and the model — should not move at all.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>A dataset has n = 20 and a total loss of 30. What is the mean?
+    <details><summary>Answer</summary>
+      <p>30 ÷ 20 = <strong>1.5</strong>. One and a half points per example.</p>
+    </details>
+  </li>
+  <li>Dataset A has mean 2.0, dataset B has mean 1.5. Which is better, and why can't the totals decide?
+    <details><summary>Answer</summary>
+      <p>B: 1.5 &lt; 2.0. Totals scale with n, so a large sloppy dataset can out-total a small accurate one. Dividing puts both on the same per-example footing.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>The average is now a single number the model can be judged by — and the next lab asks which θ makes that number smallest.</p>
+
+<div class="labnav">
+  <a href="004e-sum.html">← Lab 05 · Σᵢ — add the atoms</a>
+  <a href="004g-argmin.html">Lab 07 · argmin vs min →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=2" defer></script>
+<script src="../assets/course.js?v=8" defer></script>
+</body>
+</html>

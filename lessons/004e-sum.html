@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>004.5 — Σᵢ: add the atoms</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=2">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Read Σᵢ as a running total over examples, and see why the order of the losses does not change the sum.">
+</head>
+<body data-page="lab">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Objective · Lab 5 / 9</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="004-supervised-learning.html#labs">Topic 04 · Supervised learning</a></p>
+
+<header class="masthead">
+  <p class="kicker">The objective, one symbol at a time · Lab 5</p>
+  <h1>Σ<sub>i</sub> — add the atoms</h1>
+  <p class="objective">You can read the sum as a running total and explain why order is irrelevant.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">θ* = argmin<sub>θ</sub> (1/n)</span> <span class="hot">Σ<sub>i</sub></span> <span class="dim">L( f<sub>θ</sub>(x<sub>i</sub>), y<sub>i</sub> )</span></p>
+<p class="eqn-note">Lab 5 of 9 · the whole expression is dimmed; only the sum is lit</p>
+<p>Σ<sub>i</sub> means "add up over every example". The <em>i</em> is a placeholder that visits row 1, then row 2, and keeps going until the rows run out. The subscript only says which row you are on. Each row contributes one loss, and the sum is what they all cost together.</p>
+
+<h2>A running total</h2>
+<p>Here are four examples and their four prices. The second column is a single ℓ<sub>i</sub> — one loss, one example. Read the last column downwards, not sideways: every row adds its loss to whatever the rows above already paid.</p>
+
+<table>
+  <tr><th>Example</th><th class="num">Loss ℓ<sub>i</sub></th><th class="num">Running total</th></tr>
+  <tr><td>x<sub>1</sub></td><td class="num">9</td><td class="num">9</td></tr>
+  <tr><td>x<sub>2</sub></td><td class="num">4</td><td class="num">13</td></tr>
+  <tr><td>x<sub>3</sub></td><td class="num">1</td><td class="num">14</td></tr>
+  <tr><td>x<sub>4</sub></td><td class="num">16</td><td class="num">30</td></tr>
+</table>
+
+<p>The running total lands on 30. That single number is the whole Σ<sub>i</sub> — the total price of all four predictions, with nothing averaged and nothing dropped.</p>
+
+<h2>Turn rows on and off</h2>
+<p>Every bar below is one example's loss. Untick one and the total drops by exactly that loss; tick it again and the same amount returns.</p>
+
+<figure class="fig" data-graph="sum">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-sum-t f-sum-d">
+    <title id="f-sum-t">Four per-example losses stacked as bars with a running total</title>
+    <desc id="f-sum-d">Four bars labelled x1 to x4 with heights 9, 4, 1 and 16. Turning a bar off removes it from the total shown below.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls">
+    <label><input type="checkbox" data-k="row" checked> x₁</label>
+    <label><input type="checkbox" data-k="row" checked> x₂</label>
+    <label><input type="checkbox" data-k="row" checked> x₃</label>
+    <label><input type="checkbox" data-k="row" checked> x₄</label>
+    <output data-out="total" aria-live="polite">Σ = 30</output>
+    <button type="reset">Reset</button>
+  </div>
+  <figcaption><strong>Each bar is one ℓᵢ; the total is their sum.</strong> Uncheck one: the total drops by exactly that example's loss, and nothing else changes.</figcaption>
+</figure>
+
+<p>Switch off x<sub>4</sub> and the total falls from 30 to 14 — a drop of 16, which is that bar's height. The other three bars never move, because a sum only counts what is present.</p>
+<p>Nor is 30 a score out of anything. It is an amount, and it would keep climbing if a fifth row existed.</p>
+
+<h2>Order does not matter</h2>
+<p>Same four losses, two different orders:</p>
+<p class="eqn">9 + 4 + 1 + 16 = 30</p>
+<p class="eqn">16 + 1 + 4 + 9 = 30</p>
+<p>Addition is commutative: the order you list the rows in has no effect on the result. A total is a property of the set of losses, not of their sequence — so you can sort them, reverse them, or shuffle them and still land on 30.</p>
+<p>What changes with order is only the running total at each step: 9, 13, 14, 30 against 16, 17, 21, 30. The destination is the same.</p>
+
+<h2>Faded example</h2>
+<p>Both totals are hidden. Work the first row, then the second.</p>
+<table>
+  <tr><th>Losses</th><th class="num">Σ<sub>i</sub></th></tr>
+  <tr><td>9, 4, 1</td><td class="num">?</td></tr>
+  <tr><td>16, 9</td><td class="num">?</td></tr>
+</table>
+<details><summary>Check the hidden totals</summary>
+  <p>9 + 4 + 1 = <strong>14</strong>. 16 + 9 = <strong>25</strong>. The row count changed; the operation did not.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Σ means average."</strong> No. Σ is a plain sum: add the losses, stop, report the total. Nothing is divided by anything.</p>
+  <p><strong>Correction:</strong> the average is the next symbol, 1/n, which divides the sum by the number of examples. Two symbols, two jobs — Σ adds, 1/n scales.</p>
+</div>
+<p><strong>The tell:</strong> a total that grows when you add rows is a sum; an average stays in the same range. Add a fifth example with loss 4 and Σ climbs from 30 to 34, while the typical loss per row barely shifts.</p>
+
+<h2>Retrieval check</h2>
+<p>Two questions on the running total, from memory.</p>
+<ol class="quiz">
+  <li>What is Σ<sub>i</sub> of the losses 9, 4, 1?
+    <details><summary>Answer</summary>
+      <p>14. Three rows: 9 + 4 = 13, then 13 + 1 = 14. No division involved.</p>
+    </details>
+  </li>
+  <li>A total stands at 30 and you remove the example with loss 16. What is the new total?
+    <details><summary>Answer</summary>
+      <p>14. Removing a row subtracts exactly its loss, because a sum is built only from the rows that are present.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Σ<sub>i</sub> hands you a total that grows with the number of rows. Lab 6 adds 1/n so the number stops depending on how many examples you had.</p>
+
+<div class="labnav">
+  <a href="004d-atom.html">← Lab 04 · L(f_θ(xᵢ), yᵢ) — the atom</a>
+  <a href="004f-average.html">Lab 06 · 1/n — turn a total into a rate →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=2" defer></script>
+<script src="../assets/course.js?v=8" defer></script>
+</body>
+</html>

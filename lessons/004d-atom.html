@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>004.4 — L(f_θ(xᵢ), yᵢ): the atom</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=2">
+<link rel="stylesheet" href="../assets/figures.css?v=2">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Turn one row into one loss in two steps: predict first, then price the prediction.">
+</head>
+<body data-page="lab">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Objective · Lab 4 / 9</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="004-supervised-learning.html#labs">Topic 04 · Supervised learning</a></p>
+
+<header class="masthead">
+  <p class="kicker">The objective, one symbol at a time · Lab 4</p>
+  <h1>L(f_θ(xᵢ), yᵢ) — the atom</h1>
+  <p class="objective">You can turn one row into one loss, in two steps, without skipping the first.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">θ* = argmin<sub>θ</sub> (1/n) Σ<sub>i</sub></span> <span class="hot">L( f<sub>θ</sub>(x<sub>i</sub>), y<sub>i</sub> )</span></p>
+<p class="eqn-note">Lab 4 of 9 · the whole term is lit; everything around it only repeats or combines it</p>
+<p>Read the lit part as a sentence: <em>the price of the model's answer on example i</em>. The sum, the 1/n and the argmin invent nothing new. Everything later in the objective only combines copies of this term.</p>
+<p>The result has its own name: ℓᵢ, one loss, for one example. This lab is about producing that number and nothing else.</p>
+
+<h2>Two steps, one number</h2>
+<p>Two things happen to a row, always in this order. First the model predicts. Then the loss prices that prediction.</p>
+<p><strong>Step 1 — predict.</strong> θ is every number the model learns. Applied to the input xᵢ, it returns a number written f_θ(xᵢ), or ŷ for short. With the course model ŷ = 2x + 1 and xᵢ = 3, that is 7. A prediction is a value, not yet a price.</p>
+<p><strong>Step 2 — price.</strong> L compares the prediction with the true answer yᵢ, subtracts, squares, and returns one number. Here (10 − 7)² = 9.</p>
+
+<table>
+  <tr><th>xᵢ</th><th class="num">yᵢ (truth)</th><th class="num">ŷ (prediction)</th><th class="num">residual yᵢ − ŷ</th><th class="num">loss L</th></tr>
+  <tr><td class="num">3</td><td class="num">10</td><td class="num">7</td><td class="num">3</td><td class="num">9</td></tr>
+</table>
+
+<p>Five numbers on one row, and only the last is a loss. The other four are its inputs — which is why skipping step 1 leaves step 2 with nothing to price.</p>
+<p>Note where the prediction sits: inside the brackets of L, as an argument. It is food for the price, not a rival to it.</p>
+
+<h2>The pipeline</h2>
+<p>Two of these boxes do work; the rest are values being carried between them.</p>
+
+<figure class="fig" data-graph="pipeline">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-atom-t f-atom-d">
+    <title id="f-atom-t">One example passing through the model and the loss</title>
+    <desc id="f-atom-d">Five boxes in a row: the input row x-i, the model f-theta, the prediction y-hat, the loss L, and the single loss value l-i. Arrows show the order.</desc>
+    <g data-layer></g>
+  </svg>
+  <figcaption><strong>One row in, one number out.</strong> The prediction is an intermediate value; only ℓᵢ is what the sum will add.</figcaption>
+</figure>
+
+<p>Order matters. ŷ exists before L runs, and L sees one row only: not θ, not the other examples, not the average.</p>
+
+<h2>Three rows at once</h2>
+<p>Now a dataset of three rows, with the same two steps run on each row separately.</p>
+
+<table>
+  <tr><th>i</th><th class="num">xᵢ</th><th class="num">yᵢ</th><th class="num">ŷ</th><th class="num">ℓᵢ = (yᵢ − ŷ)²</th></tr>
+  <tr><td class="num">1</td><td class="num">0</td><td class="num">1</td><td class="num">1</td><td class="num">0</td></tr>
+  <tr><td class="num">2</td><td class="num">2</td><td class="num">5</td><td class="num">5</td><td class="num">0</td></tr>
+  <tr><td class="num">3</td><td class="num">4</td><td class="num">9</td><td class="num">5</td><td class="num">16</td></tr>
+</table>
+
+<p>Rows 1 and 2 are free: prediction equals truth, so the price is zero. Row 3 misses by 4 and costs 16. One row can be perfect while another is expensive — the atom never averages them away.</p>
+<p>Each ℓᵢ here was computed as if the other two rows did not exist. That isolation is the point of the word <em>atom</em>.</p>
+<p>The objective will add 0 + 0 + 16 and divide by 3. An average of about 5.3, with no hint of which row caused it.</p>
+
+<h2>Faded example</h2>
+<p>Full solve first. Truth 10, prediction 7: residual 3, so the price is 3² = 9. Then the last step is removed, and then the last two.</p>
+
+<table>
+  <tr><th class="num">Truth y</th><th class="num">Prediction ŷ</th><th class="num">Residual</th><th class="num">Loss</th></tr>
+  <tr><td class="num">10</td><td class="num">7</td><td class="num">3</td><td class="num">9</td></tr>
+  <tr><td class="num">5</td><td class="num">11</td><td class="num">−6</td><td class="num">?</td></tr>
+  <tr><td class="num">0</td><td class="num">4</td><td class="num">?</td><td class="num">?</td></tr>
+</table>
+
+<details><summary>Check the last two rows</summary>
+  <p>Row 2: (−6)² = <strong>36</strong>. Row 3: residual <strong>−4</strong>, loss <strong>16</strong>. The sign never survives the square; the size always does.</p>
+</details>
+
+<h2>The trap</h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The loss is computed on the average."</strong> No. The objective averages losses; the atom does not. Each ℓᵢ is computed from one row, alone, before any addition happens.</p>
+  <p><strong>Correction:</strong> two rows give two prices. Add them afterwards if you like — but a loss divided by n before it exists is not a loss.</p>
+</div>
+<p><strong>The tell:</strong> if you cannot write one ℓᵢ for one row, you are computing the objective, not the atom. Try it on a single row, with no n in sight.</p>
+
+<h2>Retrieval check</h2>
+<ol class="quiz">
+  <li>Truth 5, prediction 2. What is the loss?
+    <details><summary>Answer</summary>
+      <p>Residual 3, loss 3² = <strong>9</strong>. Prediction first, then price.</p>
+    </details>
+  </li>
+  <li>Which costs more, a residual of 3 or a residual of 4 — and by how much?
+    <details><summary>Answer</summary>
+      <p>Residual 4 costs 16; residual 3 costs 9. The wider gap costs <strong>7 more</strong> for one extra unit of error.</p>
+    </details>
+  </li>
+</ol>
+
+<h2>Next</h2>
+<p>Lab 5 puts Σᵢ in front of this term: the same two steps, once per row, then added.</p>
+
+<div class="labnav">
+  <a href="004c-loss.html">← Lab 03 · L(·,·) — the price of being wrong</a>
+  <a href="004e-sum.html">Lab 05 · Σᵢ — add the atoms →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=2" defer></script>
+<script src="../assets/course.js?v=8" defer></script>
+</body>
+</html>

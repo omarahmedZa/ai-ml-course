@@ -52,22 +52,21 @@
 <span class="formula">θ* = argmin_θ  (1/n) Σᵢ L(f_θ(xᵢ), yᵢ)</span>
 <p>Why this part exists: the loss is the only definition of "better", so a mismatch optimises the wrong thing — squared error on a yes/no task rewards confident wrong answers while the gradient fades.</p>
 <aside class="lab-callout" id="labs">
-  <p class="lab-eyebrow">Equation labs · 2 of 9 published</p>
+  <p class="lab-eyebrow">Equation labs · 9 of 9 · about 3 minutes each</p>
   <h3 class="lab-title">Take this formula apart, one symbol at a time</h3>
-  <p class="lab-sub">Each lab is 3 minutes, covers one symbol, and gives you a figure you can drag. Start with the loss; it is the piece everything else counts.</p>
+  <p class="lab-sub">Nine labs, one per symbol. Each has a figure you can drag. Read them in order; every lab uses the numbers from the one before.</p>
   <ul class="lab-list">
-    <li><a href="004.3-loss.html">
-      <span class="lab-num">03</span>
-      <span class="lab-body"><strong>L(·,·) — the price of being wrong</strong><span>Compute squared error for one prediction, and see what the square buys you.</span></span>
-      <span class="lab-go">Open lab →</span>
-    </a></li>
-    <li><a href="004.7-argmin.html">
-      <span class="lab-num">07</span>
-      <span class="lab-body"><strong>argmin vs min — position or height?</strong><span>Training returns a θ, not a loss. Watch a search land on it.</span></span>
-      <span class="lab-go">Open lab →</span>
-    </a></li>
+    <li><a href="004a-theta.html"><span class="lab-num">01</span><span class="lab-body"><strong>θ — the numbers that move</strong></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004b-prediction.html"><span class="lab-num">02</span><span class="lab-body"><strong>f_θ(xᵢ) — one prediction</strong></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004c-loss.html"><span class="lab-num">03</span><span class="lab-body"><strong>L(·,·) — the price of being wrong</strong></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004d-atom.html"><span class="lab-num">04</span><span class="lab-body"><strong>L(f_θ(xᵢ), yᵢ) — the atom</strong></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004e-sum.html"><span class="lab-num">05</span><span class="lab-body"><strong>Σᵢ — add the atoms</strong></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004f-average.html"><span class="lab-num">06</span><span class="lab-body"><strong>1/n — turn a total into a rate</strong></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004g-argmin.html"><span class="lab-num">07</span><span class="lab-body"><strong>argmin vs min</strong></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004h-optimal.html"><span class="lab-num">08</span><span class="lab-body"><strong>θ* — optimal for what?</strong></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004i-objective.html"><span class="lab-num">09</span><span class="lab-body"><strong>The whole objective</strong></span><span class="lab-go">Open lab →</span></a></li>
   </ul>
-  <p class="lab-rest">Still to come: θ · f<sub>θ</sub>(x<sub>i</sub>) · Σ<sub>i</sub> · 1/n · θ* · the full objective.</p>
+  <p class="lab-rest">Finished all nine? The next topic puts the whole objective to work.</p>
 </aside>
 
 
