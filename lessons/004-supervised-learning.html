@@ -106,7 +106,7 @@
 
 
 <h3>Part 5 — Search over θ by gradient descent</h3>
-<p>Start with random dials, measure how the average loss responds to each parameter, and step downhill: <code>θ ← θ − η∇L</code>, where <code>η</code> is the learning rate. Repeat for a set number of epochs, one pass over the 10,000 rows each.</p>
+<p>Start with random dials, measure how the average loss responds to each parameter, and step downhill: <code>θ ← θ − η∇L</code>, where <code>η</code> is the learning rate and <code>∇L</code> is the derivative (gradient) of the loss with respect to θ — computed by differentiating through <code>f_θ(x)</code>. Repeat for a set number of epochs, one pass over the 10,000 rows each.</p>
 <p>Why this part exists: 3 dials could be found by grid search, but 300 million cannot; the gradient is the only affordable direction finder, and a learning rate of 10 instead of 0.1 sends the loss upward.</p>
 
 <h3>Part 6 — Report on data the search never touched</h3>
