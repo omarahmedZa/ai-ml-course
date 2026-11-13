@@ -25,7 +25,7 @@
 </header>
 
 <h2>Why this matters<span class="h2-topic">— the gradient</span></h2>
-<p class="lede">Every training loop in this course — backprop, Q-learning, PPO — is the same sentence: measure the slope, step the other way. PyTorch reduces it to two lines, <code>loss.backward()</code> then <code>p ← p − η · p.grad</code>, and every optimizer you meet is a variation on how far to trust the second one.</p>
+<p class="lede">Every training loop in this course — backprop, Q-learning, PPO — is the same sentence: measure the slope, step the other way. The loss you minimise is a function <code>f</code> of the parameters, and the slope is its derivative (the gradient) with respect to those parameters — how fast the loss changes when a knob turns. PyTorch reduces it to two lines, <code>loss.backward()</code> then <code>p ← p − η · p.grad</code>, and every optimizer you meet is a variation on how far to trust the second one.</p>
 <p>The failure this prevents is a run that looks alive and is not. On <code>f(w) = w²</code> with <code>η = 10</code> instead of <code>0.1</code>, one step takes <code>w = 3</code> to <code>3 − 10(6) = −57</code> and the loss from 9 to 3,249, then keeps multiplying until it overflows; the traceback names a matrix multiply, never the learning rate. The same two lines settle the exam question <em>"<code>f(w) = 3w²</code> at <code>w = 2</code>, one step at <code>η = 0.1</code>"</em>: the slope is <code>6w = 12</code>, so <code>w ← 2 − 1.2 = 0.8</code>.</p>
 
 <div class="numstrip" role="group" aria-label="Key numbers">
