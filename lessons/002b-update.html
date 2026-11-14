@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>002.2 — Why the update subtracts</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Equation · Lab 2 / 2</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
   <span class="grow"></span>
   <button type="button" data-theme-toggle>◐ auto</button>
 </nav>
@@ -25,13 +26,13 @@
 <header class="masthead">
   <p class="kicker">Equation lab · the direction of the step</p>
   <h1>Why the update subtracts</h1>
-  <p class="objective">You can explain why w ← w − η∇f walks downhill, and why a minus sign does not mean the weights shrink.</p>
+  <p class="objective">You can explain why w ← w − η∇f <span class="say" data-sym="η">(eta)</span> walks downhill, and why a minus sign does not mean the weights shrink.</p>
 </header>
 
 <h2>Where this sits</h2>
 <p class="eqn"><span class="dim">w ← w</span> <span class="hot">− η∇f(w)</span></p>
 <p class="eqn-note">Lab 2 of 2 · the slope and the rate are dim; the subtraction is lit</p>
-<p>∇f(w) is the gradient: the slope of the loss with respect to the weight. It points in the direction that makes the loss <em>larger</em>. Training wants the loss smaller, so it moves the other way — and that is the whole job of the minus sign.</p>
+<p>∇f(w) <span class="say" data-sym="∇">(nabla)</span> is the gradient: the slope of the loss with respect to the weight. It points in the direction that makes the loss <em>larger</em>. Training wants the loss smaller, so it moves the other way — and that is the whole job of the minus sign.</p>
 
 <h2>The gradient points uphill</h2>
 <p>On f(w) = w² at w = 3 the slope is 6. A positive slope means: increase w, and the loss increases. To lose less, decrease w. The gradient told you the uphill direction; the update does the opposite.</p>
@@ -48,7 +49,7 @@
   <figcaption><strong>Every step crosses the slope and heads for the dot.</strong> Right of the bottom the slope is positive and w falls; left of it the slope is negative and w rises. Both are the same subtraction.</figcaption>
 </figure>
 
-<p>Move μ and the whole bowl slides, floor and all. The dot is always the point where the slope is zero — the one place the update stops doing anything.</p>
+<p>Move μ <span class="say" data-sym="μ">(mu)</span> and the whole bowl slides, floor and all. The dot is always the point where the slope is zero — the one place the update stops doing anything.</p>
 
 <h2>One step, with numbers</h2>
 <p>Take J(w) = (w − 2)² + 1 and start at w = 4. The slope there is 2(w − 2) = 4, and the loss is 5. With η = 0.1 the step is 0.4: w becomes 4 − 0.4 = 3.6 and the loss becomes 3.56.</p>

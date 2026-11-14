@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>033 — Federated setting and FedAvg</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 33 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -64,7 +65,7 @@
 <p><strong>Why this part exists:</strong> the server must improve the model from numbers whose size does not grow with the number of rows the client holds.</p>
 
 <h3>Part 6 — Average by share, then repeat</h3>
-<p>The server computes <code>w_{t+1} = Σ_k (n_k/n) w_t^k</code>, where <code>n</code> is the total example count. The shares are non-negative and sum to 1, so the result is a convex combination and cannot leave the range spanned by the clients. It broadcasts the result and the loop restarts.</p>
+<p>The server computes <code>w_{t+1} = Σ_k (n_k/n) w_t^k</code><span class="say" data-sym="Σ">(sigma)</span>, where <code>n</code> is the total example count. The shares are non-negative and sum to 1, so the result is a convex combination and cannot leave the range spanned by the clients. It broadcasts the result and the loop restarts.</p>
 <p><strong>Why this part exists:</strong> a 700-example client has a lower-variance gradient than a 100-example one and should count seven times more; equal shares let a tiny client outvote the data.</p>
 
 <figure class="fig">

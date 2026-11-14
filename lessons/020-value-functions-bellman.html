@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>020 — Value functions and Bellman</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 20 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -26,7 +27,7 @@
 
 <h2>Why this matters<span class="h2-topic">— value functions</span></h2>
 <p class="lede">A value function is a price tag on a situation: one number answering "if I am here, and behave like this from now on, how much reward is left?" Every algorithm in this unit uses one. Value iteration ranks states with it, Q-learning stores one per state–action pair, actor–critic trains a critic to score the actor, and policy gradient subtracts a state value to steady its updates.</p>
-<p>Two kinds of damage come from getting it wrong. In an exam it is a two-line backup — <code>r = 1</code>, <code>γ = 0.9</code>, <code>V(s′) = 2</code>, so <code>Q = 2.8</code> — and candidates lose the marks by adding the reward twice or forgetting the discount. In a project it is silent inflation: bootstrap past a terminal state and every finished episode is credited with a future that does not exist. With <code>γ = 0.9</code> and a phantom <code>V = 5</code>, each ending gains 4.5 of invented value, so the average return climbs, the training curve looks healthy, and the policy gets worse.</p>
+<p>Two kinds of damage come from getting it wrong. In an exam it is a two-line backup — <code>r = 1</code>, <code>γ = 0.9</code><span class="say" data-sym="γ">(gamma)</span>, <code>V(s′) = 2</code>, so <code>Q = 2.8</code> — and candidates lose the marks by adding the reward twice or forgetting the discount. In a project it is silent inflation: bootstrap past a terminal state and every finished episode is credited with a future that does not exist. With <code>γ = 0.9</code> and a phantom <code>V = 5</code>, each ending gains 4.5 of invented value, so the average return climbs, the training curve looks healthy, and the policy gets worse.</p>
 <div class="numstrip" role="group" aria-label="Key numbers"><div><b>2.8</b><span>Q from r = 1, γ = 0.9, V(s′) = 2</span></div><div><b>2.41</b><span>V under a 0.7 / 0.3 policy mix</span></div><div><b>0.39</b><span>price of that 0.3 chance of the worse action</span></div></div>
 
 <h2>The one core idea<span class="h2-topic">— value functions</span></h2>
@@ -38,7 +39,7 @@
 <p>Seven parts, from the quantity being predicted to the update that learns it from samples.</p>
 
 <h3>Part 1 — Expectation, because the future is random</h3>
-<p><code>V^π(s)</code> is the <em>expected</em> return: a probability-weighted average over every future the policy — the rule that picks actions — might produce. With a 10% slip, a thousand episodes from <code>s</code> average the intended outcome and the slipped one in proportion to how often each occurs. Why this part exists: without an average, the value of one state would differ on every visit and no table could ever settle.</p>
+<p><code>V^π(s)</code><span class="say" data-sym="π">(pi)</span> is the <em>expected</em> return: a probability-weighted average over every future the policy — the rule that picks actions — might produce. With a 10% slip, a thousand episodes from <code>s</code> average the intended outcome and the slipped one in proportion to how often each occurs. Why this part exists: without an average, the value of one state would differ on every visit and no table could ever settle.</p>
 
 <h3>Part 2 — One number per state</h3>
 <p>The value table has <code>|S|</code> entries, so 25 for a 5×5 grid. Each entry is a prediction about the future, not a record of the past. Why this part exists: this is the compression that makes the problem tractable. A distribution over thousands of trajectories becomes a single scalar, and "which state is better" becomes a comparison of two numbers.</p>
@@ -81,10 +82,10 @@
 </figure>
 
 <h3>Part 6 — The max turns evaluation into control</h3>
-<p>Replace the average over actions with a maximum and you get <code>Q*(s,a) = Σ_{s′} P[R + γ max_{a′} Q*(s′,a′)]</code>. The target now asks what the best next action would give, not what the current policy does. Why this part exists: evaluation scores the policy you already have, and the max scores the best one available. Without it you can rank policies but never improve one.</p>
+<p>Replace the average over actions with a maximum and you get <code>Q*(s,a) = Σ_{s′} P[R + γ max_{a′} Q*(s′,a′)]</code><span class="say" data-sym="Σ">(sigma)</span>. The target now asks what the best next action would give, not what the current policy does. Why this part exists: evaluation scores the policy you already have, and the max scores the best one available. Without it you can rank policies but never improve one.</p>
 
 <h3>Part 7 — TD learning samples instead of averaging</h3>
-<p>In practice <code>P</code> is unknown, so take the one transition you observed and move partway toward it: <code>V(s) ← V(s) + α[r + γV(s′) − V(s)]</code>. With <code>V(s) = 2.0</code>, <code>r = 1</code>, <code>γ = 0.9</code>, <code>V(s′) = 2</code> and <code>α = 0.1</code>, the target is 2.8, the error is 0.8, and the new value is 2.08. Why this part exists: you cannot sum over next states you have never enumerated, and <code>α = 0.1</code> is why one sample moves the estimate by 10% rather than all the way.</p>
+<p>In practice <code>P</code> is unknown, so take the one transition you observed and move partway toward it: <code>V(s) ← V(s) + α[r + γV(s′) − V(s)]</code><span class="say" data-sym="α">(alpha)</span>. With <code>V(s) = 2.0</code>, <code>r = 1</code>, <code>γ = 0.9</code>, <code>V(s′) = 2</code> and <code>α = 0.1</code>, the target is 2.8, the error is 0.8, and the new value is 2.08. Why this part exists: you cannot sum over next states you have never enumerated, and <code>α = 0.1</code> is why one sample moves the estimate by 10% rather than all the way.</p>
 
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 2 · about 3 minutes each</p>

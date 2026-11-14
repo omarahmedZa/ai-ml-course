@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>002 — Slope to gradient</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 02 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -25,7 +26,7 @@
 </header>
 
 <h2>Why this matters<span class="h2-topic">— the gradient</span></h2>
-<p class="lede">Every training loop in this course — backprop, Q-learning, PPO — is the same sentence: measure the slope, step the other way. The loss you minimise is a function <code>f</code> of the parameters, and the slope is its derivative (the gradient) with respect to those parameters — how fast the loss changes when a knob turns. PyTorch reduces it to two lines, <code>loss.backward()</code> then <code>p ← p − η · p.grad</code>, and every optimizer you meet is a variation on how far to trust the second one.</p>
+<p class="lede">Every training loop in this course — backprop, Q-learning, PPO — is the same sentence: measure the slope, step the other way. The loss you minimise is a function <code>f</code> of the parameters, and the slope is its derivative (the gradient) with respect to those parameters — how fast the loss changes when a knob turns. PyTorch reduces it to two lines, <code>loss.backward()</code> then <code>p ← p − η · p.grad</code><span class="say" data-sym="η">(eta)</span>, and every optimizer you meet is a variation on how far to trust the second one.</p>
 <p>The failure this prevents is a run that looks alive and is not. On <code>f(w) = w²</code> with <code>η = 10</code> instead of <code>0.1</code>, one step takes <code>w = 3</code> to <code>3 − 10(6) = −57</code> and the loss from 9 to 3,249, then keeps multiplying until it overflows; the traceback names a matrix multiply, never the learning rate. The same two lines settle the exam question <em>"<code>f(w) = 3w²</code> at <code>w = 2</code>, one step at <code>η = 0.1</code>"</em>: the slope is <code>6w = 12</code>, so <code>w ← 2 − 1.2 = 0.8</code>.</p>
 
 <div class="numstrip" role="group" aria-label="Key numbers">
@@ -48,10 +49,10 @@
 
 <table>
   <tr><th>Part</th><th>The question it settles</th><th>What you keep</th></tr>
-  <tr><td>1</td><td>What is a slope?</td><td>rise over run, <code>Δf / Δw</code></td></tr>
+  <tr><td>1</td><td>What is a slope?</td><td>rise over run, <code>Δf / Δw</code><span class="say" data-sym="Δ">(delta)</span></td></tr>
   <tr><td>2</td><td>What is the slope at one point?</td><td>the derivative <code>f′</code></td></tr>
   <tr><td>3</td><td>What if there are many parameters?</td><td>one partial derivative per knob</td></tr>
-  <tr><td>4</td><td>How do the partials combine?</td><td>the gradient vector <code>∇f</code></td></tr>
+  <tr><td>4</td><td>How do the partials combine?</td><td>the gradient vector <code>∇f</code><span class="say" data-sym="∇">(nabla)</span></td></tr>
   <tr><td>5</td><td>Which way is uphill?</td><td>the gradient's direction and length</td></tr>
   <tr><td>6</td><td>How far do I step, and which way?</td><td><code>w ← w − η∇f</code></td></tr>
   <tr><td>7</td><td>When do I stop?</td><td>watch the slope shrink</td></tr>
@@ -77,7 +78,7 @@
 </figure>
 
 <h3>Part 3 — Freeze every other knob</h3>
-<p>A real model has many parameters, so "the slope" has to split: one slope per parameter. The <strong>partial derivative</strong> <code>∂f/∂x</code> is the slope in <code>x</code> while every other variable is held still. The curly ∂ is the same idea as d, plus a reminder: other knobs frozen.</p>
+<p>A real model has many parameters, so "the slope" has to split: one slope per parameter. The <strong>partial derivative</strong> <code>∂f/∂x</code><span class="say" data-sym="∂">(partial)</span> is the slope in <code>x</code> while every other variable is held still. The curly ∂ is the same idea as d, plus a reminder: other knobs frozen.</p>
 <p>On <code>f(x, y) = x² + 3y</code> at <code>(2, 1)</code>: freeze <code>y</code> and the second term acts as a constant, so along <code>x</code> the function looks like <code>x²</code> and <code>∂f/∂x = 2x = 4</code>. Freeze <code>x</code> and the first term is the constant, so along <code>y</code> it looks like <code>3y</code> and <code>∂f/∂y = 3</code>. Two questions, two answers, one measured at a time.</p>
 <p>Notice what the 3 implies: it never shrinks as <code>y</code> changes. The function is linear in <code>y</code>, so there is no bottom in that direction — no value of <code>y</code> makes its slope reach zero.</p>
 <p><strong>Why this part exists.</strong> Move two knobs at once and the change you observe belongs to neither: you cannot tell which one caused it, so you cannot correct either.</p>

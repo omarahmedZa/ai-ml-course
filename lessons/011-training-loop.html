@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>011 — The training loop</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 11 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -36,7 +37,7 @@
 
 <h2>The one core idea<span class="h2-topic">— the training loop</span></h2>
 <p>The loop is a thermostat with a fixed routine: look at a batch, measure the error, find the slope, nudge every weight a little, clear the slate. Nothing clever happens here — the information is in the gradients, and the loop only decides how far to step.</p>
-<p>In one line: <strong>forward, loss, backward, step, zero.</strong> With <code>η = 0.05</code> and <code>∂L/∂w = −32</code>, the update is <code>w ← w − 0.05(−32) = w + 1.6</code>.</p>
+<p>In one line: <strong>forward, loss, backward, step, zero.</strong> With <code>η = 0.05</code><span class="say" data-sym="η">(eta)</span> and <code>∂L/∂w = −32</code><span class="say" data-sym="∂">(partial)</span>, the update is <code>w ← w − 0.05(−32) = w + 1.6</code>.</p>
 
 <div class="keybox"><span class="sym">w ← w − η·∂L/∂w</span><p>Forward, loss, backward, step, zero: the loop only decides how far.</p></div>
 

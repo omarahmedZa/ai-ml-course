@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>007.1 — Gini impurity: scoring a split</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Trees · Lab 1</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
   <span class="grow"></span>
   <button type="button" data-theme-toggle>◐ auto</button>
 </nav>
@@ -38,7 +39,7 @@
 <p>Gini is not the only impurity. Entropy plays the same role, and trees often use either. What matters here is that a split is judged by how much impurity it removes, not by how small one child looks.</p>
 
 <h2>Score a split by the drop</h2>
-<p>A cut sends rows left or right. Score each child with I, then weight by its share of rows: n<sub>L</sub>/n for the left, n<sub>R</sub>/n for the right. Subtract both from the parent. That difference, Δ, is the split criterion.</p>
+<p>A cut sends rows left or right. Score each child with I, then weight by its share of rows: n<sub>L</sub>/n for the left, n<sub>R</sub>/n for the right. Subtract both from the parent. That difference, Δ <span class="say" data-sym="Δ">(delta)</span>, is the split criterion.</p>
 <p>Take 100 rows, 50 positive and 50 negative: I(parent) = 0.5. A cut puts 45 positive and 5 negative on the left, and 5 positive and 45 negative on the right. Each child has I = 1 − (0.9² + 0.1²) = 0.18.</p>
 <p>The children hold half the rows each, so the weighted impurity is 0.5 × 0.18 + 0.5 × 0.18 = 0.18. The drop is 0.5 − 0.18 = 0.32. That 0.32 is what the tree records for this cut.</p>
 

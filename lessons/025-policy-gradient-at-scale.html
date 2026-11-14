@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>025 — Policy gradient at scale</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 25 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -31,7 +32,7 @@
 <div class="numstrip" role="group" aria-label="Key numbers">
   <div><b>3</b><span>upgrades between REINFORCE and PPO</span></div>
   <div><b>100</b><span>return of the lucky episode</span></div>
-  <div><b>0.2</b><span>PPO's clip range ε</span></div>
+  <div><b>0.2</b><span>PPO's clip range ε</span><span class="say" data-sym="ε">(epsilon)</span></div>
 </div>
 
 <h2>The one core idea<span class="h2-topic">— policy gradient</span></h2>
@@ -47,22 +48,22 @@
 <p>Seven parts follow, each one an upgrade stacked on the last.</p>
 
 <h3>Part 1 — Parameterise the policy itself</h3>
-<p>The network outputs a probability per action, <code>π_θ(a|s)</code>; for continuous control, the mean and spread of a Gaussian you then sample from. There is no value table to consult — the network's output <em>is</em> the behaviour. <strong>Why this part exists:</strong> a gradient needs something to differentiate, and behaviour is only differentiable once it is written as a function of θ.</p>
+<p>The network outputs a probability per action, <code>π_θ(a|s)</code><span class="say" data-sym="π">(pi)</span>; for continuous control, the mean and spread of a Gaussian you then sample from. There is no value table to consult — the network's output <em>is</em> the behaviour. <strong>Why this part exists:</strong> a gradient needs something to differentiate, and behaviour is only differentiable once it is written as a function of θ <span class="say" data-sym="θ">(theta)</span>.</p>
 
 <h3>Part 2 — The score function says "more likely"</h3>
-<p><code>∇_θ log π_θ(a|s)</code> is the direction in weight space that raises the probability of the action just taken, measured at the current weights. It has the same shape as θ, so it can be added to θ directly. <strong>Why this part exists:</strong> it converts "that action was good" into a concrete nudge, and it never needs a derivative of the environment.</p>
+<p><code>∇_θ log π_θ(a|s)</code><span class="say" data-sym="∇">(nabla)</span> is the direction in weight space that raises the probability of the action just taken, measured at the current weights. It has the same shape as θ, so it can be added to θ directly. <strong>Why this part exists:</strong> it converts "that action was good" into a concrete nudge, and it never needs a derivative of the environment.</p>
 
 <h3>Part 3 — Weight the nudge by the return</h3>
 <p>The estimator is <code>E[∇log π · G_t]</code>: push up actions that returned a lot, push down actions that returned little. This is REINFORCE in full, and it is unbiased. <strong>Why this part exists:</strong> unweighted, every action would be pushed up equally, which changes nothing except the sharpness of the distribution.</p>
 
 <h3>Part 4 — A baseline removes the state's own value</h3>
-<p>Subtract <code>b(s)</code>, any function of state alone: <code>E[∇log π (G − b(s))]</code>. Because <code>Σ_a π(a|s)∇log π(a|s) = 0</code>, the expectation does not move; only the spread around it shrinks. <strong>Why this part exists:</strong> the 100-everywhere state above contributes 100 of weight and zero learning signal.</p>
+<p>Subtract <code>b(s)</code>, any function of state alone: <code>E[∇log π (G − b(s))]</code>. Because <code>Σ_a π(a|s)∇log π(a|s) = 0</code><span class="say" data-sym="Σ">(sigma)</span>, the expectation does not move; only the spread around it shrinks. <strong>Why this part exists:</strong> the 100-everywhere state above contributes 100 of weight and zero learning signal.</p>
 
 <h3>Part 5 — A critic learns the baseline</h3>
-<p>Set <code>b = V_φ(s)</code>, a second network trained by regression on observed returns. Then <code>G − V</code> is the advantage: how much better than this state's average the action was. <strong>Why this part exists:</strong> a hand-set baseline cannot follow a policy that improves, and the critic can — paying for it with bias whenever <code>V_φ</code> is wrong.</p>
+<p>Set <code>b = V_φ(s)</code><span class="say" data-sym="φ">(phi)</span>, a second network trained by regression on observed returns. Then <code>G − V</code> is the advantage: how much better than this state's average the action was. <strong>Why this part exists:</strong> a hand-set baseline cannot follow a policy that improves, and the critic can — paying for it with bias whenever <code>V_φ</code> is wrong.</p>
 
 <h3>Part 6 — GAE blends one step with many</h3>
-<p>A one-step advantage has low variance and high bias; a full-episode return has the reverse. GAE mixes them: <code>A = δ_t + γλδ_{t+1} + (γλ)²δ_{t+2} + …</code>, where δ is a one-step TD error. <strong>Why this part exists:</strong> λ = 0 hands you the critic's guess and λ = 1 the raw return, so one dial replaces an argument about which is right.</p>
+<p>A one-step advantage has low variance and high bias; a full-episode return has the reverse. GAE mixes them: <code>A = δ_t + γλδ_{t+1} + (γλ)²δ_{t+2} + …</code><span class="say" data-sym="δ">(delta)</span>, where δ is a one-step TD error. <strong>Why this part exists:</strong> λ <span class="say" data-sym="λ">(lambda)</span> = 0 hands you the critic's guess and λ = 1 the raw return, so one dial replaces an argument about which is right.</p>
 
 <h3>Part 7 — Clip the ratio</h3>
 <p>PPO maximises <code>min(rA, clip(r, 1−ε, 1+ε)A)</code> with <code>r = π_new/π_old</code> and <code>ε = 0.2</code>. Inside the band this is the ordinary policy gradient; outside, the objective goes flat and further movement buys nothing. <strong>Why this part exists:</strong> on-policy data is used once, so a single destructive step wastes the whole rollout that produced it.</p>
@@ -149,7 +150,7 @@
 <p><strong>What to notice.</strong> With <code>A = +2</code> the objective stops at 2.4: whether the ratio is 1.3 or 2.0, the gradient beyond the band is zero, so an already-good action earns nothing more. With <code>A = −2</code> the pattern is asymmetric — at ratio 2.0 the objective keeps falling to −4.0, because making a bad action twice as likely should still be punished. Only the <em>reward</em> side is capped. That asymmetry is what <code>min</code> does.</p>
 
 <h3>3. What λ does to one advantage</h3>
-<p>Two TD errors, <code>δ₀ = 1.0</code> and <code>δ₁ = 2.0</code>, with <code>γ = 0.9</code>. GAE keeps two terms: <code>δ₀ + (γλ)δ₁</code>.</p>
+<p>Two TD errors, <code>δ₀ = 1.0</code> and <code>δ₁ = 2.0</code>, with <code>γ = 0.9</code><span class="say" data-sym="γ">(gamma)</span>. GAE keeps two terms: <code>δ₀ + (γλ)δ₁</code>.</p>
 
 <table>
   <tr><th class="num">λ</th><th class="num">γλ</th><th>Terms</th><th class="num">A</th></tr>

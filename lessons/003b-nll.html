@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>003.2 — Σ: summing surprise over the data</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Equation · Lab 2 / 2</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
   <span class="grow"></span>
   <button type="button" data-theme-toggle>◐ auto</button>
 </nav>
@@ -24,7 +25,7 @@
 
 <header class="masthead">
   <p class="kicker">Equation lab · summing surprise</p>
-  <h1>Σ — summing surprise over the data</h1>
+  <h1>Σ <span class="say" data-sym="Σ">(sigma)</span> — summing surprise over the data</h1>
   <p class="objective">You can total the per-row surprises, then divide by the row count so two datasets can be compared.</p>
 </header>
 
@@ -52,7 +53,7 @@
 
 <h2>Sum then divide</h2>
 <p>A total grows with the number of rows, so it cannot compare two test sets of different size. Six good rows total 0.63; three mediocre ones total 1.16. The smaller bill belongs to the better model here, but only because the row counts are close.</p>
-<p>Divide by n, the number of rows, and the number becomes per-row. The objective writes that as (1/n) Σ<sub>i</sub>. The minimiser does not move: the same θ wins before and after the division.</p>
+<p>Divide by n, the number of rows, and the number becomes per-row. The objective writes that as (1/n) Σ<sub>i</sub>. The minimiser does not move: the same θ <span class="say" data-sym="θ">(theta)</span> wins before and after the division.</p>
 
 <h2>One more example</h2>
 <p>The faded table keeps the row count fixed at three. Change the count instead and hold the three row costs — 0.105, 0.357 and 0.693 — exactly where they are. The addition never changes; only the number you divide by does, and that alone is enough to move the mean away from any single row.</p>

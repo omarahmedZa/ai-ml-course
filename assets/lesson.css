@@ -634,3 +634,25 @@ img, svg { max-width: 100%; }
   text-transform: none;
   color: var(--ink-faint);
 }
+
+/* ---------- spoken symbol names ---------- */
+.say {
+  font-size: .76em;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+.sym-cell {
+  font-family: ui-monospace, monospace;
+  font-size: 1.15rem;
+  color: var(--accent);
+  text-align: center;
+}
+.nav-sym { font-size: .78rem; }
+.met {
+  display: block;
+  margin-top: .2rem;
+  font-size: .72rem;
+  color: var(--ink-faint);
+}

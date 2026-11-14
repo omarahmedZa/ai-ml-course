@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>029 — Alignment and inference</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 29 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -43,10 +44,10 @@
 <p>Humans write prompt–answer pairs, typically a few thousand to a few hundred thousand, and the model is trained with cross-entropy on the answer tokens only; the prompt is masked out of the loss. Format matters as much as content: the model learns where an answer starts and when to stop. <strong>Why this part exists:</strong> a base model has no idea that a question deserves a reply, so without this stage a prompt is just text to continue.</p>
 
 <h3>Part 2 — Train a reward model on comparisons</h3>
-<p>Annotators see two answers to the same prompt and pick the better one. The reward model learns to give the preferred answer a higher score, using the Bradley–Terry loss <code>−log σ(r(A) − r(B))</code>, where σ is the logistic function. <strong>Why this part exists:</strong> people are unreliable at absolute ratings but consistent at pairwise choices, and a single number is what an optimiser can climb.</p>
+<p>Annotators see two answers to the same prompt and pick the better one. The reward model learns to give the preferred answer a higher score, using the Bradley–Terry loss <code>−log σ(r(A) − r(B))</code><span class="say" data-sym="σ">(sigma)</span>, where σ is the logistic function. <strong>Why this part exists:</strong> people are unreliable at absolute ratings but consistent at pairwise choices, and a single number is what an optimiser can climb.</p>
 
 <h3>Part 3 — Optimise the policy with a leash</h3>
-<p>PPO, a reinforcement-learning loop, samples answers, scores them with the reward model, and updates the model to raise that score. The objective subtracts <code>β · KL(π ‖ π_SFT)</code>, a penalty on drifting away from the fine-tuned model. <strong>Why this part exists:</strong> the reward model is a rough approximation, so an unconstrained optimiser finds its errors — repetitive, flattering, or confidently wrong text that scores highly.</p>
+<p>PPO, a reinforcement-learning loop, samples answers, scores them with the reward model, and updates the model to raise that score. The objective subtracts <code>β · KL(π ‖ π_SFT)</code><span class="say" data-sym="π,β">(pi, beta)</span>, a penalty on drifting away from the fine-tuned model. <strong>Why this part exists:</strong> the reward model is a rough approximation, so an unconstrained optimiser finds its errors — repetitive, flattering, or confidently wrong text that scores highly.</p>
 
 <figure class="fig">
   <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-align-t f-align-d">

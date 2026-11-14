@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>008 — The neuron</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 08 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -87,7 +88,7 @@
     <rect x="480" y="312" width="12" height="12" rx="2" fill="none" stroke="var(--sym-pred)" stroke-width="1.6"/>
     <text x="500" y="322" font-size="12" font-family="ui-monospace, monospace" fill="var(--ink-soft)">prediction</text>
   </svg>
-  <figcaption><strong>Score, then bend.</strong> Grey inputs meet red weights and the bias to form one score z; the fixed grey φ clamps negatives to zero, and the blue a is what the next layer receives. Training moves only the red numbers.</figcaption>
+  <figcaption><strong>Score, then bend.</strong> Grey inputs meet red weights and the bias to form one score z; the fixed grey φ <span class="say" data-sym="φ">(phi)</span> clamps negatives to zero, and the blue a is what the next layer receives. Training moves only the red numbers.</figcaption>
 </figure>
 
 <h2>How it actually works<span class="h2-topic">— the neuron</span></h2>

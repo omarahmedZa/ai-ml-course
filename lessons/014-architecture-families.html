@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>014 — Architecture families</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 14 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -44,7 +45,7 @@
 <p><strong>Why this part exists:</strong> without naming the assumption you cannot tell whether a family fits the problem, and the choice collapses into picking whatever is fashionable.</p>
 
 <h3>Part 2 — The MLP assumes nothing</h3>
-<p>A multilayer perceptron is <code>y = W₂φ(W₁x)</code>, and every input connects to every output. A layer from 40 inputs to 64 has <code>40 × 64 = 2,560</code> weights, each learned independently. Permuting the input features changes the function completely: the network has no idea that column 3 sits beside column 4.</p>
+<p>A multilayer perceptron is <code>y = W₂φ(W₁x)</code><span class="say" data-sym="φ">(phi)</span>, and every input connects to every output. A layer from 40 inputs to 64 has <code>40 × 64 = 2,560</code> weights, each learned independently. Permuting the input features changes the function completely: the network has no idea that column 3 sits beside column 4.</p>
 <p><strong>Why this part exists:</strong> it is the honest baseline. When features genuinely have no order, assuming nothing is the correct prior, and a tree ensemble or an MLP is hard to beat.</p>
 
 <h3>Part 3 — The CNN shares one filter everywhere</h3>

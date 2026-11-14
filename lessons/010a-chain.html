@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>010.1 — The chain rule</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Objective · Lab 1 / 2</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
   <span class="grow"></span>
   <button type="button" data-theme-toggle>◐ auto</button>
 </nav>
@@ -31,7 +32,7 @@
 <h2>Where this sits</h2>
 <p class="eqn"><span class="dim">∂L/∂w =</span> <span class="hot">∂L/∂z · ∂z/∂w</span> <span class="dim">= 2(z − y)·x</span></p>
 <p class="eqn-note">Lab 1 of 2 · the two local slopes are lit; the multiplication between them is the whole rule</p>
-<p>∂ means "a small change in". ∂L/∂w is the slope of the loss with respect to one weight: how much L moves when w moves a little. Backprop obtains it without a second forward pass, by reusing slopes already measured in the network.</p>
+<p>∂ <span class="say" data-sym="∂">(partial)</span> means "a small change in". ∂L/∂w is the slope of the loss with respect to one weight: how much L moves when w moves a little. Backprop obtains it without a second forward pass, by reusing slopes already measured in the network.</p>
 
 <h2>Slopes in series multiply</h2>
 <p>Suppose z changes three times as fast as w, and L changes twice as fast as z. Then L changes six times as fast as w, because 3 × 2 = 6. Rates in series multiply. That sentence is the chain rule, and every backward pass is a long product of such rates.</p>
@@ -62,7 +63,7 @@
 <p>Both gradients are negative: raising either value raises the loss, so gradient descent subtracts and increases w and b. They start from the same −6, but w carries an extra factor of x = 2, so it moves twice as far. That factor is not importance; it is the input sitting in the path.</p>
 
 <h2>One step lands on the truth</h2>
-<p>With learning rate <code>η = 0.1</code>: <code>w ← 3 − 0.1(−12) = 4.2</code> and <code>b ← 1 − 0.1(−6) = 1.6</code>. The new prediction is 4.2·2 + 1.6 = 10, so the loss is zero. That exactness belongs to this quadratic, not to training in general.</p>
+<p>With learning rate <code>η = 0.1</code><span class="say" data-sym="η">(eta)</span>: <code>w ← 3 − 0.1(−12) = 4.2</code> and <code>b ← 1 − 0.1(−6) = 1.6</code>. The new prediction is 4.2·2 + 1.6 = 10, so the loss is zero. That exactness belongs to this quadratic, not to training in general.</p>
 
 <h2>Faded example</h2>
 <p>The first row is solved. In the second, w has moved to 4 while b stays at 1, so only the weight changed; fill in the missing derivative.</p>

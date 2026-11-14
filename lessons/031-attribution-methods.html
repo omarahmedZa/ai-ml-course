@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>031 — Attribution methods</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 31 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -42,7 +43,7 @@
 <p><strong>Why this part exists:</strong> shift the zero point and every number shifts; two teams can compare charts that answer different questions.</p>
 
 <h3>Part 2 — Saliency reads the slope at one point</h3>
-<p><strong>Saliency</strong> is <code>∂f/∂xᵢ</code> at the input: how fast the score moves if you nudge feature <em>i</em> by a hair. It costs one backward pass, which is why it is the default in vision pipelines. It describes the tangent, never the feature's necessity.</p>
+<p><strong>Saliency</strong> is <code>∂f/∂xᵢ</code><span class="say" data-sym="∂">(partial)</span> at the input: how fast the score moves if you nudge feature <em>i</em> by a hair. It costs one backward pass, which is why it is the default in vision pipelines. It describes the tangent, never the feature's necessity.</p>
 <p><strong>Why this part exists:</strong> it is the cheapest attribution there is; one backward pass is sometimes all a live system can afford.</p>
 
 <h3>Part 3 — Saturation makes that slope lie</h3>
@@ -59,7 +60,7 @@
 
 <h3>Part 6 — Shapley averages marginal gains over orderings</h3>
 <p>Treat features as players in a coalition. Add them in some order, recording what each one added when it joined; average that gain over every possible order. Two features give 2 orderings, ten give <code>10! = 3,628,800</code>. That average is the Shapley value.</p>
-<span class="formula">φᵢ = Σ_{S ⊆ F\{i}}  |S|!(|F|−|S|−1)! / |F|!  · [ v(S ∪ {i}) − v(S) ]</span>
+<span class="formula">φᵢ = Σ_{S ⊆ F\{i}}  |S|!(|F|−|S|−1)! / |F|!  · [ v(S ∪ {i}) − v(S) ]</span><span class="say" data-sym="Σ">(sigma)</span>
 <p><strong>Why this part exists:</strong> order matters — a duplicate adds nothing when it joins second — so averaging is the only way to give each feature one fair number.</p>
 
 <h3>Part 7 — The axioms decide what you may cite</h3>
@@ -71,7 +72,7 @@
   <h3 class="lab-title">Take this formula apart, one symbol at a time</h3>
   <p class="lab-sub">Each lab is 3 minutes, covers one symbol, and gives you a figure you can drag.</p>
   <ul class="lab-list">
-    <li><a href="031a-shapley.html"><span class="lab-num">31a</span><span class="lab-body"><strong>φ — a fair share of the prediction</strong><span>Compute a Shapley value for two features by averaging their marginal gain over every…</span></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="031a-shapley.html"><span class="lab-num">31a</span><span class="lab-body"><strong>φ <span class="say" data-sym="φ">(phi)</span> — a fair share of the prediction</strong><span>Compute a Shapley value for two features by averaging their marginal gain over every…</span></span><span class="lab-go">Open lab →</span></a></li>
   </ul>
 </aside>
 

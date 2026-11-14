@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>013 — Optimization failure modes</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 13 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -83,7 +84,7 @@
 </figure>
 
 <h3>Part 3 — Initialisation holds the variance steady</h3>
-<p>He initialisation draws weights with standard deviation <code>√(2 / fan_in)</code>; for 512 inputs that is <code>√(2/512) = 0.0625</code>. Xavier uses <code>√(1 / fan_in)</code> and suits tanh, which is centred at zero. The scale is chosen so activation variance stays roughly constant through the layer.</p>
+<p>He initialisation draws weights with standard deviation <code>√(2 / fan_in)</code><span class="say" data-sym="√">(square root)</span>; for 512 inputs that is <code>√(2/512) = 0.0625</code>. Xavier uses <code>√(1 / fan_in)</code> and suits tanh, which is centred at zero. The scale is chosen so activation variance stays roughly constant through the layer.</p>
 <p><strong>Why this part exists:</strong> a bad init sets the product at the wrong scale before training begins, and no number of steps reliably recovers from it.</p>
 
 <h3>Part 4 — Normalisation re-centres the operating point</h3>
@@ -91,7 +92,7 @@
 <p><strong>Why this part exists:</strong> saturation only hurts when the input has drifted into the flat region; re-centring keeps the derivative large.</p>
 
 <h3>Part 5 — Residual connections add an identity path</h3>
-<p>A residual block computes <code>y = x + f(x)</code>, so its Jacobian is <code>∂y/∂x = I + ∂f/∂x</code>. If the block's own derivative is 0.25, the total is 1.25, and ten blocks deliver <code>1.25¹⁰ ≈ 9.3</code> where a plain stack delivers 9.5 × 10⁻⁷. This is the idea that made 100-plus-layer networks trainable.</p>
+<p>A residual block computes <code>y = x + f(x)</code>, so its Jacobian is <code>∂y/∂x = I + ∂f/∂x</code><span class="say" data-sym="∂">(partial)</span>. If the block's own derivative is 0.25, the total is 1.25, and ten blocks deliver <code>1.25¹⁰ ≈ 9.3</code> where a plain stack delivers 9.5 × 10⁻⁷. This is the idea that made 100-plus-layer networks trainable.</p>
 <p><strong>Why this part exists:</strong> it is the only fix here that changes the arithmetic of the product rather than the size of each factor.</p>
 
 <h3>Part 6 — Clipping bounds the step</h3>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>028 — Pretraining</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 28 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -39,7 +40,7 @@
 <h2>How it actually works<span class="h2-topic">— pretraining</span></h2>
 <p>Seven parts, following one document through one training step.</p>
 
-<span class="formula">perplexity = exp( −(1/N) Σ log p(token_t | token_&lt;t) )</span>
+<span class="formula">perplexity = exp( −(1/N) Σ log p(token_t | token_&lt;t) )</span><span class="say" data-sym="Σ">(sigma)</span>
 
 <h3>Part 1 — Turn text into token IDs</h3>
 <p>A tokenizer splits text into pieces and maps each piece to an integer, so a sentence becomes a list such as <code>[464, 3797, 3332]</code>. A typical vocabulary holds 50,000 entries, which fixes the size of the model's output. <strong>Why this part exists:</strong> a network can only emit numbers from a finite set, and 50,000 is small enough to compute a full distribution over at every position.</p>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>002.1 — η: how far one step goes</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Equation · Lab 1 / 2</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
   <span class="grow"></span>
   <button type="button" data-theme-toggle>◐ auto</button>
 </nav>
@@ -24,14 +25,14 @@
 
 <header class="masthead">
   <p class="kicker">Equation lab · the learning rate</p>
-  <h1>η — how far one step goes</h1>
+  <h1>η <span class="say" data-sym="η">(eta)</span> — how far one step goes</h1>
   <p class="objective">You can say what η controls, and tell a step that is too small from one that is too large.</p>
 </header>
 
 <h2>Where this sits</h2>
 <p class="eqn"><span class="dim">w ← w −</span> <span class="hot">η</span> <span class="dim">∇f(w)</span></p>
 <p class="eqn-note">Lab 1 of 2 · only η is lit; the slope and the weights stay dim</p>
-<p>η (eta) is the <strong>learning rate</strong>. The gradient ∇f says which way the ground rises; η says how much of that reading you act on. Training repeats w ← w − η∇f(w) until the loss stops falling.</p>
+<p>η (eta) is the <strong>learning rate</strong>. The gradient ∇f <span class="say" data-sym="∇">(nabla)</span> says which way the ground rises; η says how much of that reading you act on. Training repeats w ← w − η∇f(w) until the loss stops falling.</p>
 
 <h2>A step size, not a speed</h2>
 <p>Take f(w) = w², the bowl used all through topic 2. Its slope is 2w. At w = 3 the slope is 6, so a rate of η = 0.1 moves w by 0.6 and lands on 2.4. The loss drops from 9 to 5.76.</p>

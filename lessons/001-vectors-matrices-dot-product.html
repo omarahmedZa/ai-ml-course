@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>001 — Vectors, matrices, dot product</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 01 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -57,7 +58,7 @@
 <p>Positive means <code>x</code> lies on <code>w</code>'s side of the boundary. Zero means the two are perpendicular: the input has nothing the model is looking for. Negative means it points the other way. In a classifier, the boundary is exactly <code>w·x + b = 0</code>, so the sign answers "which class?" and the distance from zero answers "how sure?". This is why a score of 0.2 and a score of 20 can give the same label but very different confidence.</p>
 
 <h3>Part 4 — Length inflates the score</h3>
-<p>Geometrically, <code>x·w = ‖x‖ ‖w‖ cos θ</code>, where <code>‖·‖</code> is the length of the arrow and <code>θ</code> is the angle between them. Two consequences follow. First, the score grows if you simply make <code>x</code> longer — double every feature and the score doubles, even though the direction, and therefore the meaning, is unchanged. Second, the only part that carries <em>direction</em> is <code>cos θ</code>.</p>
+<p>Geometrically, <code>x·w = ‖x‖ ‖w‖ cos θ</code><span class="say" data-sym="θ">(theta)</span>, where <code>‖·‖</code> is the length of the arrow and <code>θ</code> is the angle between them. Two consequences follow. First, the score grows if you simply make <code>x</code> longer — double every feature and the score doubles, even though the direction, and therefore the meaning, is unchanged. Second, the only part that carries <em>direction</em> is <code>cos θ</code>.</p>
 
 <figure class="fig">
   <svg viewBox="0 0 340 150" role="img" aria-labelledby="f-proj-t f-proj-d">
@@ -113,7 +114,7 @@
   <tr><th>Term</th><th>Plain meaning</th></tr>
   <tr><td><strong>Vector</strong></td><td>An ordered list of numbers: one data point, or one arrow.</td></tr>
   <tr><td><strong>Dot product</strong></td><td>Multiply matching positions, add the results: one number.</td></tr>
-  <tr><td><strong>Norm ‖x‖</strong></td><td>The length of the arrow: <code>√(x₁² + x₂² + …)</code>.</td></tr>
+  <tr><td><strong>Norm ‖x‖</strong></td><td>The length of the arrow: <code>√(x₁² + x₂² + …)</code><span class="say" data-sym="√">(square root)</span>.</td></tr>
   <tr><td><strong>Cosine similarity</strong></td><td>Dot product with both lengths divided out: pure alignment.</td></tr>
   <tr><td><strong>Bias b</strong></td><td>A constant added after the dot product; moves the threshold.</td></tr>
 </table>

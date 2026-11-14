@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>007 — Trees and ensembles</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 07 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -44,11 +45,11 @@
 <p>Six parts: three build one tree, three explain how many trees are combined.</p>
 
 <h3>Part 1 — Score purity with Gini or entropy</h3>
-<p><strong>Impurity</strong> measures how mixed a node's labels are. Gini is <code>1 − Σ pₖ²</code>, so 50 positives and 50 negatives give <code>1 − (0.25 + 0.25) = 0.5</code> while a pure node gives 0. Regression swaps Gini for variance, playing the same role.</p>
+<p><strong>Impurity</strong> measures how mixed a node's labels are. Gini is <code>1 − Σ pₖ²</code><span class="say" data-sym="Σ">(sigma)</span>, so 50 positives and 50 negatives give <code>1 − (0.25 + 0.25) = 0.5</code> while a pure node gives 0. Regression swaps Gini for variance, playing the same role.</p>
 <p>Why this part exists: without a number, "best split" is an opinion, and the greedy search has nothing to maximise.</p>
 
 <h3>Part 2 — Try every cut, score by weighted drop</h3>
-<p>For each feature, sort the values and test a threshold between each adjacent pair — 99 candidate cuts for 100 distinct values. Score a cut by the children's impurity weighted by their sizes, and keep the largest drop: <code>Δ = I(parent) − (n_L/n)I(L) − (n_R/n)I(R)</code>.</p>
+<p>For each feature, sort the values and test a threshold between each adjacent pair — 99 candidate cuts for 100 distinct values. Score a cut by the children's impurity weighted by their sizes, and keep the largest drop: <code>Δ = I(parent) − (n_L/n)I(L) − (n_R/n)I(R)</code><span class="say" data-sym="Δ">(delta)</span>.</p>
 <p>Why this part exists: unweighted child impurity lets a cut that isolates a single row look perfect while the other 99 rows stay mixed.</p>
 
 <figure class="fig">

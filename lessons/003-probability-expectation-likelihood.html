@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>003 — Probability, expectation, likelihood</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 03 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -26,7 +27,7 @@
 
 <h2>Why this matters<span class="h2-topic">— probability and likelihood</span></h2>
 <p class="lede">A classifier does not output a label; it outputs a distribution over labels, and that distribution is what gets scored. Softmax turns scores into probabilities, cross-entropy turns the probability of the true class into a loss, and both are likelihood arithmetic. The same move reappears in a language model (probability of the next token) and in RL (expected return over a policy).</p>
-<p>The failure this prevents is quiet. Compare total NLL on two test sets — 500 rows and 2,000 rows — and the larger set wins by default, because <code>−Σ log p</code> is a sum that grows with the row count. A team reporting the sum can "improve" a model by evaluating it on more data. Dividing by <code>N</code> makes the number per-row and comparable, which is the difference between a metric and a mood.</p>
+<p>The failure this prevents is quiet. Compare total NLL on two test sets — 500 rows and 2,000 rows — and the larger set wins by default, because <code>−Σ log p</code><span class="say" data-sym="Σ">(sigma)</span> is a sum that grows with the row count. A team reporting the sum can "improve" a model by evaluating it on more data. Dividing by <code>N</code> makes the number per-row and comparable, which is the difference between a metric and a mood.</p>
 
 <div class="numstrip" role="group" aria-label="Key numbers">
   <div><b>500</b><span>rows in the first test set</span></div>
@@ -53,10 +54,10 @@
 <p>Expectation is <code>E[X] = Σ x·p(x)</code>, the value you would average over many draws. A fair die gives <code>(1+2+3+4+5+6)/6 = 21/6 = 3.5</code>, a number no face ever shows. Over a dataset the same formula with <code>p = 1/N</code> is the mean loss per example. Why this part exists: training needs one number to minimise, and expectation is the honest way to collapse a distribution into one.</p>
 
 <h3>Part 3 — Variance is the spread around that average</h3>
-<p><code>Var(X) = E[(X − E[X])²]</code>. For the die, deviations from 3.5 are −2.5, −1.5, −0.5, 0.5, 1.5, 2.5; their squares average <code>17.5/6 = 2.92</code>, so the standard deviation is <code>√2.92 ≈ 1.71</code>. Two models can share a mean loss and differ here: one uniformly mediocre, one superb on most rows and catastrophic on a few. Why this part exists: a mean hides risk, so an average cannot tell you whether it came from consistency or from compensating extremes.</p>
+<p><code>Var(X) = E[(X − E[X])²]</code>. For the die, deviations from 3.5 are −2.5, −1.5, −0.5, 0.5, 1.5, 2.5; their squares average <code>17.5/6 = 2.92</code>, so the standard deviation is <code>√2.92 ≈ 1.71</code><span class="say" data-sym="√">(square root)</span>. Two models can share a mean loss and differ here: one uniformly mediocre, one superb on most rows and catastrophic on a few. Why this part exists: a mean hides risk, so an average cannot tell you whether it came from consistency or from compensating extremes.</p>
 
 <h3>Part 4 — Likelihood flips which thing is fixed</h3>
-<p><code>p(data | θ)</code> fixes the parameters and asks about the data. Training fixes the data — you already have it — and varies the parameters; that reversed view is the likelihood <code>L(θ)</code>. Three heads in three tosses gives <code>L(0.7) = 0.7³ = 0.343</code> and <code>L(0.5) = 0.125</code>, with only the hypothesis changing between them. Why this part exists: the forward question is about data you have not collected, so it cannot be evaluated after the fact.</p>
+<p><code>p(data | θ)</code><span class="say" data-sym="θ">(theta)</span> fixes the parameters and asks about the data. Training fixes the data — you already have it — and varies the parameters; that reversed view is the likelihood <code>L(θ)</code>. Three heads in three tosses gives <code>L(0.7) = 0.7³ = 0.343</code> and <code>L(0.5) = 0.125</code>, with only the hypothesis changing between them. Why this part exists: the forward question is about data you have not collected, so it cannot be evaluated after the fact.</p>
 
 <figure class="fig" data-graph="bars">
   <svg viewBox="0 0 720 360" role="img" aria-labelledby="f003-t f003-d"><title id="f003-t">A distribution over three outcomes, with the observed outcome highlighted</title><desc id="f003-d">Three bars that sum to one: heads at 0.7, tails at 0.2, edge at 0.1. The heads bar is highlighted because heads is the outcome that happened. Likelihood scores that one bar rather than the others: 0.7 for a single toss, and 0.343 for three independent heads.</desc><g data-layer></g></svg>

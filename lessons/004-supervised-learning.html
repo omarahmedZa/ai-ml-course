@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>004 — Supervised learning</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,12 +16,13 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 04 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
   <p class="kicker">Unit 1 · Machine learning foundations · Topic 4 of 35</p>
   <h1>Supervised learning as function fitting</h1>
-  <p class="objective">You can write down <code>(X, y, f_θ, L)</code> for any supervised task and say what is being learned.</p>
+  <p class="objective">You can write down <code>(X, y, f_θ, L)</code><span class="say" data-sym="θ">(theta)</span> for any supervised task and say what is being learned.</p>
 </header>
 
 <h2>Why this matters<span class="h2-topic">— the objective</span></h2>
@@ -96,7 +97,7 @@
     <li><a href="004b-prediction.html"><span class="lab-num">04b</span><span class="lab-body"><strong>f_θ(xᵢ) — one prediction</strong><span>Read the subscript correctly and turn one row into one number.</span></span><span class="lab-go">Open lab →</span></a></li>
     <li><a href="004c-loss.html"><span class="lab-num">04c</span><span class="lab-body"><strong>L(·,·) — the price of being wrong</strong><span>Compute the squared error for one prediction, and say what the square buys you.</span></span><span class="lab-go">Open lab →</span></a></li>
     <li><a href="004d-atom.html"><span class="lab-num">04d</span><span class="lab-body"><strong>L(f_θ(xᵢ), yᵢ) — the atom</strong><span>Turn one row into one loss, in two steps, without skipping the first.</span></span><span class="lab-go">Open lab →</span></a></li>
-    <li><a href="004e-sum.html"><span class="lab-num">04e</span><span class="lab-body"><strong>Σi — add the atoms</strong><span>Read the sum as a running total and explain why order is irrelevant.</span></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004e-sum.html"><span class="lab-num">04e</span><span class="lab-body"><strong>Σi <span class="say" data-sym="Σ">(sigma)</span> — add the atoms</strong><span>Read the sum as a running total and explain why order is irrelevant.</span></span><span class="lab-go">Open lab →</span></a></li>
     <li><a href="004f-average.html"><span class="lab-num">04f</span><span class="lab-body"><strong>1/n — turn a total into a rate</strong><span>Explain why dividing by n makes two datasets comparable.</span></span><span class="lab-go">Open lab →</span></a></li>
     <li><a href="004g-argmin.html"><span class="lab-num">04g</span><span class="lab-body"><strong>argmin vs min</strong><span>Say which one returns a position, which returns a height, and why training needs the…</span></span><span class="lab-go">Open lab →</span></a></li>
     <li><a href="004h-optimal.html"><span class="lab-num">04h</span><span class="lab-body"><strong>θ* — optimal for what?</strong><span>Say what θ* is relative to, and why it is not the true parameters.</span></span><span class="lab-go">Open lab →</span></a></li>
@@ -106,7 +107,7 @@
 
 
 <h3>Part 5 — Search over θ by gradient descent</h3>
-<p>Start with random dials, measure how the average loss responds to each parameter, and step downhill: <code>θ ← θ − η∇L</code>, where <code>η</code> is the learning rate and <code>∇L</code> is the derivative (gradient) of the loss with respect to θ — computed by differentiating through <code>f_θ(x)</code>. Repeat for a set number of epochs, one pass over the 10,000 rows each.</p>
+<p>Start with random dials, measure how the average loss responds to each parameter, and step downhill: <code>θ ← θ − η∇L</code><span class="say" data-sym="η">(eta)</span>, where <code>η</code> is the learning rate and <code>∇L</code><span class="say" data-sym="∇">(nabla)</span> is the derivative (gradient) of the loss with respect to θ — computed by differentiating through <code>f_θ(x)</code>. Repeat for a set number of epochs, one pass over the 10,000 rows each.</p>
 <p>Why this part exists: 3 dials could be found by grid search, but 300 million cannot; the gradient is the only affordable direction finder, and a learning rate of 10 instead of 0.1 sends the loss upward.</p>
 
 <h3>Part 6 — Report on data the search never touched</h3>
@@ -121,7 +122,7 @@
 <table>
   <tr><th>Step</th><th>Arithmetic</th><th class="num">Value</th></tr>
   <tr><td>Weighted sum z</td><td class="num">2(1) + (−0.01)(50) + (−1) = 2 − 0.5 − 1</td><td class="num">0.5</td></tr>
-  <tr><td>Probability p = σ(z)</td><td class="num">1 / (1 + e<sup>−0.5</sup>) = 1 / (1 + 0.607)</td><td class="num">0.622</td></tr>
+  <tr><td>Probability p = σ(z) <span class="say" data-sym="σ">(sigma)</span></td><td class="num">1 / (1 + e<sup>−0.5</sup>) = 1 / (1 + 0.607)</td><td class="num">0.622</td></tr>
   <tr><td>Loss if y = 1</td><td class="num">−ln(0.622)</td><td class="num">0.475</td></tr>
   <tr><td>Loss if y = 0</td><td class="num">−ln(0.378)</td><td class="num">0.973</td></tr>
 </table>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>034 — Non-IID data and convergence</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 34 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -90,7 +91,7 @@
 <p><strong>Why this part exists:</strong> this is the topic's core trade-off: local steps save rounds and cost agreement, and the bill arrives in a currency the loss curve never shows.</p>
 
 <h3>Part 5 — FedProx puts a leash on each step</h3>
-<p>FedProx adds <code>(μ/2)‖w − w_t‖²</code> to each local objective, so the local gradient becomes <code>∇F_k(w) + μ(w − w_t)</code>. That term is zero at the global model and grows with distance: a spring tied to <code>w_t</code>. μ is the stiffness — 0 removes the leash, large μ approaches no local steps at all.</p>
+<p>FedProx adds <code>(μ/2)‖w − w_t‖²</code><span class="say" data-sym="μ">(mu)</span> to each local objective, so the local gradient becomes <code>∇F_k(w) + μ(w − w_t)</code><span class="say" data-sym="∇">(nabla)</span>. That term is zero at the global model and grows with distance: a spring tied to <code>w_t</code>. μ is the stiffness — 0 removes the leash, large μ approaches no local steps at all.</p>
 <p><strong>Why this part exists:</strong> without a leash, more local work is unbounded drift; with one, a client can take many steps without the server losing control of where it ends up.</p>
 
 <h3>Part 6 — Personalisation and fairness</h3>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>006 — Linear and logistic regression</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 06 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -25,7 +26,7 @@
 </header>
 
 <h2>Why this matters<span class="h2-topic">— regression</span></h2>
-<p class="lede">These are the baselines every project must beat before deep learning is justified, and logistic regression is literally the last layer of every classifier in Unit 7. Same dot product, one extra function. A linear model predicts a quantity — tomorrow's demand, a house price, a dose. A logistic model predicts a probability — will this customer default, is this scan abnormal — and thresholds it into yes or no. Between them they cover most tabular problems you will meet, and a stack of fifty neural layers still ends in <code>σ(w·x + b)</code>.</p>
+<p class="lede">These are the baselines every project must beat before deep learning is justified, and logistic regression is literally the last layer of every classifier in Unit 7. Same dot product, one extra function. A linear model predicts a quantity — tomorrow's demand, a house price, a dose. A logistic model predicts a probability — will this customer default, is this scan abnormal — and thresholds it into yes or no. Between them they cover most tabular problems you will meet, and a stack of fifty neural layers still ends in <code>σ(w·x + b)</code><span class="say" data-sym="σ">(sigma)</span>.</p>
 <p><strong>The failure it prevents.</strong> An exam question gives <code>w = [1, −2]</code>, <code>b = 1</code> and asks where the boundary sits and which side is class 1. Students who read the output as a score draw the line correctly and then label both sides backwards, because the boundary is <code>z = 0</code>, not <code>p = 0</code>. In a project the same confusion ships a classifier reporting 97% accuracy on data with 3% positives — it answers "no" to every row and the metric never notices.</p>
 
 <div class="numstrip" role="group" aria-label="Key numbers">
@@ -86,7 +87,7 @@
 <p>Why this part exists: put a sigmoid in front of squared error and the gradient fades exactly when the prediction is most wrong, so training stalls at whatever random weights it started from.</p>
 
 <h3>Part 6 — Solve, knowing there is one valley</h3>
-<p>Linear regression has a closed form, <code>θ = (XᵀX)⁻¹Xᵀy</code>. Logistic regression has none, because the sigmoid makes the equations non-linear, so gradient descent updates <code>w ← w − η(p − y)x</code>. Both objectives are convex, so each has a single minimum.</p>
+<p>Linear regression has a closed form, <code>θ = (XᵀX)⁻¹Xᵀy</code><span class="say" data-sym="θ">(theta)</span>. Logistic regression has none, because the sigmoid makes the equations non-linear, so gradient descent updates <code>w ← w − η(p − y)x</code><span class="say" data-sym="η">(eta)</span>. Both objectives are convex, so each has a single minimum.</p>
 <p>Why this part exists: knowing the surface has one valley tells you a stalled loss is a learning-rate bug, not a second valley worth exploring.</p>
 
 <aside class="lab-callout" id="labs">

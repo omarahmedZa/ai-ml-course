@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>009 — Layers and the forward pass</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 09 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -47,7 +48,7 @@
 <strong>Why this part exists:</strong> the mixing is where learning happens; without a matrix, each output could only ever see one input.</p>
 
 <h3>Part 2 — Two names, one vector</h3>
-<p>The linear step produces <code>z</code>, the <strong>pre-activation</strong>, and the bend produces <code>a = φ(z)</code>, the <strong>activation</strong>. Same shape, different stage: <code>z</code> is what the weights computed, <code>a</code> is what the next layer receives. With ReLU, <code>z = [−0.4, 2.1]</code> becomes <code>a = [0, 2.1]</code>.
+<p>The linear step produces <code>z</code>, the <strong>pre-activation</strong>, and the bend produces <code>a = φ(z)</code><span class="say" data-sym="φ">(phi)</span>, the <strong>activation</strong>. Same shape, different stage: <code>z</code> is what the weights computed, <code>a</code> is what the next layer receives. With ReLU, <code>z = [−0.4, 2.1]</code> becomes <code>a = [0, 2.1]</code>.
 <strong>Why this part exists:</strong> every bug report about a "dead layer" is a claim about <code>z</code>, so keeping the two names apart keeps the diagnosis honest.</p>
 
 
@@ -107,7 +108,7 @@
   <tr><td>z¹₂</td><td class="num">−1(1) + 0(−1) + 1</td><td class="num">0</td></tr>
   <tr><td>a¹ = ReLU(z¹)</td><td class="num">max(0, ·)</td><td class="num">[0, 0]</td></tr>
   <tr><td>z²</td><td class="num">1(0) + 1(0) − 0.5</td><td class="num">−0.5</td></tr>
-  <tr><td>a² = σ(z²)</td><td class="num">1/(1+e⁰·⁵)</td><td class="num">0.378</td></tr>
+  <tr><td>a² = σ(z²) <span class="say" data-sym="σ">(sigma)</span></td><td class="num">1/(1+e⁰·⁵)</td><td class="num">0.378</td></tr>
 </table>
 
 <p><strong>What to notice.</strong> The ReLU destroyed everything: both hidden units sat at or below zero, so <code>a¹ = [0, 0]</code> and the output depended only on <code>b²</code>. The number 0.378 is what a network says when it has forgotten the input. Change <code>x</code> to anything at all and the answer stays 0.378 until at least one hidden unit crosses zero.</p>

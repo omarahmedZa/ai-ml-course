@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>010.2 — Fan-out: gradients add</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Objective · Lab 2 / 2</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
   <span class="grow"></span>
   <button type="button" data-theme-toggle>◐ auto</button>
 </nav>
@@ -80,7 +81,7 @@
 </figure>
 
 <h2>The numbers</h2>
-<p>Branch A sends 3 and branch B sends 4, so <code>∂L/∂u = 7</code>. With <code>η = 0.1</code> the update is <code>u ← u − 0.1 × 7</code>. A branch sending zero — a ReLU clamped shut, a masked path — adds zero and changes nothing, while the surviving branches still report their full amounts.</p>
+<p>Branch A sends 3 and branch B sends 4, so <code>∂L/∂u = 7</code><span class="say" data-sym="∂">(partial)</span>. With <code>η = 0.1</code><span class="say" data-sym="η">(eta)</span> the update is <code>u ← u − 0.1 × 7</code>. A branch sending zero — a ReLU clamped shut, a masked path — adds zero and changes nothing, while the surviving branches still report their full amounts.</p>
 
 <h2>Why not multiply</h2>
 <p>Multiplication belongs to slopes in series, where one quantity feeds the next. Here the branches are parallel: two routes from the same u to the same loss. Serial slopes multiply; parallel contributions add.</p>

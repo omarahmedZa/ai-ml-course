@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>026.1 — softmax: scores into weights</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Attention · Lab 1 / 2</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
   <span class="grow"></span>
   <button type="button" data-theme-toggle>◐ auto</button>
 </nav>
@@ -61,7 +62,7 @@
 <p>The weights are used at once: the output is 0.67 × v<sub>1</sub> + 0.25 × v<sub>2</sub> + 0.09 × v<sub>3</sub>, where each v is that token's value vector. The result is the same width as one value, because it is a weighted average of values rather than a longer list of them.</p>
 
 <h2>Two tokens, by hand</h2>
-<p>Raw scores 1 and 0 are divided by √2 first, giving 0.707 and 0. Exponentiating gives 2.028 and 1.000; the total is 3.028. Then 2.028 ÷ 3.028 = 0.67 and 1.000 ÷ 3.028 = 0.33. Add the same constant to both scores and nothing changes — only the gap decides the split.</p>
+<p>Raw scores 1 and 0 are divided by √2 <span class="say" data-sym="√">(square root)</span> first, giving 0.707 and 0. Exponentiating gives 2.028 and 1.000; the total is 3.028. Then 2.028 ÷ 3.028 = 0.67 and 1.000 ÷ 3.028 = 0.33. Add the same constant to both scores and nothing changes — only the gap decides the split.</p>
 
 <h2>Why subtract the maximum</h2>
 <p>Implementations subtract the row maximum before exponentiating. Scores 1, 0, −1 become 0, −1, −2; the exponentials become 1, 0.368, 0.135; the weights are identical. The shift is housekeeping: e<sup>1000</sup> overflows a float, and the answer must not depend on how large the scores happen to be.</p>

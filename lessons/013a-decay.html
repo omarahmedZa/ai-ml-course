@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>013.1 — g^L: how much gradient survives</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Optimization · Lab 1 / 2</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
   <span class="grow"></span>
   <button type="button" data-theme-toggle>◐ auto</button>
 </nav>
@@ -75,7 +76,7 @@
 <p>A sigmoid layer's derivative never exceeds 0.25, so ten sigmoid layers pass <code>0.25<sup>10</sup> ≈ 9.5 × 10<sup>−7</sup></code> — below what a 32-bit float resolves usefully. In the other direction, a badly scaled stack with <code>g = 1.5</code> passes <code>1.5<sup>10</sup> ≈ 58</code> after ten layers and <code>1.5<sup>30</sup> ≈ 191,751</code> after thirty.</p>
 
 <h2>Five fixes, one product</h2>
-<p>ReLU keeps the factor at 1 for positive inputs. He initialisation spreads each weight by <code>√(2/fan_in)</code>, steadying activation scale. Normalisation re-centres every layer to mean 0, variance 1. Those three hold the factor near 1. Residuals add an identity path instead, so the factor becomes <code>1 + g</code>. Clipping rescales gradients above a threshold, capping the exploding side.</p>
+<p>ReLU keeps the factor at 1 for positive inputs. He initialisation spreads each weight by <code>√(2/fan_in)</code><span class="say" data-sym="√">(square root)</span>, steadying activation scale. Normalisation re-centres every layer to mean 0, variance 1. Those three hold the factor near 1. Residuals add an identity path instead, so the factor becomes <code>1 + g</code>. Clipping rescales gradients above a threshold, capping the exploding side.</p>
 
 <h2>Faded example</h2>
 <p>Multiply the gain by itself once per layer. The first row is done; fill the rest.</p>

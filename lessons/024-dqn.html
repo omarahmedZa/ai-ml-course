@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>024 — DQN</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 24 / 35</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
 </nav>
 
 <header class="masthead">
@@ -40,14 +41,14 @@
 
 <div class="keybox">
   <span class="sym">y = r + γ max Q_θ⁻(s′,a′)</span>
-  <p>Build the target from a frozen copy θ⁻ refreshed every 10,000 steps; gradients move only the online θ.</p>
+  <p>Build the target from a frozen copy θ⁻ <span class="say" data-sym="θ">(theta)</span> refreshed every 10,000 steps; gradients move only the online θ.</p>
 </div>
 
 <h2>How it actually works<span class="h2-topic">— DQN</span></h2>
 <p>Six parts follow; each repairs one fault, and later parts assume the earlier repairs hold.</p>
 
 <h3>Part 1 — Two faults, not one</h3>
-<p>Q-learning with a network has two independent defects. Data arrives in time order, so a gradient step sees the same corridor 32 times; and the target <code>r + γ max Q_θ(s′)</code> is written in the same weights the step is about to change. <strong>Why this part exists:</strong> naming them separately is what makes the two fixes, and the exam answer, fall out.</p>
+<p>Q-learning with a network has two independent defects. Data arrives in time order, so a gradient step sees the same corridor 32 times; and the target <code>r + γ max Q_θ(s′)</code><span class="say" data-sym="γ">(gamma)</span> is written in the same weights the step is about to change. <strong>Why this part exists:</strong> naming them separately is what makes the two fixes, and the exam answer, fall out.</p>
 
 <h3>Part 2 — Replay buffer: store, then shuffle</h3>
 <p>Keep recent transitions in a buffer of 10⁶ and draw random minibatches of 32. A stored transition stays usable, so one frame can teach many updates; the buffer is a ring, evicting the oldest entry at 10⁶, so the data never lags the policy by more than a million steps. <strong>Why this part exists:</strong> random sampling restores the approximate i.i.d. assumption the gradient expects — without it, 32 near-identical frames act as one sample holding the whole batch's weight.</p>
@@ -106,7 +107,7 @@
 <p>Standard DQN takes a maximum over θ⁻'s noisy estimates, and the maximum of noise sits above the truth. Double DQN chooses the action with θ, then reads that action's value from θ⁻. <strong>Why this part exists:</strong> it splits choosing from scoring, removing most of the upward bias for one extra forward pass.</p>
 
 <h3>Part 6 — Two policies, one network</h3>
-<p>The behaviour policy generates data: ε-greedy on <code>Q_θ</code>. The target policy is what you are learning: pure greedy max. ε decays 1.0 → 0.1 over the first million frames, and 4 stacked frames span 4 ÷ 60 ≈ 0.067 s so the network can see velocity. <strong>Why this part exists:</strong> one frame cannot tell "moving left" from "moving right", and greedy behaviour too early starves the buffer of variety.</p>
+<p>The behaviour policy generates data: ε <span class="say" data-sym="ε">(epsilon)</span>-greedy on <code>Q_θ</code>. The target policy is what you are learning: pure greedy max. ε decays 1.0 → 0.1 over the first million frames, and 4 stacked frames span 4 ÷ 60 ≈ 0.067 s so the network can see velocity. <strong>Why this part exists:</strong> one frame cannot tell "moving left" from "moving right", and greedy behaviour too early starves the buffer of variety.</p>
 
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 1 · about 3 minutes each</p>
@@ -169,7 +170,7 @@
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"A replay buffer is a general RL trick — more data is always better."</strong> It feels right because the buffer is just memory, and memory sounds neutral. But every stored transition was produced by a policy, and reusing it is only valid if your gradient tolerates data from an older policy.</p>
-  <p>DQN tolerates it because its target is a max over actions, which needs no probability from the behaviour policy. Put a buffer behind REINFORCE or PPO and the importance ratio <code>π_new / π_old</code> spans orders of magnitude; the gradient you compute is for a policy that no longer exists, and the weights move in a direction nothing supports.</p>
+  <p>DQN tolerates it because its target is a max over actions, which needs no probability from the behaviour policy. Put a buffer behind REINFORCE or PPO and the importance ratio <code>π_new / π_old</code><span class="say" data-sym="π">(pi)</span> spans orders of magnitude; the gradient you compute is for a policy that no longer exists, and the weights move in a direction nothing supports.</p>
   <p><strong>Correction:</strong> replay is an off-policy tool. On-policy methods may reuse a rollout for a few epochs, then must discard it. A second trap: Double DQN reduces the bias from the <code>max</code>; it does not make estimates unbiased.</p>
 </div>
 <p><strong>The tell:</strong> the ratio histogram in your logs has a tail past 10, or the entropy collapses in a few hundred steps while the loss looks fine. For the moving-target fault the tell is different: loss falls smoothly, evaluation return rises and then breaks, and reloading an older checkpoint recovers the run — a target that outran its own predictions.</p>

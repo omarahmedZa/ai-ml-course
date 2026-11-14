@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>035.1 — ε and δ: the shape of a privacy promise</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Privacy · Lab 1</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
   <span class="grow"></span>
   <button type="button" data-theme-toggle>◐ auto</button>
 </nav>
@@ -24,13 +25,13 @@
 
 <header class="masthead">
   <p class="kicker">Privacy, one symbol at a time · Lab 1</p>
-  <h1>ε and δ — the shape of a privacy promise</h1>
-  <p class="objective">You can read the guarantee aloud, set clip C and noise σC, and say what the noise costs in accuracy.</p>
+  <h1>ε <span class="say" data-sym="ε">(epsilon)</span> and δ — the shape of a privacy promise</h1>
+  <p class="objective">You can read the guarantee aloud, set clip C and noise σC <span class="say" data-sym="σ">(sigma)</span>, and say what the noise costs in accuracy.</p>
 </header>
 
 <h2>Where this sits</h2>
 <p class="eqn"><span class="dim">Pr[ M(D) ∈ S ] ≤</span> <span class="hot">e<sup>ε</sup></span> <span class="dim">Pr[ M(D′) ∈ S ] + δ</span></p>
-<p class="eqn-note">Lab 1 of 1 · the multiplier is lit; the data, the mechanism and δ are dimmed</p>
+<p class="eqn-note">Lab 1 of 1 · the multiplier is lit; the data, the mechanism and δ <span class="say" data-sym="δ">(delta)</span> are dimmed</p>
 <p>D and D′ are two datasets that differ in exactly one person. M is whatever leaves the machine — an update, a sum, a trained model. The inequality says those two outputs look nearly the same, so the released number barely depends on any one person.</p>
 
 <h2>Reading the two symbols</h2>

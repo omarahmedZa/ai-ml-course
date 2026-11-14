@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>022.1 — TD error: target − estimate</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 22 · Lab 1 / 1</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
   <span class="grow"></span>
   <button type="button" data-theme-toggle>◐ auto</button>
 </nav>
@@ -25,13 +26,13 @@
 <header class="masthead">
   <p class="kicker">Two solution families, one symbol at a time · Lab 1</p>
   <h1>TD error — target minus estimate</h1>
-  <p class="objective">You can compute a TD error and the new Q value, and say why α rarely equals 1.</p>
+  <p class="objective">You can compute a TD error and the new Q value, and say why α <span class="say" data-sym="α">(alpha)</span> rarely equals 1.</p>
 </header>
 
 <h2>Where this sits</h2>
 <p class="eqn"><span class="dim">Q(s,a) ← Q(s,a) +</span> <span class="hot">α[ target − Q(s,a) ]</span></p>
 <p class="eqn-note">Topic 22 · the update term is lit; the estimate being nudged stays dim</p>
-<p>An update has two numbers: where the estimate is, and where the evidence says it should be. The target is r + γ max Q(s′,a′). The bracket is the TD error — the gap between them, signed.</p>
+<p>An update has two numbers: where the estimate is, and where the evidence says it should be. The target is r + γ <span class="say" data-sym="γ">(gamma)</span> max Q(s′,a′). The bracket is the TD error — the gap between them, signed.</p>
 <p>TD stands for temporal difference: the difference between a prediction made now and a slightly better prediction made one step later.</p>
 
 <h2>A nudge, not a replacement</h2>

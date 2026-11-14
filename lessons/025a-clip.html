@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>025.1 — r: the ratio, clipped to 1 ± 0.2</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=8">
+<link rel="stylesheet" href="../assets/lesson.css?v=9">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -16,6 +16,7 @@
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Policy gradient · Lab 1 / 2</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
   <span class="grow"></span>
   <button type="button" data-theme-toggle>◐ auto</button>
 </nav>
@@ -30,7 +31,7 @@
 
 <h2>Where this sits</h2>
 <p class="eqn"><span class="dim">maximise</span> <span class="hot">min( r·A , clip(r, 1−ε, 1+ε)·A )</span></p>
-<p class="eqn-note">Lab 1 of 2 · r = π<sub>new</sub> / π<sub>old</sub> · A is the advantage · ε = 0.2</p>
+<p class="eqn-note">Lab 1 of 2 · r = π<sub>new</sub><span class="say" data-sym="π">(pi)</span> / π<sub>old</sub> · A is the advantage · ε <span class="say" data-sym="ε">(epsilon)</span> = 0.2</p>
 <p>PPO changes the policy in small steps because on-policy data is used once. A step that is too large wastes the rollout that produced it, and the policy may not recover. The ratio measures the size of that step.</p>
 
 <h2>What the ratio measures</h2>
