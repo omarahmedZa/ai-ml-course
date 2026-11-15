@@ -95,7 +95,7 @@
   <h3 class="lab-title">Take this formula apart, one symbol at a time</h3>
   <p class="lab-sub">Each lab is 3 minutes, covers one symbol, and gives you a figure you can drag.</p>
   <ul class="lab-list">
-    <li><a href="035a-dp.html"><span class="lab-num">35a</span><span class="lab-body"><strong>ε and δ <span class="say" data-sym="δ">(delta)</span> — the shape of a privacy promise</strong><span>Read the guarantee aloud, set clip C and noise σC, and say what the noise costs in accuracy.</span></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="035a-dp.html"><span class="lab-num">35a</span><span class="lab-body"><strong>ε and δ — the shape of a privacy promise</strong><span>Read the guarantee aloud, set clip C and noise σC, and say what the noise costs in accuracy.</span></span><span class="lab-go">Open lab →</span></a></li>
   </ul>
 </aside>
 
@@ -145,7 +145,7 @@
   <span class="label">Most common wrong mental model</span>
   <p><strong>"Federated means private."</strong> It feels right because the data provably never moves and the architecture diagram puts a padlock on every device. Locality is a real property; it is just not the one being claimed.</p>
   <p>The update is a compressed picture of the data, and compression is not encryption: a server that stores a thousand rounds has a thousand pictures of the same client. Clipping, noise and secure aggregation each remove one channel, and none of them is implied by the federated loop. A second trap is treating DP as free: every unit of ε buys privacy with accuracy, and the bill compounds across rounds.</p>
-  <p><strong>Correction:</strong> write the claim as a mechanism plus a number — "trained with DP-SGD, ε = 1.0 at δ = 10⁻⁵, secure aggregation over 100 rounds" — and check that each part maps to an adversary you named.</p>
+  <p><strong>Correction:</strong> write the claim as a mechanism plus a number — "trained with DP-SGD, ε = 1.0 at δ <span class="say" data-sym="δ">(delta)</span> = 10⁻⁵, secure aggregation over 100 rounds" — and check that each part maps to an adversary you named.</p>
 </div>
 <table class="trap-table">
   <tr><th>What it feels like</th><th>What is true</th></tr>

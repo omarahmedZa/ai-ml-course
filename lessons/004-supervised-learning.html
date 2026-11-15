@@ -86,7 +86,7 @@
 
 <h3>Part 4 — Define the loss L that scores mistakes</h3>
 <p><code>L</code> takes one prediction and one target and returns 0 when they agree, more as they diverge. Squared error suits continuous targets; cross-entropy suits probabilities. Averaging <code>L</code> over all <code>n</code> rows gives the <strong>empirical risk</strong>, the single number training minimises:</p>
-<span class="formula">θ* = argmin_θ  (1/n) Σᵢ L(f_θ(xᵢ), yᵢ)</span>
+<span class="formula">θ* = argmin_θ  (1/n) Σᵢ L(f_θ(xᵢ), yᵢ)</span><span class="say" data-sym="Σ">(sigma)</span>
 <p>Why this part exists: the loss is the only definition of "better", so a mismatch optimises the wrong thing — squared error on a yes/no task rewards confident wrong answers while the gradient fades.</p>
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 9 · about 3 minutes each</p>
@@ -97,7 +97,7 @@
     <li><a href="004b-prediction.html"><span class="lab-num">04b</span><span class="lab-body"><strong>f_θ(xᵢ) — one prediction</strong><span>Read the subscript correctly and turn one row into one number.</span></span><span class="lab-go">Open lab →</span></a></li>
     <li><a href="004c-loss.html"><span class="lab-num">04c</span><span class="lab-body"><strong>L(·,·) — the price of being wrong</strong><span>Compute the squared error for one prediction, and say what the square buys you.</span></span><span class="lab-go">Open lab →</span></a></li>
     <li><a href="004d-atom.html"><span class="lab-num">04d</span><span class="lab-body"><strong>L(f_θ(xᵢ), yᵢ) — the atom</strong><span>Turn one row into one loss, in two steps, without skipping the first.</span></span><span class="lab-go">Open lab →</span></a></li>
-    <li><a href="004e-sum.html"><span class="lab-num">04e</span><span class="lab-body"><strong>Σi <span class="say" data-sym="Σ">(sigma)</span> — add the atoms</strong><span>Read the sum as a running total and explain why order is irrelevant.</span></span><span class="lab-go">Open lab →</span></a></li>
+    <li><a href="004e-sum.html"><span class="lab-num">04e</span><span class="lab-body"><strong>Σi — add the atoms</strong><span>Read the sum as a running total and explain why order is irrelevant.</span></span><span class="lab-go">Open lab →</span></a></li>
     <li><a href="004f-average.html"><span class="lab-num">04f</span><span class="lab-body"><strong>1/n — turn a total into a rate</strong><span>Explain why dividing by n makes two datasets comparable.</span></span><span class="lab-go">Open lab →</span></a></li>
     <li><a href="004g-argmin.html"><span class="lab-num">04g</span><span class="lab-body"><strong>argmin vs min</strong><span>Say which one returns a position, which returns a height, and why training needs the…</span></span><span class="lab-go">Open lab →</span></a></li>
     <li><a href="004h-optimal.html"><span class="lab-num">04h</span><span class="lab-body"><strong>θ* — optimal for what?</strong><span>Say what θ* is relative to, and why it is not the true parameters.</span></span><span class="lab-go">Open lab →</span></a></li>
@@ -117,15 +117,39 @@
 <h2>Worked example<span class="h2-topic">— the objective</span></h2>
 
 <h3>1. One email, end to end</h3>
-<p>Features <code>x = [1, 50]</code>: "contains 'free'" (1) and "length in words" (50). Parameters <code>w = [2, −0.01]</code>, <code>b = −1</code>. Multiply out every term; that is where sign errors hide.</p>
+<p>One email arrives and the model must answer one question: <em>spam or not?</em> It gets there in three moves — score the evidence, turn the score into a probability, then price the mistake. The table holds those three moves with the numbers filled in. Before it, the same three moves with a single dial, so the arithmetic fits in your head.</p>
+
+<p><strong>Move 1 — score the evidence.</strong> Multiply each feature by its weight, add the results, add the bias. A positive score leans "spam", a negative one leans "not spam". <strong>Move 2 — squash the score into a probability</strong> between 0 and 1. <strong>Move 3 — price the answer</strong> against the true label.</p>
+
+<p><strong>Simplest version: one dial.</strong> Forget length. The email either contains "free" (1) or it does not (0). One weight <code>w = 2</code>, one bias <code>b = −1</code>.</p>
 
 <table>
-  <tr><th>Step</th><th>Arithmetic</th><th class="num">Value</th></tr>
-  <tr><td>Weighted sum z</td><td class="num">2(1) + (−0.01)(50) + (−1) = 2 − 0.5 − 1</td><td class="num">0.5</td></tr>
-  <tr><td>Probability p = σ(z) <span class="say" data-sym="σ">(sigma)</span></td><td class="num">1 / (1 + e<sup>−0.5</sup>) = 1 / (1 + 0.607)</td><td class="num">0.622</td></tr>
-  <tr><td>Loss if y = 1</td><td class="num">−ln(0.622)</td><td class="num">0.475</td></tr>
-  <tr><td>Loss if y = 0</td><td class="num">−ln(0.378)</td><td class="num">0.973</td></tr>
+  <tr><th>Step</th><th class="num">Value</th></tr>
+  <tr><td><code>z = 2(1) + (−1) = 2 − 1</code></td><td class="num">1.0</td></tr>
+  <tr><td><code>p = 1/(1 + e<sup>−1</sup>) = 1/1.368</code></td><td class="num">0.731</td></tr>
+  <tr><td>Loss if spam: <code>−ln(0.731)</code></td><td class="num">0.313</td></tr>
+  <tr><td>Loss if ham: <code>−ln(0.269)</code></td><td class="num">1.313</td></tr>
 </table>
+
+<p><strong>Read it as a sentence.</strong> "Contains 'free'" is worth 2 points of evidence, and the bias takes 1 away, so the model starts at 1.0 — mildly suspicious. The squash turns 1.0 into 0.73: "73% spam". If the email really is spam, that answer costs 0.313. If it is ham, the same answer costs 1.313, because 73% spam is a confidently wrong answer for a ham email.</p>
+
+<p><strong>Now the real email, row by row.</strong> Features <code>x = [1, 50]</code>: "contains 'free'" (1) and "length in words" (50). Parameters <code>w = [2, −0.01]</code>, <code>b = −1</code>.</p>
+
+<table>
+  <tr><th>Step</th><th class="num">Value</th></tr>
+  <tr><td><code>z = 2(1) + (−0.01)(50) + (−1) = 2 − 0.5 − 1</code></td><td class="num">0.5</td></tr>
+  <tr><td><code>p = 1/(1 + e<sup>−0.5</sup>) = 1/1.607</code></td><td class="num">0.622</td></tr>
+  <tr><td>Loss if spam: <code>−ln(0.622)</code></td><td class="num">0.475</td></tr>
+  <tr><td>Loss if ham: <code>−ln(0.378)</code></td><td class="num">0.973</td></tr>
+</table>
+
+<p><strong>Row 1 — add the evidence.</strong> <code>2(1)</code> is the "free" evidence: +2. <code>(−0.01)(50)</code> is the length: 50 words at −0.01 each = −0.5, so a long email loses half a point. <code>(−1)</code> is the bias: every email starts one point down. Add the three: 2 − 0.5 − 1 = 0.5.</p>
+
+<p><strong>Row 2 — squash it to a probability.</strong> <code>e<sup>−0.5</sup> = 0.607</code>, so <code>1 / (1 + 0.607) = 0.622</code>. The squash sends a score of 0 to 0.5, positive scores above 0.5 and negative scores below. This one lands just above the middle: 62% spam.</p>
+
+<p><strong>Rows 3 and 4 — price it, and only one row counts.</strong> The label <code>y</code> picks the row. Spam email: <code>−ln(0.622) = 0.475</code>. Ham email: <code>−ln(0.378) = 0.973</code> — same prediction, a bigger bill, because 62% spam is a poor answer for a ham email.</p>
+
+<p><strong>Why the log.</strong> <code>−ln p</code> is 0 when you were confident and right, and grows without limit when you are confident and wrong: p = 0.9 costs 0.105, p = 0.5 costs 0.693, p = 0.1 costs 2.303. That slope is what training follows.</p>
 
 <p><strong>What to notice.</strong> One prediction, two possible losses, and the label decides which counts — the model is never scored in the abstract. The length feature, weighted at −0.01, subtracted 0.5 from the score, so this model reads long emails as slightly less spammy. Being wrong about a ham email costs 0.973 while being wrong about spam costs 0.475, which is why training drifts borderline emails toward "ham".</p>
 
