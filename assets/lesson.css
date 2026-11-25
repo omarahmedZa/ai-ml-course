@@ -977,3 +977,24 @@ body.reading { overflow: hidden; }
   border-radius: 8px; font-size: .84rem; background: var(--card);
 }
 .solve-row a:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ---------- search results: readable ---------- */
+.search-results {
+  width: min(34rem, 92vw); text-transform: none; letter-spacing: 0;
+  padding: .35rem;
+}
+.search-results li {
+  display: flex; align-items: baseline; gap: .9rem;
+  padding: .42rem .5rem; border-radius: 6px;
+}
+.search-results a {
+  flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; font-size: .82rem; color: var(--ink);
+  text-transform: none; letter-spacing: 0;
+}
+.search-results span {
+  flex: 0 0 auto; max-width: 42%; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; font-size: .66rem; color: var(--ink-faint);
+  text-transform: none; letter-spacing: .01em;
+}
+.search-results li:hover a { color: var(--accent); }

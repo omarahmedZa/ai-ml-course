@@ -890,7 +890,9 @@
           var a = document.createElement("a");
           a.href = rootPrefix() + e.url;
           var small = document.createElement("span");
-          small.textContent = e.type === "lesson" ? e.bookTitle : e.type;
+          small.textContent = e.type === "lesson"
+            ? e.bookTitle
+            : e.type + " · " + (e.bookTitle || "");
           a.textContent = e.title;
           li.appendChild(a);
           li.appendChild(small);
