@@ -15,17 +15,23 @@
   }
   function doneCount(book) {
     var s = store().lessons || {}, n = 0;
-    book.contents.forEach(function (c) {
+    allRows(book).forEach(function (c) {
       if (!c.planned && s[c.id] && s[c.id].sections && Object.keys(s[c.id].sections).length >= 8) n++;
     });
     return n;
   }
+  function allRows(book) {
+    var out = [];
+    book.levels.forEach(function (l) { out = out.concat(l.rows); });
+    return out;
+  }
   function firstUnfinished(book) {
-    var s = store().lessons || {};
-    for (var i = 0; i < book.contents.length; i++) {
-      var c = book.contents[i];
+    var st = store().lessons || {};
+    var rows = allRows(book);
+    for (var i = 0; i < rows.length; i++) {
+      var c = rows[i];
       if (c.planned) continue;
-      if (!s[c.id] || !s[c.id].sections || Object.keys(s[c.id].sections).length < 8) return c.id;
+      if (!st[c.id] || !st[c.id].sections || Object.keys(st[c.id].sections).length < 8) return c.id;
     }
     return null;
   }
@@ -77,13 +83,26 @@
     return p;
   }
 
-  function contentsPage(book, list, part) {
+  function contentsPage(book, level) {
     var p = el("div", "page");
-    p.appendChild(el("p", "page-kicker", "Contents" + (part ? " · part " + part : "")));
+    p.appendChild(el("p", "page-kicker", "Part " + level.roman));
+    var head = el("div", "part-head");
+    head.appendChild(el("h3", "part-name", level.name));
+    head.appendChild(el("span", "part-count",
+      doneIn(level) + " / " + level.total + " lessons"));
+    p.appendChild(head);
+    var startRow = level.start;
+    if (startRow) {
+      var a = el("a", "start-btn", "START | " + startRow.title);
+      a.setAttribute("href", "../" + startRow.url);
+      p.appendChild(a);
+    } else {
+      p.appendChild(el("span", "start-btn off", "opens in a later wave"));
+    }
     var ol = el("ol", "toc");
     var here = firstUnfinished(book);
     var s = store().lessons || {};
-    list.forEach(function (c) {
+    level.rows.forEach(function (c) {
       var li = el("li", "toc-row" + (c.planned ? " planned" : ""));
       li.appendChild(el("span", "toc-n", String(c.n)));
       var title = el(c.planned ? "span" : "a", "toc-title", c.title);
@@ -96,40 +115,43 @@
       li.appendChild(mark);
       if (c.id === here) li.appendChild(el("span", "toc-here", "here"));
       if (c.planned) li.appendChild(el("span", "toc-wave", "wave"));
-      p.appendChild(li);
+      ol.appendChild(li);
     });
     p.appendChild(ol);
     return p;
   }
 
+  function doneIn(level) {
+    var s = store().lessons || {}, n = 0;
+    level.rows.forEach(function (c) {
+      if (!c.planned && s[c.id] && s[c.id].sections && Object.keys(s[c.id].sections).length >= 8) n++;
+    });
+    return n;
+  }
+
   function build(book) {
     var pages = [];
     pages.push([exLibris(book), preface(book)]);
-    var list = book.contents;
-    var half = Math.ceil(list.length / 2);
-    if (list.length > 7) {
-      pages.push([contentsPage(book, list.slice(0, half), 1),
-                  contentsPage(book, list.slice(half), 2)]);
-    } else {
-      var legend = el("div", "page");
-      legend.appendChild(el("p", "page-kicker", "How a lesson works"));
-      legend.appendChild(el("p", "serif-body", book.promise));
-      var dl = el("dl", "conv");
-      [["Why it matters", "the failure this prevents"],
-       ["The core idea", "the one sentence to keep"],
-       ["How it works", "the mechanism, in parts"],
-       ["Worked example", "numbers, end to end"],
-       ["The trap", "the wrong model, and its tell"],
-       ["Retrieval", "three questions, no notes"],
-       ["Build it", "a notebook you can run"],
-       ["Practice", "two harder questions"]].forEach(function (row) {
-        var dt = el("dt", null, row[0]);
-        dl.appendChild(dt);
-        dl.appendChild(el("dd", null, row[1]));
-      });
-      legend.appendChild(dl);
-      pages.push([contentsPage(book, list), legend]);
-    }
+    var lv = book.levels;
+    pages.push([contentsPage(book, lv[0]), contentsPage(book, lv[1])]);
+    var third = contentsPage(book, lv[2]);
+    var legend = el("div", "page");
+    legend.appendChild(el("p", "page-kicker", "How a lesson works"));
+    legend.appendChild(el("p", "serif-body", book.promise));
+    var dl = el("dl", "conv");
+    [["Why it matters", "the failure this prevents"],
+     ["The core idea", "the one sentence to keep"],
+     ["How it works", "the mechanism, in parts"],
+     ["Worked example", "numbers, end to end"],
+     ["The trap", "the wrong model, and its tell"],
+     ["Retrieval", "three questions, no notes"],
+     ["Build it", "a notebook you can run"],
+     ["Practice", "two harder questions"]].forEach(function (row) {
+      dl.appendChild(el("dt", null, row[0]));
+      dl.appendChild(el("dd", null, row[1]));
+    });
+    legend.appendChild(dl);
+    pages.push([third, legend]);
     var folio = 2;
     pages.forEach(function (pair) {
       pair.forEach(function (pg) {
