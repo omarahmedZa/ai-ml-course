@@ -100,6 +100,13 @@
 <h3>Part 6 — Position has to be injected</h3>
 <p>Attention treats its input as a set: permute the tokens and every output is permuted the same way. To break that, add a position vector to each embedding, or rotate queries and keys by an angle proportional to position. <strong>Rotary position embedding (RoPE)</strong> rotates the query at position <code>m</code> and the key at position <code>n</code>, so their dot product depends on <code>m − n</code>. <strong>Why this part exists:</strong> without it, "dog bites man" and "man bites dog" are the same bag of tokens.</p>
 
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 1</p>
+  <h3 class="lab-title">Drag the symbol</h3>
+  <ul class="lab-list">
+    <li><a href="050a-heads.html"><span class="lab-num">A</span><span class="lab-body"><strong>h — one width, several views</strong><span>Interactive: drag the parameter, read the number.</span></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
+</aside>
 <h2>Worked example<span class="h2-topic">— attention</span></h2>
 
 <h3>1. One head on two tokens</h3>

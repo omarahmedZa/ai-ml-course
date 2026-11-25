@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>036.1 — λ: the direction a matrix only stretches</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="λ is the factor a matrix applies to its own directions — and the miss it cannot explain on every other vector.">
+</head>
+<body data-page="lab" data-lesson="036a" class="library">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <span class="pill">Book 1 · Lab</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="036-eigen-svd.html#labs">Topic 36 · Eigenvalues, eigenvectors &amp; SVD</a> — the directions that survive a matrix</p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · the stretch factor</p>
+  <h1>λ <span class="say" data-sym="λ">(lambda)</span> — the stretch a direction allows</h1>
+  <p class="objective">You can say what λ measures, spot an eigenvector from the arithmetic, and explain why an ordinary vector needs a second number.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">A</span> <span class="dim">v</span> = <span class="hot">λ</span> <span class="dim">v</span></p>
+<p class="eqn-note">Lab 1 of 1 · only λ is lit; the matrix A and the vector v stay dim</p>
+<p>Multiplying by a matrix turns almost every arrow it is handed. A few arrows come back pointing the same way, only longer or shorter. Those are the <strong>eigenvectors</strong>, and λ (lambda) is the factor by which they change. The matrix <code>A = [[3,1],[1,3]]</code> has exactly two of them.</p>
+
+<h2>The curve behind the equation</h2>
+<p>Take <code>v = (1,0)</code>. The matrix sends it to <code>Av = (3,1)</code>. No number λ can turn <code>(3,1)</code> into a multiple of <code>(1,0)</code>, because every multiple of <code>(1,0)</code> has a zero second entry and this one has 1. So <code>Av = λv</code> fails for this v, and that failure is what the lab is about.</p>
+<p>The best you can do is pick λ so that λv lands as close to Av as possible. The figure plots the squared miss between them for every candidate λ.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="f-lam-t f-lam-d">
+    <title id="f-lam-t">Squared miss between A v and a stretched copy of v, for every candidate stretch</title>
+    <desc id="f-lam-d">A bowl-shaped curve over candidate stretch from zero to six. The lowest point sits at a stretch of three with a squared miss of one. At a stretch of zero the miss is ten, and at six it is also ten. The bottom is above zero because the vector (1,0) is not an eigenvector.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls">
+    <label>best stretch λ* <input type="range" data-k="mu" min="0" max="6" step="0.1" value="3"></label>
+    <label>turn left over <input type="range" data-k="floor" min="0" max="4" step="0.1" value="1"></label>
+    <output data-out="val" aria-live="polite">mu = 3.00 · floor = 1.00</output>
+    <button type="reset">Reset</button>
+  </div>
+  <script type="application/json" class="curve-data">{"kind":"quadratic","x":[0,6],"y":[0,12],"xticks":[0,1,2,3,4,5,6],"yticks":[0,3,6,9,12],"xlabel":"candidate stretch λ′ (a number)","ylabel":"squared miss  ‖Av − λ′v‖²","controls":[{"k":"mu","label":"best stretch λ*","min":0,"max":6,"step":0.1,"value":3},{"k":"floor","label":"turn left over (0 = eigenvector)","min":0,"max":4,"step":0.1,"value":1}]}</script>
+  <figcaption><strong>The bottom of the bowl is the best λ; its height is what stretching cannot explain.</strong> Set the height to zero and the bowl touches the axis: now Av = λv exactly, so v is an eigenvector.</figcaption>
+</figure>
+
+<p>The two sliders describe one direction. The first moves the bottom, which is the λ that fits best. The second lifts the whole bowl, which is the part of Av that no multiple of v can reach. Eigenvector means that part is zero.</p>
+
+<h2>What to notice</h2>
+<table>
+  <tr><th>Direction v</th><th class="num">Av</th><th class="num">Best λ</th><th class="num">Miss²</th></tr>
+  <tr><td><code>(1, 1)</code></td><td class="num">(4, 4)</td><td class="num">4.0</td><td class="num">0</td></tr>
+  <tr><td><code>(1, −1)</code></td><td class="num">(2, −2)</td><td class="num">2.0</td><td class="num">0</td></tr>
+  <tr><td><code>(1, 0)</code></td><td class="num">(3, 1)</td><td class="num">3.0</td><td class="num">1</td></tr>
+  <tr><td><code>(1, 2)</code></td><td class="num">(5, 7)</td><td class="num">3.8</td><td class="num">1.8</td></tr>
+</table>
+<p>The first two rows are eigenvectors: Av is a multiple of v and the miss is exactly zero. The last two are ordinary vectors. Each still has a best λ, the bottom of its own bowl, but that bottom sits above the axis, so no λ makes the equation exact.</p>
+<p>λ is not a length. For <code>v = (1,0)</code> the answer Av has length <code>√10 = 3.16</code>, while the best λ is 3. λ is the factor you would apply to v, not the size of the result. Because A is symmetric, its two eigenvalues are real, its eigenvectors are perpendicular, and the misses for every other direction are positive.</p>
+
+<h2>The trap<span class="h2-topic">— λ</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Every vector has an eigenvalue."</strong> Every vector has a best-fit λ, and the bowl always has a bottom. An eigenvalue is stricter: it is a λ for which some non-zero v satisfies Av = λv with no miss at all.</p>
+  <p><strong>Correction:</strong> eigenvalues belong to the matrix, not to the arrow you happen to test. This matrix has two, 4 and 2. A tested vector may sit on neither.</p>
+</div>
+<p><strong>The tell:</strong> compute Av and λv separately and compare entries. If the two entries of Av are not the same multiple of the entries of v, you have a best fit, not an eigenpair.</p>
+
+<h2>Retrieval check<span class="h2-topic">— λ</span></h2>
+<ol class="quiz">
+  <li>For the same matrix, test <code>v = (1,−1)</code>. What is Av, and what is λ?
+    <details><summary>Answer</summary>
+      <p><code>Av = (3−1, 1−3) = (2,−2) = 2v</code>, so λ = 2. The two entries are both twice the entries of v, so the equation holds exactly and the miss is zero.</p>
+    </details>
+  </li>
+  <li>Why is λ = 3 not an eigenvalue of A, even though 3 is the best stretch for <code>(1,0)</code>?
+    <details><summary>Answer</summary>
+      <p>Because <code>3v = (3,3)</code> while <code>Av = (3,1)</code>. They differ in the second entry, so the miss is 1, not 0. The only exact stretches are those of <code>(1,1)</code> and <code>(1,−1)</code>.</p>
+    </details>
+  </li>
+</ol>
+
+<p>Next, the same idea at a dataset's scale: the directions of a covariance matrix are the ones worth keeping, and their λ values rank them.</p>
+
+<div class="labnav">
+  <a href="035a-dp.html">← 035a · ε (epsilon) and δ — the shape of a privacy promise</a>
+  <a href="037a-norm.html">037a · ‖x‖ (the norm of x) — one arrow, three sizes →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=5" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
+</body>
+</html>

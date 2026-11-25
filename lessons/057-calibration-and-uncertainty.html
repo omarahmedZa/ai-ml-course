@@ -86,6 +86,13 @@
 <p><strong>Temperature scaling</strong> divides the logits by one learned number <code>T</code> and re-applies softmax: <code>p' = softmax(z / T)</code>. With <code>T &gt; 1</code> probabilities soften and the ranking and argmax stay put. Isotonic regression is more flexible but needs more data. Measure again on a fresh split.</p>
 <p><strong>Why:</strong> calibration is rarely a training objective, and a repair that reordered cases would break your threshold.</p>
 
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 1</p>
+  <h3 class="lab-title">Drag the symbol</h3>
+  <ul class="lab-list">
+    <li><a href="057a-temperature.html"><span class="lab-num">A</span><span class="lab-body"><strong>T (temperature) — pulling the bars onto the diagonal</strong><span>Interactive: drag the parameter, read the number.</span></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
+</aside>
 <h2>Worked example<span class="h2-topic">— calibration</span></h2>
 <p>200 held-out predictions in five bins. Each row gives a count, a confidence, an observed frequency, and that row's share of the total gap.</p>
 

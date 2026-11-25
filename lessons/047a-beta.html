@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>047.1 — β: the share of the last step</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="β sets how much of the running velocity momentum keeps, and therefore how many past gradients still vote.">
+</head>
+<body data-page="lab" data-lesson="047a" class="library">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <span class="pill">Topic 47 · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="047-optimizers-sgd-adam.html#labs">Topic 47 · Optimizers</a> — where momentum is introduced</p>
+
+<header class="masthead">
+  <p class="kicker">Optimization, one symbol at a time · Lab 1</p>
+  <h1>β <span class="say" data-sym="β">(beta)</span> — the share of the last step</h1>
+  <p class="objective">You can compute a velocity by hand, and say what β = 0, β = 0.9 and β = 0.99 each do to a run.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">v ←</span> <span class="hot">β</span> <span class="dim">v + g</span> &nbsp;&nbsp;&nbsp; <span class="dim">w ← w − η v</span></p>
+<p class="eqn-note">Lab 1 · only β is lit; g is the gradient and η is the step size</p>
+<p>Momentum keeps a second list of numbers, the <strong>velocity</strong> v, the same shape as the weights. Each step it adds the new gradient to a fraction β of the old velocity, then moves the weights by η times that running total. Set β = 0 and the velocity is just today's gradient, so the rule collapses back to plain SGD.</p>
+<p>So β answers one question: how much of yesterday still counts?</p>
+
+<h2>The average behind the arrow</h2>
+<p>Unroll the rule and the answer becomes literal. After k steps the velocity is g<sub>k</sub> + β g<sub>k−1</sub> + β² g<sub>k−2</sub> + …, so the gradient from k steps ago enters with weight β<sup>k</sup> relative to today's. At β = 0.9 the memory is about ten gradients long; at β = 0.99 about a hundred; at β = 0 one.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-beta-t f-beta-d">
+    <title id="f-beta-t">How much a gradient loses for each step it ages</title>
+    <desc id="f-beta-d">A curve falling from one at zero steps back toward zero at twenty steps back. With beta 0.9 the curve is still at about a third after ten steps; with beta 0 the curve drops to zero after the first step.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls"></div>
+  <script type="application/json" class="curve-data">{"kind":"expdecay","x":[0,20],"y":[0,1.05],"xlabel":"steps back k","ylabel":"β^k","xticks":[0,5,10,15,20],"yticks":[0,0.25,0.5,0.75,1],"controls":[{"k":"base","label":"β","min":0,"max":0.99,"step":0.01,"value":0.9}]}</script>
+  <figcaption><strong>β is a memory length, not a step length.</strong> At β = 0.9 a gradient ten steps old still carries 0.35 of today's weight; at β = 0.99 it carries 0.90; at β = 0 the bar is gone after one step.</figcaption>
+</figure>
+
+<p>The weights form a geometric ladder, and the ladder is the whole mechanism. A direction that repeats accumulates; a direction that reverses loses to its own history. The weights halve every seven steps at β = 0.9.</p>
+
+<table>
+  <tr><th class="num">β</th><th class="num">Memory 1/(1−β)</th><th class="num">Weight after 10 steps</th><th class="num">After 50 steps</th></tr>
+  <tr><td class="num">0</td><td class="num">1</td><td class="num">0.000</td><td class="num">0.000</td></tr>
+  <tr><td class="num">0.5</td><td class="num">2</td><td class="num">0.001</td><td class="num">0.000</td></tr>
+  <tr><td class="num">0.9</td><td class="num">10</td><td class="num">0.349</td><td class="num">0.005</td></tr>
+  <tr><td class="num">0.99</td><td class="num">100</td><td class="num">0.904</td><td class="num">0.605</td></tr>
+</table>
+
+<h2>Two patterns, two verdicts</h2>
+<p>A ravine is steep across and shallow along. Across it the gradient alternates sign: +2, −2, +2. Along it a steady +0.2 points downhill. Push both patterns through β = 0.9 with η = 0.1 and the two verdicts separate.</p>
+
+<table>
+  <tr><th>Gradient pattern</th><th class="num">Plain SGD velocity</th><th class="num">Momentum velocity</th></tr>
+  <tr><td>alternating +2, −2, +2 …</td><td class="num">±2</td><td class="num">±0.105</td></tr>
+  <tr><td>steady +0.2, +0.2 …</td><td class="num">0.2</td><td class="num">2.0</td></tr>
+</table>
+
+<p>Momentum divides the steady part by 1 − β and multiplies the alternating part by (1 − β)/(1 + β). At 0.9 that is ten times up and about nineteen times down, from one rule. The zigzag across the ravine is cut to 5% of its raw size while the march along it speeds up tenfold.</p>
+<p>The first step is untouched: v starts at zero, so v<sub>1</sub> = g<sub>1</sub>. The two runs part company from the second step.</p>
+
+<h2>The trap<span class="h2-topic">— β</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"β is a second learning rate."</strong> It is not a distance. η still sets how far one unit of velocity moves the weights. β changes what a unit means: the steady velocity is g/(1−β), so the steady step is ηg/(1−β).</p>
+  <p><strong>Correction:</strong> treat η and β as a product. Raising β from 0.9 to 0.99 multiplies every sustained step by ten, so η has to come down by roughly ten to keep the same run.</p>
+</div>
+<p><strong>The tell:</strong> the loss falls, then spikes and oscillates with a constant amplitude instead of settling — the weights are crossing the basin and climbing the far wall. A sudden tenfold step after "just adding momentum" is β doing its job, not bad data.</p>
+
+<h2>Retrieval check<span class="h2-topic">— β</span></h2>
+<ol class="quiz">
+  <li>The gradient is 1 on every step, v starts at 0, β = 0.9. What is v after three steps, and how far does the third step of η = 0.1 move the weights?
+    <details><summary>Answer</summary>
+      <p>v<sub>1</sub> = 1, v<sub>2</sub> = 0.9 + 1 = 1.9, v<sub>3</sub> = 0.9(1.9) + 1 = <strong>2.71</strong>. The third step is 0.1 × 2.71 = <strong>0.271</strong>, not 0.1. The velocity is still climbing toward its ceiling of 1/(1 − 0.9) = 10.</p>
+    </details>
+  </li>
+  <li>Why can β = 0.99 at the old η diverge while β = 0.9 was stable?
+    <details><summary>Answer</summary>
+      <p>The sustained velocity is g/(1−β), so 0.99 turns a gradient of g into 100g. With η = 0.1 the step is 10g — ten times the step that was already near the limit. Lower η by about the same factor, or the ravine walls are crossed in one move.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="labnav">
+  <a href="043a-pc.html">← 043a · PC1 (the first component) — the axis that keeps the most spread</a>
+  <a href="048a-merges.html">048a · merges — the pair that wins →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=5" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
+</body>
+</html>

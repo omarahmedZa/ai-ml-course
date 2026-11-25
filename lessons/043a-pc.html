@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>043.1 — PC1: the direction that keeps the most spread</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="PC1 is the axis that captures the most variance; turning away from it costs variance in proportion to cos squared.">
+</head>
+<body data-page="lab" data-lesson="043a" class="library">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <span class="pill">Book 2 · Lab</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="043-pca-dimensionality-reduction.html#labs">Topic 43 · PCA &amp; dimensionality reduction</a> — the axis worth keeping</p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · the first principal axis</p>
+  <h1>PC1 <span class="say" data-sym="PC1">(the first component)</span> — the axis that keeps the most spread</h1>
+  <p class="objective">You can say what PC1 maximises, read a projected variance off a rotation, and turn it into an explained-variance ratio.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="hot">PC1</span> <span class="dim">= the axis a that maximises ‖Xa‖² , with ‖a‖ = 1</span></p>
+<p class="eqn-note">Lab 1 of 1 · PC1 is lit; the cloud and its coordinates stay dim</p>
+<p>PCA looks for the direction along which the data is most spread out. Project every point onto a candidate axis and measure the variance of those projections; the axis that makes it largest is the first principal component. A second axis, perpendicular to the first, takes the most of what is left.</p>
+
+<h2>Turning the axis</h2>
+<p>Take a simple cloud with variance 4 along one direction and variance 1 across it, uncorrelated, so the total is 5. An axis at angle θ from PC1 captures</p>
+<p class="eqn"><span class="dim">captured = 1 + 3</span> <span class="hot">cos²θ</span></p>
+<p>At θ = 0 it captures all 4 of PC1. At 90° it captures the 1 that PC2 carries. In between, the captured share follows the square of the cosine, which is why a small turn costs very little.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="f-pc-t f-pc-d">
+    <title id="f-pc-t">Variance captured by an axis, against how closely it points along PC1</title>
+    <desc id="f-pc-d">A straight line rising from a variance of one when the axis is across PC1 to four when it points along PC1. A marker at full alignment reads four, which is four fifths of the total variance of five.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls">
+    <label>alignment with PC1 <input type="range" data-k="align" min="0" max="1" step="0.01" value="1"></label>
+    <label>extra variance on PC1 <input type="range" data-k="w" min="0" max="4" step="0.1" value="3"></label>
+    <label>variance on PC2 <input type="range" data-k="b" min="0" max="2" step="0.1" value="1"></label>
+    <output data-out="val" aria-live="polite">w = 3.00 · b = 1.00 · align = 1.00 · y = 4.00</output>
+    <button type="reset">Reset</button>
+  </div>
+  <script type="application/json" class="curve-data">{"kind":"line","x":[0,1],"y":[0,5],"xticks":[0,0.25,0.5,0.75,1],"yticks":[0,1,2,3,4,5],"xlabel":"alignment with PC1  (cos²θ: 1 = along PC1, 0 = across)","ylabel":"variance captured (points)","controls":[{"k":"w","label":"extra variance PC1 carries","min":0,"max":4,"step":0.1,"value":3},{"k":"b","label":"variance PC2 carries","min":0,"max":2,"step":0.1,"value":1},{"k":"align","label":"alignment of your axis","min":0,"max":1,"step":0.01,"value":1}],"marker":"align"}</script>
+  <figcaption><strong>A 45° turn keeps only 62% of PC1's variance.</strong> PC1 carries 4 of the 5 points of variance; at 45° the axis captures 2.5, so the explained ratio is 50% — well below the 80% PC1 gets.</figcaption>
+</figure>
+
+<p>The horizontal axis is <code>cos²θ</code>, not θ, because that is the quantity the variance depends on. Alignment 1 means your axis points straight down PC1; alignment 0 means it is perpendicular, along PC2. The marker is your current axis, and its height is the variance you keep.</p>
+
+<h2>What to notice</h2>
+<table>
+  <tr><th class="num">θ from PC1</th><th class="num">cos²θ</th><th class="num">Captured</th><th class="num">Explained ratio</th></tr>
+  <tr><td class="num">0°</td><td class="num">1.00</td><td class="num">4.0</td><td class="num">80%</td></tr>
+  <tr><td class="num">30°</td><td class="num">0.75</td><td class="num">3.25</td><td class="num">65%</td></tr>
+  <tr><td class="num">45°</td><td class="num">0.50</td><td class="num">2.5</td><td class="num">50%</td></tr>
+  <tr><td class="num">90°</td><td class="num">0.00</td><td class="num">1.0</td><td class="num">20%</td></tr>
+</table>
+<p>The ratio is the captured variance divided by the total, <code>4 + 1 = 5</code>. PC1 explains 80%, and that is the most any single axis can do here. The remaining 20% is the variance across the cloud, and only a second axis can reach it.</p>
+<p>Notice the shape of the loss. The figure is drawn against <code>cos²θ</code>, so it is a straight line; read against the angle instead and it is a smooth step, almost flat near 0° and near 90° and steepest around 45°. A few degrees off PC1 cost almost nothing, which is why the leading component is stable to estimate from a noisy sample while the trailing ones are not.</p>
+<p>Drag the two variance sliders to change the cloud. Widen the gap between PC1 and PC2 and the line steepens: rotation matters more. Set them equal and the line goes flat — every direction captures the same variance, and PC1 stops being special.</p>
+
+<h2>The trap<span class="h2-topic">— PC1</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"PC1 is the feature with the biggest values."</strong> PC1 is a direction, usually a mix of features, chosen because projections onto it spread out most. A feature can have large raw numbers and still contribute little once the others are accounted for.</p>
+  <p><strong>Correction:</strong> PC1 is defined by variance captured, not by the size of any column. Scaling the features changes the answer, which is why standardising first is the default.</p>
+</div>
+<p><strong>The tell:</strong> if PC1 explains 100% of a two-feature cloud, one feature is an exact multiple of the other or the cloud is a straight line. Two genuine directions cannot both be captured by one axis.</p>
+
+<h2>Retrieval check<span class="h2-topic">— PC1</span></h2>
+<ol class="quiz">
+  <li>A cloud has variance 4 along one direction and 1 across it. What share does PC1 explain?
+    <details><summary>Answer</summary>
+      <p>The total is 5, and PC1 captures 4, so the ratio is <code>4/5 = 80%</code>. The other 20% needs a second axis.</p>
+    </details>
+  </li>
+  <li>An axis sits 45° from PC1. How much variance does it capture, and what is the ratio?
+    <details><summary>Answer</summary>
+      <p><code>cos²45° = 0.5</code>, so captured = <code>1 + 3(0.5) = 2.5</code> out of 5, a ratio of 50%. The capture is linear in cos²θ, so half the alignment gives half the variance here, not 80%.</p>
+    </details>
+  </li>
+</ol>
+
+<p>Next, keep r components instead of one and the same arithmetic gives the total variance retained — the number that sets how many dimensions you can afford to drop.</p>
+
+<div class="labnav">
+  <a href="041a-margin.html">← 041a · margin (the gap) — the band a point must clear</a>
+  <a href="047a-beta.html">047a · β (beta) — the share of the last step →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=5" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
+</body>
+</html>

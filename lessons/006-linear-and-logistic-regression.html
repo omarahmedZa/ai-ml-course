@@ -10,7 +10,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can derive a logistic decision boundary, and say why squared error is the wrong loss for classification.">
 </head>
-<body data-lesson="006" data-book="classical-ml" data-book-number="2" class="library">
+<body data-page="lesson" data-lesson="006" data-book="classical-ml" data-book-number="2" class="library">
 <main>
 
 <nav class="topline">
@@ -43,15 +43,13 @@
 <div class="keybox"><span class="sym">p = σ(w·x + b), boundary at w·x + b = 0</span><p>One weighted sum; the link decides whether the output is a quantity or a probability.</p></div>
 
 <h2>How it actually works<span class="h2-topic">— regression</span></h2>
-<p>Six parts, from the sum itself to the algorithm that finds its weights.</p>
+<p>Six steps, from the weighted sum itself to the algorithm that finds its weights.</p>
 
-<h3>Part 1 — One weighted sum is the whole model</h3>
-<p><code>z = w·x + b</code>, with one weight per feature and one bias. A 2-feature classifier stores exactly 3 numbers, and every prediction is arithmetic on those 3. Interpretability comes free: a weight of 2 means one more unit of that feature adds 2 to the score.</p>
-<p>Why this part exists: without the bias, every boundary is forced through the origin, so a model could not express a dividing line sitting at <code>x₂ = 0.5x₁ + 0.5</code>.</p>
+<h3>Step 1 — Start with one weighted sum</h3>
+<p><code>z = w·x + b</code>, with one weight per feature and one bias. A 2-feature classifier stores exactly 3 numbers, and every prediction is arithmetic on those 3: a weight of 2 means one more unit of that feature adds 2 to the score. Without the bias every boundary is forced through the origin, so a model could not express a dividing line at <code>x₂ = 0.5x₁ + 0.5</code>.</p>
 
-<h3>Part 2 — The link decides what the score means</h3>
-<p>Linear regression uses the identity link, so <code>ŷ = z</code> and any real value is allowed. Logistic regression uses the sigmoid <code>σ(z) = 1/(1 + e⁻ᶻ)</code>, which maps the whole real line into (0, 1) and equals 0.5 at <code>z = 0</code>. Choosing the link is choosing whether the output is a quantity or a probability.</p>
-<p>Why this part exists: an identity link on a probability task returns values like −0.4 or 1.7, which no likelihood can score and no threshold can interpret.</p>
+<h3>Step 2 — Choose a link, so the score means something</h3>
+<p>Linear regression uses the identity link, so <code>ŷ = z</code> and any real value is allowed. Logistic regression uses the sigmoid <code>σ(z) = 1/(1 + e⁻ᶻ)</code>, which maps the whole real line into (0, 1) and equals <code>0.5</code> at <code>z = 0</code>. The choice decides whether the output is a quantity or a probability: an identity link on a probability task returns values like −0.4 or 1.7, which no likelihood can score.</p>
 
 <figure class="fig" data-graph="curve">
   <svg viewBox="0 0 720 360" role="img" aria-labelledby="f006-t f006-d">
@@ -75,21 +73,17 @@
   <figcaption><strong>Every score becomes a probability, and 0.5 is the boundary.</strong> The curve crosses 0.5 only at z = 0, so w·x + b = 0 is the decision line; k changes how fast confidence saturates, never where the label flips.</figcaption>
 </figure>
 
-<h3>Part 3 — The score is log-odds, not probability</h3>
-<p>Solving the sigmoid for <code>z</code> gives <code>z = ln(p/(1−p))</code>, the <strong>log-odds</strong>. A probability of 0.8 means odds of 4:1, so <code>z = ln 4 = 1.386</code>. The model is therefore linear in log-odds, and equal steps in <code>z</code> multiply the odds by the same factor — the arithmetic of evidence that accumulates additively.</p>
-<p>Why this part exists: treating <code>z</code> as a probability puts the boundary at 0.5 instead of 0 and makes every later geometric statement wrong.</p>
+<h3>Step 3 — Read the score as log-odds</h3>
+<p>Solving the sigmoid for <code>z</code> gives <code>z = ln(p/(1−p))</code>, the <strong>log-odds</strong>. A probability of 0.8 means odds of 4:1, so <code>z = ln 4 = 1.386</code>: the model is linear in log-odds, and equal steps in <code>z</code> multiply the odds by a fixed factor. Treat <code>z</code> as a probability instead and the boundary sits at 0.5 rather than 0, which makes every later geometric statement wrong.</p>
 
-<h3>Part 4 — The boundary is where the score is zero</h3>
-<p>Predict class 1 when <code>p &gt; 0.5</code>, which happens exactly when <code>z &gt; 0</code>. So the decision boundary is <code>w·x + b = 0</code>, a hyperplane — the flat surface a straight boundary makes — whose normal vector is <code>w</code>, and it stays straight however confident the probabilities become. Distance from the plane sets confidence; it never changes the label.</p>
-<p>Why this part exists: half the marks in this topic live here, and scaling <code>w</code> by 10 leaves the boundary fixed while pushing probabilities to the extremes.</p>
+<h3>Step 4 — Find the boundary where the score is zero</h3>
+<p>Predict class 1 when <code>p &gt; 0.5</code>, which happens exactly when <code>z &gt; 0</code>. So the decision boundary is <code>w·x + b = 0</code>, a hyperplane whose normal vector is <code>w</code>, and it stays straight however confident the probabilities become — distance from the plane sets confidence, never the label. Scale <code>w</code> by 10 and the line does not move while probabilities push to the extremes.</p>
 
-<h3>Part 5 — Match the loss to the output type</h3>
-<p>Squared error is right for a quantity and wrong for a probability. Binary cross-entropy, <code>−[y ln p + (1−y) ln(1−p)]</code>, is the likelihood from topic 3, and its gradient with respect to the score is simply <code>(p − y)</code> — large when the model is wrong, zero when it is right.</p>
-<p>Why this part exists: put a sigmoid in front of squared error and the gradient fades exactly when the prediction is most wrong, so training stalls at whatever random weights it started from.</p>
+<h3>Step 5 — Match the loss to the output type</h3>
+<p>Squared error is right for a quantity and wrong for a probability. Binary cross-entropy, <code>−[y ln p + (1−y) ln(1−p)]</code>, is the likelihood from topic 3, and its gradient with respect to the score is simply <code>(p − y)</code> — large when the model is wrong, zero when it is right. Put a sigmoid in front of squared error instead and the gradient fades exactly when the prediction is most wrong.</p>
 
-<h3>Part 6 — Solve, knowing there is one valley</h3>
-<p>Linear regression has a closed form, <code>θ = (XᵀX)⁻¹Xᵀy</code><span class="say" data-sym="θ">(theta)</span>. Logistic regression has none, because the sigmoid makes the equations non-linear, so gradient descent updates <code>w ← w − η(p − y)x</code><span class="say" data-sym="η">(eta)</span>. Both objectives are convex, so each has a single minimum.</p>
-<p>Why this part exists: knowing the surface has one valley tells you a stalled loss is a learning-rate bug, not a second valley worth exploring.</p>
+<h3>Step 6 — Solve, knowing there is one valley</h3>
+<p>Linear regression has a closed form, <code>θ = (XᵀX)⁻¹Xᵀy</code><span class="say" data-sym="θ">(theta)</span>. Logistic regression has none, because the sigmoid makes the equations non-linear, so gradient descent updates <code>w ← w − η(p − y)x</code><span class="say" data-sym="η">(eta)</span> instead. Both objectives are convex, so each has a single minimum — which makes a stalled loss a learning-rate bug, not a second valley worth exploring.</p>
 
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 1 · about 3 minutes each</p>
@@ -99,7 +93,6 @@
     <li><a href="006a-sigmoid.html"><span class="lab-num">06a</span><span class="lab-body"><strong>σ(z) — from score to probability</strong><span>Turn a weighted sum into a probability and find where the model switches sides.</span></span><span class="lab-go">Open lab →</span></a></li>
   </ul>
 </aside>
-
 <h2>Worked example<span class="h2-topic">— regression</span></h2>
 
 <h3>1. One point through the sigmoid</h3>
@@ -142,6 +135,20 @@
 </table>
 
 <p><strong>What to notice.</strong> The useless predictor wins on accuracy, 97.0% against 95.0%, while missing every case anyone cares about. Model A costs 9 false positives to catch 5 true positives, and accuracy is blind to that trade. Report precision and recall against the trivial baseline; otherwise the metric rewards the model that does nothing.</p>
+
+<h3>4. Check yourself</h3>
+<p>On paper first; the answers are one click away.</p>
+<ol class="steps">
+  <li><code>z = 2</code>. What is <code>p</code>, and what are the odds it represents?
+    <details><summary>Answer</summary><p><code>p = 1/(1 + e⁻²) = 1/(1 + 0.135) = 0.881</code>; the odds are <code>e² ≈ 7.4</code> to 1, since <code>z</code> is log-odds.</p></details>
+  </li>
+  <li><code>w = [1, 2]</code>, <code>b = −1</code>, <code>x = [3, 1]</code>. Which class, and how confident?
+    <details><summary>Answer</summary><p><code>z = 3 + 2 − 1 = 4</code>, so class 1 with <code>p = 1/(1 + e⁻⁴) = 0.982</code>. The size of <code>z</code> sets confidence; only its sign sets the label.</p></details>
+  </li>
+  <li>A row has <code>y = 0</code> and the model outputs <code>p = 0.9</code>. What does cross-entropy charge?
+    <details><summary>Answer</summary><p><code>−ln(1 − 0.9) = −ln(0.1) = 2.303</code> — a confident, wrong answer, priced far above the 0.693 of a shrug.</p></details>
+  </li>
+</ol>
 
 <section class="playground">
   <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">σ(z) (sigma) — from score to probability — drag, step, then read the numbers.</p></div><a class="pg-link" href="006a-sigmoid.html">Open full screen →</a></div>
@@ -216,7 +223,7 @@ coef, *_ = np.linalg.lstsq(A, y, rcond=None)</code></pre>
 <p class="source">Primary source: <a href="https://scikit-learn.org/stable/modules/linear_model.html">scikit-learn — Generalized linear models</a>.</p>
 
 </main>
-  <script src="../assets/graph.js?v=4" defer></script>
+  <script src="../assets/graph.js?v=5" defer></script>
   <script src="../assets/search-index.js" defer></script>
 <script src="../assets/course.js?v=18" defer></script>
 </body>

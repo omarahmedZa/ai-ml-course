@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>041.1 — margin: the band a point must clear</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="The margin is a free band around the boundary; points inside it pay, and C decides how much that payment matters.">
+</head>
+<body data-page="lab" data-lesson="041a" class="library">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <span class="pill">Book 2 · Lab</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="041-svm-and-kernels.html#labs">Topic 41 · SVM &amp; kernels</a> — the gap the boundary keeps</p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · the width of the gap</p>
+  <h1>margin <span class="say" data-sym="margin">(the gap)</span> — the band a point must clear</h1>
+  <p class="objective">You can say what the margin measures, name the points that set it, and explain what C trades away.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">cost = max( 0,</span> <span class="hot">margin</span> <span class="dim">− m )</span></p>
+<p class="eqn-note">Lab 1 of 1 · the margin is lit; the point's position m stays dim</p>
+<p>A support vector machine does not just want a line that separates the classes. It wants the widest empty band it can get around that line. The half-width of the band is the margin, and every point is scored by how far inside that band it sits.</p>
+
+<h2>The cost of standing inside the band</h2>
+<p>Let m be a point's signed distance from the boundary: positive on its own side, negative on the wrong side. If the margin is 1, a point at m = 0.4 is inside the band by 0.6 and pays 0.6. A point at m = 1.6 has cleared the band and pays nothing.</p>
+<p>The figure plots that price. Drag the margin and the whole line shifts: the point where the cost reaches zero is the edge of the band you are demanding.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="f-mar-t f-mar-d">
+    <title id="f-mar-t">Cost paid by a point against its distance from the separating boundary</title>
+    <desc id="f-mar-d">A straight line falling from a cost of two at a distance of minus one, crossing zero at a distance of one and staying on the axis beyond. Points left of the crossing are inside the margin and pay; points right of it pay nothing.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls">
+    <label>penalty per point <input type="range" data-k="w" min="-2" max="-0.5" step="0.05" value="-1"></label>
+    <label>margin width <input type="range" data-k="b" min="0" max="2.5" step="0.05" value="1"></label>
+    <output data-out="val" aria-live="polite">w = −1.00 · b = 1.00</output>
+    <button type="reset">Reset</button>
+  </div>
+  <script type="application/json" class="curve-data">{"kind":"line","x":[-1,3],"y":[0,2.5],"xticks":[-1,0,1,2,3],"yticks":[0,0.5,1,1.5,2,2.5],"xlabel":"signed distance from the boundary m (points)","ylabel":"cost paid by that point","controls":[{"k":"w","label":"penalty per point inside the margin","min":-2,"max":-0.5,"step":0.05,"value":-1},{"k":"b","label":"margin width (where cost reaches zero)","min":0,"max":2.5,"step":0.05,"value":1}]}</script>
+  <figcaption><strong>The margin is where the cost line meets the axis.</strong> Every point on or to the left of that crossing is a support vector: it is either misclassified or inside the band. Points to the right cost nothing and do not affect the boundary.</figcaption>
+</figure>
+
+<p>Three points sit at m = 0.2, m = 0.9 and m = 1.6 with the margin at 1. Their costs are 0.8, 0.1 and 0. The first two are support vectors; the third is correctly classified and clear of the band, so moving it further out would not change the line at all.</p>
+<p>Only the support vectors constrain the answer. That is the surprising economy of the SVM: a thousand rows may be stored, but the fit is decided by the handful sitting on or inside the band.</p>
+
+<h2>What to notice</h2>
+<table>
+  <tr><th class="num">m</th><th class="num">Cost at margin 1</th><th>Where it sits</th><th>Support vector?</th></tr>
+  <tr><td class="num">−0.3</td><td class="num">1.3</td><td>wrong side of the boundary</td><td>yes</td></tr>
+  <tr><td class="num">0.2</td><td class="num">0.8</td><td>inside the band, correct side</td><td>yes</td></tr>
+  <tr><td class="num">0.9</td><td class="num">0.1</td><td>just inside the band</td><td>yes</td></tr>
+  <tr><td class="num">1.6</td><td class="num">0</td><td>clear of the band</td><td>no</td></tr>
+</table>
+<p>The width of the band is <code>2/‖w‖</code>, so a boundary with small weights has a wide margin. Widening the margin pushes the boundary away from the nearest points, which is safer on new data — until the band starts swallowing points of the other class.</p>
+<p>C is the price of that trade. The full objective is <code>½‖w‖² + C × Σ cost</code>. A large C makes each violation expensive, so the model keeps the band narrow to avoid paying; a small C lets violations go cheaply, so the model widens the band and accepts more of them.</p>
+<table>
+  <tr><th class="num">C</th><th class="num">Margin</th><th class="num">Support vectors</th><th>Behaviour</th></tr>
+  <tr><td class="num">0.1</td><td class="num">2.0</td><td class="num">7</td><td>wide band, more mistakes, steadier</td></tr>
+  <tr><td class="num">1</td><td class="num">1.0</td><td class="num">3</td><td>balanced</td></tr>
+  <tr><td class="num">100</td><td class="num">0.4</td><td class="num">2</td><td>narrow band, few mistakes, fragile</td></tr>
+</table>
+
+<h2>The trap<span class="h2-topic">— margin</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The margin is the gap between the two classes."</strong> The gap is where the classes happen to be. The margin is a band the model chooses, wide enough to be safe and narrow enough to avoid swallowing points.</p>
+  <p><strong>Correction:</strong> the support vectors do not sit outside the margin; they sit on its edge or inside it, and they are the only rows that set its width.</p>
+</div>
+<p><strong>The tell:</strong> if moving a distant, correctly classified point changes your boundary, the model is not behaving like an SVM. Only points with a non-zero cost should move it.</p>
+
+<h2>Retrieval check<span class="h2-topic">— margin</span></h2>
+<ol class="quiz">
+  <li>With margin 1, a point sits at m = 0.4. What does it pay, and is it a support vector?
+    <details><summary>Answer</summary>
+      <p>It pays <code>1 − 0.4 = 0.6</code>. It is inside the band, so it is a support vector and its position helps set the boundary.</p>
+    </details>
+  </li>
+  <li>What changes when C drops from 100 to 0.1?
+    <details><summary>Answer</summary>
+      <p>Violations become cheap, so the model accepts a wider band and more mistakes inside it. The margin widens, more points become support vectors, and the fit is less sensitive to individual rows.</p>
+    </details>
+  </li>
+</ol>
+
+<p>Next, the same idea without a boundary: a kernel replaces the distance in this cost with a similarity, so the band can bend.</p>
+
+<div class="labnav">
+  <a href="040a-k.html">← 040a · k (kay) — how many neighbours vote</a>
+  <a href="043a-pc.html">043a · PC1 (the first component) — the axis that keeps the most spread →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=5" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
+</body>
+</html>

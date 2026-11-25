@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>040.1 — k: how many neighbours vote</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="k sets how many neighbours vote, and moving it trades a noisy boundary for a blurred one.">
+</head>
+<body data-page="lab" data-lesson="040a" class="library">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <span class="pill">Book 2 · Lab</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="040-knn-curse-of-dimensionality.html#labs">Topic 40 · kNN &amp; the curse of dimensionality</a> — the vote that decides a label</p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · the neighbour count</p>
+  <h1>k <span class="say" data-sym="k">(kay)</span> — how many neighbours vote</h1>
+  <p class="objective">You can say what k counts, predict which way a query flips as k grows, and explain why neither end of the range is safe.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">ŷ = majority(</span> <span class="hot">k</span> <span class="dim">nearest labels )</span></p>
+<p class="eqn-note">Lab 1 of 1 · only k is lit; the distances and the labels stay dim</p>
+<p>A k-nearest-neighbours model stores every training row and does nothing until a query arrives. It then measures the distance from the query to every stored row, keeps the k closest, and returns the label most of them carry. k is the only dial, and it changes the answer.</p>
+
+<h2>The neighbours vote</h2>
+<p>Picture a two-class scatter with a query at the origin. The seven closest training points are A, A, A, B, B, B, B, at distances 1.0, 1.0, 1.1, 1.1, 1.2, 1.3 and 1.4. Everything past them is far away and mostly B.</p>
+<p>The figure plots the cost of choosing k, measured as the squared distance from the k that fits this scatter best. Drag k and the marker climbs the bowl; drag the best k and the whole bowl slides.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="f-k-t f-k-d">
+    <title id="f-k-t">Cost of choosing k, lowest at seven neighbours</title>
+    <desc id="f-k-d">A bowl-shaped curve over k from zero to fifteen. Its lowest point is at k equal to seven, with a small error left at the bottom. At k equal to one the cost is thirty-six, because one neighbour is six steps from the best choice.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls">
+    <label>neighbours k <input type="range" data-k="k" min="1" max="15" step="1" value="1"></label>
+    <label>best k <input type="range" data-k="mu" min="1" max="15" step="1" value="7"></label>
+    <label>error at the best k <input type="range" data-k="floor" min="0" max="0.5" step="0.01" value="0.12"></label>
+    <output data-out="val" aria-live="polite">k = 1 · mu = 7.00 · floor = 0.12</output>
+    <button type="reset">Reset</button>
+  </div>
+  <script type="application/json" class="curve-data">{"kind":"quadratic","x":[0,15],"y":[0,70],"xticks":[0,3,6,9,12,15],"yticks":[0,20,40,60],"xlabel":"number of neighbours k","ylabel":"cost of choosing k  ((k − best k)²)","controls":[{"k":"k","label":"neighbours k","min":1,"max":15,"step":1,"value":1},{"k":"mu","label":"best k for this scatter","min":1,"max":15,"step":1,"value":7},{"k":"floor","label":"error left at the best k","min":0,"max":0.5,"step":0.01,"value":0.12}],"marker":"k"}</script>
+  <figcaption><strong>The bottom of the bowl is the k this scatter can support.</strong> Move away in either direction and the cost rises; at k = 1 the query follows a single point, and at k = 15 it follows the whole neighbourhood.</figcaption>
+</figure>
+
+<p>At k = 1 the vote is a single label, so the query takes whichever point happens to be closest. At k = 3 the three nearest are all A and the answer is A. At k = 7 the four B points outvote the three A points and the answer flips to B. The flip happens at the first k where B holds the majority, and it does not flip back in this neighbourhood.</p>
+
+<h2>What to notice</h2>
+<table>
+  <tr><th class="num">k</th><th>Neighbours counted</th><th class="num">A : B</th><th>Decision</th></tr>
+  <tr><td class="num">1</td><td>nearest only</td><td class="num">1 : 0</td><td>A</td></tr>
+  <tr><td class="num">3</td><td>three closest</td><td class="num">3 : 0</td><td>A</td></tr>
+  <tr><td class="num">5</td><td>adds two B</td><td class="num">3 : 2</td><td>A</td></tr>
+  <tr><td class="num">7</td><td>adds two more B</td><td class="num">3 : 4</td><td>B — the flip</td></tr>
+  <tr><td class="num">15</td><td>adds eight more, mostly B</td><td class="num">5 : 10</td><td>B</td></tr>
+</table>
+<p>Small k follows the data closely. The boundary bends around every stored point, training error is near zero, and a single mislabelled row creates an island of the wrong class. Test error is high because the model has memorised noise.</p>
+<p>Large k averages over a wide neighbourhood. The boundary becomes smooth and the noise islands disappear, but points from the other class get a vote they should not have, and the boundary drifts away from the true one. Test error rises again for the opposite reason.</p>
+<p>The best k is where those two pressures balance. It grows with the number of rows and shrinks as the classes overlap more. A common starting point is <code>√n</code>, which is 10 for 100 rows; the curve here bottoms out at 7.</p>
+
+<h2>The trap<span class="h2-topic">— k</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"k = 1 is the most accurate, because it uses the closest point."</strong> It is the most faithful to the training rows, which is not the same thing. One row's label decides a whole region, so one bad label becomes a whole bad patch.</p>
+  <p><strong>Correction:</strong> judge k on held-out rows. If training error is near zero while test error is high, k is too small, not too precise.</p>
+</div>
+<p><strong>The tell:</strong> the boundary has thin tendrils and isolated islands. That is a k = 1 or k = 3 signature; a smooth boundary that ignores real structure is the signature of k too large.</p>
+
+<h2>Retrieval check<span class="h2-topic">— k</span></h2>
+<ol class="quiz">
+  <li>Using the seven neighbours above, what does the model predict at k = 4 and at k = 6?
+    <details><summary>Answer</summary>
+      <p>At k = 4 the neighbours are A, A, A, B, so A wins 3 to 1. At k = 6 they are A, A, A, B, B, B, a 3–3 tie — most implementations break it by distance, which favours the closer A. k = 7 is the first clear B majority.</p>
+    </details>
+  </li>
+  <li>Why does k = 15 smooth the boundary, and what does that cost?
+    <details><summary>Answer</summary>
+      <p>Every query averages 15 labels, so a single point carries 1/15 of the vote instead of all of it. Isolated islands vanish, but nearby points of the other class now vote too, so genuinely sharp structure is blurred away.</p>
+    </details>
+  </li>
+</ol>
+
+<p>Next, the same distance that picks the neighbours becomes useless when every pair of points is far apart — the curse of dimensionality.</p>
+
+<div class="labnav">
+  <a href="038a-sigma.html">← 038a · σ (sigma) — the width of a bell</a>
+  <a href="041a-margin.html">041a · margin (the gap) — the band a point must clear →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=5" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
+</body>
+</html>

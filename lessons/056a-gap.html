@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>056.1 — Δ: the gap between two groups</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Δ compares two groups' selection rates; the threshold sets the size of the gap, and equalising it costs accuracy.">
+</head>
+<body data-page="lab" data-lesson="056a" class="library">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <span class="pill">Fairness · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="056-fairness-and-bias-measurement.html">Topic 56 · Fairness &amp; bias measurement</a> — where a decision becomes a rate</p>
+
+<header class="masthead">
+  <p class="kicker">Fairness, one number at a time · Lab 1</p>
+  <h1>Δ <span class="say" data-sym="Δ">(delta)</span> — the gap between two groups</h1>
+  <p class="objective">You can compute the parity difference and the impact ratio from two selection rates, and say what equalising them costs in accuracy.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">Δ =</span> <span class="hot">|P(ŷ = 1 | A) − P(ŷ = 1 | B)|</span></p>
+<p class="eqn-note">Lab 1 · only the gap is lit; the two base rates and the cut stay dim</p>
+<p>Δ is read off <strong>decisions</strong>, not scores. Each group has a selection rate: the share of that group that gets the positive decision. Δ is the distance between those two shares, taken as an absolute value, because a gap in either direction is still a gap.</p>
+<p>Its companion is a ratio of the same two numbers, the <strong>disparate impact ratio</strong>: the smaller rate divided by the larger. A gap of 0.30 is thirty percentage points; a ratio of 0.50 says one group is approved at half the other's rate. United States regulators call a ratio below 0.80 adverse impact — the four-fifths rule.</p>
+
+<h2>One model, two base rates</h2>
+<p>In this lab both groups face the same score. A qualified applicant scores between 0.6 and 1.0; an unqualified one between 0.0 and 0.4. The score separates the classes perfectly for both groups, so any unfairness you see comes from the population, not from a model that fits one group worse.</p>
+<p>What differs is the base rate, the share of each group that is qualified. Group A sits at 0.60 and stays there. Group B starts at 0.30, and the first slider moves it. The second slider moves the single threshold that both groups are judged by.</p>
+
+<figure class="fig" data-graph="fair-parity">
+  <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="f-gap-t f-gap-d">
+    <title id="f-gap-t">Two groups with the same score and different base rates, split by one threshold</title>
+    <desc id="f-gap-d">Two score distributions. Group A has base rate 0.60 and group B 0.30. Qualified applicants score between 0.6 and 1.0, unqualified between 0.0 and 0.4. A threshold at 0.50 approves 60 percent of A and 30 percent of B.</desc>
+    <g data-layer>
+      <line x1="64" y1="292" x2="700" y2="292" stroke="var(--ink-faint)"/>
+      <line x1="64" y1="292" x2="64" y2="296" stroke="var(--ink-faint)"/>
+      <text x="64" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0</text>
+      <line x1="191.2" y1="292" x2="191.2" y2="296" stroke="var(--ink-faint)"/>
+      <text x="191.2" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.2</text>
+      <line x1="318.4" y1="292" x2="318.4" y2="296" stroke="var(--ink-faint)"/>
+      <text x="318.4" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.4</text>
+      <line x1="445.6" y1="292" x2="445.6" y2="296" stroke="var(--ink-faint)"/>
+      <text x="445.6" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.6</text>
+      <line x1="572.8" y1="292" x2="572.8" y2="296" stroke="var(--ink-faint)"/>
+      <text x="572.8" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.8</text>
+      <line x1="700" y1="292" x2="700" y2="296" stroke="var(--ink-faint)"/>
+      <text x="700" y="308" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1.0</text>
+      <text x="700" y="326" text-anchor="end" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">score (0 to 1)</text>
+
+      <line x1="64" y1="36" x2="84" y2="36" stroke="var(--sym-pred)" stroke-width="3"/>
+      <text x="90" y="40" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">approved (score ≥ t)</text>
+      <line x1="270" y1="36" x2="290" y2="36" stroke="var(--sym-data)" stroke-width="3"/>
+      <text x="296" y="40" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">rejected</text>
+
+      <text x="64" y="78" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">A · base rate 0.60</text>
+      <line x1="64" y1="150" x2="700" y2="150" stroke="var(--rule)"/>
+      <rect x="64" y="108" width="254.4" height="42" fill="var(--sym-data)" opacity=".42"/>
+      <rect x="445.6" y="87" width="254.4" height="63" fill="var(--sym-pred)" opacity=".55"/>
+      <text x="572.8" y="122" text-anchor="middle" font-size="11" fill="var(--ink)" font-family="ui-monospace, monospace">60% approved</text>
+
+      <text x="64" y="210" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">B · base rate 0.30</text>
+      <rect x="64" y="218.5" width="254.4" height="73.5" fill="var(--sym-data)" opacity=".42"/>
+      <rect x="445.6" y="260.5" width="254.4" height="31.5" fill="var(--sym-pred)" opacity=".55"/>
+      <text x="572.8" y="280" text-anchor="middle" font-size="11" fill="var(--ink)" font-family="ui-monospace, monospace">30% approved</text>
+
+      <line x1="382" y1="44" x2="382" y2="292" stroke="var(--sym-param)" stroke-width="2.5" stroke-dasharray="6 4"/>
+      <text x="390" y="58" font-size="12" fill="var(--sym-param)" font-family="ui-monospace, monospace">threshold t = 0.50</text>
+    </g>
+  </svg>
+  <script type="application/json" class="fig-data">{"kind":"fair-parity","groupA":{"base":0.6},"groupB":{"base":0.3,"range":[0.1,0.6]},"threshold":0.5,"thresholdRange":[0,0.8],"qualified":[0.6,1.0],"unqualified":[0.0,0.4]}</script>
+  <div class="fig-controls">
+    <label>base rate · group B <input type="range" data-k="b" min="0.1" max="0.6" step="0.01" value="0.3"></label>
+    <label>threshold t · score <input type="range" data-k="t" min="0" max="0.8" step="0.01" value="0.5"></label>
+    <output data-out="gap" aria-live="polite">Δ 0.30 · ratio 0.50 · accuracy 1.00 · parity cost 0.55</output>
+    <button type="reset">Reset</button>
+  </div>
+  <figcaption><strong>At t = 0.50 the score is right about everyone, and A is approved at twice B's rate.</strong> The gap is the difference between the two blue blocks. It does not shrink until the threshold stops separating qualified from unqualified.</figcaption>
+</figure>
+
+<p>Set group B's base rate to 0.60 and the two panels turn identical: Δ = 0 at every threshold, because the groups now hold the same mix of qualified people. Nothing about the model changed, which is the honest reading of this picture — here the gap is a base-rate gap.</p>
+
+<h2>What parity costs</h2>
+<p>Equal selection rates are a property of the decisions, so the only lever in this figure is the threshold. Move it and the gap narrows, but not for free: the readout's last number is the accuracy you would give up to reach the nearest threshold with equal rates.</p>
+
+<table>
+  <tr><th class="num">threshold</th><th class="num">rate A</th><th class="num">rate B</th><th class="num">Δ</th><th class="num">ratio</th><th class="num">accuracy</th></tr>
+  <tr><td class="num">0.50</td><td class="num">0.60</td><td class="num">0.30</td><td class="num">0.30</td><td class="num">0.50</td><td class="num">1.00</td></tr>
+  <tr><td class="num">0.20</td><td class="num">0.80</td><td class="num">0.65</td><td class="num">0.15</td><td class="num">0.81</td><td class="num">0.73</td></tr>
+  <tr><td class="num">0.00</td><td class="num">1.00</td><td class="num">1.00</td><td class="num">0.00</td><td class="num">1.00</td><td class="num">0.45</td></tr>
+</table>
+
+<p>The middle row is the awkward one. The ratio passes the four-fifths rule at 0.81 while the difference is still 0.15, so two summaries of the same two rates disagree. An audit reports both, and states which definition it was asked to satisfy.</p>
+<p>The last row is parity. Approving everybody makes the rates equal and drops accuracy to 0.45, the average base rate. Rejecting everybody also reaches parity, at accuracy 0.55, the share who are unqualified. Inside the useful range of the threshold, no single cut produces equal rates at all.</p>
+
+<h2>The trap<span class="h2-topic">— Δ</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Both groups are equally accurate, so the model is fair."</strong> Accuracy compares predictions with labels inside a group. Parity compares decisions between groups. With unequal base rates and one threshold, the first can be perfect while the second reads 0.30.</p>
+  <p><strong>Correction:</strong> name the definition before you measure. Parity, equal opportunity and equalised odds can disagree on the same table, and each one has a cost the others do not.</p>
+</div>
+<p><strong>The tell:</strong> a fairness claim that mentions neither a threshold nor a base rate is not yet a measurement. Both decide the number you get.</p>
+
+<h2>Retrieval check<span class="h2-topic">— Δ</span></h2>
+<ol class="quiz">
+  <li>Group A is approved at 0.60, group B at 0.30. What are Δ and the ratio, and does the four-fifths rule pass?
+    <details><summary>Answer</summary>
+      <p>Δ = |0.60 − 0.30| = <strong>0.30</strong>. Ratio = 0.30 / 0.60 = <strong>0.50</strong>, below 0.80, so it fails. The two numbers use the same pair of rates and answer different questions: points of difference versus relative rate.</p>
+    </details>
+  </li>
+  <li>Your team wants Δ = 0 with one threshold and this score. What happens to accuracy?
+    <details><summary>Answer</summary>
+      <p>The only cuts with equal rates are approve-all, accuracy <strong>0.45</strong>, or reject-all, accuracy <strong>0.55</strong>. Every cut that separates qualified from unqualified leaves the 0.30 gap. Equalising needs group-specific thresholds or a different population, not a better model.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="labnav">
+  <a href="053a-vi.html">← 053a · γ (gamma) — what one sweep is worth</a>
+  <a href="057a-temperature.html">057a · T (temperature) — pulling the bars onto the diagonal →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=5" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
+</body>
+</html>

@@ -597,6 +597,130 @@
     });
   };
 
+
+  /* ---------- shared helpers for the three specialised renderers ---------- */
+  function spec(fig) {
+    var raw = fig.querySelector("script[type='application/json']");
+    if (!raw) return null;
+    var out;
+    try { out = JSON.parse(raw.textContent); } catch (e) { return null; }
+    raw.style.display = "none";
+    return out;
+  }
+
+  function val(fig, k, dflt) {
+    var el = fig.querySelector('[data-k="' + k + '"]');
+    return el ? parseFloat(el.value) : dflt;
+  }
+
+  function bindAll(fig, draw) {
+    fig.querySelectorAll("[data-k]").forEach(function (el) {
+      el.addEventListener("input", draw);
+    });
+    var reset = fig.querySelector("button[type=reset]");
+    if (reset) reset.addEventListener("click", function () { setTimeout(draw, 0); });
+    draw();
+  }
+
+  function out(fig, k, text) {
+    var el = fig.querySelector('[data-out="' + k + '"]');
+    if (el) el.textContent = text;
+  }
+
+  function phi(x) {
+    var t = 1 / (1 + 0.2316419 * Math.abs(x));
+    var d = 0.3989423 * Math.exp(-x * x / 2);
+    var p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+    return x > 0 ? 1 - p : p;
+  }
+
+  R["fair-parity"] = function (fig) {
+    var sp = spec(fig); if (!sp) return;
+    var svg = fig.querySelector("svg");
+    var rate = function (base, t) {
+      var pq = t <= 0.6 ? 1 : t >= 1 ? 0 : (1 - t) / 0.4;
+      var pu = t <= 0 ? 1 : t >= 0.4 ? 0 : (0.4 - t) / 0.4;
+      return base * pq + (1 - base) * pu;
+    };
+    bindAll(fig, function () {
+      var b = val(fig, "b", 0.3), t = val(fig, "t", 0.5);
+      var ra = rate(sp.groupA.base, t), rb = rate(b, t);
+      var acc = (sp.groupA.base * (t <= 0.6 ? 1 : t >= 1 ? 0 : (t - 0.6) / 0.4)
+               + (1 - sp.groupA.base) * (t <= 0 ? 0 : t >= 0.4 ? 1 : t / 0.4)
+               + b * (t <= 0.6 ? 1 : t >= 1 ? 0 : (t - 0.6) / 0.4)
+               + (1 - b) * (t <= 0 ? 0 : t >= 0.4 ? 1 : t / 0.4)) / 2;
+      var best = 1, bt = 0;
+      for (var x = 0; x <= 0.8; x += 0.005) {
+        var d = Math.abs(rate(sp.groupA.base, x) - rate(b, x));
+        if (d < best) { best = d; bt = x; }
+      }
+      var eqAcc = (sp.groupA.base * (bt <= 0.6 ? 1 : bt >= 1 ? 0 : (bt - 0.6) / 0.4)
+                 + (1 - sp.groupA.base) * (bt <= 0 ? 0 : bt >= 0.4 ? 1 : bt / 0.4)
+                 + b * (bt <= 0.6 ? 1 : bt >= 1 ? 0 : (bt - 0.6) / 0.4)
+                 + (1 - b) * (bt <= 0 ? 0 : bt >= 0.4 ? 1 : bt / 0.4)) / 2;
+      var g = clearLayer(svg), m = axes(g, { x0: 0, x1: 1, y0: 0, y1: 1, xticks: [0, 0.2, 0.4, 0.6, 0.8, 1], yticks: [] });
+      function row(y, base, labelText, colour) {
+        var h = 0.16;
+        mk("rect", { x: m.sx(0.6), y: m.sy(y + h), width: m.sx(1) - m.sx(0.6), height: m.sy(y) - m.sy(y + h), fill: "var(--sym-pred)", opacity: .75 }, g);
+        mk("rect", { x: m.sx(0), y: m.sy(y + h), width: m.sx(0.4) - m.sx(0), height: m.sy(y) - m.sy(y + h), fill: "var(--rule)", opacity: .9 }, g);
+        label(g, m.sx(0), m.sy(y + h) - 8, labelText, colour, 12);
+        label(g, m.sx(0.8), m.sy(y + h / 2) + 4, "approved " + Math.round(base * 100) + "%", colour, 11);
+      }
+      row(0.66, ra, "group A · base " + sp.groupA.base.toFixed(2), "var(--sym-data)");
+      row(0.30, rb, "group B · base " + b.toFixed(2), "var(--sym-data)");
+      mk("line", { x1: m.sx(t), x2: m.sx(t), y1: m.sy(0.95), y2: m.sy(0.18), stroke: "var(--sym-param)", "stroke-width": 2, "stroke-dasharray": "5 4" }, g);
+      label(g, m.sx(t) + 6, m.sy(0.95) + 4, "t = " + t.toFixed(2), "var(--sym-param)", 11);
+      out(fig, "gap", "Δ " + Math.abs(ra - rb).toFixed(2) + " · ratio " + (Math.min(ra, rb) / Math.max(ra, rb)).toFixed(2)
+        + " · accuracy " + acc.toFixed(2) + " · parity cost " + (1 - eqAcc).toFixed(2));
+    });
+  };
+
+  R.reliability = function (fig) {
+    var sp = spec(fig); if (!sp) return;
+    var svg = fig.querySelector("svg");
+    var logit = function (p) { return Math.log(p / (1 - p)); };
+    var sig = function (z) { return 1 / (1 + Math.exp(-z)); };
+    bindAll(fig, function () {
+      var T = val(fig, "temp", 1);
+      var pred = sp.bins.map(function (c) { return sig(logit(c) / T); });
+      var ece = pred.reduce(function (a, p, i) { return a + Math.abs(p - sp.observed[i]); }, 0) / pred.length;
+      var g = clearLayer(svg), m = axes(g, { x0: 0, x1: 1, y0: 0, y1: 1, xticks: [0, .2, .4, .6, .8, 1], yticks: [0, .2, .4, .6, .8, 1] });
+      mk("line", { x1: m.sx(0), y1: m.sy(0), x2: m.sx(1), y2: m.sy(1), stroke: "var(--ink-faint)", "stroke-dasharray": "4 4" }, g);
+      pred.forEach(function (p, i) {
+        var o = sp.observed[i];
+        mk("line", { x1: m.sx(p), y1: m.sy(0), x2: m.sx(p), y2: m.sy(o), stroke: "var(--sym-loss)", "stroke-width": 6, opacity: .45 }, g);
+        mk("circle", { cx: m.sx(p), cy: m.sy(o), r: 4.5, fill: "var(--sym-pred)" }, g);
+      });
+      label(g, m.sx(0.05), m.sy(0.96), "observed", "var(--ink-faint)", 11);
+      label(g, m.sx(0.78), m.sy(0.1), "predicted", "var(--ink-faint)", 11);
+      out(fig, "ece", "T = " + T.toFixed(1) + " · ECE " + ece.toFixed(3));
+    });
+  };
+
+  R["drift-ks"] = function (fig) {
+    var sp = spec(fig); if (!sp) return;
+    var svg = fig.querySelector("svg");
+    var pdf = function (x, mu, sd) { return Math.exp(-Math.pow(x - mu, 2) / (2 * sd * sd)); };
+    bindAll(fig, function () {
+      var mu = val(fig, "mu", sp.live.mean);
+      var ref = sp.reference, sd = ref.sd;
+      var D = 2 * phi(Math.abs(mu - ref.mean) / (2 * sd)) - 1;
+      var g = clearLayer(svg), m = axes(g, { x0: 0.1, x1: 1.0, y0: 0, y1: 1.1, xticks: [0.2, 0.4, 0.6, 0.8, 1], yticks: [] });
+      function curve(mu2, colour, dash) {
+        var pts = [];
+        for (var x = 0.1; x <= 1.0; x += 0.01) pts.push(m.sx(x) + "," + m.sy(pdf(x, mu2, sd)));
+        mk("polyline", { points: pts.join(" "), fill: "none", stroke: colour, "stroke-width": 2.4, "stroke-dasharray": dash || "" }, g);
+      }
+      curve(ref.mean, "var(--sym-data)", "5 4");
+      curve(mu, "var(--sym-pred)");
+      var gy = m.sy(0.12);
+      mk("line", { x1: P.l, x2: P.r, y1: gy, y2: gy, stroke: "var(--rule)" }, g);
+      mk("line", { x1: m.sx(D / 1.1), x2: m.sx(D / 1.1), y1: gy - 8, y2: gy + 8, stroke: D > sp.alert ? "var(--bad)" : D > sp.look ? "var(--warn)" : "var(--ok)", "stroke-width": 3 }, g);
+      label(g, P.l, gy - 12, "KS D", "var(--ink-faint)", 11);
+      out(fig, "ks", "μ = " + mu.toFixed(2) + " · D = " + D.toFixed(2) + " · " + (D > sp.alert ? "alert" : D > sp.look ? "watch" : "ok"));
+    });
+  };
+
   window.FIG = { mk: mk, clearLayer: clearLayer, axes: axes, arrow: arrow, label: label, fmt: fmt, P: P, reduced: reduced, renderers: R };
 
   document.addEventListener("DOMContentLoaded", function () {

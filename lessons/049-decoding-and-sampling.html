@@ -103,6 +103,13 @@
 <h3>Part 6 — The rest of the recipe</h3>
 <p>Repetition penalties subtract from tokens already used; frequency and presence penalties scale with how often and whether they appeared. A seed makes sampling reproducible on the same hardware, and stop sequences end generation at a marker. For extraction, classification and code, use greedy or a very low temperature; for brainstorming, raise <code>T</code> and keep top-p near 0.9. <strong>Why this part exists:</strong> most "the model is unreliable" reports are a decoding configuration, not a capability.</p>
 
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 1</p>
+  <h3 class="lab-title">Drag the symbol</h3>
+  <ul class="lab-list">
+    <li><a href="049a-temperature.html"><span class="lab-num">A</span><span class="lab-body"><strong>T — one dial, two names</strong><span>Interactive: drag the parameter, read the number.</span></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
+</aside>
 <h2>Worked example<span class="h2-topic">— decoding</span></h2>
 
 <h3>1. Four logits at three temperatures</h3>

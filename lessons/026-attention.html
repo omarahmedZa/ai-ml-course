@@ -10,7 +10,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can compute scaled dot-product attention by hand for two tokens and explain the Q/K/V roles.">
 </head>
-<body data-lesson="026" data-book="language" data-book-number="4" class="library">
+<body data-page="lesson" data-lesson="026" data-book="language" data-book-number="4" class="library">
 <main>
 
 <nav class="topline">
@@ -28,20 +28,32 @@
 
 <h2>Why this matters<span class="h2-topic">— attention</span></h2>
 <p class="lede">Attention lets a language model treat a sentence as a web of related positions rather than a fixed row of slots. Each token writes a question, compares that question against every token's advertisement, and copies a blend of what the best matches offer.</p>
-<p>It is the only place in a Transformer where information moves sideways between positions; the feed-forward layer, the normalisation and the output head all work on one token at a time. That is why "it" can take its meaning from a noun eight tokens back. In an exam, "compute attention for these two tokens" is four mechanical steps, and the marks sit in the arithmetic. In a project, the same four steps host the quiet bugs: a softmax computed down the columns instead of across the rows, so each key sums to 1 while each query sums to 1.7 and the output arrives 70% too long; or a scale factor left out because the code "looked fine". Both run without error and train badly.</p>
+<p>It is the only place in a Transformer where information moves sideways; everything else works on one token at a time. That is why "it" can take its meaning from a noun eight tokens back. In an exam, "compute attention for these two tokens" is four mechanical steps, and the marks sit in the arithmetic. In a project, the same four steps host the quiet bugs: a softmax computed down the columns instead of across the rows, so each key sums to 1 while each query sums to 1.7 and the output arrives 70% too long; or a scale factor left out because the code "looked fine". Both run without error and train badly.</p>
 
 <div class="numstrip" role="group" aria-label="Key numbers"><div><b>70%</b><span>output overshoot when softmax runs down columns</span></div><div><b>512</b><span>numbers in each token vector</span></div><div><b>8</b><span>attention heads per block</span></div></div>
 
 <h2>The one core idea<span class="h2-topic">— attention</span></h2>
-<p>Picture a library desk. You arrive with a question (the <strong>query</strong>). Every book has a label on its spine (the <strong>key</strong>) saying what it covers, and pages inside (the <strong>value</strong>) holding the actual content. You do not pick one book and ignore the rest; you score every label against your question and photocopy a fraction of each book, in proportion to how well its label matched.</p>
+<p>Picture a library desk. You arrive with a question (the <strong>query</strong>). Every book has a label on its spine (the <strong>key</strong>) saying what it covers, and pages inside (the <strong>value</strong>) holding the actual content. You do not pick one book: you score every label against your question and photocopy a fraction of each, in proportion to the match.</p>
 <p>In one line: <strong>attention is a soft lookup — score everything, then take a weighted average.</strong> With <code>q = [1, 0]</code>, <code>k₁ = [1, 0]</code>, <code>k₂ = [0, 1]</code>, the two scores are 1 and 0; after dividing by <code>√2</code><span class="say" data-sym="√">(square root)</span> and exponentiating they become weights 0.670 and 0.330, so the output is <code>0.670 × v₁ + 0.330 × v₂</code>.</p>
 
 <div class="keybox"><span class="sym">softmax(QKᵀ/√d_k)·V</span><p>Every query scores every key, the scores become row weights that sum to 1, and those weights blend the values.</p></div>
 
 <h2>How it actually works<span class="h2-topic">— attention</span></h2>
-<p>Seven parts. Each one is a line of the formula below, in the order the numbers travel.</p>
+<p>Seven steps, one per line of the formula below, in the order the numbers travel.</p>
 
 <span class="formula">Attention(Q,K,V) = softmax( QKᵀ / √d_k ) V</span>
+
+<h3>Step 1 — Make three vectors per token</h3>
+<p>A token arrives as a list of 512 numbers. Three learned matrices multiply that list and produce three new lists: a query, a key and a value, each 512 numbers wide. One vector could not play all three roles — if the question and the answer were the same vector, every token would match itself most strongly and learn nothing about its neighbours. Three vectors still need a way to be compared.</p>
+
+<h3>Step 2 — Score every pair with a dot product</h3>
+<p>Every query is dotted with every key: multiply matching positions and add. For unit-length vectors the score is 1 when the two point the same way, 0 when they are perpendicular, and negative when they disagree. A 12-token sequence therefore produces a 12×12 score matrix — 144 numbers — with one row per query. Raw scores are unbounded, so their size must be brought under control.</p>
+
+<h3>Step 3 — Divide by √d_k</h3>
+<p>With head width <code>d_k = 64</code>, the raw scores of random unit vectors have a standard deviation of about 8, so ordinary entries sit near ±8. Dividing by <code>√64 = 8</code> pulls the spread back to roughly 1. Leave it unscaled and softmax over scores of size 8 puts <code>0.9997</code> of the mass on one token, and the gradient through a row with all its mass on one entry is almost exactly zero.</p>
+
+<h3>Step 4 — Softmax each row</h3>
+<p>Per row: subtract the row maximum, exponentiate every entry, divide by the row sum. Scores 0.707 and 0 become <code>e⁰·⁷⁰⁷ = 2.028</code> and <code>e⁰ = 1</code>; the total is 3.028, so the weights are <code>2.028/3.028 = 0.670</code> and <code>1/3.028 = 0.330</code>. Scores alone cannot be averaged — they carry any sign, so the weights must first be made positive and sum to 1.</p>
 
 <figure class="fig">
   <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-attn-t f-attn-d">
@@ -107,26 +119,14 @@
   <tr><td><strong>V</strong> (value)</td><td>What this position passes on</td><td>Document body</td></tr>
 </table>
 
-<h3>Part 1 — Make three vectors per token</h3>
-<p>A token arrives as a list of 512 numbers. Three learned matrices multiply that list and produce three new lists: a query, a key and a value, each 512 numbers wide. <strong>Why this part exists:</strong> a single vector cannot be both the question and the answer — if it were, every token would match itself most strongly and learn nothing about its neighbours.</p>
+<h3>Step 5 — Blend the values</h3>
+<p>The output for that query is <code>0.670 × [10, 0] + 0.330 × [0, 10] = [6.70, 3.30]</code>, still two numbers wide. Every query repeats this independently, so the layer returns one vector per token, shape <code>n × d</code>. Weights are not the answer: the next layer needs a vector of the same width, so the weights must multiply content, one row at a time.</p>
 
-<h3>Part 2 — Score every pair with a dot product</h3>
-<p>Every query is dotted with every key: multiply matching positions and add. For unit-length vectors the score is 1 when the two point the same way, 0 when they are perpendicular, and negative when they disagree. A 12-token sequence therefore produces a 12×12 score matrix — 144 numbers — and each row belongs to one query. <strong>Why this part exists:</strong> this matrix is the only quantity that decides who listens to whom; every later step merely smooths and applies it.</p>
+<h3>Step 6 — Run several heads</h3>
+<p>Rather than one 512-wide attention, the block runs 8 heads of 64 dimensions each, concatenates the eight outputs back to 512, and multiplies by an output matrix; the multiply count is the same as a single wide head. One softmax per layer can express only one averaging pattern — a head tracking syntax would have to share weights with one tracking coreference. Every head, though, pays for its score matrix.</p>
 
-<h3>Part 3 — Divide by √d_k</h3>
-<p>With head width <code>d_k = 64</code>, the raw scores of random unit vectors have a standard deviation of about 8, so ordinary entries sit near ±8. Dividing by <code>√64 = 8</code> pulls the spread back to roughly 1. <strong>Why this part exists:</strong> softmax over scores of size 8 puts 0.9997 of the mass on one token, and the gradient through a vector with all its mass on one entry is almost exactly zero, so the layer stops learning.</p>
-
-<h3>Part 4 — Softmax each row</h3>
-<p>Per row: subtract the row maximum, exponentiate every entry, then divide by the row sum. Scores 0.707 and 0 become <code>e⁰·⁷⁰⁷ = 2.028</code> and <code>e⁰ = 1</code>; the total is 3.028, so the weights are 0.670 and 0.330. <strong>Why this part exists:</strong> weights must be positive and add to 1, otherwise the output is a sum that grows with sequence length instead of an average that stays in the values' own range.</p>
-
-<h3>Part 5 — Blend the values</h3>
-<p>The output for that query is <code>0.670 × [10, 0] + 0.330 × [0, 10] = [6.70, 3.30]</code>, still two numbers wide. Every query repeats this independently, so the layer returns one vector per token, shape <code>n × d</code>. <strong>Why this part exists:</strong> the next layer needs an input of the same width, and mixing values rather than scores is what lets one position carry content from several neighbours at once.</p>
-
-<h3>Part 6 — Run several heads</h3>
-<p>Rather than one 512-wide attention, the block runs 8 heads of 64 dimensions each, concatenates the eight outputs back to 512, and multiplies by an output matrix. The multiply count is the same as a single wide head. <strong>Why this part exists:</strong> one softmax per layer can express only one averaging pattern, so a head tracking syntax would have to share weights with one tracking coreference.</p>
-
-<h3>Part 7 — Pay for the square</h3>
-<p>The score matrix costs <code>n²</code> entries per head. At <code>n = 1,000</code> that is 1,000,000 numbers per head, or 8,000,000 across 8 heads; at <code>n = 2,000</code> it is 4,000,000 per head. <strong>Why this part exists:</strong> this quadratic term, not the parameter count, sets the price of long context.</p>
+<h3>Step 7 — Pay for the square</h3>
+<p>The score matrix costs <code>n²</code> entries per head. At <code>n = 1,000</code> that is 1,000,000 numbers per head, or 8,000,000 across 8 heads; at <code>n = 2,000</code> it is 4,000,000 per head. This quadratic term, not the parameter count, sets the price of long context.</p>
 
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 2 · about 3 minutes each</p>
@@ -137,7 +137,6 @@
     <li><a href="026b-scaling.html"><span class="lab-num">26b</span><span class="lab-body"><strong>1/√dk — keeping scores in range</strong><span>Explain why scores are divided by the square root of the head width, and what a missing…</span></span><span class="lab-go">Open lab →</span></a></li>
   </ul>
 </aside>
-
 
 <figure class="fig" data-anim="flow">
   <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-att-t f-att-d">
@@ -154,7 +153,6 @@
   </div>
   <figcaption><strong>Every token produces three vectors; the scores become weights; the weights blend the values.</strong></figcaption>
 </figure>
-
 <h2>Worked example<span class="h2-topic">— attention</span></h2>
 
 <h3>1. Two tokens, by hand</h3>
@@ -197,6 +195,20 @@
 
 <p><strong>What to notice.</strong> Doubling the sequence multiplies the work by four, not two. Each entry is also kept in memory for the backward pass, so the same factor applies to activations: a context that fits in 8 GB at 1,000 tokens needs roughly 32 GB at 2,000.</p>
 
+<h3>4. Check yourself</h3>
+<p>On paper first.</p>
+<ol class="steps">
+  <li><code>q = [1, 0]</code> against keys <code>[1, 0]</code> and <code>[0, 1]</code>, with <code>d_k = 2</code>. Give both weights.
+    <details><summary>Answer</summary><p>Scores <code>1</code> and <code>0</code>; divide by <code>√2</code> for 0.707 and 0; exponentiate for 2.028 and 1; divide by 3.028 for 0.670 and 0.330.</p></details>
+  </li>
+  <li>A 4-token sequence runs through 8 heads. How many score entries does one forward pass hold?
+    <details><summary>Answer</summary><p><code>4² = 16</code> per head, so 128. Each row sums to 1, so the totals are shares, not similarities.</p></details>
+  </li>
+  <li>Two tokens have identical query and key vectors. Does the first token put all its weight on itself?
+    <details><summary>Answer</summary><p>No: equal scores give equal weights, 0.5 and 0.5. A dark diagonal is learned from different projections, not guaranteed by self-matching.</p></details>
+  </li>
+</ol>
+
 <section class="playground">
   <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">softmax — scores into weights — drag, step, then read the numbers.</p></div><a class="pg-link" href="026a-softmax.html">Open full screen →</a></div>
   <iframe src="026a-softmax.html" title="Interactive lab: softmax — scores into weights" loading="lazy"></iframe>
@@ -205,7 +217,7 @@
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
   <p><strong>"The attention weights show why the model gave that answer."</strong> It feels right because weights are the one set of numbers in the block that sum to 1 and read like percentages.</p>
-  <p>The correction is that a weight is a routing decision for the <em>next</em> layer, not a causal contribution to the output. A token can receive a weight of 0.8 and add nothing, because its value vector is close to zero; and the feed-forward layer that follows can ignore whatever arrived. Attention heads are also redundant: ablating a single head often leaves the prediction unchanged. Topic 32 shows this empirically.</p>
+  <p>The correction is that a weight is a routing decision for the <em>next</em> layer, not a causal contribution to the output. A token can receive a weight of 0.8 and add nothing, because its value vector is close to zero, and the feed-forward layer can ignore whatever arrived. Heads are also redundant: ablating one often leaves the prediction unchanged (topic 32).</p>
   <p>A related error is expecting memory or recurrence. Attention has neither — it re-reads the whole prefix on every pass, and order has to be injected explicitly (topic 27).</p>
 </div>
 <table class="trap-table">
@@ -270,8 +282,8 @@ V = np.array([[10., 0.], [0., 10.]])</code></pre>
 <p class="source">Primary source: Jay Alammar, <a href="https://jalammar.github.io/illustrated-transformer/">The Illustrated Transformer</a>.</p>
 
 </main>
-  <script src="../assets/graph.js?v=4" defer></script>
-  <script src="../assets/anim.js?v=3" defer></script>
+  <script src="../assets/graph.js?v=5" defer></script>
+  <script src="../assets/anim.js?v=4" defer></script>
   <script src="../assets/search-index.js" defer></script>
 <script src="../assets/course.js?v=18" defer></script>
 </body>

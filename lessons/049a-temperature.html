@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>049.1 — T: one dial, two names</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Temperature divides the logits before softmax, so the same reshuffling can be read as a change of gap or a change of T.">
+</head>
+<body data-page="lab" data-lesson="049a" class="library">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <span class="pill">Topic 49 · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="049-decoding-and-sampling.html#labs">Topic 49 · Decoding &amp; sampling</a> — where temperature and top-p are introduced</p>
+
+<header class="masthead">
+  <p class="kicker">Decoding, one symbol at a time · Lab 1</p>
+  <h1>T — one dial, two names</h1>
+  <p class="objective">You can compute the top-token share at three temperatures, and say how many tokens top-p keeps at each one.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">p = softmax( z /</span> <span class="hot">T</span> <span class="dim">)</span></p>
+<p class="eqn-note">Topic 49 · only T is lit; z is the vector of raw logits, one per candidate token</p>
+<p>The last layer returns a logit per vocabulary item: unbounded, possibly negative, not required to sum to anything. Softmax exponentiates each one and divides by the total. Temperature divides every logit by the same number first, so T = 1 leaves the model exactly as trained, T below 1 widens the gaps, and T above 1 narrows them.</p>
+<p>No token changes place. Only the shares move.</p>
+
+<h2>Temperature is a gap multiplier</h2>
+<p>Softmax sees z and T only through the ratio z/T. Doubling every logit does exactly what halving T does. With two candidates only the gap Δ = z<sub>1</sub> − z<sub>2</sub> matters, and the leader's share is 1/(1 + e<sup>−Δ/T</sup>) — a sigmoid in Δ whose steepness is 1/T.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-temp-t f-temp-d">
+    <title id="f-temp-t">The top-two share as the logit gap widens, at a temperature you set</title>
+    <desc id="f-temp-d">An S-shaped curve rising from one half at zero gap toward one at a gap of four. Turning the temperature up makes the curve flatter; turning it down makes the curve rise sooner.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls"></div>
+  <script type="application/json" class="curve-data">{"kind":"sigmoid","x":[0,4],"y":[0,1.02],"xlabel":"logit gap Δ  (z₁ − z₂)","ylabel":"top-two share","xticks":[0,1,2,3,4],"yticks":[0,0.25,0.5,0.75,1],"controls":[{"k":"k","label":"inverse temperature 1/T","min":0.1,"max":4,"step":0.1,"value":1}]}</script>
+  <figcaption><strong>Temperature and logit gap enter as one product.</strong> At Δ = 2 and 1/T = 1 the leader holds 0.881; at 1/T = 2 (T = 0.5) it holds 0.982; at 1/T = 0.5 (T = 2) it holds 0.731. The readout's k is 1/T.</figcaption>
+</figure>
+
+<p>The fixed logit pair sits at Δ = 2; the height there is the leader's share. At 1/T = 1 it is 0.881 — the number the top-p step below produces after keeping the best two.</p>
+
+<h2>What the gate keeps</h2>
+<p>Top-p sorts the row and keeps the shortest prefix whose total reaches p. Take logits <code>[3, 1, 0, −1]</code>, the threshold p = 0.9, and three temperatures.</p>
+
+<table>
+  <tr><th class="num">T</th><th>Probabilities</th><th class="num">Cumulative</th><th class="num">Kept</th></tr>
+  <tr><td class="num">0.5</td><td>0.979 · 0.018 · 0.002 · 0.000</td><td class="num">0.979 · 0.997 · 0.999 · 1.000</td><td class="num">1</td></tr>
+  <tr><td class="num">1</td><td>0.831 · 0.112 · 0.041 · 0.015</td><td class="num">0.831 · 0.943 · 0.984 · 1.000</td><td class="num">2</td></tr>
+  <tr><td class="num">2</td><td>0.579 · 0.213 · 0.129 · 0.078</td><td class="num">0.579 · 0.792 · 0.921 · 1.000</td><td class="num">3</td></tr>
+</table>
+
+<p>Same vector, same threshold, three different gates. At T = 0.5 the leader alone clears 0.9, so one token survives and the sampler is effectively greedy. At T = 2 the mass has spread, the running total climbs slowly, and the gate must reach a third token. Renormalize the survivors or they no longer sum to one: at T = 1 the kept pair becomes 0.831/0.943 = 0.881 and 0.112/0.943 = 0.119.</p>
+<p>That renormalized 0.881 is the same number the figure shows at 1/T = 1 and Δ = 2. Truncation did not change the race between the top two; it removed the runners that could not win.</p>
+
+<h2>The trap<span class="h2-topic">— T</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Higher temperature makes the model more creative, so it gives better answers."</strong> Temperature adds no ideas. It flattens probability the model already assigned, which gives unlikely tokens more chances and the correct one fewer. On factual work that is a tax on accuracy, not a boost in imagination.</p>
+  <p><strong>Correction:</strong> choose decoding by task — greedy or very low T for extraction and code, higher T only where variety is the point and a wrong answer is cheap.</p>
+</div>
+<p><strong>The tell:</strong> the same prompt scored on different runs without a fixed seed; or an extraction task that succeeds four times in five at T = 1 and five times in five at T = 0. A second tell is a top-p setting that keeps one token on a confident step and thirty on a flat one — working as designed, and a sign that a fixed top-k would behave very differently.</p>
+
+<h2>Retrieval check<span class="h2-topic">— T</span></h2>
+<ol class="quiz">
+  <li>Two logits are 2 and 0. At T = 0.5, what is the top token's probability?
+    <details><summary>Answer</summary>
+      <p>Divide by 0.5, which doubles the logits to <strong>[4, 0]</strong>. Then e<sup>4</sup> = 54.6 against 1, total 55.6, so the share is <strong>0.982</strong>. The scaled gap doubled, and the leader's share rose from 0.881 to 0.982.</p>
+    </details>
+  </li>
+  <li>Why does top-p 0.9 keep two tokens at T = 1 but three at T = 2?
+    <details><summary>Answer</summary>
+      <p>Raising T flattens the row, so each prefix holds less of the total. The first two tokens reach 0.943 at T = 1 but only 0.792 at T = 2, so a third token is needed to pass 0.9. The gate adapts to the spread; the threshold never moved.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="labnav">
+  <a href="048a-merges.html">← 048a · merges — the pair that wins</a>
+  <a href="050a-heads.html">050a · h — one width, several views →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=5" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
+</body>
+</html>

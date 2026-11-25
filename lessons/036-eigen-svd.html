@@ -92,6 +92,13 @@
 <p>The SVD writes <code>A</code> as a sum of rank-one pieces: <code>A = σ₁u₁v₁ᵀ + σ₂u₂v₂ᵀ + …</code>. Each piece is one direction pair weighted by its singular value. If <code>σ₃</code> is tiny next to <code>σ₁</code>, that piece contributes little and can be dropped. Storing the top <code>k</code> pieces of a 1,000 × 1,000 matrix costs <code>k(2,000 + 1)</code> numbers; at <code>k = 10</code> that is 20,010 instead of 1,000,000, a 98% saving.</p>
 <p>Why this matters: the error is fixed by the singular values you discard, so compression becomes a budget decision.</p>
 
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 1</p>
+  <h3 class="lab-title">Drag the symbol</h3>
+  <ul class="lab-list">
+    <li><a href="036a-lambda.html"><span class="lab-num">A</span><span class="lab-body"><strong>λ (lambda) — the stretch a direction allows</strong><span>Interactive: drag the parameter, read the number.</span></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
+</aside>
 <h2>Worked example<span class="h2-topic">— directions that survive a matrix</span></h2>
 
 <h3>1. Two directions, by hand</h3>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>053.1 — γ: what one sweep is worth</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Run value iteration on a three-state chain and watch the discount decide both how fast the values settle and which action wins.">
+</head>
+<body data-page="lab" data-lesson="053a" class="library">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <span class="pill">Topic 53 · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="053-mdps-and-dynamic-programming.html#labs">Topic 53 · MDPs &amp; dynamic programming</a> — where the Bellman backup is introduced</p>
+
+<header class="masthead">
+  <p class="kicker">The MDP, one symbol at a time · Lab 1</p>
+  <h1>γ <span class="say" data-sym="γ">(gamma)</span> — what one sweep is worth</h1>
+  <p class="objective">You can run a value-iteration sweep by hand on three states, and say when γ changes the answer rather than the speed.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">V(s) ← max<sub>a</sub> Σ p(s′|s,a)[ r +</span> <span class="hot">γ</span> <span class="dim">V(s′) ]</span></p>
+<p class="eqn-note">Topic 53 · only γ is lit; r is the reward on the transition and p is the transition probability</p>
+<p>The backup reads the value of the next state, adds the reward on the way there, and multiplies the future by γ. Apply it to every state at once and you have one <strong>sweep</strong> of value iteration. Start from zeros and repeat; when γ &lt; 1 the values settle on a fixed point.</p>
+
+<h2>Three states, one sweep</h2>
+<p>The chain is <code>A → B → C</code>, with C terminal and worth 0. At A there is a shortcut to B paying 0 and a scenic route straight to C paying 0.5. At B, <code>go</code> reaches C and pays 1. Every transition is certain, so each probability is 1.</p>
+
+<table>
+  <tr><th>From</th><th>Action</th><th>To</th><th class="num">Reward</th></tr>
+  <tr><td>A</td><td>shortcut</td><td>B</td><td class="num">0</td></tr>
+  <tr><td>A</td><td>scenic</td><td>C</td><td class="num">0.5</td></tr>
+  <tr><td>B</td><td>go</td><td>C</td><td class="num">1</td></tr>
+  <tr><td>C</td><td>—</td><td>—</td><td class="num">0</td></tr>
+</table>
+
+<p>Take γ = 0.9 and start with every value at 0. Sweep 1: B pays 1 and then ends, so V(B) = 1 + 0.9 × 0 = 1. At A the shortcut is worth 0 + 0.9 × 0 = 0 against 0.5 for the scenic route, so V(A) = 0.5. Sweep 2 rereads the values just written: the shortcut is now 0.9 × 1 = 0.9, which beats 0.5, so V(A) rises to 0.9. Sweep 3 changes nothing.</p>
+
+<table>
+  <tr><th class="num">Sweep</th><th class="num">V(A)</th><th class="num">V(B)</th><th class="num">V(C)</th></tr>
+  <tr><td class="num">0</td><td class="num">0.00</td><td class="num">0.00</td><td class="num">0</td></tr>
+  <tr><td class="num">1</td><td class="num">0.50</td><td class="num">1.00</td><td class="num">0</td></tr>
+  <tr><td class="num">2</td><td class="num">0.90</td><td class="num">1.00</td><td class="num">0</td></tr>
+  <tr><td class="num">3</td><td class="num">0.90</td><td class="num">1.00</td><td class="num">0</td></tr>
+</table>
+
+<p>Each sweep carries value back exactly one transition. Sweep 1 lets B see the reward at the end of its own edge; sweep 2 lets A see B's new value. A longer chain would take one sweep per edge, and every extra edge costs another factor of γ.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-vi-t f-vi-d">
+    <title id="f-vi-t">The fraction of a reward that survives k steps of delay</title>
+    <desc id="f-vi-d">A curve falling from one at zero delay toward zero at twenty steps. At gamma 0.9 ten steps of delay leave about a third; at gamma 0.5 ten steps leave almost nothing.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls"></div>
+  <script type="application/json" class="curve-data">{"kind":"expdecay","x":[0,20],"y":[0,1.05],"xlabel":"steps of delay k","ylabel":"γ^k","xticks":[0,5,10,15,20],"yticks":[0,0.25,0.5,0.75,1],"controls":[{"k":"base","label":"γ","min":0.5,"max":0.99,"step":0.01,"value":0.9}]}</script>
+  <figcaption><strong>A sweep reaches one edge; γ prices every edge after the first.</strong> At γ = 0.9 a reward ten steps of delay away is still worth 0.35 when it arrives. At γ = 0.5 it is worth 0.001 — the same reward, a different discount.</figcaption>
+</figure>
+
+<p>The curve is also a picture of patience: near 1 the agent will wait for the distant reward; near 0.5 it takes whatever pays now.</p>
+
+<h2>The discount decides the action</h2>
+<p>At A the two actions can be compared directly. The shortcut is worth γ × V(B) = γ × 1, because B is worth 1 and one step of delay is priced at γ. The scenic route pays 0.5 immediately. So the choice depends only on whether γ is above or below 0.5.</p>
+
+<table>
+  <tr><th class="num">γ</th><th class="num">Q(A, shortcut)</th><th class="num">Q(A, scenic)</th><th>Preferred</th></tr>
+  <tr><td class="num">0.4</td><td class="num">0.40</td><td class="num">0.50</td><td>scenic</td></tr>
+  <tr><td class="num">0.5</td><td class="num">0.50</td><td class="num">0.50</td><td>tie</td></tr>
+  <tr><td class="num">0.7</td><td class="num">0.70</td><td class="num">0.50</td><td>shortcut</td></tr>
+  <tr><td class="num">0.9</td><td class="num">0.90</td><td class="num">0.50</td><td>shortcut</td></tr>
+  <tr><td class="num">0.99</td><td class="num">0.99</td><td class="num">0.50</td><td>shortcut</td></tr>
+</table>
+
+<p>Nothing about the states, actions or rewards changed. γ moved one comparison and the policy moved with it — the discount is an input to the answer, not a solver setting.</p>
+
+<h2>The trap<span class="h2-topic">— γ</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"γ only affects how fast value iteration converges."</strong> It does change the speed — a γ near 1 needs many more sweeps — but it also moves the fixed point. Change γ and the values converge to different numbers, and at A the policy flips.</p>
+  <p><strong>Correction:</strong> read γ as part of the task, written beside the reward. More sweeps cannot repair a discount that priced the future at the wrong rate; they converge harder to the answer γ asked for.</p>
+</div>
+<p><strong>The tell:</strong> the values settle tidily, the sweep count is small, and the agent still behaves myopically. That is not a convergence bug — check γ, and check which transition the reward sits on.</p>
+
+<h2>Retrieval check<span class="h2-topic">— γ</span></h2>
+<ol class="quiz">
+  <li>With γ = 0.4, which action does A prefer, and why?
+    <details><summary>Answer</summary>
+      <p>The <strong>scenic route</strong>. The shortcut is worth 0.4 × 1 = 0.40, while the scenic route pays 0.5 immediately. The 1 at B is still there, but at this discount it arrives too late to beat half a point now.</p>
+    </details>
+  </li>
+  <li>After two sweeps at γ = 0.9, V(A) = 0.9 and V(B) = 1.0. Why is V(A) not also 1.0?
+    <details><summary>Answer</summary>
+      <p>The 1 is collected on the edge from B to C, one transition beyond B. From A that reward has one step of delay, so it enters as γ × 1 = <strong>0.9</strong>. V(B) is 1.0 because B is standing on the paying edge.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="labnav">
+  <a href="050a-heads.html">← 050a · h — one width, several views</a>
+  <a href="056a-gap.html">056a · Δ (delta) — the gap between two groups →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=5" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
+</body>
+</html>

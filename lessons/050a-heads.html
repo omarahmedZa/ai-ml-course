@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>050.1 — h: one width, several views</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Two heads read the same four tokens with different weight patterns, while h splits one width rather than multiplying the parameters.">
+</head>
+<body data-page="lab" data-lesson="050a" class="library">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <span class="pill">Topic 50 · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="050-multi-head-attention-positions.html#labs">Topic 50 · Multi-head attention</a> — where heads are split and rejoined</p>
+
+<header class="masthead">
+  <p class="kicker">Attention, one symbol at a time · Lab 1</p>
+  <h1>h — one width, several views</h1>
+  <p class="objective">You can read a head's weight row, say what a second head adds, and show that doubling h leaves the parameter count alone.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">head<sub>i</sub> = softmax(Q<sub>i</sub>K<sub>i</sub><sup>T</sup>/√d<sub>k</sub>) V<sub>i</sub></span> &nbsp;&nbsp; <span class="dim">d<sub>head</sub> = d<sub>model</sub> /</span> <span class="hot">h</span></p>
+<p class="eqn-note">Lab 1 · only h is lit; Q, K and V are the projections each head owns</p>
+<p>One head produces one weighted average of the values. Multi-head attention runs h of those in parallel, each with its own projections, concatenates the h outputs to width d<sub>model</sub>, and multiplies by W<sub>O</sub>. The outputs are not averaged; they are stacked and then mixed by one learned matrix.</p>
+
+<h2>A head is a row of weights</h2>
+<p>Take the four tokens <code>the · cat · sat · down</code> and a causal mask, so each row can only see itself and the tokens before it. Every row sums to 1. The two heads below have the same job description — blend the values — and completely different patterns.</p>
+
+<table>
+  <tr><th>Query</th><th colspan="4">head 1 · near tokens</th><th colspan="4">head 2 · first token</th></tr>
+  <tr><th></th><th class="num">the</th><th class="num">cat</th><th class="num">sat</th><th class="num">down</th><th class="num">the</th><th class="num">cat</th><th class="num">sat</th><th class="num">down</th></tr>
+  <tr><td><code>the</code></td><td class="num">1.000</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">1.000</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+  <tr><td><code>cat</code></td><td class="num">0.667</td><td class="num">0.333</td><td class="num">0</td><td class="num">0</td><td class="num">0.600</td><td class="num">0.400</td><td class="num">0</td><td class="num">0</td></tr>
+  <tr><td><code>sat</code></td><td class="num">0.571</td><td class="num">0.286</td><td class="num">0.143</td><td class="num">0</td><td class="num">0.600</td><td class="num">0</td><td class="num">0.400</td><td class="num">0</td></tr>
+  <tr><td><code>down</code></td><td class="num">0.533</td><td class="num">0.267</td><td class="num">0.133</td><td class="num">0.067</td><td class="num">0.600</td><td class="num">0</td><td class="num">0</td><td class="num">0.400</td></tr>
+</table>
+
+<p>Head 1 is a locality head: its weight halves with every position back, so <code>down</code> puts about half its mass on itself and a quarter on <code>sat</code>. Head 2 is an anchor head: 60% of every row after the first goes to <code>the</code>, and the other 40% to the token just before the query. Both rows for <code>down</code> sum to 1.0 and neither is more correct; they answer different questions about the same sentence.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-head-t f-head-d">
+    <title id="f-head-t">How fast a locality head's weight falls with distance</title>
+    <desc id="f-head-d">A curve falling from one at zero positions back toward zero. At decay 0.5 the weight three positions back is about one eighth of the query's own weight; at 0.9 it is about three quarters.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls"></div>
+  <script type="application/json" class="curve-data">{"kind":"expdecay","x":[0,5],"y":[0,1.05],"xlabel":"positions back d","ylabel":"relative weight r^d","xticks":[0,1,2,3,4,5],"yticks":[0,0.25,0.5,0.75,1],"controls":[{"k":"base","label":"decay r","min":0.3,"max":0.95,"step":0.01,"value":0.5}]}</script>
+  <figcaption><strong>The decay rate is the head's personality.</strong> At r = 0.5 head 1's row for <code>down</code> is this curve renormalized: 0.533 · 0.267 · 0.133 · 0.067. At r = 0.9 the same head would look almost uniform.</figcaption>
+</figure>
+
+<p>The slider shows the family the table is one member of. A low r gives a head that sees only its own position and the one before it; an r near 1 gives a head that treats the whole prefix alike. Real heads sit somewhere between, and most are neither perfectly local nor perfectly global.</p>
+
+<h2>The same budget, split h ways</h2>
+<p>At d<sub>model</sub> = 512, each head's projections cost 4 × 512 × d<sub>head</sub>. The four matrices are Q, K, V and the output mix inside the head, so the bill scales with d<sub>head</sub> — and d<sub>head</sub> shrinks as h grows.</p>
+
+<table>
+  <tr><th class="num">h</th><th class="num">d<sub>head</sub></th><th class="num">Per head</th><th class="num">All heads</th></tr>
+  <tr><td class="num">1</td><td class="num">512</td><td class="num">1,048,576</td><td class="num">1,048,576</td></tr>
+  <tr><td class="num">4</td><td class="num">128</td><td class="num">262,144</td><td class="num">1,048,576</td></tr>
+  <tr><td class="num">8</td><td class="num">64</td><td class="num">131,072</td><td class="num">1,048,576</td></tr>
+  <tr><td class="num">16</td><td class="num">32</td><td class="num">65,536</td><td class="num">1,048,576</td></tr>
+</table>
+
+<p>The last column never moves: 4 × 512² = 1,048,576. Eight heads of 64 use exactly the columns one head of 512 would use. Multi-head is a factoring of the same budget, not a second budget, and that is why h can be changed without changing the model's size.</p>
+
+<h2>The trap<span class="h2-topic">— h</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"More heads means more parameters, so more heads is more capacity."</strong> The parameter count is flat in h. What changes is the shape of the computation: more, narrower subspaces, each with its own softmax row.</p>
+  <p><strong>Correction:</strong> treat h as a factoring choice. Too few heads gives one blended pattern; too many gives many tiny ones, some redundant and prunable. Neither is free capacity.</p>
+</div>
+<p><strong>The tell:</strong> a parameter table that grows when h grows. If the total moved, the implementation is projecting to full width per head before splitting, and the model is h times larger than intended.</p>
+
+<h2>Retrieval check<span class="h2-topic">— h</span></h2>
+<ol class="quiz">
+  <li>d<sub>model</sub> = 512 and h = 16. What is d<sub>head</sub>, and what do all heads cost together?
+    <details><summary>Answer</summary>
+      <p>d<sub>head</sub> = 512/16 = <strong>32</strong>. Each head costs 4 × 512 × 32 = <strong>65,536</strong>, so sixteen heads cost <strong>1,048,576</strong> — identical to one head of 512. The width was divided, not duplicated.</p>
+    </details>
+  </li>
+  <li>Head 1's row for <code>down</code> is 0.533, 0.267, 0.133, 0.067. What is the ratio between neighbours, and what kind of head is it?
+    <details><summary>Answer</summary>
+      <p>Each weight is half the one closer to the query: <strong>r = 0.5</strong>. That is a locality head — it mostly uses its own token and the one just before it, and pays little attention to anything further back.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="labnav">
+  <a href="049a-temperature.html">← 049a · T — one dial, two names</a>
+  <a href="053a-vi.html">053a · γ (gamma) — what one sweep is worth →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=5" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
+</body>
+</html>

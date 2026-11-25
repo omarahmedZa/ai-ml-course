@@ -10,7 +10,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can write down (X, y, f_θ, L) for any supervised task and say what is being learned.">
 </head>
-<body data-lesson="004" data-book="classical-ml" data-book-number="2" class="library">
+<body data-page="lesson" data-lesson="004" data-book="classical-ml" data-book-number="2" class="library">
 <main>
 
 <nav class="topline">
@@ -71,24 +71,25 @@
   <figcaption><strong>Only f_θ changes during training.</strong> X and y are given; L is chosen by you; θ is what the search moves.</figcaption>
 </figure>
 
-<p>Take it in six parts: the four objects on the line <code>(X, y, f_θ, L)</code>, then the two steps that connect them.</p>
+<p>Six steps: the four objects on the line <code>(X, y, f_θ, L)</code>, then the two moves that connect them.</p>
 
-<h3>Part 1 — Collect inputs as a matrix X</h3>
-<p><code>X</code> holds one row per example and one column per feature, so 10,000 emails with 2 features give a 10,000 × 2 matrix. Features must be numbers, so text and categories are encoded first, and that encoding decides what the model can notice. Rows can be shuffled freely; columns must keep one fixed order.</p>
-<p>Why this part exists: every later shape is checked against these two numbers, and a transposed <code>X</code> of 2 × 10,000 would train without error while pairing emails with the wrong feature.</p>
+<h3>Step 1 — Collect the inputs as a matrix X</h3>
+<p><code>X</code> holds one row per example and one column per feature, so 10,000 emails with 2 features give a 10,000 × 2 matrix. Features must be numbers, so text and categories are encoded first, and that encoding decides what the model can notice. Rows shuffle freely; columns keep one fixed order — a transposed 2 × 10,000 <code>X</code> trains without error while pairing emails with the wrong feature. Inputs alone still say nothing about the answer.</p>
 
-<h3>Part 2 — Record targets as a vector y</h3>
-<p><code>y</code> is one value per row of <code>X</code>, so 10,000 labels: 1 for spam, 0 for ham. The type of <code>y</code> fixes the task — continuous values mean regression, a small label set means classification — and the loss must match that type.</p>
-<p>Why this part exists: shift <code>y</code> by one row and every email is trained against its neighbour's label, so the loss plateaus near a coin flip and extra training cannot rescue it.</p>
+<h3>Step 2 — Record the targets as a vector y</h3>
+<p><code>y</code> holds one value per row of <code>X</code>: 10,000 labels, 1 for spam and 0 for ham. Its type fixes the task — continuous values mean regression, a small label set means classification — and the loss must match that type. Shift <code>y</code> by one row and every email trains against its neighbour's label, so the loss plateaus near a coin flip. With both objects fixed, nothing yet maps one to the other.</p>
 
-<h3>Part 3 — Choose a hypothesis class for f_θ</h3>
-<p>The <strong>hypothesis class</strong> is the set of functions you allow the model to be. A linear model draws straight boundaries, a 3-layer network draws curved ones, a tree draws staircase ones. Choosing the class is a promise about what is representable, made before data arrives.</p>
-<p>Why this part exists: no amount of training lets a straight line separate two interleaved spirals, so a mismatch here surfaces much later as a loss that refuses to fall.</p>
+<h3>Step 3 — Choose a hypothesis class for f_θ</h3>
+<p>The <strong>hypothesis class</strong> is the set of functions you allow the model to be: a linear model draws straight boundaries, a 3-layer network curved ones, a tree staircase ones. Choosing it is a promise about what is representable, made before data arrives — no amount of training lets a straight line separate two interleaved spirals. A class alone carries no numbers, so there is nothing yet to score.</p>
 
-<h3>Part 4 — Define the loss L that scores mistakes</h3>
-<p><code>L</code> takes one prediction and one target and returns 0 when they agree, more as they diverge. Squared error suits continuous targets; cross-entropy suits probabilities. Averaging <code>L</code> over all <code>n</code> rows gives the <strong>empirical risk</strong>, the single number training minimises:</p>
+<h3>Step 4 — Define the loss L that prices mistakes</h3>
+<p><code>L</code> takes one prediction and one target and returns 0 when they agree, more as they diverge: squared error suits continuous targets, cross-entropy suits probabilities. Averaging <code>L</code> over all <code>n</code> rows gives the <strong>empirical risk</strong>, the single number training minimises — three cross-entropies of 0.105, 0.223 and 0.511 average to <code>0.839/3 = 0.280</code>. On a yes/no task, squared error rewards confident wrong answers while the gradient fades.</p>
+
 <span class="formula">θ* = argmin_θ  (1/n) Σᵢ L(f_θ(xᵢ), yᵢ)</span><span class="say" data-sym="Σ">(sigma)</span>
-<p>Why this part exists: the loss is the only definition of "better", so a mismatch optimises the wrong thing — squared error on a yes/no task rewards confident wrong answers while the gradient fades.</p>
+
+<h3>Step 5 — Search over θ by gradient descent</h3>
+<p>Start with random dials, measure how the average loss responds to each parameter, and step downhill: <code>θ ← θ − η∇L</code><span class="say" data-sym="η">(eta)</span>, where <code>η</code> is the learning rate and <code>∇L</code><span class="say" data-sym="∇">(nabla)</span> the gradient of the loss with respect to <code>θ</code>. Three dials could be found by grid search; 300 million cannot, so the gradient is the only affordable direction finder — and <code>η = 10</code> instead of <code>0.1</code> sends the loss upward.</p>
+
 <aside class="lab-callout" id="labs">
   <p class="lab-eyebrow">Equation labs · 9 · about 3 minutes each</p>
   <h3 class="lab-title">Take this formula apart, one symbol at a time</h3>
@@ -106,23 +107,12 @@
   </ul>
 </aside>
 
-
-<h3>Part 5 — Search over θ by gradient descent</h3>
-<p>Start with random dials, measure how the average loss responds to each parameter, and step downhill: <code>θ ← θ − η∇L</code><span class="say" data-sym="η">(eta)</span>, where <code>η</code> is the learning rate and <code>∇L</code><span class="say" data-sym="∇">(nabla)</span> is the derivative (gradient) of the loss with respect to θ — computed by differentiating through <code>f_θ(x)</code>. Repeat for a set number of epochs, one pass over the 10,000 rows each.</p>
-<p>Why this part exists: 3 dials could be found by grid search, but 300 million cannot; the gradient is the only affordable direction finder, and a learning rate of 10 instead of 0.1 sends the loss upward.</p>
-
-<h3>Part 6 — Report on data the search never touched</h3>
-<p>Split before training: roughly 60% train, 20% validation for choosing settings, 20% test for one final number. Training loss says whether the search worked; test loss says whether it mattered.</p>
-<p>Why this part exists: parameters were chosen to fit the training rows, so their error there is biased low — with 3 dials that gap is a fraction of a point, but with 10 million dials it can be 30 points wide.</p>
-
+<h3>Step 6 — Report on data the search never touched</h3>
+<p>Split before training: roughly 60% train (6,000 rows), 20% validation (2,000) for choosing settings, 20% test (2,000) for one final number. Training loss says whether the search worked; test loss says whether it mattered. Parameters were chosen to fit the training rows, so their error there is biased low: with 3 dials the gap is a fraction of a point, with 10 million dials it can be 30 points wide.</p>
 <h2>Worked example<span class="h2-topic">— the objective</span></h2>
 
 <h3>1. One email, end to end</h3>
-<p>One email arrives and the model must answer one question: <em>spam or not?</em> It gets there in three moves — score the evidence, turn the score into a probability, then price the mistake. The table holds those three moves with the numbers filled in. Before it, the same three moves with a single dial, so the arithmetic fits in your head.</p>
-
-<p><strong>Move 1 — score the evidence.</strong> Multiply each feature by its weight, add the results, add the bias. A positive score leans "spam", a negative one leans "not spam". <strong>Move 2 — squash the score into a probability</strong> between 0 and 1. <strong>Move 3 — price the answer</strong> against the true label.</p>
-
-<p><strong>Simplest version: one dial.</strong> Forget length. The email either contains "free" (1) or it does not (0). One weight <code>w = 2</code>, one bias <code>b = −1</code>.</p>
+<p>One email arrives and the model must answer one question: <em>spam or not?</em> Three moves — score the evidence, squash the score into a probability, price the answer against the label. A one-dial version first, so the arithmetic fits in your head: the email contains "free" (1) or it does not (0), with <code>w = 2</code>, <code>b = −1</code>.</p>
 
 <table>
   <tr><th>Step</th><th class="num">Value</th></tr>
@@ -132,9 +122,9 @@
   <tr><td>Loss if ham: <code>−ln(0.269)</code></td><td class="num">1.313</td></tr>
 </table>
 
-<p><strong>Read it as a sentence.</strong> "Contains 'free'" is worth 2 points of evidence, and the bias takes 1 away, so the model starts at 1.0 — mildly suspicious. The squash turns 1.0 into 0.73: "73% spam". If the email really is spam, that answer costs 0.313. If it is ham, the same answer costs 1.313, because 73% spam is a confidently wrong answer for a ham email.</p>
+<p><strong>Read it as a sentence.</strong> "Free" is worth 2 points of evidence and the bias takes 1 away, so the score is <code>2 − 1 = 1.0</code> — mildly suspicious. The squash turns 1.0 into 0.731, "73% spam", which costs 0.313 if the email really is spam and 1.313 if it is ham: 73% spam is a confidently wrong answer for a ham email.</p>
 
-<p><strong>Now the real email, row by row.</strong> Features <code>x = [1, 50]</code>: "contains 'free'" (1) and "length in words" (50). Parameters <code>w = [2, −0.01]</code>, <code>b = −1</code>.</p>
+<p><strong>Now the real email.</strong> Features <code>x = [1, 50]</code> — "contains 'free'" and "length in words" — with <code>w = [2, −0.01]</code>, <code>b = −1</code>.</p>
 
 <table>
   <tr><th>Step</th><th class="num">Value</th></tr>
@@ -144,15 +134,15 @@
   <tr><td>Loss if ham: <code>−ln(0.378)</code></td><td class="num">0.973</td></tr>
 </table>
 
-<p><strong>Row 1 — add the evidence.</strong> <code>2(1)</code> is the "free" evidence: +2. <code>(−0.01)(50)</code> is the length: 50 words at −0.01 each = −0.5, so a long email loses half a point. <code>(−1)</code> is the bias: every email starts one point down. Add the three: 2 − 0.5 − 1 = 0.5.</p>
+<p><strong>Row 1 — add the evidence.</strong> <code>2(1) = +2</code> for "free"; <code>(−0.01)(50) = −0.5</code> for length, 50 words at −0.01 each; <code>−1</code> for the bias. Add the three: <code>2 − 0.5 − 1 = 0.5</code>.</p>
 
-<p><strong>Row 2 — squash it to a probability.</strong> <code>e<sup>−0.5</sup> = 0.607</code>, so <code>1 / (1 + 0.607) = 0.622</code>. The squash sends a score of 0 to 0.5, positive scores above 0.5 and negative scores below. This one lands just above the middle: 62% spam.</p>
+<p><strong>Row 2 — squash it.</strong> <code>e<sup>−0.5</sup> = 0.607</code>, so <code>1/(1 + 0.607) = 0.622</code>: 62% spam. A score of 0 lands on 0.5, positives above it, negatives below.</p>
 
-<p><strong>Rows 3 and 4 — price it, and only one row counts.</strong> The label <code>y</code> picks the row. Spam email: <code>−ln(0.622) = 0.475</code>. Ham email: <code>−ln(0.378) = 0.973</code> — same prediction, a bigger bill, because 62% spam is a poor answer for a ham email.</p>
+<p><strong>Rows 3 and 4 — price it.</strong> The label picks the row: <code>−ln(0.622) = 0.475</code> if the email is spam, <code>−ln(0.378) = 0.973</code> if it is ham. Same prediction, a bigger bill, because 62% spam is a poor answer for a ham email.</p>
 
-<p><strong>Why the log.</strong> <code>−ln p</code> is 0 when you were confident and right, and grows without limit when you are confident and wrong: p = 0.9 costs 0.105, p = 0.5 costs 0.693, p = 0.1 costs 2.303. That slope is what training follows.</p>
+<p><strong>Why the log.</strong> <code>−ln p</code> is 0 when you are confident and right, and grows without limit when you are confident and wrong: p = 0.9 costs 0.105, p = 0.5 costs 0.693, p = 0.1 costs 2.303. That slope is what training follows.</p>
 
-<p><strong>What to notice.</strong> One prediction, two possible losses, and the label decides which counts — the model is never scored in the abstract. The length feature, weighted at −0.01, subtracted 0.5 from the score, so this model reads long emails as slightly less spammy. Being wrong about a ham email costs 0.973 while being wrong about spam costs 0.475, which is why training drifts borderline emails toward "ham".</p>
+<p><strong>What to notice.</strong> The length feature, weighted at −0.01, subtracted 0.5 from the score, so this model reads long emails as slightly less spammy — and being wrong about ham costs 0.973 against 0.475 for spam, which is why training drifts borderline emails toward "ham".</p>
 
 <h3>2. Three emails, one number</h3>
 <p>Targets <code>y = [1, 0, 1]</code>, predictions <code>p = [0.9, 0.2, 0.6]</code>. Cross-entropy uses <code>−ln p</code> when the label is 1 and <code>−ln(1 − p)</code> when it is 0.</p>
@@ -165,8 +155,21 @@
   <tr><td>Average</td><td class="num">—</td><td class="num">—</td><td class="num">0.839 / 3</td><td class="num"><strong>0.280</strong></td></tr>
 </table>
 
-<p><strong>What to notice.</strong> Three predictions collapse to 0.280 — the empirical risk θ is optimised against. Email 3 contributes almost half the total despite being "right" — confidence is graded, not pass/fail. A model that always says 0.5 scores <code>−ln 0.5 = 0.693</code>, so 0.693 is the real floor to beat, not 0.</p>
+<p><strong>What to notice.</strong> Three predictions collapse to one number, 0.280, which is the empirical risk θ is optimised against. Email 3 contributes almost half the total despite being "right": confidence is graded, not pass/fail. A model that always says 0.5 scores <code>−ln 0.5 = 0.693</code>, so 0.693 is the floor to beat, not 0.</p>
 
+<h3>3. Check yourself</h3>
+<p>On paper first: reading the tables is not producing them.</p>
+<ol class="steps">
+  <li>Same one-dial email, but <code>w = 1</code>, <code>b = 0</code>. What are the score, the probability and the loss if it is spam?
+    <details><summary>Answer</summary><p><code>z = 1(1) + 0 = 1</code>, so <code>p = 0.731</code> and the loss is 0.313 — identical to the first table. Only the score decides the prediction, not how the two numbers split to produce it.</p></details>
+  </li>
+  <li>Example 2 has <code>p = [0.9, 0.2, 0.6]</code>. If the middle prediction moves from 0.2 to 0.8, what happens to the average loss?
+    <details><summary>Answer</summary><p>It jumps from 0.280 to <code>(0.105 + 1.609 + 0.511)/3 = 0.742</code>: with <code>y = 0</code> the term is <code>−ln(1 − p)</code>, so a confidently wrong answer costs 1.609.</p></details>
+  </li>
+  <li>On this same three-email set, what does a model that always outputs 0.5 score — and is that better or worse than 0.280?
+    <details><summary>Answer</summary><p><code>−ln 0.5 = 0.693</code> per row, so 0.693. Worse than 0.280, and that is the honest baseline any classifier must beat.</p></details>
+  </li>
+</ol>
 <section class="playground">
   <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">θ (theta) — the numbers that move — drag, step, then read the numbers.</p></div><a class="pg-link" href="004a-theta.html">Open full screen →</a></div>
   <iframe src="004a-theta.html" title="Interactive lab: θ (theta) — the numbers that move" loading="lazy"></iframe>

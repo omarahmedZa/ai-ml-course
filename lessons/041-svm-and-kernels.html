@@ -91,6 +91,13 @@
 <p>If no straight boundary works, map the inputs into a richer space and draw a straight boundary there. A <strong>kernel</strong> <code>K(x, z)</code> returns the dot product of two points <em>after</em> that mapping, without performing it: <code>K(x, z) = φ(x) · φ(z)</code><span class="say" data-sym="φ">(phi)</span>. The standard choices are the polynomial kernel <code>K(x, z) = (1 + x · z)^d</code> and the radial basis function <code>K(x, z) = exp(−γ‖x − z‖²)</code><span class="say" data-sym="γ">(gamma)</span>, where <code>γ</code> sets how fast similarity fades with distance.</p>
 <p>Why this works: in the dual form of the optimisation, the data appears only inside dot products. Replace every dot product with <code>K</code> and the solver never needs the mapped coordinates. The prediction becomes <code>f(x) = Σᵢ αᵢ yᵢ K(xᵢ, x) + b</code><span class="say" data-sym="α">(alpha)</span>, where <code>αᵢ</code> is a weight per training point. Most <code>αᵢ</code> come out zero; the nonzero ones are the support vectors.</p>
 
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 1</p>
+  <h3 class="lab-title">Drag the symbol</h3>
+  <ul class="lab-list">
+    <li><a href="041a-margin.html"><span class="lab-num">A</span><span class="lab-body"><strong>margin (the gap) — the band a point must clear</strong><span>Interactive: drag the parameter, read the number.</span></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
+</aside>
 <h2>Worked example<span class="h2-topic">— margins</span></h2>
 
 <h3>1. A one-dimensional margin, solved by hand</h3>

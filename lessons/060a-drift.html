@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>060.1 — D: the largest gap between two windows</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Slide the live mean and watch the KS distance cross its alert line while the two distributions still overlap.">
+</head>
+<body data-page="lab" data-lesson="060a" class="library">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <span class="pill">Monitoring · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="060-monitoring-drift-data-quality.html">Topic 60 · Monitoring, drift &amp; data quality</a> — where a frozen reference meets this week's traffic</p>
+
+<header class="masthead">
+  <p class="kicker">Monitoring, one number at a time · Lab 1</p>
+  <h1>D <span class="say" data-sym="D">(KS distance)</span> — the largest gap between two windows</h1>
+  <p class="objective">You can read a drift statistic against its alert line, and say what crossing it does and does not tell you.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">D = max<sub>x</sub> |</span> <span class="hot">F<sub>train</sub>(x) − F<sub>live</sub>(x)</span> <span class="dim">|</span></p>
+<p class="eqn-note">Lab 1 · F is a cumulative share; only the live window is allowed to move</p>
+<p>Monitoring keeps one distribution still. F<sub>train</sub> is the reference — the scores from a known-good week, frozen as a file. F<sub>live</sub> is the window you are watching now. D is the largest vertical gap between the two cumulative curves: 0 when they agree everywhere, 1 when they do not overlap at all.</p>
+<p>This is the two-sample Kolmogorov–Smirnov statistic applied to model scores. The reading used in this course: 0.05 is worth a look, 0.10 is an alert.</p>
+
+<h2>Two windows, one reference</h2>
+<p>Both windows hold 2,000 scores. The reference is normal with mean 0.50 and spread 0.10, and that curve never moves. The live mean μ is the slider; its spread stays at 0.10, so the only change is location.</p>
+<p>At μ = 0.50 the curves coincide and D = 0. Raise μ and the live curve slides right. The figure draws densities because they are easier to read than cumulative curves, but D is measured on the cumulative versions — the single point where the two are furthest apart.</p>
+
+<figure class="fig" data-graph="drift-ks">
+  <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="f-drift-t f-drift-d">
+    <title id="f-drift-t">Reference and live score distributions with a KS distance of 0.24</title>
+    <desc id="f-drift-d">A solid grey reference curve with mean 0.50 and a dashed blue live curve with mean 0.56, both with spread 0.10. The live curve sits to the right. A gauge shows the KS distance at 0.24, past the alert threshold of 0.10.</desc>
+    <g data-layer>
+      <line x1="64" y1="36" x2="84" y2="36" stroke="var(--sym-data)" stroke-width="2.5"/>
+      <text x="90" y="40" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">train (frozen)</text>
+      <line x1="210" y1="36" x2="230" y2="36" stroke="var(--sym-pred)" stroke-width="2.5" stroke-dasharray="6 4"/>
+      <text x="236" y="40" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">live (this week)</text>
+
+      <text x="360" y="42" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">drift D (alert ≥ 0.10)</text>
+      <text x="690" y="42" text-anchor="end" font-size="12" fill="var(--sym-loss)" font-family="ui-monospace, monospace">D = 0.24</text>
+      <rect x="360" y="55" width="330" height="6" rx="3" fill="var(--rule)"/>
+      <rect x="360" y="55" width="194.7" height="6" rx="3" fill="var(--sym-loss)"/>
+      <line x1="401.3" y1="51" x2="401.3" y2="65" stroke="var(--sym-param)" stroke-width="1.5"/>
+      <line x1="442.5" y1="51" x2="442.5" y2="65" stroke="var(--sym-param)" stroke-width="2.5"/>
+      <text x="401.3" y="76" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.05</text>
+      <text x="442.5" y="76" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.10</text>
+
+      <text x="64" y="84" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">density</text>
+      <polygon points="64,300 64.0,291.6 77.3,289.2 90.5,286.2 103.8,282.6 117.0,278.3 130.2,273.1 143.5,267.2 156.8,260.3 170.0,252.5 183.2,243.8 196.5,234.3 209.7,223.9 223.0,212.8 236.2,201.2 249.5,189.3 262.8,177.3 276.0,165.5 289.3,154.0 302.5,143.4 315.7,133.7 329.0,125.4 342.2,118.7 355.5,113.7 368.8,110.6 382.0,109.6 395.3,110.6 408.5,113.7 421.8,118.7 435.0,125.4 448.2,133.7 461.5,143.4 474.8,154.0 488.0,165.5 501.2,177.3 514.5,189.3 527.7,201.2 541.0,212.8 554.3,223.9 567.5,234.3 580.8,243.8 594.0,252.5 607.2,260.3 620.5,267.2 633.8,273.1 647.0,278.3 660.2,282.6 673.5,286.2 686.7,289.2 700,291.6 700,300" fill="var(--sym-data)" opacity=".16"/>
+      <polyline points="64.0,291.6 77.3,289.2 90.5,286.2 103.8,282.6 117.0,278.3 130.2,273.1 143.5,267.2 156.8,260.3 170.0,252.5 183.2,243.8 196.5,234.3 209.7,223.9 223.0,212.8 236.2,201.2 249.5,189.3 262.8,177.3 276.0,165.5 289.3,154.0 302.5,143.4 315.7,133.7 329.0,125.4 342.2,118.7 355.5,113.7 368.8,110.6 382.0,109.6 395.3,110.6 408.5,113.7 421.8,118.7 435.0,125.4 448.2,133.7 461.5,143.4 474.8,154.0 488.0,165.5 501.2,177.3 514.5,189.3 527.7,201.2 541.0,212.8 554.3,223.9 567.5,234.3 580.8,243.8 594.0,252.5 607.2,260.3 620.5,267.2 633.8,273.1 647.0,278.3 660.2,282.6 673.5,286.2 686.7,289.2 700.0,291.6" fill="none" stroke="var(--sym-data)" stroke-width="2.5"/>
+      <polyline points="64.0,298.4 77.3,297.9 90.5,297.1 103.8,296.1 117.0,294.8 130.2,293.2 143.5,291.1 156.8,288.5 170.0,285.4 183.2,281.6 196.5,277.1 209.7,271.8 223.0,265.6 236.2,258.5 249.5,250.5 262.8,241.6 276.0,231.8 289.3,221.3 302.5,210.1 315.7,198.4 329.0,186.4 342.2,174.4 355.5,162.7 368.8,151.4 382.0,141.0 395.3,131.6 408.5,123.7 421.8,117.3 435.0,112.8 448.2,110.2 461.5,109.7 474.8,111.2 488.0,114.7 501.2,120.1 514.5,127.3 527.7,135.9 541.0,145.9 554.3,156.7 567.5,168.3 580.8,180.2 594.0,192.2 607.2,204.1 620.5,215.5 633.8,226.4 647.0,236.6 660.2,246.0 673.5,254.5 686.7,262.0 700.0,268.7" fill="none" stroke="var(--sym-pred)" stroke-width="2.5" stroke-dasharray="6 4"/>
+
+      <line x1="64" y1="300" x2="700" y2="300" stroke="var(--ink-faint)"/>
+      <text x="191.2" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.3</text>
+      <text x="318.4" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.4</text>
+      <text x="445.6" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.5</text>
+      <text x="572.8" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.6</text>
+      <text x="700" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.7</text>
+      <text x="700" y="336" text-anchor="end" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">score (0 to 1)</text>
+    </g>
+  </svg>
+  <script type="application/json" class="fig-data">{"kind":"drift-ks","reference":{"mean":0.5,"sd":0.1,"n":2000},"live":{"mean":0.56,"sd":0.1,"n":2000},"look":0.05,"alert":0.1}</script>
+  <div class="fig-controls">
+    <label>live mean μ · score <input type="range" data-k="mu" min="0.5" max="0.6" step="0.005" value="0.56"></label>
+    <output data-out="ks" aria-live="polite">μ = 0.56 · D = 0.24 · alert</output>
+    <button type="reset">Reset</button>
+  </div>
+  <figcaption><strong>A 0.06 shift in the mean gives D = 0.24, more than twice the alert line.</strong> The curves still overlap heavily, which is why a distance between inputs is a warning about the population, not a verdict on the model.</figcaption>
+</figure>
+
+<p>Every alert in this figure comes from a mean shift of a few hundredths of a score point. That is not a sensitive test misbehaving: D measures difference, and with 2,000 rows the difference is real. Whether it matters is a separate question, answered by the decision and the labels.</p>
+
+<h2>Reading the number</h2>
+<p>For two normal curves with equal spread, D has a closed form: D = 2Φ(δ / 2σ) − 1, where δ is the shift and σ the spread. At δ = 0.06 and σ = 0.10 that is 2Φ(0.30) − 1 = 0.24. Φ is the share of a normal curve below a value, which any statistics function will hand you.</p>
+
+<table>
+  <tr><th class="num">live mean</th><th class="num">shift</th><th class="num">D</th><th>reading</th></tr>
+  <tr><td class="num">0.50</td><td class="num">0.00</td><td class="num">0.00</td><td>stable</td></tr>
+  <tr><td class="num">0.52</td><td class="num">0.02</td><td class="num">0.08</td><td>worth a look</td></tr>
+  <tr><td class="num">0.54</td><td class="num">0.04</td><td class="num">0.16</td><td>alert</td></tr>
+  <tr><td class="num">0.56</td><td class="num">0.06</td><td class="num">0.24</td><td>alert</td></tr>
+  <tr><td class="num">0.60</td><td class="num">0.10</td><td class="num">0.38</td><td>alert</td></tr>
+</table>
+
+<p>The number is a distance, so it has no direction: a rise and a fall of the same size give the same D. It also saturates. Doubling the shift from 0.05 to 0.10 does not double D; it moves 0.20 to 0.38. D ranks shifts well and measures them in nothing at all, which is why a dashboard shows the two distributions beside it.</p>
+<p>An alert opens an investigation, and the first check is the pipeline, not the model: units, ranges, missingness, duplicates. A score that quietly changed from dollars to cents produces exactly this picture, and it is a data-quality event.</p>
+
+<h2>The trap<span class="h2-topic">— D</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"D = 0 means the model is fine."</strong> D compares score distributions. A model can keep its scores and lose accuracy, because the link between a score and an outcome changed underneath it.</p>
+  <p><strong>Correction:</strong> treat inputs and scores as leading indicators, then confirm with accuracy once labels arrive. The alert is a question with an owner, not an instruction.</p>
+</div>
+<p><strong>The tell:</strong> an accuracy drop with a flat D points at the labels, the cut or the outcome job. Drift in the inputs would have shown up first.</p>
+
+<h2>Retrieval check<span class="h2-topic">— D</span></h2>
+<ol class="quiz">
+  <li>The live mean moves from 0.50 to 0.55, spread still 0.10. Is that an alert at the 0.10 line?
+    <details><summary>Answer</summary>
+      <p>D = 2Φ(0.05 / 0.20) − 1 = 2Φ(0.25) − 1 ≈ <strong>0.20</strong>, so yes: twice the alert line. A shift of about 0.013 is enough to cross 0.05.</p>
+    </details>
+  </li>
+  <li>D has fallen to 0.02, but accuracy on last week's labelled rows dropped 8 points. What do you check?
+    <details><summary>Answer</summary>
+      <p>Not the score distribution. Look at the labels, the decision cut and the outcome pipeline. A flat D says the scores look the same, not that they still mean the same thing.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="labnav">
+  <a href="057a-temperature.html">← 057a · T (temperature) — pulling the bars onto the diagonal</a>
+  <span></span>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=5" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
+</body>
+</html>

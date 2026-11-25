@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>038.1 — σ: the width of a bell</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="σ sets how far a Gaussian spreads, which fixes the 68/95 rule and the standard error of the mean.">
+</head>
+<body data-page="lab" data-lesson="038a" class="library">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <span class="pill">Book 1 · Lab</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="038-distributions-and-sampling.html#labs">Topic 38 · Distributions &amp; sampling</a> — the spread of a bell</p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · the spread parameter</p>
+  <h1>σ <span class="say" data-sym="σ">(sigma)</span> — the width of a bell</h1>
+  <p class="objective">You can say what σ measures, read the 68/95 rule off it, and keep it apart from the standard error of the mean.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">p(x) =</span> <span class="hot">1/(σ√2π)</span> <span class="dim">· e<sup>−(x−μ)²/2σ²</sup></span></p>
+<p class="eqn-note">Lab 1 of 1 · σ appears twice, in the height and in the exponent; μ only shifts the bell</p>
+<p>A Gaussian is fixed by two numbers. μ (mu) says where its centre is; σ (sigma) says how far values typically sit from that centre. The height of the curve is not a separate choice: it is whatever makes the area under the curve equal 1, and that is why σ appears in front as well as in the exponent.</p>
+
+<h2>Wider bell, flatter curve</h2>
+<p>The figure shows the share of the data below a value, measured from the centre. Drag the steepness and watch the curve flatten or sharpen. A flat curve means values are spread far from μ; a sharp one means they crowd it.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="f-sig-t f-sig-d">
+    <title id="f-sig-t">Share of a Gaussian's data below a value, as its spread changes</title>
+    <desc id="f-sig-d">An S-shaped curve rising through one half at a distance of zero from the mean. It reaches about 0.84 at one unit and 0.97 at two units. A steeper curve corresponds to a smaller spread.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls">
+    <label>steepness k <input type="range" data-k="k" min="0.5" max="3" step="0.05" value="1.7"></label>
+    <output data-out="val" aria-live="polite">k = 1.70</output>
+    <button type="reset">Reset</button>
+  </div>
+  <script type="application/json" class="curve-data">{"kind":"sigmoid","x":[-4,4],"y":[0,1],"xticks":[-4,-2,0,2,4],"yticks":[0,0.25,0.5,0.75,1],"xlabel":"value − μ (points)","ylabel":"share of the data below","controls":[{"k":"k","label":"steepness k  (σ = 1 at k = 1.7)","min":0.5,"max":3,"step":0.05,"value":1.7}]}</script>
+  <figcaption><strong>σ is a distance in the units of the data, not a probability.</strong> At steepness 1.7 the curve puts 84% of the data below μ + 1σ and 97% below μ + 2σ — the 68/95 rule measured from the centre.</figcaption>
+</figure>
+
+<p>The steepness is about <code>1.7/σ</code>, so dragging it right makes σ smaller. Halve the steepness and you double the width: the same horizontal distance now carries less probability, and the curve takes longer to reach the top.</p>
+
+<h2>What to notice</h2>
+<table>
+  <tr><th>Distance from μ</th><th class="num">Share inside, both sides</th><th class="num">With μ = 10, σ = 2</th></tr>
+  <tr><td class="num">±1σ</td><td class="num">68%</td><td class="num">8 to 12</td></tr>
+  <tr><td class="num">±2σ</td><td class="num">95%</td><td class="num">6 to 14</td></tr>
+  <tr><td class="num">±3σ</td><td class="num">99.7%</td><td class="num">4 to 16</td></tr>
+</table>
+<p>The rule is a statement about one observation, not about an average. A single reading from this bell lands within 2 points of 10 about 95 times in 100. Nothing in that statement improves when you collect more data; the bell itself does not narrow.</p>
+<p>The average does narrow. If <code>n</code> independent readings have spread σ, their mean has spread <code>σ/√n</code>, called the standard error. With σ = 2: one reading has standard error 2, a mean of 100 readings has 0.2, and a mean of 400 has 0.1. Four times the data halves the error.</p>
+<table>
+  <tr><th>n</th><th class="num">1</th><th class="num">100</th><th class="num">400</th></tr>
+  <tr><td>σ = 2, standard error</td><td class="num">2.0</td><td class="num">0.20</td><td class="num">0.10</td></tr>
+  <tr><td>95% range for the mean</td><td class="num">±3.9</td><td class="num">±0.39</td><td class="num">±0.20</td></tr>
+</table>
+
+<h2>The trap<span class="h2-topic">— σ</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"σ is the error of the mean."</strong> σ measures one observation's spread. The error of the mean is σ/√n, which is smaller and shrinks with sample size.</p>
+  <p><strong>Correction:</strong> keep two names and two symbols. σ describes the population; σ/√n describes your estimate of its centre.</p>
+</div>
+<p><strong>The tell:</strong> if the reported uncertainty falls when you add rows but the spread of the raw values does not, you are reading a standard error. If both stay the same, you are reading σ.</p>
+
+<h2>Retrieval check<span class="h2-topic">— σ</span></h2>
+<ol class="quiz">
+  <li>A measurement has μ = 50 and σ = 5. Between which values do about 95% of single readings fall?
+    <details><summary>Answer</summary>
+      <p>μ ± 2σ = 50 ± 10, so 40 to 60. About 95% of single readings land there; 68% land within one σ, from 45 to 55.</p>
+    </details>
+  </li>
+  <li>σ = 4 and n = 64. What is the standard error of the mean, and what happens to it at n = 256?
+    <details><summary>Answer</summary>
+      <p>At n = 64, <code>4/√64 = 4/8 = 0.5</code>. At n = 256, <code>4/16 = 0.25</code>. Four times the data halves the standard error, while σ stays 4.</p>
+    </details>
+  </li>
+</ol>
+
+<p>Next, σ becomes the yardstick for judging an estimate: how far a fitted value sits from the truth, measured in standard errors.</p>
+
+<div class="labnav">
+  <a href="037a-norm.html">← 037a · ‖x‖ (the norm of x) — one arrow, three sizes</a>
+  <a href="040a-k.html">040a · k (kay) — how many neighbours vote →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=5" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
+</body>
+</html>

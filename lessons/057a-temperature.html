@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>057.1 — T: pulling the bars onto the diagonal</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Temperature divides the logit: raise it and the reliability bars slide onto the diagonal while ECE falls.">
+</head>
+<body data-page="lab" data-lesson="057a" class="library">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <span class="pill">Calibration · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="057-calibration-and-uncertainty.html">Topic 57 · Calibration &amp; uncertainty</a> — where a probability makes a promise</p>
+
+<header class="masthead">
+  <p class="kicker">Calibration, one number at a time · Lab 1</p>
+  <h1>T <span class="say" data-sym="T">(temperature)</span> — pulling the bars onto the diagonal</h1>
+  <p class="objective">You can read a reliability diagram, compute ECE from its bins, and explain what one temperature does to both.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">p̂ = σ(</span> <span class="hot">z / T</span> <span class="dim">)</span></p>
+<p class="eqn-note">Lab 1 · z is the model's logit; T divides it before the sigmoid; σ is the sigmoid</p>
+<p>A confidence is a promise: among the cases where the model says 0.8, about 80% should turn out positive. A <strong>reliability diagram</strong> checks that promise bin by bin, and the <strong>expected calibration error</strong> (ECE) reduces the whole picture to one number.</p>
+<p>This lab holds 1,000 held-out predictions fixed — five bins of 200 each. The labels never move, so each bin's observed frequency is fixed too. The only thing the slider changes is what the model <em>says</em>.</p>
+
+<h2>The diagram, and the error it measures</h2>
+<p>Each bar is one confidence bin. Its horizontal position is that bin's mean confidence after the temperature is applied; its top is the share of the bin that was actually positive. Perfect calibration is the dashed diagonal, where a bar's top touches the line it stands on.</p>
+<p>ECE is the distance from the bar tops to the diagonal, weighted by bin size. All five bins hold 200 rows here, so it is a plain average: ECE = (1/5) Σ |conf − freq|. Nothing else in the model is allowed to move.</p>
+
+<figure class="fig" data-graph="reliability">
+  <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="f-cal-t f-cal-d">
+    <title id="f-cal-t">A reliability diagram at temperature 1 with every bar below the diagonal</title>
+    <desc id="f-cal-d">Five bars at confidence 0.55 to 0.95. Their tops sit at observed frequencies 0.53, 0.60, 0.68, 0.76 and 0.88, each below the diagonal by 0.02 to 0.09. The expected calibration error is 0.060.</desc>
+    <g data-layer>
+      <line x1="64" y1="300" x2="700" y2="300" stroke="var(--ink-faint)"/>
+      <line x1="64" y1="300" x2="64" y2="24" stroke="var(--ink-faint)"/>
+      <line x1="64" y1="300" x2="700" y2="24" stroke="var(--ink-faint)" stroke-dasharray="6 5"/>
+
+      <text x="170" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.5</text>
+      <text x="276" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.6</text>
+      <text x="382" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.7</text>
+      <text x="488" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.8</text>
+      <text x="594" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.9</text>
+      <text x="700" y="316" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1.0</text>
+      <text x="56" y="300" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.4</text>
+      <text x="56" y="254" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.5</text>
+      <text x="56" y="208" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.6</text>
+      <text x="56" y="162" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.7</text>
+      <text x="56" y="116" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.8</text>
+      <text x="56" y="70" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.9</text>
+      <text x="56" y="28" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1.0</text>
+
+      <text x="700" y="336" text-anchor="end" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">confidence after T</text>
+      <text x="64" y="18" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">observed frequency</text>
+
+      <line x1="64" y1="254" x2="700" y2="254" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+      <line x1="64" y1="208" x2="700" y2="208" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+      <line x1="64" y1="162" x2="700" y2="162" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+      <line x1="64" y1="116" x2="700" y2="116" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+      <line x1="64" y1="70" x2="700" y2="70" stroke="var(--rule)" stroke-dasharray="3 4" opacity=".5"/>
+
+      <rect x="201" y="238.6" width="44" height="61.4" rx="2" fill="var(--sym-pred)" opacity=".55"/>
+      <rect x="307" y="207.2" width="44" height="92.8" rx="2" fill="var(--sym-pred)" opacity=".55"/>
+      <rect x="413" y="173.3" width="44" height="126.7" rx="2" fill="var(--sym-pred)" opacity=".55"/>
+      <rect x="519" y="134.1" width="44" height="165.9" rx="2" fill="var(--sym-pred)" opacity=".55"/>
+      <rect x="625" y="80.6" width="44" height="219.4" rx="2" fill="var(--sym-pred)" opacity=".55"/>
+
+      <line x1="223" y1="238.6" x2="223" y2="231" stroke="var(--sym-loss)" stroke-width="2.5"/>
+      <line x1="329" y1="207.2" x2="329" y2="185" stroke="var(--sym-loss)" stroke-width="2.5"/>
+      <line x1="435" y1="173.3" x2="435" y2="139" stroke="var(--sym-loss)" stroke-width="2.5"/>
+      <line x1="541" y1="134.1" x2="541" y2="93" stroke="var(--sym-loss)" stroke-width="2.5"/>
+      <line x1="647" y1="80.6" x2="647" y2="47" stroke="var(--sym-loss)" stroke-width="2.5"/>
+
+      <text x="70" y="52" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">dashed = perfect</text>
+      <text x="70" y="66" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">calibration</text>
+      <text x="70" y="86" font-size="11" fill="var(--sym-loss)" font-family="ui-monospace, monospace">amber = the gap</text>
+    </g>
+  </svg>
+  <script type="application/json" class="fig-data">{"kind":"reliability","bins":[0.55,0.65,0.75,0.85,0.95],"perBin":200,"observed":[0.533,0.602,0.675,0.761,0.877],"temperature":1.0,"range":[0.5,3.0]}</script>
+  <div class="fig-controls">
+    <label>temperature T <input type="range" data-k="temp" min="0.5" max="3" step="0.1" value="1"></label>
+    <output data-out="ece" aria-live="polite">T = 1.0 · ECE 0.060</output>
+    <button type="reset">Reset</button>
+  </div>
+  <figcaption><strong>At T = 1 every bar sits below the line, by 0.02 at the bottom and 0.09 near the top.</strong> Raise the temperature and the bars slide left while their tops stay put, so the diagonal comes down to meet them.</figcaption>
+</figure>
+
+<p>Every bar is left of where it would need to be for its top to touch the line, which is the picture of overconfidence. The 0.85 bin is the worst offender: it claims 0.85 and delivers 0.76.</p>
+
+<h2>Turning the dial</h2>
+<p>Temperature divides the logit before the sigmoid. T above 1 shrinks every logit toward zero, so every confidence moves toward 0.5; T below 1 stretches them away. The observed frequencies do not care, because the labels were already fixed.</p>
+
+<table>
+  <tr><th class="num">T</th><th class="num">mean confidence</th><th class="num">ECE</th></tr>
+  <tr><td class="num">0.5</td><td class="num">0.85</td><td class="num">0.159</td></tr>
+  <tr><td class="num">1.0</td><td class="num">0.75</td><td class="num">0.060</td></tr>
+  <tr><td class="num">1.5</td><td class="num">0.69</td><td class="num">0.000</td></tr>
+  <tr><td class="num">2.0</td><td class="num">0.65</td><td class="num">0.039</td></tr>
+  <tr><td class="num">3.0</td><td class="num">0.61</td><td class="num">0.084</td></tr>
+</table>
+
+<p>The best temperature here is near 1.5, where each bar top lands on the diagonal and ECE reaches zero. Past it the bars cross above the line: they become underconfident, and at T = 3 the error is 0.084, worse than doing nothing. One dial, fitted on held-out data, and the same five bins tell you when you have gone too far.</p>
+<p>None of this changes a single decision. Dividing by a positive T preserves the order of the scores, so the 0.5 cut, the accuracy and the ranking are identical at every T. Only the numbers you quote as probabilities move.</p>
+
+<h2>The trap<span class="h2-topic">— T</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Temperature makes the model better."</strong> It makes the probabilities more honest and leaves the decisions alone. If accuracy was 0.81 at T = 1, it is 0.81 at T = 2.</p>
+  <p><strong>Correction:</strong> fit T on a calibration split, then re-measure ECE on fresh rows. T repairs overconfidence; it cannot add information the weights do not hold.</p>
+</div>
+<p><strong>The tell:</strong> if accuracy or the confusion matrix moved after you turned the dial, you changed the cut by accident. A temperature is a monotone rescale, so it cannot reorder two cases.</p>
+
+<h2>Retrieval check<span class="h2-topic">— T</span></h2>
+<ol class="quiz">
+  <li>A logit of 1.10 gives a confidence of 0.75. What is the confidence at T = 2?
+    <details><summary>Answer</summary>
+      <p>σ(1.10 / 2) = σ(0.55) = <strong>0.63</strong>. Halving the logit pulls the number toward 0.5; the ranking against every other case is untouched.</p>
+    </details>
+  </li>
+  <li>ECE falls from 0.060 to 0.000 as T goes from 1 to 1.5. Did the model get more accurate?
+    <details><summary>Answer</summary>
+      <p>No. The labels and the ordering never changed; only the reported probabilities moved onto the diagonal. Accuracy at a fixed cut is identical, and ECE alone cannot reward sharpness — a constant 0.5 predictor would score zero.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="labnav">
+  <a href="056a-gap.html">← 056a · Δ (delta) — the gap between two groups</a>
+  <a href="060a-drift.html">060a · D (KS distance) — the largest gap between two windows →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=5" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
+</body>
+</html>

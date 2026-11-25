@@ -92,6 +92,13 @@
 <p>L2 regularization adds <code>λθ</code><span class="say" data-sym="λ">(lambda)</span> to the gradient, which Adam scales by <code>1/√v̂</code>, so heavily updated weights decay less. <strong>AdamW</strong> decouples it: shrink <code>θ</code> by <code>η·λ</code>, then apply the Adam step. Set <code>η</code> first, add warmup for transformers, and clip gradient norm to 1.0.</p>
 <p><strong>Why this part exists:</strong> these settings cause most "Adam does not generalize" reports.</p>
 
+<aside class="lab-callout" id="labs">
+  <p class="lab-eyebrow">Equation labs · 1</p>
+  <h3 class="lab-title">Drag the symbol</h3>
+  <ul class="lab-list">
+    <li><a href="047a-beta.html"><span class="lab-num">A</span><span class="lab-body"><strong>β (beta) — the share of the last step</strong><span>Interactive: drag the parameter, read the number.</span></span><span class="lab-go">Open lab →</span></a></li>
+  </ul>
+</aside>
 <h2>Worked example<span class="h2-topic">— optimization</span></h2>
 
 <h3>1. Two gradients, three optimizers</h3>

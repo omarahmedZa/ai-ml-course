@@ -1342,6 +1342,193 @@
   "symbols": []
  },
  {
+  "type": "lab",
+  "id": "036a",
+  "title": "λ (lambda) — the stretch a direction allows",
+  "book": "foundations",
+  "bookTitle": "Foundations",
+  "categories": [
+   "linear-algebra"
+  ],
+  "summary": "λ is the factor a matrix applies to its own directions — and the miss it cannot explain on every other vector.",
+  "url": "lessons/036a-lambda.html",
+  "symbols": []
+ },
+ {
+  "type": "lab",
+  "id": "037a",
+  "title": "‖x‖ (the norm of x) — one arrow, three sizes",
+  "book": "foundations",
+  "bookTitle": "Foundations",
+  "categories": [
+   "linear-algebra"
+  ],
+  "summary": "The L1, L2 and L∞ norms agree on zero and disagree everywhere else; their unit balls show why.",
+  "url": "lessons/037a-norm.html",
+  "symbols": []
+ },
+ {
+  "type": "lab",
+  "id": "038a",
+  "title": "σ (sigma) — the width of a bell",
+  "book": "foundations",
+  "bookTitle": "Foundations",
+  "categories": [
+   "probability-statistics"
+  ],
+  "summary": "σ sets how far a Gaussian spreads, which fixes the 68/95 rule and the standard error of the mean.",
+  "url": "lessons/038a-sigma.html",
+  "symbols": []
+ },
+ {
+  "type": "lab",
+  "id": "040a",
+  "title": "k (kay) — how many neighbours vote",
+  "book": "classical-ml",
+  "bookTitle": "Classical ML",
+  "categories": [
+   "classical-ml"
+  ],
+  "summary": "k sets how many neighbours vote, and moving it trades a noisy boundary for a blurred one.",
+  "url": "lessons/040a-k.html",
+  "symbols": []
+ },
+ {
+  "type": "lab",
+  "id": "041a",
+  "title": "margin (the gap) — the band a point must clear",
+  "book": "classical-ml",
+  "bookTitle": "Classical ML",
+  "categories": [
+   "classical-ml",
+   "calculus-optimization"
+  ],
+  "summary": "The margin is a free band around the boundary; points inside it pay, and C decides how much that payment matters.",
+  "url": "lessons/041a-margin.html",
+  "symbols": []
+ },
+ {
+  "type": "lab",
+  "id": "043a",
+  "title": "PC1 (the first component) — the axis that keeps the most spread",
+  "book": "classical-ml",
+  "bookTitle": "Classical ML",
+  "categories": [
+   "linear-algebra",
+   "classical-ml"
+  ],
+  "summary": "PC1 is the axis that captures the most variance; turning away from it costs variance in proportion to cos squared.",
+  "url": "lessons/043a-pc.html",
+  "symbols": []
+ },
+ {
+  "type": "lab",
+  "id": "047a",
+  "title": "β (beta) — the share of the last step",
+  "book": "neural-networks",
+  "bookTitle": "Neural Networks",
+  "categories": [
+   "calculus-optimization",
+   "deep-learning"
+  ],
+  "summary": "β sets how much of the running velocity momentum keeps, and therefore how many past gradients still vote.",
+  "url": "lessons/047a-beta.html",
+  "symbols": []
+ },
+ {
+  "type": "lab",
+  "id": "048a",
+  "title": "merges — the pair that wins",
+  "book": "language",
+  "bookTitle": "Language & Transformers",
+  "categories": [
+   "nlp-transformers"
+  ],
+  "summary": "Run four BPE merges by hand on a nine-word corpus and watch the pair counts change identity after every merge.",
+  "url": "lessons/048a-merges.html",
+  "symbols": []
+ },
+ {
+  "type": "lab",
+  "id": "049a",
+  "title": "T — one dial, two names",
+  "book": "language",
+  "bookTitle": "Language & Transformers",
+  "categories": [
+   "nlp-transformers"
+  ],
+  "summary": "Temperature divides the logits before softmax, so the same reshuffling can be read as a change of gap or a change of T.",
+  "url": "lessons/049a-temperature.html",
+  "symbols": []
+ },
+ {
+  "type": "lab",
+  "id": "050a",
+  "title": "h — one width, several views",
+  "book": "language",
+  "bookTitle": "Language & Transformers",
+  "categories": [
+   "nlp-transformers"
+  ],
+  "summary": "Two heads read the same four tokens with different weight patterns, while h splits one width rather than multiplying the parameters.",
+  "url": "lessons/050a-heads.html",
+  "symbols": []
+ },
+ {
+  "type": "lab",
+  "id": "053a",
+  "title": "γ (gamma) — what one sweep is worth",
+  "book": "rl",
+  "bookTitle": "Reinforcement Learning",
+  "categories": [
+   "reinforcement-learning"
+  ],
+  "summary": "Run value iteration on a three-state chain and watch the discount decide both how fast the values settle and which action wins.",
+  "url": "lessons/053a-vi.html",
+  "symbols": []
+ },
+ {
+  "type": "lab",
+  "id": "056a",
+  "title": "Δ (delta) — the gap between two groups",
+  "book": "trust",
+  "bookTitle": "Trust, Privacy & Scale",
+  "categories": [
+   "evaluation-metrics",
+   "explainability"
+  ],
+  "summary": "Δ compares two groups' selection rates; the threshold sets the size of the gap, and equalising it costs accuracy.",
+  "url": "lessons/056a-gap.html",
+  "symbols": []
+ },
+ {
+  "type": "lab",
+  "id": "057a",
+  "title": "T (temperature) — pulling the bars onto the diagonal",
+  "book": "trust",
+  "bookTitle": "Trust, Privacy & Scale",
+  "categories": [
+   "evaluation-metrics"
+  ],
+  "summary": "Temperature divides the logit: raise it and the reliability bars slide onto the diagonal while ECE falls.",
+  "url": "lessons/057a-temperature.html",
+  "symbols": []
+ },
+ {
+  "type": "lab",
+  "id": "060a",
+  "title": "D (KS distance) — the largest gap between two windows",
+  "book": "systems",
+  "bookTitle": "Systems",
+  "categories": [
+   "systems",
+   "evaluation-metrics"
+  ],
+  "summary": "Slide the live mean and watch the KS distance cross its alert line while the two distributions still overlap.",
+  "url": "lessons/060a-drift.html",
+  "symbols": []
+ },
+ {
   "type": "symbol",
   "id": "partial",
   "title": "∂ — partial",

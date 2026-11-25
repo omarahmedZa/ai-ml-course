@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>037.1 — ‖x‖: three ways to measure one arrow</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="The L1, L2 and L∞ norms agree on zero and disagree everywhere else; their unit balls show why.">
+</head>
+<body data-page="lab" data-lesson="037a" class="library">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <span class="pill">Book 1 · Lab</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="037-norms-and-distances.html#labs">Topic 37 · Norms &amp; distances</a> — the size of an arrow</p>
+
+<header class="masthead">
+  <p class="kicker">Equation lab · three measures of size</p>
+  <h1>‖x‖ <span class="say" data-sym="‖x‖">(the norm of x)</span> — one arrow, three sizes</h1>
+  <p class="objective">You can read the three norms off the same point, and say which unit ball is smallest and why.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="hot">‖x‖</span> <span class="dim">is ‖x‖₁ , ‖x‖₂ , or ‖x‖∞ — one symbol, three rules</span></p>
+<p class="eqn-note">Lab 1 of 1 · only the norm is lit; the point and its coordinates stay dim</p>
+<p>A norm answers "how big is this vector?" without caring about direction. It must be zero only at the origin, scale with the vector, and obey the triangle inequality. Those three rules leave room for many answers, and machine learning relies on the differences between them.</p>
+
+<h2>Three slopes on one ray</h2>
+<p>Take the point <code>(t, t)</code>, which sits on the 45° ray at distance t from the origin. Its three norms are simple:</p>
+<p class="eqn"><span class="hot">‖x‖₁</span> <span class="dim">= 2t</span> &nbsp;·&nbsp; <span class="hot">‖x‖₂</span> <span class="dim">= √2 t ≈ 1.41t</span> &nbsp;·&nbsp; <span class="hot">‖x‖∞</span> <span class="dim">= t</span></p>
+<p>Each is a straight line through the origin, and only the slope changes. The figure draws that line for a slope you choose, with a marker at the distance you choose.</p>
+
+<figure class="fig" data-graph="curve">
+  <svg viewBox="0 0 720 360" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="f-norm-t f-norm-d">
+    <title id="f-norm-t">How the size of the point (t, t) grows with distance for the L1, L2 and L-infinity norms</title>
+    <desc id="f-norm-d">A straight line through the origin with slope 1.41, marked with a point at a distance of one where the norm reads 1.41. Steeper slopes belong to the L2 and L1 norms, flatter ones to the L-infinity norm.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls">
+    <label>norm slope <input type="range" data-k="k" min="1" max="2" step="0.01" value="1.41"></label>
+    <label>distance t <input type="range" data-k="t" min="0" max="2" step="0.05" value="1"></label>
+    <output data-out="val" aria-live="polite">k = 1.41 · t = 1.00 · y = 1.41</output>
+    <button type="reset">Reset</button>
+  </div>
+  <script type="application/json" class="curve-data">{"kind":"abs","x":[0,2],"y":[0,4],"xticks":[0,0.5,1,1.5,2],"yticks":[0,1,2,3,4],"xlabel":"distance t along the 45° ray (points)","ylabel":"‖x‖ at the point (t, t)","controls":[{"k":"k","label":"norm slope along the ray","min":1,"max":2,"step":0.01,"value":1.41},{"k":"t","label":"distance t along the ray","min":0,"max":2,"step":0.05,"value":1}],"marker":"t"}</script>
+  <figcaption><strong>The steeper the line, the smaller the unit ball.</strong> Slopes 1, √2 and 2 are L∞, L2 and L1. Each reaches a norm of 1 at t = 1, 0.707 and 0.5, so the L1 diamond is the tightest of the three.</figcaption>
+</figure>
+
+<p>Set the slope to 1 and the line runs through <code>(1, 1)</code>: the L∞ norm of <code>(1,1)</code> is 1. Set it to 1.41 and the same distance reads 1.41: the L2 norm. Set it to 2 and it reads 2: the L1 norm. The marker shows the value for the distance you are standing at.</p>
+
+<h2>What to notice</h2>
+<table>
+  <tr><th>Point</th><th class="num">‖x‖₁</th><th class="num">‖x‖₂</th><th class="num">‖x‖∞</th><th>Ball shape</th></tr>
+  <tr><td class="num">(1, 1)</td><td class="num">2</td><td class="num">1.41</td><td class="num">1</td><td>diamond, circle, square</td></tr>
+  <tr><td class="num">(3, 4)</td><td class="num">7</td><td class="num">5</td><td class="num">4</td><td>3–4–5 triangle</td></tr>
+  <tr><td class="num">(1, 0)</td><td class="num">1</td><td class="num">1</td><td class="num">1</td><td>all three agree on an axis</td></tr>
+</table>
+<p>The three norms agree at the origin and on the axes, and nowhere else. On the diagonal L1 is exactly twice L∞, because L1 adds the two equal coordinates while L∞ keeps the larger one. L2 sits between them at √2.</p>
+<p>The unit ball is the set of points with norm at most 1. To find where the 45° ray leaves that set, solve <code>slope × t = 1</code>. L∞ leaves at t = 1, L2 at 0.707, L1 at 0.5. The L1 ball is contained in the L2 ball, which is contained in the L∞ ball, and that nesting is the whole geometry of the three.</p>
+<p>This is why the choice matters in a model. An L1 penalty pays a fixed price per non-zero coordinate, so it pushes small weights to exactly zero. An L2 penalty pays for the square, so it shrinks every weight a little and almost never reaches zero.</p>
+
+<h2>The trap<span class="h2-topic">— ‖x‖</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"L1 is the biggest norm, so it is the loosest."</strong> It reports the largest number for the same arrow, which makes its unit ball the smallest. A tight ball means the norm grows fast, so fewer points are allowed inside.</p>
+  <p><strong>Correction:</strong> the number and the shape move in opposite directions. Bigger readings mean a smaller ball.</p>
+</div>
+<p><strong>The tell:</strong> if a plot of the L1 ball looks like a circle, you are drawing L2. The corners of the diamond sit on the axes and are the giveaway.</p>
+
+<h2>Retrieval check<span class="h2-topic">— ‖x‖</span></h2>
+<ol class="quiz">
+  <li>For <code>x = (3,4)</code>, compute all three norms. Which is smallest?
+    <details><summary>Answer</summary>
+      <p>L1 = 3 + 4 = 7, L2 = <code>√(9+16) = 5</code>, L∞ = 4. L∞ is smallest here. The order L∞ ≤ L2 ≤ L1 holds for every vector.</p>
+    </details>
+  </li>
+  <li>Which unit ball contains the other two, and what does that say about the norm?
+    <details><summary>Answer</summary>
+      <p>The L∞ ball, the square from −1 to 1 on each axis, contains the L2 circle and the L1 diamond. A larger ball means the norm grows more slowly, so more points stay at size 1 or less.</p>
+    </details>
+  </li>
+</ol>
+
+<p>Next, the same three-way choice appears whenever a model has to decide how much a single far-away point is allowed to count.</p>
+
+<div class="labnav">
+  <a href="036a-lambda.html">← 036a · λ (lambda) — the stretch a direction allows</a>
+  <a href="038a-sigma.html">038a · σ (sigma) — the width of a bell →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=5" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
+</body>
+</html>

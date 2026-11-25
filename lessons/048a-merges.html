@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>048.1 — merges: the pair that wins</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Run four BPE merges by hand on a nine-word corpus and watch the pair counts change identity after every merge.">
+</head>
+<body data-page="lab" data-lesson="048a" class="library">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <span class="pill">Topic 48 · Lab 1</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<p class="crumbs">Part of <a href="048-subword-tokenizers-bpe.html#labs">Topic 48 · Subword tokenizers</a> — where the merge rule is defined</p>
+
+<header class="masthead">
+  <p class="kicker">Tokenization, one rule at a time · Lab 1</p>
+  <h1>merges — the pair that wins</h1>
+  <p class="objective">You can run four merges by hand, predict the next winner, and say why a merge changes counts that were never touched.</p>
+</header>
+
+<h2>Where this sits</h2>
+<p class="eqn"><span class="dim">repeat:</span> <span class="hot">(a, b) ← the most frequent adjacent pair</span> <span class="dim">→ add ab to V</span></p>
+<p class="eqn-note">Topic 48 · the whole learner is one line, run until the vocabulary budget is full</p>
+<p>A symbol is any string already in the vocabulary; at the start, one character. The rule counts every adjacent pair across the corpus, replaces the winner with one new symbol, and starts again. The saved merge list — in order — is the tokenizer.</p>
+
+<h2>Count, merge, recount</h2>
+<p>Take a corpus of nine words: <code>sun</code> five times, <code>sung</code> three times, <code>gun</code> twice. As characters that is 5 × 3 + 3 × 4 + 2 × 3 = 33 symbols and 23 adjacent pairs.</p>
+
+<table>
+  <tr><th>Word</th><th class="num">Copies</th><th>As characters</th></tr>
+  <tr><td><code>sun</code></td><td class="num">5</td><td><code>s u n</code></td></tr>
+  <tr><td><code>sung</code></td><td class="num">3</td><td><code>s u n g</code></td></tr>
+  <tr><td><code>gun</code></td><td class="num">2</td><td><code>g u n</code></td></tr>
+</table>
+
+<p>Counting by copies gives <code>(u,n)</code> 10, <code>(s,u)</code> 8, <code>(n,g)</code> 3 and <code>(g,u)</code> 2. The winner is <code>u+n</code>, so all ten occurrences become the symbol <code>un</code>. Press play, or drag the scrubber, to advance one merge at a time; the number beside each pair is its count before that merge.</p>
+
+<figure class="fig" data-anim="flow">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-merge-t f-merge-d">
+    <title id="f-merge-t">Four merges applied to the sun, sung and gun corpus</title>
+    <desc id="f-merge-d">Four stages. The first merges u plus n, which occurs ten times, into un. The second merges s plus un, eight times, into sun. The third merges sun plus g, three times, into sung. The fourth merges g plus un, twice, into gun.</desc>
+    <g data-layer></g>
+  </svg>
+  <div class="fig-controls">
+    <button type="button" data-play data-playing="false">Play</button>
+    <label>merge <input type="range" data-scrub min="0" max="100" value="0"></label>
+    <output data-out="step" aria-live="polite">stage 1 / 4</output>
+    <button type="button" data-reset>Reset</button>
+  </div>
+  <script type="application/json" class="flow-data">{"steps":["u+n ×10 → un","s+un ×8 → sun","sun+g ×3 → sung","g+un ×2 → gun"],"note":"recount before every merge"}</script>
+  <figcaption><strong>Each stage is one merge.</strong> The count is taken fresh before it, so the numbers fall as occurrences are consumed and new adjacencies appear.</figcaption>
+</figure>
+
+<p>The merge is not a subtraction. When <code>u+n</code> becomes <code>un</code>, every pair that touched either half changes identity: <code>(s,u)</code>, <code>(u,n)</code>, <code>(n,g)</code> and <code>(g,u)</code> all leave the list. New pairs appear at the joins — <code>(s,un)</code> and <code>(un,g)</code> — and <code>(g,u)</code> returns as <code>(g,un)</code>, still counted twice but no longer the same pair. The counts 8, 3 and 2 all belong to pairs that did not exist a moment earlier.</p>
+
+<table>
+  <tr><th class="num">Merge</th><th>Pair counts before it</th><th>Winner</th><th>As symbols after</th><th class="num">Symbols</th></tr>
+  <tr><td class="num">1</td><td><code>(u,n) 10 · (s,u) 8 · (n,g) 3 · (g,u) 2</code></td><td><code>un</code></td><td><code>s un · s un g · g un</code></td><td class="num">23</td></tr>
+  <tr><td class="num">2</td><td><code>(s,un) 8 · (un,g) 3 · (g,un) 2</code></td><td><code>sun</code></td><td><code>sun · sun g · g un</code></td><td class="num">15</td></tr>
+  <tr><td class="num">3</td><td><code>(sun,g) 3 · (g,un) 2</code></td><td><code>sung</code></td><td><code>sun · sung · g un</code></td><td class="num">12</td></tr>
+  <tr><td class="num">4</td><td><code>(g,un) 2</code></td><td><code>gun</code></td><td><code>sun · sung · gun</code></td><td class="num">10</td></tr>
+</table>
+
+<figure class="fig" data-graph="bars">
+  <script type="application/json" class="bars-data">{"values":[33,23,15,12,10],"labels":["start","m1","m2","m3","m4"],"max":36,"ylabel":"symbols"}</script>
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-corp-t f-corp-d">
+    <title id="f-corp-t">Corpus length after each of the four merges</title>
+    <desc id="f-corp-d">Five bars: 33 symbols before any merge, then 23, 15, 12 and 10 after merges one to four. The last bar equals one symbol per word occurrence.</desc>
+    <g data-layer></g>
+  </svg>
+  <figcaption><strong>Four merges take the corpus from 33 symbols to 10.</strong> Ten is not the vocabulary size — it is one symbol per word occurrence: five <code>sun</code>, three <code>sung</code>, two <code>gun</code>.</figcaption>
+</figure>
+
+<p>The vocabulary is four characters, <code>s</code>, <code>u</code>, <code>n</code>, <code>g</code>, plus the four merged symbols, so eight. The corpus holds ten token positions because the same symbol is reused. Vocabulary counts distinct labels; tokens count positions.</p>
+
+<h2>The trap<span class="h2-topic">— merges</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A merge only changes the pair it merges."</strong> It changes every pair that touched either half. <code>u+n</code> removes <code>(s,u)</code> and <code>(n,g)</code> as well as <code>(u,n)</code>, and the count that was <code>(g,u)</code> returns under the new pair <code>(g,un)</code>.</p>
+  <p><strong>Correction:</strong> after each merge, rebuild the adjacency list. The counts are not the old table minus the winner; the pair identities change too.</p>
+</div>
+<p><strong>The tell:</strong> your count table stops adding up — the total no longer matches the number of adjacencies. With 33 symbols in nine words there are 23 pairs; after one merge 13 remain, and none of the three survivors existed before.</p>
+
+<h2>Retrieval check<span class="h2-topic">— merges</span></h2>
+<ol class="quiz">
+  <li>Why does <code>(s,u)</code> disappear after the first merge, even though no <code>s</code> or <code>u</code> character was deleted?
+    <details><summary>Answer</summary>
+      <p>A pair is two adjacent symbols. The <code>u</code> now sits inside the symbol <code>un</code>, which has one left edge and one right edge, so the old <code>s</code>–<code>u</code> boundary is gone. The <code>s</code> now forms the pair <code>(s,un)</code>.</p>
+    </details>
+  </li>
+  <li>The corpus ends at 10 tokens with a vocabulary of 8 symbols. Why are those two numbers different?
+    <details><summary>Answer</summary>
+      <p>The vocabulary is the set of distinct symbols — four characters and four merges. The 10 counts positions: <code>sun</code> appears five times, <code>sung</code> three, <code>gun</code> two. Repeated symbols share one vocabulary entry.</p>
+    </details>
+  </li>
+</ol>
+
+<div class="labnav">
+  <a href="047a-beta.html">← 047a · β (beta) — the share of the last step</a>
+  <a href="049a-temperature.html">049a · T — one dial, two names →</a>
+</div>
+
+</main>
+<script src="../assets/graph.js?v=5" defer></script>
+<script src="../assets/anim.js?v=4" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
+</body>
+</html>
