@@ -33,33 +33,36 @@
   <li><strong>Internet once</strong> — to download <code>dml.py</code> and each problem. After that, <code>run</code> works offline.</li>
 </ul>
 
-<h2>Step 1 — install Python and NumPy<span class="h2-topic">— once per machine</span></h2>
-<pre><code># macOS (Homebrew) or Linux
-brew install python          # macOS
-sudo apt install python3 python3-pip   # Debian/Ubuntu
+<h2>Step 1 — a virtual environment<span class="h2-topic">— never pip into the system</span></h2>
+<p>Modern Debian/Ubuntu (PEP 668) refuses <code>pip install</code> outside a virtual environment — that is the <code>externally-managed-environment</code> error. Do not fight it and do not use <code>--break-system-packages</code>. Make a venv next to <code>dml.py</code>:</p>
+<pre><code>mkdir -p ~/ml-problems &amp;&amp; cd ~/ml-problems
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 
-# Windows: install from python.org, tick "Add python.exe to PATH"
-
-# all systems
-python3 -m pip install numpy</code></pre>
-<p>Check both:</p>
-<pre><code>python3 --version
-python3 -c "import numpy; print(numpy.__version__)"</code></pre>
-<p>On Windows the command is usually <code>py</code> instead of <code>python3</code>. Use <code>py</code> in every command below.</p>
+python -m pip install --upgrade pip
+python -m pip install numpy</code></pre>
+<p>The prompt now starts with <code>(.venv)</code>. Every command below uses <code>python</code> — the venv's interpreter — not <code>python3</code>. If you close the terminal, re-run <code>source .venv/bin/activate</code> first.</p>
+<p><strong>Prefer your distro's package?</strong> That also works, no venv needed:</p>
+<pre><code>sudo apt install python3-numpy python3-venv   # Debian / Ubuntu
+brew install numpy                            # macOS (Homebrew python)</code></pre>
+<p>Check:</p>
+<pre><code>python --version
+python -c "import numpy; print(numpy.__version__)"</code></pre>
+<p>If <code>venv</code> itself is missing on Debian/Ubuntu: <code>sudo apt install python3-venv python3-full</code>.</p>
 
 <h2>Step 2 — download <code>dml.py</code><span class="h2-topic">— one file, no install</span></h2>
-<pre><code>mkdir ~/ml-problems &amp;&amp; cd ~/ml-problems
+<pre><code>cd ~/ml-problems
 curl -O https://omarahmedza.github.io/ai-ml-course/dml.py
 
 # no curl? open the URL in a browser and save the file here.
 # Windows PowerShell:
 #   Invoke-WebRequest https://omarahmedza.github.io/ai-ml-course/dml.py -OutFile dml.py</code></pre>
 <p>Check it:</p>
-<pre><code>python3 dml.py doctor</code></pre>
+<pre><code>python dml.py doctor</code></pre>
 <p>You should see your Python version, NumPy, <em>site reachable</em>, and <em>work writable</em>. If any line fails, the fix is in the troubleshooting table below.</p>
 
 <h2>Step 3 — pull your first problem<span class="h2-topic">— a starter and its tests</span></h2>
-<pre><code>python3 dml.py pull 001</code></pre>
+<pre><code>python dml.py pull 001</code></pre>
 <p>This creates:</p>
 <pre><code>ml-problems/
   dml.py
@@ -70,8 +73,8 @@ curl -O https://omarahmedza.github.io/ai-ml-course/dml.py
 
 <h2>Step 4 — edit, run, submit<span class="h2-topic">— the loop you repeat</span></h2>
 <pre><code># open work/001/solution.py in any editor and write the function
-python3 dml.py run 001        # per-test pass/fail
-python3 dml.py submit 001     # score + a link and a token</code></pre>
+python dml.py run 001         # per-test pass/fail
+python dml.py submit 001      # score + a link and a token</code></pre>
 <p>You will see:</p>
 <pre><code>Score 5.0/5 on attempt 1 (best 5.0/5)
 Open:  https://…/problems/001.html#r=…
@@ -92,7 +95,8 @@ Paste: eyJ2IjoxLCJpZCI6IjAwMSIs…~8f3a1c2d</code></pre>
 <table>
   <tr><th>Message</th><th>Fix</th></tr>
   <tr><td><code>python3: command not found</code></td><td>Windows: use <code>py</code>. macOS: <code>brew install python</code>. Linux: <code>sudo apt install python3</code>.</td></tr>
-  <tr><td><code>No module named numpy</code></td><td><code>python3 -m pip install numpy</code> (or <code>py -m pip install numpy</code>).</td></tr>
+  <tr><td><code>No module named numpy</code></td><td>You are outside the venv: <code>source .venv/bin/activate</code>, then <code>python -m pip install numpy</code>.</td></tr>
+  <tr><td><code>externally-managed-environment</code></td><td>PEP 668: pip refuses to touch the system Python. Create the venv in step 1 and use <code>python</code>; do <em>not</em> pass <code>--break-system-packages</code>.</td></tr>
   <tr><td><code>could not download …</code></td><td>No internet or a proxy. Clone the repo once and use <code>--bundle-dir repo/problems/data</code> on every command.</td></tr>
   <tr><td><code>Permission denied</code></td><td>You are in a read-only folder. <code>cd ~</code> and make a work folder there.</td></tr>
   <tr><td>Token rejected</td><td>Copy it again from the <code>Paste:</code> line — a partial copy fails the checksum.</td></tr>
@@ -101,8 +105,8 @@ Paste: eyJ2IjoxLCJpZCI6IjAwMSIs…~8f3a1c2d</code></pre>
 <h2>Offline mode<span class="h2-topic">— no network at all</span></h2>
 <pre><code>git clone https://github.com/omarahmedZa/ai-ml-course
 cd ml-problems
-python3 dml.py pull 001 --bundle-dir ../ai-ml-course/problems/data
-python3 dml.py submit 001 --bundle-dir ../ai-ml-course/problems/data --no-open</code></pre>
+python dml.py pull 001 --bundle-dir ../ai-ml-course/problems/data
+python dml.py submit 001 --bundle-dir ../ai-ml-course/problems/data --no-open</code></pre>
 <p>The bundle directory contains every problem's statement and tests, so nothing is downloaded.</p>
 
 <div class="next">

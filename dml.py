@@ -243,11 +243,14 @@ def cmd_import(args):
 def cmd_doctor(args):
     ok = True
     print(f"python {sys.version.split()[0]}")
+    in_venv = sys.prefix != getattr(sys, "base_prefix", sys.prefix)
+    print(f"venv   {'active' if in_venv else 'not active (fine, but pip installs need one)'}")
     try:
         import numpy
         print(f"numpy  {numpy.__version__}")
     except Exception:
         print("numpy  missing (needed by some problems)")
+        print("       fix: python3 -m venv .venv && source .venv/bin/activate && python -m pip install numpy")
     try:
         with urllib.request.urlopen(f"{BASE}/index.html", timeout=10) as r:
             print(f"site   reachable ({r.status})")
