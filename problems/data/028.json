@@ -3,7 +3,7 @@
   "lesson": "028",
   "book": "language",
   "title": "Masked loss, averaged correctly",
-  "difficulty": "medium",
+  "difficulty": "hard",
   "shape": "scratch",
   "categories": [
     "nlp-transformers"

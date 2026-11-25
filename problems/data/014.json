@@ -3,7 +3,7 @@
   "lesson": "014",
   "book": "neural-networks",
   "title": "Convolution parameter count",
-  "difficulty": "easy",
+  "difficulty": "hard",
   "shape": "extend",
   "categories": [
     "deep-learning"

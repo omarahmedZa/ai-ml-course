@@ -3,7 +3,7 @@
   "lesson": "057",
   "book": "trust",
   "title": "Expected calibration error, weighted",
-  "difficulty": "medium",
+  "difficulty": "hard",
   "shape": "extend",
   "categories": [
     "evaluation-metrics"

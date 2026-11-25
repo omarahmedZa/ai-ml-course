@@ -3,7 +3,7 @@
   "lesson": "013",
   "book": "neural-networks",
   "title": "Debug gradient-norm clipping",
-  "difficulty": "medium",
+  "difficulty": "hard",
   "shape": "debug",
   "categories": [
     "deep-learning",

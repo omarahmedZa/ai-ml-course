@@ -3,7 +3,7 @@
   "lesson": "011",
   "book": "neural-networks",
   "title": "Count the updates",
-  "difficulty": "easy",
+  "difficulty": "medium",
   "shape": "extend",
   "categories": [
     "deep-learning",

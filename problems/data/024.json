@@ -3,7 +3,7 @@
   "lesson": "024",
   "book": "rl",
   "title": "DQN target, terminal fixed",
-  "difficulty": "easy",
+  "difficulty": "medium",
   "shape": "debug",
   "categories": [
     "reinforcement-learning"

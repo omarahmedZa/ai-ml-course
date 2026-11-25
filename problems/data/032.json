@@ -3,7 +3,7 @@
   "lesson": "032",
   "book": "trust",
   "title": "Deletion test against random",
-  "difficulty": "medium",
+  "difficulty": "hard",
   "shape": "debug",
   "categories": [
     "explainability",

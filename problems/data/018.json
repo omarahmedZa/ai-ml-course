@@ -3,7 +3,7 @@
   "lesson": "018",
   "book": "language",
   "title": "Sequence log-probability",
-  "difficulty": "medium",
+  "difficulty": "easy",
   "shape": "extend",
   "categories": [
     "nlp-transformers"

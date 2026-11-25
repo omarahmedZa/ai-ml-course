@@ -3,7 +3,7 @@
   "lesson": "015",
   "book": "language",
   "title": "BPE encode by replaying merges",
-  "difficulty": "medium",
+  "difficulty": "easy",
   "shape": "scratch",
   "categories": [
     "nlp-transformers"

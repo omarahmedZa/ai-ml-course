@@ -3,7 +3,7 @@
   "lesson": "043",
   "book": "classical-ml",
   "title": "Project onto principal components",
-  "difficulty": "medium",
+  "difficulty": "hard",
   "shape": "scratch",
   "categories": [
     "linear-algebra",

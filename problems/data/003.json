@@ -3,7 +3,7 @@
   "lesson": "003",
   "book": "foundations",
   "title": "Log-likelihood without underflow",
-  "difficulty": "medium",
+  "difficulty": "easy",
   "shape": "extend",
   "categories": [
     "probability-statistics"

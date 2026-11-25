@@ -3,7 +3,7 @@
   "lesson": "010",
   "book": "neural-networks",
   "title": "Debug the linear-unit gradients",
-  "difficulty": "medium",
+  "difficulty": "easy",
   "shape": "debug",
   "categories": [
     "deep-learning"

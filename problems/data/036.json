@@ -3,7 +3,7 @@
   "lesson": "036",
   "book": "foundations",
   "title": "Power iteration, step by step",
-  "difficulty": "medium",
+  "difficulty": "hard",
   "shape": "scratch",
   "categories": [
     "linear-algebra"

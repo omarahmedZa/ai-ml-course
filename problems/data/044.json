@@ -3,7 +3,7 @@
   "lesson": "044",
   "book": "classical-ml",
   "title": "Standardise without leaking",
-  "difficulty": "medium",
+  "difficulty": "hard",
   "shape": "debug",
   "categories": [
     "classical-ml"

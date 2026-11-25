@@ -3,7 +3,7 @@
   "lesson": "033",
   "book": "trust",
   "title": "One FedAvg round, weighted by examples",
-  "difficulty": "medium",
+  "difficulty": "easy",
   "shape": "scratch",
   "categories": [
     "federated-privacy"

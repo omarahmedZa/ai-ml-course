@@ -3,7 +3,7 @@
   "lesson": "022",
   "book": "rl",
   "title": "Q-learning update, sign fixed",
-  "difficulty": "easy",
+  "difficulty": "medium",
   "shape": "debug",
   "categories": [
     "reinforcement-learning"

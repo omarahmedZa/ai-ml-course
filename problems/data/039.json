@@ -3,7 +3,7 @@
   "lesson": "039",
   "book": "foundations",
   "title": "Debug the bias–variance sum",
-  "difficulty": "easy",
+  "difficulty": "hard",
   "shape": "debug",
   "categories": [
     "probability-statistics"

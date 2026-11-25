@@ -3,7 +3,7 @@
   "lesson": "009",
   "book": "neural-networks",
   "title": "Two-layer forward pass, by hand",
-  "difficulty": "medium",
+  "difficulty": "easy",
   "shape": "scratch",
   "categories": [
     "deep-learning"

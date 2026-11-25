@@ -3,7 +3,7 @@
   "lesson": "029",
   "book": "language",
   "title": "Preference loss on a leash",
-  "difficulty": "medium",
+  "difficulty": "hard",
   "shape": "extend",
   "categories": [
     "nlp-transformers"

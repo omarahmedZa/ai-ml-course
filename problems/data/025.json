@@ -3,7 +3,7 @@
   "lesson": "025",
   "book": "rl",
   "title": "Add PPO's clipped objective",
-  "difficulty": "medium",
+  "difficulty": "hard",
   "shape": "extend",
   "categories": [
     "reinforcement-learning"

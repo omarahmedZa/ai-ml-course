@@ -3,7 +3,7 @@
   "lesson": "017",
   "book": "language",
   "title": "Debug the LSTM cell update",
-  "difficulty": "medium",
+  "difficulty": "easy",
   "shape": "debug",
   "categories": [
     "nlp-transformers"

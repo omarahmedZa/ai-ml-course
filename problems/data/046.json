@@ -3,7 +3,7 @@
   "lesson": "046",
   "book": "neural-networks",
   "title": "He initialization, debugged",
-  "difficulty": "easy",
+  "difficulty": "hard",
   "shape": "debug",
   "categories": [
     "deep-learning"

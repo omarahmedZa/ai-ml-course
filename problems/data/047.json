@@ -3,7 +3,7 @@
   "lesson": "047",
   "book": "neural-networks",
   "title": "Add Adam to the update loop",
-  "difficulty": "medium",
+  "difficulty": "hard",
   "shape": "extend",
   "categories": [
     "calculus-optimization",

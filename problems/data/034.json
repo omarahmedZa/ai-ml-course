@@ -3,7 +3,7 @@
   "lesson": "034",
   "book": "trust",
   "title": "FedProx fixed point, leash attached",
-  "difficulty": "easy",
+  "difficulty": "medium",
   "shape": "debug",
   "categories": [
     "federated-privacy"

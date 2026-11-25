@@ -3,7 +3,7 @@
   "lesson": "031",
   "book": "trust",
   "title": "Shapley by averaging orderings",
-  "difficulty": "hard",
+  "difficulty": "medium",
   "shape": "scratch",
   "categories": [
     "explainability"

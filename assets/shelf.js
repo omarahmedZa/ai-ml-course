@@ -118,13 +118,15 @@
         sub.setAttribute("href", base() + "problems/" + c.id + ".html");
         li.appendChild(sub);
       }
+      var state = el("span", "toc-state");
       var mark = el("span", "toc-mark");
       var st = s[c.id];
       if (st && st.sections && Object.keys(st.sections).length >= 8) mark.classList.add("done");
       else if (st && st.sections && Object.keys(st.sections).length) mark.classList.add("part");
-      li.appendChild(mark);
-      if (c.id === here) li.appendChild(el("span", "toc-here", "here"));
-      if (c.planned) li.appendChild(el("span", "toc-wave", "wave"));
+      state.appendChild(mark);
+      if (c.id === here) { mark.classList.add("here"); state.appendChild(el("span", "toc-here", "here")); }
+      if (c.planned) state.appendChild(el("span", "toc-wave", "wave"));
+      li.appendChild(state);
       ol.appendChild(li);
     });
     p.appendChild(ol);
