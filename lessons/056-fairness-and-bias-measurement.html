@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>056 — Fairness &amp; bias measurement</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can compute selection-rate and true-positive-rate gaps between groups and say which fairness claim each one supports.">
+</head>
+<body data-page="lesson" data-lesson="056" data-book="trust" data-book-number="6">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 56 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 6 · Trust, Privacy & Scale · lesson 7 of 8</p>
+  <h1>Fairness &amp; bias measurement</h1>
+  <p class="objective">You can compute selection-rate and true-positive-rate gaps between groups and say which fairness claim each one supports.</p>
+</header>
+<p class="bookline"><a href="../paths/trust.html">Trust, Privacy &amp; Scale</a><span class="chip">Evaluation &amp; Metrics</span></p>
+
+<h2>Why this matters<span class="h2-topic">— fairness</span></h2>
+<p class="lede">A loan model can be 70% accurate in every group and still reject twice as many qualified applicants from one of them. Accuracy averages the two ways of being wrong, so a lopsided pattern disappears. Fairness measurement takes the average apart.</p>
+<p><strong>The failure it prevents.</strong> An exam question says "accuracy is equal across groups, so the model is fair" and a one-line "yes" scores nothing. In a project, nobody measured per-group decisions, so harm arrives as a complaint. Count four outcomes per group and compare rates.</p>
+
+<h2>The one core idea<span class="h2-topic">— fairness</span></h2>
+<p>Fairness is a property of the <strong>decisions</strong> a model makes, measured inside groups you name in advance. A decision is a threshold on a score: approve above the line, reject below. Move the line and the group counts change.</p>
+<p>The unit is a 2 × 2 table per group: correctly approved, wrongly approved, wrongly rejected, correctly rejected — <code>TP</code>, <code>FP</code>, <code>FN</code>, <code>TN</code>. Every fairness number is a ratio built from them.</p>
+
+<h2>How it actually works<span class="h2-topic">— fairness</span></h2>
+<p>Six steps: name the group, build its table, choose a rate, compare rates, ask whether the gap is real, then decide what to do.</p>
+
+<h3>Part 1 — Name the group first</h3>
+<p>Write down the attribute <code>g</code> you are auditing — a protected class such as age band, gender or region — and its categories. The column is usually not a model input, which is fine: you group people after the prediction.</p>
+
+<h3>Part 2 — Build the 2 × 2 table</h3>
+<p>For group A, count decisions against the truth: <code>TP</code> qualified and approved, <code>FP</code> unqualified and approved, <code>FN</code> qualified and rejected, <code>TN</code> unqualified and rejected.</p>
+<p><strong>Why this part exists:</strong> every later rate is one division from this table, and a reviewer can recount it.</p>
+
+<h3>Part 3 — Selection rate is the approval rate</h3>
+<p>The <strong>selection rate</strong> is the share of a group receiving the positive decision:</p>
+<span class="formula">selection rate = (TP + FP) / (TP + FP + FN + TN)</span>
+<p>It ignores whether approvals were correct. Demographic parity asks for equal selection rates — the rate an applicant experiences.</p>
+
+<h3>Part 4 — Error rates condition on the truth</h3>
+<p>The <strong>true-positive rate</strong> is the share of truly qualified applicants approved:</p>
+<span class="formula">TPR = TP / (TP + FN)</span>
+<p>The <strong>false-positive rate</strong> is <code>FP / (FP + TN)</code>. Equal opportunity asks for equal TPRs; equalised odds asks for equal TPR and FPR at once.</p>
+<p><strong>Why it matters:</strong> equal selection rates can coexist with unequal TPRs when base rates differ, so approvals alone hide the harm.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-fair-t f-fair-d">
+    <title id="f-fair-t">Two groups, equal accuracy, unequal rates</title>
+    <desc id="f-fair-d">Bars: groups A and B are both 70 percent accurate, but A selects 0.50 with TPR 0.75, while B selects 0.30 with TPR 0.50.</desc>
+    <line x1="150" y1="40" x2="150" y2="310" stroke="var(--ink-faint)" stroke-width="1.2"/>
+    <line x1="150" y1="310" x2="690" y2="310" stroke="var(--ink-faint)" stroke-width="1.2"/>
+    <text x="150" y="330" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0</text>
+    <text x="420" y="330" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.50</text>
+    <text x="690" y="330" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1.0</text>
+    <text x="24" y="78" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">A · selection</text>
+    <text x="24" y="128" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">B · selection</text>
+    <text x="24" y="208" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">A · TPR</text>
+    <text x="24" y="258" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">B · TPR</text>
+    <rect x="150" y="60" width="270" height="28" rx="3" fill="var(--sym-pred)" opacity=".75"/>
+    <rect x="150" y="110" width="162" height="28" rx="3" fill="var(--sym-pred)" opacity=".45"/>
+    <rect x="150" y="190" width="405" height="28" rx="3" fill="var(--sym-opt)" opacity=".75"/>
+    <rect x="150" y="240" width="270" height="28" rx="3" fill="var(--sym-opt)" opacity=".45"/>
+    <text x="432" y="79" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.50</text>
+    <text x="324" y="129" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.30</text>
+    <text x="567" y="209" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.75</text>
+    <text x="432" y="259" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">0.50</text>
+    <line x1="420" y1="40" x2="420" y2="310" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="4 4"/>
+  </svg>
+  <figcaption><strong>Accuracy is the same; the experience is not.</strong> Both groups are 70% correct, yet A approves half its applicants and B 30%. Three in four qualified A applicants are approved, one in two qualified B applicants.</figcaption>
+</figure>
+
+<h3>Part 5 — A gap is an estimate</h3>
+<p>With 100 people per group and a TPR near 0.75, one group's standard error is about <code>√(p(1−p)/n) ≈ 0.04</code><span class="say" data-sym="√">(square root)</span>; the gap's is near 0.06. A 0.25 gap is large; 0.04 is noise. Report counts, rates and an interval.</p>
+
+<h3>Part 6 — Pick the definition and own the trade-off</h3>
+<p>Parity, equal opportunity and equalised odds usually cannot all hold when base rates differ. Equal selection rates need group-specific thresholds, which changes TPRs; equal TPR and FPR may change selection rates. Choose the definition matching the harm, then document the cost.</p>
+<p><strong>Why it matters:</strong> "fair" without a named definition is unfalsifiable; a named definition becomes a measurement someone can sign.</p>
+
+<h2>Worked example<span class="h2-topic">— fairness</span></h2>
+<p>Two groups, 100 applicants each, 40 qualified and 60 not. One model and one global threshold produce these tables.</p>
+
+<table>
+  <tr><th>Count</th><th class="num">Group A</th><th class="num">Group B</th></tr>
+  <tr><td>TP — qualified, approved</td><td class="num">30</td><td class="num">20</td></tr>
+  <tr><td>FP — unqualified, approved</td><td class="num">20</td><td class="num">10</td></tr>
+  <tr><td>FN — qualified, rejected</td><td class="num">10</td><td class="num">20</td></tr>
+  <tr><td>TN — unqualified, rejected</td><td class="num">40</td><td class="num">50</td></tr>
+  <tr><td><strong>Accuracy</strong></td><td class="num"><strong>70/100 = 0.70</strong></td><td class="num"><strong>70/100 = 0.70</strong></td></tr>
+</table>
+
+<p><strong>Step 1 — accuracy.</strong> A is right <code>(30 + 40)/100 = 0.70</code> of the time; B is right <code>(20 + 50)/100 = 0.70</code>. A dashboard with only this number calls the model even-handed.</p>
+
+<p><strong>Step 2 — selection rate.</strong> A approves <code>(30 + 20)/100 = 0.50</code>; B approves <code>(20 + 10)/100 = 0.30</code>. A B applicant is approved at 60% of A's rate.</p>
+
+<p><strong>Step 3 — true-positive rate.</strong> A approves <code>30/40 = 0.75</code> of its qualified applicants; B approves <code>20/40 = 0.50</code>. Ten qualified B applicants are rejected who would have been approved at A's rate.</p>
+
+<p><strong>Step 4 — the other error.</strong> A approves <code>20/60 = 0.333</code> of its unqualified applicants; B approves <code>10/60 = 0.167</code>. A is more generous on both sides of the truth.</p>
+
+<p><strong>What to notice.</strong> The accuracy gap is zero, yet every error rate differs. Raising B's approval rate to 0.50 would raise its FPR above 0.167, so the parity definitions pull in opposite directions. That tension is a fairness review.</p>
+
+<h2>The trap<span class="h2-topic">— fairness</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"We don't use the protected attribute as an input, so the model is unbiased."</strong> It feels right because the column is absent from <code>X</code>. But postcode, school, device and language are proxies: the rule can behave differently by group without seeing the label.</p>
+  <p>A second version treats fairness as one number: equal accuracy, equal selection rates and equal error rates are different claims.</p>
+  <p><strong>Correction:</strong> state the quantity, groups, counts and definition. "Selection-rate gap 0.20 between A and B on 200 held-out applicants" is checkable.</p>
+</div>
+<p><strong>The tell:</strong> a single accuracy figure with no group breakdown, or a group column in the slide deck but not in the evaluation script. A gap without counts is the second tell: 0.25 on 8 people and 0.25 on 8,000 are different objects.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>Dropping the attribute makes the model neutral.</td><td>Proxies reconstruct it; only per-group rates show the behaviour.</td></tr>
+  <tr><td>Equal accuracy means equal treatment.</td><td>Both groups can be 70% correct with a 0.25 TPR gap.</td></tr>
+</table>
+
+<h2>Retrieval check<span class="h2-topic">— fairness</span></h2>
+<ol class="quiz">
+  <li>A model selects 60% of group A and 45% of group B. What is the parity gap, and what does it not tell you?
+    <details><summary>Answer</summary>
+      <p><code>0.60 − 0.45 = 0.15</code>. It says nothing about whether approvals were correct, so it cannot show whether qualified people were missed — that needs TPR.</p>
+    </details>
+  </li>
+  <li>Two groups have identical accuracy but different TPRs. Which definition is violated, and is equalised odds satisfied?
+    <details><summary>Answer</summary>
+      <p>Equal opportunity fails because TPRs differ. Equalised odds needs TPR and FPR to match, so it fails too unless the FPRs are equal.</p>
+    </details>
+  </li>
+  <li>Why can one global threshold produce both a selection-rate gap and a TPR gap?
+    <details><summary>Answer</summary>
+      <p>If score distributions or base rates differ, one cut-off lands at different points in each distribution, so both shares diverge.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/056.html">Solve it · 056 — Fairness gaps from a decision table</a></p>
+<h2>Build it in Colab<span class="h2-topic">— fairness</span></h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/056-fairness-and-bias-measurement.ipynb">open the notebook in Colab</a> · <a href="../notebooks/056-fairness-and-bias-measurement.ipynb">local copy</a>. Run the cells in order, then change the threshold.</p>
+<pre><code>import numpy as np
+y = np.array([1, 1, 0, 0, 1, 0, 1, 0, 1, 0])   # true qualification
+p = np.array([1, 1, 0, 1, 0, 0, 1, 1, 0, 0])   # decision
+g = np.array([&quot;A&quot;] * 5 + [&quot;B&quot;] * 5)           # group
+for name in (&quot;A&quot;, &quot;B&quot;):
+    m = g == name                              # this group
+    print(name, p[m].mean(), p[m &amp; (y == 1)].mean())</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— fairness</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Equal accuracy across two groups guarantees…", "o": ["Nothing about error rates", "Equal selection rates", "Equal TPR", "Equal FPR"], "a": 0, "why": "Accuracy pools both errors; the per-group tables can differ completely."}, {"q": "A TPR gap of 0.25 with 100 people per group means…", "o": ["A large gap, but report its interval", "Proof of discrimination", "Sampling noise", "Equalised odds hold"], "a": 0, "why": "0.25 is far outside the roughly 0.06 gap error, but it is still an estimate from 200 rows."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → 057 · Calibration &amp; uncertainty.</strong> A threshold only means what its score claims. The next lesson checks whether "0.8" happens 80% of the time.</p>
+  <div class="pager">
+    <a href="055-offline-rl-and-imitation.html">← 55 · Offline RL &amp; imitation</a>
+    <a href="057-calibration-and-uncertainty.html">Next · 57 · Calibration &amp; uncertainty</a>
+  </div>
+</div>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

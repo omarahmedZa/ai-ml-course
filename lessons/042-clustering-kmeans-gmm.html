@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>042 — Clustering: k-means &amp; GMM</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can run k-means by hand, say what it optimises, and explain when a Gaussian mixture is the better model.">
+</head>
+<body data-page="lesson" data-lesson="042" data-book="classical-ml" data-book-number="2">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 42 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 2 · Classical ML · lesson 7 of 9</p>
+  <h1>Clustering: k-means &amp; GMM</h1>
+  <p class="objective">You can run k-means by hand, say what it optimises, and explain when a Gaussian mixture is the better model.</p>
+</header>
+<p class="bookline"><a href="../paths/classical-ml.html">Classical ML</a><span class="chip">Classical ML</span></p>
+
+<h2>Why this matters<span class="h2-topic">— clusters</span></h2>
+<p class="lede">Most data arrives without labels. A shop has 40,000 baskets and no column saying which customers are bargain hunters. Clustering groups rows so that members resemble each other more than outsiders, and the groups become segments or a shortlist to inspect. k-means is the fast default; a Gaussian mixture admits overlapping, differently shaped groups.</p>
+<p><strong>The failure it prevents.</strong> A churn team runs k-means on raw features where "monthly spend" ranges to 900 and "age" to 70. Distance is dominated by spend, so the five "segments" are five spend brackets. Nobody notices, because a coloured cluster plot always looks organised. Knowing what the algorithm optimises tells you to scale first and to check whether the groups survive a new seed.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>6</b><span>points, one feature, two clusters</span></div>
+  <div><b>4.0</b><span>inertia after convergence</span></div>
+  <div><b>2</b><span>passes until labels stop changing</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— clusters</span></h2>
+<p>k-means repeats two moves until nothing changes. <strong>Assign</strong> each point to its nearest centroid; <strong>update</strong> each centroid to the mean of the points assigned to it. The first move draws boundaries halfway between centroids; the second moves each centroid to the middle of its own group. Neither move can make the total squared distance worse, so the loop always settles — though not necessarily in the best arrangement.</p>
+<p>In one line: <strong>k-means minimises the sum of squared distances from points to their cluster's centre.</strong> A Gaussian mixture keeps the same alternating rhythm but replaces hard membership with a probability, and replaces "distance to a centre" with "fit to an ellipse".</p>
+
+<div class="keybox"><span class="sym">assign → recentre → repeat</span><p>Hard cells and round clusters for k-means; soft responsibilities and tilted ellipses for a GMM.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— clusters</span></h2>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-kmeans-t f-kmeans-d">
+    <title id="f-kmeans-t">One k-means update on a number line</title>
+    <desc id="f-kmeans-d">Six points sit on a line at positions one, two, three, ten, eleven and twelve. Two starting centroids at one and twelve move to two and eleven after one assignment-and-update pass, while the boundary between the clusters stays at six point five.</desc>
+    <line x1="60" y1="150" x2="640" y2="150" stroke="var(--ink-faint)" stroke-width="1.2"/>
+    <circle cx="100" cy="150" r="6" fill="var(--sym-pred)"/>
+    <circle cx="140" cy="150" r="6" fill="var(--sym-pred)"/>
+    <circle cx="180" cy="150" r="6" fill="var(--sym-pred)"/>
+    <circle cx="460" cy="150" r="6" fill="var(--sym-data)"/>
+    <circle cx="500" cy="150" r="6" fill="var(--sym-data)"/>
+    <circle cx="540" cy="150" r="6" fill="var(--sym-data)"/>
+    <text x="100" y="180" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1</text>
+    <text x="140" y="180" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">2</text>
+    <text x="180" y="180" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">3</text>
+    <text x="460" y="180" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">10</text>
+    <text x="500" y="180" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">11</text>
+    <text x="540" y="180" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">12</text>
+    <line x1="320" y1="65" x2="320" y2="245" stroke="var(--ink-faint)" stroke-width="1.3" stroke-dasharray="6 5"/>
+    <text x="328" y="72" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">boundary 6.5</text>
+    <polygon points="100,110 92,96 108,96" fill="var(--sym-param)"/>
+    <polygon points="540,110 532,96 548,96" fill="var(--sym-param)"/>
+    <text x="70" y="88" font-size="11" fill="var(--sym-param)" font-family="ui-monospace, monospace">start</text>
+    <polygon points="140,225 132,211 148,211" fill="var(--sym-opt)"/>
+    <polygon points="500,225 492,211 508,211" fill="var(--sym-opt)"/>
+    <text x="110" y="247" font-size="11" fill="var(--sym-opt)" font-family="ui-monospace, monospace">after update</text>
+    <line x1="100" y1="122" x2="132" y2="200" stroke="var(--ink-faint)" stroke-width="1.2" stroke-dasharray="4 4"/>
+    <line x1="540" y1="122" x2="508" y2="200" stroke="var(--ink-faint)" stroke-width="1.2" stroke-dasharray="4 4"/>
+    <text x="360" y="300" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">μ₁ = (1+2+3)/3 = 2 · μ₂ = (10+11+12)/3 = 11</text>
+    <text x="360" y="330" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">J = 1+0+1 + 1+0+1 = 4</text>
+  </svg>
+  <figcaption><strong>Takeaway.</strong> Assignment uses the midpoint; update uses the mean. After one pass the centroids are the group means and no point wants to switch sides.</figcaption>
+</figure>
+
+<h3>Part 1 — Points, centroids and the objective</h3>
+<p>A dataset is a matrix <code>X</code> with one row per example and one column per feature. A <strong>centroid</strong> <code>μₖ</code><span class="say" data-sym="μ">(mu)</span> is the centre of cluster <code>k</code>, written as a vector with the same number of entries as a row. The <strong>inertia</strong> is</p>
+<span class="formula">J = Σᵢ ‖xᵢ − μ<sub>c(i)</sub>‖²</span>
+<p>where <code>c(i)</code> is the cluster assigned to point <code>i</code> and <code>‖·‖²</code> is the squared Euclidean length: add the squared differences feature by feature. Inertia is in squared feature units, so its size means nothing without the data's scale.</p>
+
+<h3>Part 2 — Two moves that never disagree</h3>
+<p>The <strong>assignment</strong> move holds the centroids fixed and gives each point to the nearest one. The <strong>update</strong> move holds the assignments fixed and puts each centroid at the mean of its points. With fixed centroids, no point can get closer by choosing a different cluster; with fixed assignments, the mean is the unique minimiser of that cluster's squared distances. So <code>J</code> falls or stays flat on every step, and the loop must stop.</p>
+<p>Why this matters: stopping is not the same as stopping well. The loop stops at a local minimum, and a different start can settle with a larger <code>J</code>.</p>
+
+<h3>Part 3 — Starting well and choosing k</h3>
+<p><strong>k-means++</strong> picks the first centroid uniformly at random, then picks each next one with probability proportional to its squared distance from the nearest chosen centroid. That spreads seeds. Standard practice: several restarts, keep the lowest inertia.</p>
+<p><code>k</code> itself is a choice, not a discovery. Inertia always falls as <code>k</code> rises — with <code>k = n</code> every point is its own cluster and <code>J = 0</code> — so the "elbow" is a heuristic, not a test. The <strong>silhouette</strong> compares a point's distance to its own cluster with its distance to the nearest other cluster, on a scale from −1 to 1; higher means tighter, better separated groups.</p>
+
+<h3>Part 4 — Gaussian mixtures and soft membership</h3>
+<p>A GMM says the data came from <code>K</code> bell-shaped blobs. Each component <code>k</code> has a weight <code>πₖ</code><span class="say" data-sym="π">(pi)</span> (its share of the data, summing to 1), a mean <code>μₖ</code>, and a covariance <code>Σₖ</code><span class="say" data-sym="Σ">(sigma)</span> that lets the blob be tilted and stretched. The model's score for a point is the mixture density <code>Σₖ πₖ N(x | μₖ, Σₖ)</code>.</p>
+<p>Training is <strong>expectation–maximisation</strong>. The E-step computes each point's <strong>responsibility</strong> <code>rᵢₖ</code>: the share of its density owed to component <code>k</code>. The M-step re-estimates each component from all points, weighted by those responsibilities — a soft mean. Each pass cannot lower the total log-likelihood.</p>
+
+<h2>Worked example<span class="h2-topic">— clusters</span></h2>
+
+<h3>1. Six points, two clusters, by hand</h3>
+<p>One feature, six values: <code>1, 2, 3, 10, 11, 12</code>. Start with centroids at <code>μ₁ = 1</code> and <code>μ₂ = 12</code>.</p>
+<table>
+  <tr><th>Step</th><th>Assignment</th><th class="num">New means</th><th class="num">J</th></tr>
+  <tr><td>1</td><td>{1,2,3} and {10,11,12}</td><td class="num">2 and 11</td><td class="num">4.0</td></tr>
+  <tr><td>2</td><td>unchanged</td><td class="num">2 and 11</td><td class="num">4.0</td></tr>
+</table>
+<p><strong>Read it as a sentence.</strong> The boundary between centroids 1 and 12 is 6.5, so 3 goes left and 10 goes right. The left mean is <code>(1+2+3)/3 = 2</code>; the right mean is <code>(10+11+12)/3 = 11</code>. Distances are now 1, 0, 1 on the left and 1, 0, 1 on the right, so <code>J = 4</code>. Reassigning with centres at 2 and 11 changes nothing, and the loop halts after two passes.</p>
+<p><strong>Why the starting point mattered.</strong> Had both seeds landed at 1 and 2, the boundary would sit at 1.5 and the left cluster would hold only the point 1 — another stable arrangement with much larger inertia. Restarting and keeping the lowest <code>J</code> is the cheap defence.</p>
+
+<h3>2. One responsibility, computed</h3>
+<p>One point at <code>x = 1</code>, two components with equal weight <code>π = 0.5</code>, means <code>μ₁ = 0</code> and <code>μ₂ = 3</code>, and standard deviation <code>σ = 1</code><span class="say" data-sym="σ">(sigma)</span> for both. A Gaussian density one standard deviation from its mean is <code>0.242</code>; two standard deviations away it is <code>0.054</code>.</p>
+<table>
+  <tr><th>Component</th><th>Density N(1 | μ, 1)</th><th>Weighted by π</th><th class="num">Responsibility</th></tr>
+  <tr><td>1 (μ = 0)</td><td>0.242</td><td>0.121</td><td class="num">0.818</td></tr>
+  <tr><td>2 (μ = 3)</td><td>0.054</td><td>0.027</td><td class="num">0.182</td></tr>
+</table>
+<p><strong>Read it as a sentence.</strong> The two weighted densities add to <code>0.148</code>. Component 1 owns <code>0.121 / 0.148 = 0.818</code> of the point, component 2 owns the rest. The point is 82% component 1, not a hard label. The M-step then updates each mean using every point weighted by its responsibility, so a point between blobs pulls on both.</p>
+
+<h2>The trap<span class="h2-topic">— clusters</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"k-means found the segments that were really there."</strong> k-means partitions whatever numbers you give it into exactly <code>k</code> roughly round groups. It has no notion of a true segment, no way to say "these two groups are one", and no defence against a feature measured in a larger unit. Change the scale and the answer changes; change the seed and it may change again.</p>
+  <p>It feels right because the output is a complete, tidy labelling, and a coloured scatter plot makes any partition look like structure. But the only thing optimised is <code>J</code> — within-cluster squared distance — and that quantity can always be reduced by adding clusters or letting one wide feature dominate.</p>
+  <p><strong>Correction:</strong> treat clusters as a hypothesis. Standardise features, run several seeds, report inertia and silhouette, and check that the groups mean something outside the plot. If blobs are elongated or overlapping, use a full-covariance GMM, and still validate.</p>
+</div>
+<p><strong>The tell:</strong> one cluster holds most points while the rest are slivers, the elbow never bends, or labels reshuffle under a new seed. For a GMM, the tell is a component whose covariance collapses onto a handful of points — the likelihood rises while the model describes noise.</p>
+
+<h2>Retrieval check<span class="h2-topic">— clusters</span></h2>
+<ol class="quiz">
+  <li>Which step can increase the k-means objective: assignment, update, or neither?
+    <details><summary>Answer</summary>
+      <p>Neither, when each step is done exactly. Assignment picks the closest centre for every point; update picks the mean, which minimises squared distance for that assignment. <code>J</code> is non-increasing, which is why the loop terminates.</p>
+    </details>
+  </li>
+  <li>Why is "pick k by finding the elbow" not a real test?
+    <details><summary>Answer</summary>
+      <p>Inertia falls monotonically with <code>k</code> and reaches zero at <code>k = n</code>. An elbow is a visual judgement about where the fall slows, not a hypothesis test, and it can be absent.</p>
+    </details>
+  </li>
+  <li>What does a GMM give you that k-means cannot?
+    <details><summary>Answer</summary>
+      <p>Soft memberships and shaped clusters. Responsibilities say how much each point belongs to each component, and each component has its own covariance, so elongated or overlapping blobs can be modelled instead of forced into spheres.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/042.html">Solve it · 042 — Assign points to centroids</a></p>
+<h2>Build it in Colab<span class="h2-topic">— clusters</span></h2>
+<p>Runnable, NumPy-only: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/042-clustering-kmeans-gmm.ipynb">open the notebook in Colab</a> · <a href="../notebooks/042-clustering-kmeans-gmm.ipynb">local copy</a>. It runs Lloyd's algorithm on two blobs, plots the moving centroids, and adds an elongated cluster k-means cannot represent.</p>
+<pre><code>import numpy as np
+X = np.array([[1.], [2.], [3.], [10.], [11.], [12.]])   # six points, one feature
+C = np.array([[1.], [12.]])                            # two starting centroids
+for step in range(5):                                  # a few passes is plenty
+    d = ((X[:, None, :] - C[None, :, :]) ** 2).sum(-1) # squared distances, 6x2
+    a = d.argmin(1)                                    # nearest centroid per point
+    C = np.array([X[a == k].mean(0) for k in range(2)]) # recentre on the mean
+print(a, C.ravel())</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— clusters</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Two features: income (0–200k) and age (18–80). You run k-means and get income brackets. What went wrong?", "o": ["k was too small", "The features were not scaled, so income dominated distance", "k-means cannot handle two features", "The centroids were initialised at zero"], "a": 1, "why": "Squared distance adds raw units; a 10k income gap dwarfs a 10-year age gap. Standardise first."}, {"q": "Three overlapping, elongated groups of different sizes. Which model fits the shape of the problem?", "o": ["k-means with k = 3", "Hierarchical clustering with Euclidean distance", "A Gaussian mixture with full covariance per component", "k-means after adding a random fourth centroid"], "a": 2, "why": "Full covariances let each component be tilted and stretched, and responsibilities handle overlap."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → Topic 43: PCA.</strong> Clustering groups rows. Topic 43 turns the columns: it finds the few directions that carry most of the variance, so 784 features become two you can plot.</p>
+  <div class="pager">
+    <a href="041-svm-and-kernels.html">← 41 · SVM &amp; kernels</a>
+    <a href="043-pca-dimensionality-reduction.html">Next · 43 · PCA &amp; dimensionality reduction</a>
+  </div>
+</div>
+
+<p class="source">Primary source: <a href="https://scikit-learn.org/stable/modules/clustering.html">scikit-learn — Clustering</a> (k-means, GMM and the diagnostics that separate them).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

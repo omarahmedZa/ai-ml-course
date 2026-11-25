@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>051 — Evaluating language models</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can compute perplexity and a benchmark's error bar, and say what each one does not measure.">
+</head>
+<body data-page="lesson" data-lesson="051" data-book="language" data-book-number="4">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 51 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 4 · Language & Transformers · lesson 12 of 13</p>
+  <h1>Evaluating language models</h1>
+  <p class="objective">You can compute perplexity and a benchmark's error bar, and say what each one does not measure.</p>
+</header>
+<p class="bookline"><a href="../paths/language.html">Language &amp; Transformers</a><span class="chip">NLP &amp; Transformers</span></p>
+
+<h2>Why this matters<span class="h2-topic">— the metric</span></h2>
+<p class="lede">A language model gives a probability for every token, not one answer, so "is this model better?" cannot be read from one output. You need a number over many examples, and you need to know what it ignores. Two scores dominate: <strong>perplexity</strong>, how surprised the model is by real text, and <strong>benchmark accuracy</strong>, how often its answer is right.</p>
+<p><strong>The failure it prevents.</strong> A team swaps models for a four-point benchmark gain and finds the new one worse at extracting invoice dates. The gain was inside the noise and the benchmark held no invoices. "98% accuracy" on 50 examples, with no error bar, is the same gap in an exam answer; the error is about 2 points.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>2.0</b><span>perplexity at 0.693 average surprise</span></div>
+  <div><b>140 / 200</b><span>correct answers, a 70% score</span></div>
+  <div><b>±3.2 pts</b><span>standard error on that 70%</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— the proxy</span></h2>
+<p>Every language-model score is a <strong>proxy</strong>: a cheap number standing in for "useful to a person". Perplexity stands in for fluency — a model that puts high probability on real text has learned the statistics of language. Accuracy stands in for skill — a model that answers held-out questions has learned something transferable. Neither is the thing you want, and both can be gamed.</p>
+<p>In one line: <strong>fix the data, compute the average surprise or the hit rate, then attach an error bar before comparing.</strong> Perplexity is <code>exp</code> of average negative log-probability; accuracy is hits over attempts. The first is smooth, the second noisy.</p>
+
+<div class="keybox"><span class="sym">PPL = exp( −(1/N) Σᵢ log p(tokenᵢ | context) )</span><p>Average surprise, pushed back through the exponential so a perfect model scores 1 and a coin flip over 10 tokens scores 10.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— the pipeline</span></h2>
+<p>Five parts, in the order a careful evaluation runs them.</p>
+
+<h3>Part 1 — Freeze the text and the tokenizer</h3>
+<p>Pick held-out text the model never saw, tokenize it with the model's own tokenizer, and record the token count <code>N</code>. Perplexity is per token, so a different vocabulary changes the denominator and scores stop being comparable.</p>
+
+<h3>Part 2 — Score each token in context</h3>
+<p>At each position the model gives a probability to the token that actually appears, given everything before it. Take the log: a certain token contributes 0, one given 1% contributes −4.6. Logs turn a product into an averageable sum.</p>
+
+<h3>Part 3 — Average, then exponentiate</h3>
+<p>Average the negative logs over <code>N</code> tokens, then apply <code>exp</code>. The result is perplexity: roughly how many equally likely options the model felt it was choosing between. It restores an intuitive scale that raw log-loss lacks.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-eval-t f-eval-d">
+    <title id="f-eval-t">Two evaluation pipelines: perplexity over tokens and accuracy over questions</title>
+    <desc id="f-eval-d">Top row: held-out tokens feed a model that assigns a log probability to each, averaged to 0.693 and exponentiated to a perplexity of 2.0. Bottom row: 200 benchmark questions produce 140 correct answers, giving 0.70 with a standard error of 0.032.</desc>
+    <defs>
+      <marker id="f-eval-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--ink-faint)"/>
+      </marker>
+    </defs>
+
+    <text x="30" y="46" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">1 · perplexity · smooth, per token</text>
+
+    <rect x="24" y="70" width="140" height="66" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+    <text x="94" y="98" text-anchor="middle" font-size="13" fill="var(--sym-data)" font-family="ui-monospace, monospace">held-out text</text>
+    <text x="94" y="118" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">N = 4 tokens</text>
+
+    <rect x="204" y="70" width="160" height="66" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+    <text x="284" y="98" text-anchor="middle" font-size="13" fill="var(--sym-pred)" font-family="ui-monospace, monospace">log p(token)</text>
+    <text x="284" y="118" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">−0.69, −1.39, −0.69, 0</text>
+
+    <rect x="404" y="70" width="140" height="66" rx="8" fill="var(--card)" stroke="var(--sym-loss)" stroke-width="1.6"/>
+    <text x="474" y="98" text-anchor="middle" font-size="13" fill="var(--sym-loss)" font-family="ui-monospace, monospace">mean = 0.693</text>
+    <text x="474" y="118" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">average surprise</text>
+
+    <rect x="584" y="70" width="112" height="66" rx="8" fill="var(--card)" stroke="var(--sym-opt)" stroke-width="1.6"/>
+    <text x="640" y="98" text-anchor="middle" font-size="13" fill="var(--sym-opt)" font-family="ui-monospace, monospace">e^0.693</text>
+    <text x="640" y="118" text-anchor="middle" font-size="13" fill="var(--sym-opt)" font-family="ui-monospace, monospace">= 2.0</text>
+
+    <path d="M164 103 H204" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-eval-a)"/>
+    <path d="M364 103 H404" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-eval-a)"/>
+    <path d="M544 103 H584" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-eval-a)"/>
+
+    <line x1="24" y1="180" x2="696" y2="180" stroke="var(--rule)" stroke-width="1"/>
+
+    <text x="30" y="212" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">2 · accuracy · noisy, per question</text>
+
+    <rect x="24" y="236" width="160" height="66" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+    <text x="104" y="264" text-anchor="middle" font-size="13" fill="var(--sym-data)" font-family="ui-monospace, monospace">200 questions</text>
+    <text x="104" y="284" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">held-out benchmark</text>
+
+    <rect x="224" y="236" width="160" height="66" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+    <text x="304" y="264" text-anchor="middle" font-size="13" fill="var(--sym-pred)" font-family="ui-monospace, monospace">140 correct</text>
+    <text x="304" y="284" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">exact match</text>
+
+    <rect x="424" y="236" width="272" height="66" rx="8" fill="var(--card)" stroke="var(--sym-loss)" stroke-width="1.6"/>
+    <text x="560" y="264" text-anchor="middle" font-size="13" fill="var(--sym-loss)" font-family="ui-monospace, monospace">0.70 ± 0.032</text>
+    <text x="560" y="284" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">√(0.7 × 0.3 / 200) = 0.032</text>
+
+    <path d="M184 269 H224" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-eval-a)"/>
+    <path d="M384 269 H424" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-eval-a)"/>
+
+    <text x="360" y="342" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">one is a rate over tokens; the other is a proportion with a spread</text>
+  </svg>
+  <figcaption><strong>Perplexity is one smooth number per text; accuracy is one noisy proportion per benchmark.</strong> A perplexity win says nothing about invoice dates, and a benchmark win says nothing about another benchmark.</figcaption>
+</figure>
+
+<h3>Part 4 — Measure a task, and its error bar</h3>
+<p>Score correctness per question, then divide. Each is a coin flip with unknown bias <code>p</code>, so the score wobbles: standard error is <code>√(p(1−p)/n)</code><span class="say" data-sym="√">(square root)</span> and a 95% interval is two standard errors either side. Without it, a 2-point win on 200 questions looks like progress.</p>
+
+<h3>Part 5 — Hold the harness fixed</h3>
+<p>Prompt template, few-shot count, parsing, temperature and seed all move the score. Fix and publish them, then rerun the baseline under the same harness. Many reported gains are prompt changes.</p>
+
+<h2>Worked example<span class="h2-topic">— the arithmetic</span></h2>
+
+<h3>1. Perplexity of a four-token continuation</h3>
+<p>The model sees "the cat sat" and scores the continuation "on the mat", assigning <code>p = [0.50, 0.25, 0.50, 1.00]</code> to the four tokens in turn.</p>
+
+<table>
+  <tr><th>Token</th><th class="num">p</th><th class="num">log p</th><th class="num">−log p</th></tr>
+  <tr><td>on</td><td class="num">0.50</td><td class="num">−0.693</td><td class="num">0.693</td></tr>
+  <tr><td>the</td><td class="num">0.25</td><td class="num">−1.386</td><td class="num">1.386</td></tr>
+  <tr><td>mat</td><td class="num">0.50</td><td class="num">−0.693</td><td class="num">0.693</td></tr>
+  <tr><td>.</td><td class="num">1.00</td><td class="num">0.000</td><td class="num">0.000</td></tr>
+</table>
+
+<p><strong>Step 1 — add the surprises:</strong> 0.693 + 1.386 + 0.693 + 0 = 2.772. <strong>Step 2 — divide by four:</strong> 2.772 / 4 = 0.693. <strong>Step 3 — exponentiate:</strong> <code>e^0.693 = 2.0</code>. In words: "on average the model felt it was choosing between two equally likely tokens."</p>
+<p><strong>Why the exponential.</strong> Without it the score is 0.693 nats, a unit with no intuition. With it, a certain model scores 1.0 and one spreading probability over 10 candidates scores 10.</p>
+
+<h3>2. Accuracy on 200 questions</h3>
+<p>140 correct out of 200 gives 0.70. The standard error is <code>√(0.70 × 0.30 / 200) = √0.00105 = 0.032</code>, or 3.2 points. Two standard errors is 6.4 points, so the 95% interval runs from 63.6% to 76.4%.</p>
+
+<table>
+  <tr><th>Quantity</th><th>Arithmetic</th><th class="num">Value</th></tr>
+  <tr><td>Accuracy</td><td>140 / 200</td><td class="num">0.700</td></tr>
+  <tr><td>Variance term</td><td>0.70 × 0.30</td><td class="num">0.210</td></tr>
+  <tr><td>Standard error</td><td>√(0.210 / 200)</td><td class="num">0.032</td></tr>
+  <tr><td>95% interval</td><td>0.70 ± 2(0.032)</td><td class="num">0.636 – 0.764</td></tr>
+  <tr><td>Second model</td><td>150 / 200</td><td class="num">0.750</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> A second model at 150/200 looks 5 points better, but 5 points is barely one standard error of the difference, so the honest report is "no clear winner." Four times the questions halves the error bar. Perplexity and accuracy can also disagree: a model can predict text better and still follow the answer format worse.</p>
+
+<h2>The trap<span class="h2-topic">— the leak</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The benchmark score measures the model's ability."</strong> It measures the score on that benchmark, under that prompt, against that answer key — and benchmarks leak.</p>
+  <p>It feels right because 84.2% looks like a measurement. But test questions get scraped into pretraining data, so the model may have seen the answers; shuffling options moves the score because the model prefers option A; and a judge model brings its own biases. None of this shows in the number.</p>
+  <p><strong>Correction:</strong> ask three questions of any score — was the test set held out, was the harness identical for both models, and is the gap larger than the error bar? A fourth catches the rest: does the benchmark resemble the job?</p>
+</div>
+<p><strong>The tell:</strong> the score collapses when you reorder options, or rises only when you add "think step by step" for the new model. Contamination looks different: near-perfect scores on rare, verbatim-specific questions while paraphrases stay ordinary. A 0.4-point gain on 500 questions is smaller than its 2.2-point error bar.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>A higher benchmark score means a better model.</td><td>It means a higher score on that benchmark and prompt, which contamination can inflate.</td></tr>
+</table>
+
+<h2>Retrieval check<span class="h2-topic">— recall</span></h2>
+<ol class="quiz">
+  <li>A model assigns probability 0.5 to each of four tokens. What is its perplexity on that text?
+    <details><summary>Answer</summary>
+      <p>Each token contributes 0.693, the average is 0.693, and <code>e^0.693 = 2.0</code> — two equally likely choices per token.</p>
+    </details>
+  </li>
+  <li>Model A scores 72% and model B 75% on 100 questions. Is B better?
+    <details><summary>Answer</summary>
+      <p>Not established. The standard error near 0.73 is about 4.4 points, so a 3-point gap sits inside the noise. More questions, or a paired comparison, is needed.</p>
+    </details>
+  </li>
+  <li>Perplexity improved but task score did not. Name one explanation.
+    <details><summary>Answer</summary>
+      <p>The new model predicts ordinary text better but has not learned the answer format, or the task needs a fact the text lacks. Fluency and skill are different targets.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/051.html">Solve it · 051 — Perplexity, checked</a></p>
+<h2>Build it in Colab<span class="h2-topic">— the notebook</span></h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/051-evaluating-language-models.ipynb">open the notebook in Colab</a> · <a href="../notebooks/051-evaluating-language-models.ipynb">local copy</a>. It computes perplexity by hand and plots the error bar against sample size.</p>
+<pre><code>import numpy as np
+p = np.array([0.50, 0.25, 0.50, 1.00])   # probability of each observed token
+nll = -np.log(p).mean()                   # 0.693
+print(f&quot;perplexity = {np.exp(nll):.2f}&quot;)
+n, hits = 200, 140
+se = np.sqrt((hits/n) * (1 - hits/n) / n)  # 0.032
+print(f&quot;accuracy = {hits/n:.3f} +/- {se:.3f}&quot;)</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— drill</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "A model is certain about every token. Its perplexity is…", "o": ["1.0", "0.0", "e", "the vocabulary size"], "a": 0, "why": "Every −log p is 0, the mean is 0, and e^0 = 1."}, {"q": "150/200 vs 140/200. The 5-point gap is…", "o": ["inside one standard error of the difference", "proof the second model is better", "a 5% relative gain", "contamination"], "a": 0, "why": "Each score has SE ≈ 0.032; a 0.05 gap is about one SE, so the result is inconclusive."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → Topic 52: RAG &amp; tool use.</strong> Evaluation shows the weights are frozen and fallible. The next lesson covers the two workarounds at inference time: put documents in the context, or let the model call code.</p>
+  <div class="pager">
+    <a href="050-multi-head-attention-positions.html">← 50 · Multi-head attention &amp; positions</a>
+    <a href="052-rag-and-tool-use.html">Next · 52 · RAG &amp; tool use</a>
+  </div>
+</div>
+
+<p class="source">Primary source: Liang et al., <a href="https://arxiv.org/abs/2211.09110">Holistic evaluation of language models</a> (2022).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "id": "042",
+  "lesson": "042",
+  "book": "classical-ml",
+  "title": "Assign points to centroids",
+  "difficulty": "medium",
+  "shape": "scratch",
+  "categories": [
+    "classical-ml",
+    "clustering"
+  ],
+  "statement_md": "Write `assign_clusters(points, centroids)` returning, for each point, the index of its nearest centroid.\n\n- distance is **squared Euclidean**: sum the squared differences feature by feature\n- ties go to the **lowest** index\n- return `[]` when there are no points\n- raise `ValueError` when `centroids` is empty\n\nDo not mutate the inputs.",
+  "entry": "assign_clusters",
+  "signature": "def assign_clusters(points, centroids):",
+  "starter": "def assign_clusters(points, centroids):\n    \"\"\"Return the nearest-centroid index for each point.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_basic",
+    "test_nearest_wins",
+    "test_empty_centroids"
+  ],
+  "hidden": [
+    "test_tie_goes_low",
+    "test_single_centroid",
+    "test_empty_points",
+    "test_no_mutation",
+    "test_manhattan_differs"
+  ],
+  "tests_py": "def test_basic():\n    pts = [[0.0, 0.0], [10.0, 10.0]]\n    cents = [[0.0, 0.0], [10.0, 10.0]]\n    assert solution.assign_clusters(pts, cents) == [0, 1]\n\ndef test_nearest_wins():\n    pts = [[1.0, 1.0], [4.0, 4.0]]\n    cents = [[0.0, 0.0], [5.0, 5.0]]\n    assert solution.assign_clusters(pts, cents) == [0, 1]\n\ndef test_empty_centroids():\n    try:\n        solution.assign_clusters([[1.0]], [])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_tie_goes_low():\n    assert solution.assign_clusters([[1.0, 1.0]], [[0.0, 0.0], [2.0, 2.0]]) == [0]\n\ndef test_single_centroid():\n    assert solution.assign_clusters([[3.0], [-1.0]], [[0.0]]) == [0, 0]\n\ndef test_empty_points():\n    assert solution.assign_clusters([], [[0.0, 0.0]]) == []\n\ndef test_no_mutation():\n    pts = [[1.0, 2.0], [3.0, 4.0]]\n    cents = [[0.0, 0.0], [5.0, 5.0]]\n    solution.assign_clusters(pts, cents)\n    assert pts == [[1.0, 2.0], [3.0, 4.0]]\n\ndef test_manhattan_differs():\n    # L1 distances both equal 2 here; squared Euclidean prefers index 1.\n    assert solution.assign_clusters([[2.0, 0.0]], [[0.0, 0.0], [1.0, 1.0]]) == [1]\n",
+  "mutations": [
+    "return [1 + min(range(len(a[1])), key=lambda j: sum((p[k] - a[1][j][k]) ** 2 for k in range(len(p)))) for p in a[0]]",
+    "return [max(range(len(a[1])), key=lambda j: sum((p[k] - a[1][j][k]) ** 2 for k in range(len(p)))) for p in a[0]]"
+  ]
+}

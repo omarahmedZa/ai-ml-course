@@ -1,0 +1,30 @@
+{
+  "id": "039",
+  "lesson": "039",
+  "book": "foundations",
+  "title": "Debug the bias–variance sum",
+  "difficulty": "easy",
+  "shape": "debug",
+  "categories": [
+    "probability-statistics"
+  ],
+  "statement_md": "`mse_from_terms` should return the expected squared error of an estimator:\n\n`bias**2 + variance + noise`\n\nThe current implementation is wrong. Fix it without changing the signature. `noise` defaults to `0.0`, and the result must be a `float`.",
+  "entry": "mse_from_terms",
+  "signature": "def mse_from_terms(bias, variance, noise=0.0):",
+  "starter": "def mse_from_terms(bias, variance, noise=0.0):\n    \"\"\"Return bias squared plus variance plus irreducible noise.\"\"\"\n    return bias + variance + noise   # BUG: the bias term is not squared\n",
+  "visible": [
+    "test_zero_bias",
+    "test_basic"
+  ],
+  "hidden": [
+    "test_negative_bias",
+    "test_noise_default",
+    "test_returns_float",
+    "test_zero_all"
+  ],
+  "tests_py": "def test_zero_bias():\n    assert solution.mse_from_terms(0.0, 4.0, 0.0) == 4.0\n\ndef test_basic():\n    assert solution.mse_from_terms(2.0, 1.0, 0.5) == 5.5\n\ndef test_negative_bias():\n    assert solution.mse_from_terms(-3.0, 2.0, 0.0) == 11.0\n\ndef test_noise_default():\n    assert solution.mse_from_terms(1.0, 2.0) == 3.0\n\ndef test_returns_float():\n    assert isinstance(solution.mse_from_terms(1, 0), float)\n\ndef test_zero_all():\n    assert solution.mse_from_terms(0.0, 0.0, 0.0) == 0.0\n",
+  "mutations": [
+    "return abs(bias) + variance + noise",
+    "return bias ** 2 + variance * noise"
+  ]
+}

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>050 — Multi-head attention &amp; positions</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can compute one attention head, say what multiple heads buy, and explain how position enters the model.">
+</head>
+<body data-page="lesson" data-lesson="050" data-book="language" data-book-number="4">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 50 / 50</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 4 · Language & Transformers · lesson 11 of 13</p>
+  <h1>Multi-head attention &amp; positions</h1>
+  <p class="objective">You can compute one attention head, say what multiple heads buy, and explain how position enters the model.</p>
+</header>
+<p class="bookline"><a href="../paths/language.html">Language &amp; Transformers</a><span class="chip">Attention &amp; Blocks</span></p>
+
+<h2>Why this matters<span class="h2-topic">— attention</span></h2>
+<p class="lede">A single attention head expresses one pattern of "which token should I look at?", averaged into one output. Language needs several at once: the verb wants its subject, the adjective its noun, the pronoun its antecedent. Multi-head attention runs those searches in parallel and concatenates the results. Separately, attention is order-blind: shuffle the tokens and, without positional information, every output is merely shuffled too.</p>
+<p><strong>The failure it prevents.</strong> An exam asks why multi-head attention is not just a more expensive single head. "More heads means more capacity" is wrong: the total width is fixed, so heads partition the same budget. The marks come from the split-and-concatenate arithmetic. In code the same gap is a model that scores well on bag-of-words tasks and fails on anything order-dependent, because the positional encoding was dropped.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>512 → 8 × 64</b><span>model width split into 8 heads of width 64</span></div>
+  <div><b>1,048,576</b><span>parameters in the four projections, the same for 1 head or 8</span></div>
+  <div><b>0.670</b><span>attention weight on the matching token in the worked example</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— attention</span></h2>
+<p>Attention is a soft lookup. Write <code>Q</code> for queries (what each position looks for), <code>K</code> for keys (what each position offers), and <code>V</code> for values (what each position passes on). All three are linear projections of the same token vectors. Scores are <code>QKᵀ/√d_k</code><span class="say" data-sym="√">(square root)</span>, softmax turns each row into weights, and the output is <code>softmax(QKᵀ/√d_k)V</code> — each position's value, mixed in the proportions the weights specify.</p>
+<p>In one line: <strong>one head is one weighted average; several heads average in different learned subspaces; position is added because the average cannot tell order.</strong> With <code>d_model = 512</code> and <code>h = 8</code>, each head works in 64 dimensions, and the eight outputs are concatenated back to 512 before a final projection.</p>
+
+<div class="keybox"><span class="sym">head = softmax(QKᵀ/√d_k)V · multi-head = concat then W_O</span><p>Heads split the width, not multiply it. Position enters by adding a vector or rotating Q and K.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— attention</span></h2>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-mha-t f-mha-d">
+    <title id="f-mha-t">Two heads split one width and rejoin</title>
+    <desc id="f-mha-d">Three token vectors feed two attention heads. Each head produces a sixty-four-dimension output, the outputs are concatenated to 128, and a final projection returns the model width.</desc>
+    <rect x="24" y="140" width="72" height="80" rx="8" fill="none" stroke="var(--sym-data)" stroke-width="1.4"/>
+    <text x="60" y="174" text-anchor="middle" font-size="12" fill="var(--sym-data)" font-family="ui-monospace, monospace">x₁ x₂ x₃</text>
+    <text x="60" y="194" text-anchor="middle" font-size="10" fill="var(--ink-faint)" font-family="ui-monospace, monospace">n × 512</text>
+    <line x1="96" y1="180" x2="140" y2="110" stroke="var(--ink-faint)" stroke-width="1.3"/>
+    <line x1="96" y1="180" x2="140" y2="250" stroke="var(--ink-faint)" stroke-width="1.3"/>
+    <rect x="144" y="66" width="150" height="88" rx="8" fill="none" stroke="var(--sym-opt)" stroke-width="1.6"/>
+    <text x="219" y="92" text-anchor="middle" font-size="12" fill="var(--sym-opt)" font-family="ui-monospace, monospace">head 1</text>
+    <text x="219" y="112" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">Q K V · 64 wide</text>
+    <text x="219" y="132" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">softmax(QKᵀ/√64)V</text>
+    <rect x="144" y="206" width="150" height="88" rx="8" fill="none" stroke="var(--sym-pred)" stroke-width="1.6"/>
+    <text x="219" y="232" text-anchor="middle" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">head 2</text>
+    <text x="219" y="252" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">Q K V · 64 wide</text>
+    <text x="219" y="272" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">different projections</text>
+    <line x1="294" y1="110" x2="344" y2="150" stroke="var(--sym-opt)" stroke-width="1.5"/>
+    <line x1="294" y1="250" x2="344" y2="190" stroke="var(--sym-pred)" stroke-width="1.5"/>
+    <rect x="348" y="128" width="132" height="84" rx="8" fill="none" stroke="var(--sym-loss)" stroke-width="1.5"/>
+    <text x="414" y="154" text-anchor="middle" font-size="12" fill="var(--sym-loss)" font-family="ui-monospace, monospace">concat</text>
+    <text x="414" y="176" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">n × 128</text>
+    <text x="414" y="196" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">h × d_head</text>
+    <line x1="480" y1="170" x2="524" y2="170" stroke="var(--ink-faint)" stroke-width="1.4"/>
+    <polygon points="524,170 516,166 516,174" fill="var(--ink-faint)"/>
+    <rect x="528" y="132" width="140" height="76" rx="8" fill="none" stroke="var(--sym-param)" stroke-width="1.5"/>
+    <text x="598" y="160" text-anchor="middle" font-size="12" fill="var(--sym-param)" font-family="ui-monospace, monospace">W_O</text>
+    <text x="598" y="182" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">128 → 512</text>
+    <line x1="668" y1="170" x2="700" y2="170" stroke="var(--sym-param)" stroke-width="1.4"/>
+    <polygon points="700,170 692,166 692,174" fill="var(--sym-param)"/>
+    <text x="414" y="300" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">each head sees the whole sequence, in its own subspace</text>
+    <text x="598" y="230" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">back to model width</text>
+  </svg>
+  <figcaption><strong>Splitting is a division of labour, not a multiplication of budget.</strong> Two heads of 64 use the same 128 columns a single head of 128 would use.</figcaption>
+</figure>
+
+<p>Six parts: projections, scores, one head, the join, why it helps, position.</p>
+
+<h3>Part 1 — Three projections of the same input</h3>
+<p>Each token vector <code>x</code> of width <code>d_model</code> is multiplied by three learned matrices <code>W_Q</code>, <code>W_K</code>, <code>W_V</code>, producing a query, a key and a value. The three have different jobs, so they get different weights; stacking the results for all <code>n</code> tokens gives <code>Q</code>, <code>K</code>, <code>V</code> of shape <code>n × d_k</code>. <strong>Why this part exists:</strong> a token can ask one question, advertise a different property, and pass on a third — collapsing them into one vector removes that freedom.</p>
+
+<h3>Part 2 — Scores, scaling and the mask</h3>
+<p><code>QKᵀ</code> gives an <code>n × n</code> matrix: entry <code>(i, j)</code> is the dot product of query <code>i</code> with key <code>j</code>. Divide by <code>√d_k</code>, because a dot product of <code>d_k</code> random terms grows with <code>√d_k</code> and large scores saturate the softmax. Softmax each row so weights sum to 1. A causal mask sets entries above the diagonal to <code>−∞</code> before the softmax, zeroing them. <strong>Why this part exists:</strong> without scaling, gradients vanish at width; without the mask, a decoder reads the answer.</p>
+
+<h3>Part 3 — One head is a weighted average of values</h3>
+<p>Row <code>i</code> of the weight matrix says how much position <code>i</code> attends to each position. Multiply those weights by the value vectors and sum: the output is a mixture of all values, dominated by the ones attended to. <strong>Why this part exists:</strong> this is the entire operation; everything else is how to run several and where to put the result.</p>
+
+<h3>Part 4 — Split, run, concatenate, project</h3>
+<p>With <code>h</code> heads, project into <code>d_head = d_model/h</code> dimensions per head, run attention independently, concatenate the <code>h</code> outputs to width <code>d_model</code>, then multiply by <code>W_O</code>. At <code>d_model = 512</code>, <code>h = 8</code>: four projections per head cost <code>4 × 512 × 64 = 131,072</code>, so eight heads cost 1,048,576 — exactly what one 512-wide head costs. <strong>Why this part exists:</strong> this arithmetic answers "is multi-head just bigger?" — no, it is the same size, differently factored.</p>
+
+<h3>Part 5 — What several heads actually buy</h3>
+<p>Each head has its own initialization and gradient, so they specialize: one tracks the previous token, one links verbs to subjects, one attends to punctuation. The subspaces need not differ — many heads are redundant and can be pruned — but the ensemble is more expressive than one average. <strong>Why this part exists:</strong> heads are parallel feature detectors, not a committee of interpretable specialists.</p>
+
+<h3>Part 6 — Position has to be injected</h3>
+<p>Attention treats its input as a set: permute the tokens and every output is permuted the same way. To break that, add a position vector to each embedding, or rotate queries and keys by an angle proportional to position. <strong>Rotary position embedding (RoPE)</strong> rotates the query at position <code>m</code> and the key at position <code>n</code>, so their dot product depends on <code>m − n</code>. <strong>Why this part exists:</strong> without it, "dog bites man" and "man bites dog" are the same bag of tokens.</p>
+
+<h2>Worked example<span class="h2-topic">— attention</span></h2>
+
+<h3>1. One head on two tokens</h3>
+<p>Take <code>d_k = 2</code>, so the scale is <code>√2 = 1.414</code>. Query for token 1 is <code>q₁ = [1, 0]</code>; keys are <code>k₁ = [1, 0]</code> and <code>k₂ = [0, 1]</code>; values are <code>v₁ = [2, 0]</code> and <code>v₂ = [0, 1]</code>.</p>
+
+<table>
+  <tr><th>Step</th><th>Arithmetic</th><th class="num">Value</th></tr>
+  <tr><td>Raw scores</td><td><code>q₁·k₁ = 1</code>, <code>q₁·k₂ = 0</code></td><td class="num">[1, 0]</td></tr>
+  <tr><td>Scaled</td><td><code>[1, 0] / 1.414</code></td><td class="num">[0.707, 0]</td></tr>
+  <tr><td>Exponentiated</td><td><code>[e^0.707, e^0]</code></td><td class="num">[2.028, 1.0]</td></tr>
+  <tr><td>Weights</td><td><code>[2.028, 1.0] / 3.028</code></td><td class="num">[0.670, 0.330]</td></tr>
+  <tr><td>Output</td><td><code>0.670[2, 0] + 0.330[0, 1]</code></td><td class="num">[1.340, 0.330]</td></tr>
+</table>
+
+<p><strong>Read it as a sentence.</strong> Query 1 matches key 1 exactly and key 2 not at all, so the raw scores are 1 and 0. Scaling and exponentiating give a ratio near 2 to 1, and the weights are 67% and 33%. The output is two-thirds of value 1 and one-third of value 2: <code>[1.34, 0.33]</code>. Softmax never gives zero, which is why masking uses <code>−∞</code> rather than 0.</p>
+
+<h3>2. A second head, and the join</h3>
+<p>Suppose head 2 uses <code>q₂ = [0, 1]</code> with the same keys and values. Its scores are <code>[0, 0.707]</code>, so its weights are <code>[0.330, 0.670]</code> and its output is <code>0.330[2, 0] + 0.670[0, 1] = [0.660, 0.670]</code>. Concatenate: <code>[1.340, 0.330, 0.660, 0.670]</code>.</p>
+<p>Apply <code>W_O</code> with rows <code>[1, 0, 1, 0]</code> and <code>[0, 1, 0, 1]</code>. The first coordinate is <code>1.340 + 0.660 = 2.000</code>; the second is <code>0.330 + 0.670 = 1.000</code>. The two heads, which looked at opposite tokens, recombine into <code>[2, 1]</code> — the sum of the values. Heads see different mixtures, and <code>W_O</code> decides how to combine them.</p>
+<p><strong>Position check.</strong> Swap the tokens with no position information and the outputs are the same, reordered. The model cannot tell "A then B" from "B then A". Adding <code>p₁ = [0, 0]</code> and <code>p₂ = [1, 0]</code> changes the queries, so order matters.</p>
+
+<h2>The trap<span class="h2-topic">— attention</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"More heads means more capacity, so a 32-head model computes four times as much as an 8-head model."</strong> At fixed <code>d_model</code>, heads split the same width and the projection parameter count is unchanged. A 32-head layer does the same multiply-adds as an 8-head layer; it differs in factoring, not in amount. Many heads are redundant, and pruning a third often costs almost nothing.</p>
+  <p>It feels right because "multi" suggests multiplication, and more heads do help up to a point. The help comes from several independent subspaces early in training, not extra arithmetic.</p>
+  <p><strong>Correction:</strong> price a head by <code>d_head = d_model/h</code>. For more capacity, raise <code>d_model</code> or the layer count; for more variety, raise <code>h</code> and accept narrower heads. Never read a single attention map as an explanation — it is one layer's routing, not a causal account.</p>
+</div>
+<p><strong>The tell:</strong> attention maps from different heads that are nearly identical — the heads collapsed. A second is output unchanged when you shuffle the input tokens; position is missing or added too late. A third is an "interpretability" claim built on one head while ablating it leaves the loss flat.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>32 heads compute four times as much as 8.</td><td>At fixed width, the total projection cost is the same; only the factoring changes.</td></tr>
+  <tr><td>Attention weights show why the model answered.</td><td>They show where one layer routed; many heads are redundant and later layers rewrite the result.</td></tr>
+</table>
+
+<h2>Retrieval check<span class="h2-topic">— attention</span></h2>
+<ol class="quiz">
+  <li>With <code>d_model = 768</code> and <code>h = 12</code>, what is <code>d_head</code>, and why divide scores by <code>√d_head</code>?
+    <details><summary>Answer</summary>
+      <p><code>d_head = 64</code>. Dot products of 64 terms have standard deviation around <code>√64 = 8</code>, and dividing by 8 keeps scores near unit scale so the softmax does not saturate.</p>
+    </details>
+  </li>
+  <li>Why does removing positional information make a transformer unable to distinguish word order?
+    <details><summary>Answer</summary>
+      <p>Attention is permutation-equivariant: permuting the inputs permutes the outputs identically. Without position vectors or rotations, the model sees a set, not a sequence.</p>
+    </details>
+  </li>
+  <li>What does RoPE make the query-key dot product depend on?
+    <details><summary>Answer</summary>
+      <p>The relative offset <code>m − n</code>. Rotating each vector by an angle proportional to its position makes the inner product a function of the difference, not the absolute positions.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/050.html">Solve it · 050 — Scaled attention weights from scratch</a></p>
+<h2>Build it in Colab<span class="h2-topic">— attention</span></h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/050-multi-head-attention-positions.ipynb">open the notebook in Colab</a> · <a href="../notebooks/050-multi-head-attention-positions.ipynb">local copy</a>. Sections, plots and line-by-line notes — run the cells in order, then change the number of heads and rerun.</p>
+<pre><code>import numpy as np
+q = np.array([1.0, 0.0])                   # query for token 1
+K = np.array([[1.0, 0.0], [0.0, 1.0]])     # two keys
+V = np.array([[2.0, 0.0], [0.0, 1.0]])     # two values
+s = K @ q / np.sqrt(2)                     # scaled scores
+w = np.exp(s) / np.exp(s).sum()            # softmax over keys
+print(w, w @ V)                            # [0.67 0.33] [1.34 0.33]</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— attention</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "d_model = 512, h = 8. What is the width of each head's Q projection?", "o": ["64", "512", "8", "4096"], "a": 0, "why": "d_head = d_model / h = 512 / 8 = 64; the eight heads partition the width."}, {"q": "A causal mask sets future scores to -infinity. Why not zero?", "o": ["exp(0)=1 would leak weight", "Zero is not allowed in softmax", "It speeds up the matrix product", "It changes the value vectors"], "a": 0, "why": "A zero score exponentiates to 1 and still receives weight; -infinity maps to zero after softmax."}]</script></div>
+
+<div class="next">
+  <p><strong>End of the attention arc.</strong> You have the block: several heads, a join, and a position signal. Next, scale it up — stacking blocks, pretraining objectives, and alignment into an assistant.</p>
+  <div class="pager">
+    <a href="049-decoding-and-sampling.html">← 49 · Decoding &amp; sampling</a>
+    <a href="051-evaluating-language-models.html">Next · 51 · Evaluating language models</a>
+  </div>
+</div>
+
+<p class="source">Primary source: Vaswani et al., <a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a> (2017), and Su et al., <a href="https://arxiv.org/abs/2104.09864">RoFormer</a> (2021).</p>
+
+</main>
+  <script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

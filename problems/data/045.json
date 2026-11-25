@@ -1,0 +1,32 @@
+{
+  "id": "045",
+  "lesson": "045",
+  "book": "neural-networks",
+  "title": "2-D convolution with stride and padding",
+  "difficulty": "medium",
+  "shape": "extend",
+  "categories": [
+    "neural-networks",
+    "convolution"
+  ],
+  "statement_md": "`conv1d` already computes a valid 1-D convolution. Add `conv2d(image, kernel, stride=1, padding=0)` for a square kernel.\n\n- slide the kernel over the image with the given `stride`\n- pad with zeros: `padding` rows/columns on every side\n- each output cell is the sum of elementwise products over its patch\n- output side: `(H + 2*padding - k) // stride + 1`\n- raise `ValueError` when `stride < 1`, when the kernel is not square, or when the kernel is larger than the padded image\n\nDo not change `conv1d`.",
+  "entry": "conv2d",
+  "signature": "def conv2d(image, kernel, stride=1, padding=0):",
+  "starter": "def conv1d(signal, kernel):\n    \"\"\"Valid 1-D convolution, stride 1.\"\"\"\n    k = len(kernel)\n    return [sum(signal[i + j] * kernel[j] for j in range(k))\n            for i in range(len(signal) - k + 1)]\n\n\ndef conv2d(image, kernel, stride=1, padding=0):\n    # Your code here: slide the kernel, honour stride and zero padding.\n    pass\n",
+  "visible": [
+    "test_no_padding",
+    "test_output_shape"
+  ],
+  "hidden": [
+    "test_stride",
+    "test_padding",
+    "test_stride_and_padding",
+    "test_invalid_stride",
+    "test_kernel_too_large"
+  ],
+  "tests_py": "def test_no_padding():\n    img = [[1.0] * 3 for _ in range(3)]\n    k = [[1.0] * 2 for _ in range(2)]\n    assert solution.conv2d(img, k) == [[4.0, 4.0], [4.0, 4.0]]\n\ndef test_output_shape():\n    img = [[1.0] * 5 for _ in range(5)]\n    k = [[1.0] * 3 for _ in range(3)]\n    out = solution.conv2d(img, k)\n    assert len(out) == 3 and all(len(r) == 3 for r in out)\n    assert out[0][0] == 9.0\n\ndef test_stride():\n    img = [[1.0] * 5 for _ in range(5)]\n    k = [[1.0] * 3 for _ in range(3)]\n    assert solution.conv2d(img, k, stride=2) == [[9.0, 9.0], [9.0, 9.0]]\n\ndef test_padding():\n    img = [[1.0] * 3 for _ in range(3)]\n    k = [[1.0] * 3 for _ in range(3)]\n    out = solution.conv2d(img, k, padding=1)\n    assert out[0][0] == 4.0 and out[0][1] == 6.0 and out[1][1] == 9.0\n\ndef test_stride_and_padding():\n    img = [[1.0] * 4 for _ in range(4)]\n    k = [[1.0] * 3 for _ in range(3)]\n    assert solution.conv2d(img, k, stride=2, padding=1) == [[4.0, 6.0], [6.0, 9.0]]\n\ndef test_invalid_stride():\n    try:\n        solution.conv2d([[1.0]], [[1.0]], stride=0)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_kernel_too_large():\n    try:\n        solution.conv2d([[1.0, 2.0]], [[1.0, 0.0], [0.0, 1.0]])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n",
+  "mutations": [
+    "return [[sum(a[0][i + ki][j + kj] * a[1][ki][kj] for ki in range(len(a[1])) for kj in range(len(a[1]))) for j in range(len(a[0][0]) - len(a[1]) + 1)] for i in range(len(a[0]) - len(a[1]) + 1)]",
+    "return [[sum(a[0][i + ki][j + kj] * a[1][ki][kj] for ki in range(len(a[1])) for kj in range(len(a[1]))) / (len(a[1]) ** 2) for j in range(len(a[0][0]) - len(a[1]) + 1)] for i in range(len(a[0]) - len(a[1]) + 1)]"
+  ]
+}

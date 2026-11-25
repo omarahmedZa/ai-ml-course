@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>059 — Quantization &amp; distillation</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can compute an INT8 scale, bound its rounding error, and explain what a distilled student learns from soft targets.">
+</head>
+<body data-page="lesson" data-lesson="059" data-book="systems" data-book-number="7">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 59 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 7 · Systems · lesson 2 of 3</p>
+  <h1>Quantization &amp; distillation</h1>
+  <p class="objective">You can compute an INT8 scale, bound its rounding error, and explain what a distilled student learns from soft targets.</p>
+</header>
+<p class="bookline"><a href="../paths/systems.html">Systems</a><span class="chip">Systems</span></p>
+
+<h2>Why this matters<span class="h2-topic">— compression</span></h2>
+<p class="lede">Seven billion weights at four bytes each is 28 GB — bigger than an 8 GB GPU. Quantization stores each weight in one byte, bringing the same model to about 7 GB. Distillation trains a small student to imitate a large teacher, so the artifact that ships is smaller than the teacher.</p>
+<p><strong>The failure it prevents.</strong> An exam asks "you quantized to INT8, so latency improved fourfold — true?" and "yes" confuses memory with speed: bytes shrink fourfold, but speed depends on kernels and bandwidth. A model compressed to hit a device budget can lose eight points on one segment nobody re-tested.</p>
+
+<h2>The one core idea<span class="h2-topic">— compression</span></h2>
+<p>Compression does not preserve weights; it preserves <strong>behaviour</strong> on the input distribution. Quantization replaces each float with a small integer plus a scale, so the grid is coarse but the arithmetic is cheap. Distillation trains a student on the teacher's <strong>soft outputs</strong> — probabilities that say "mostly this, somewhat that".</p>
+<p>Both are evaluated the same way: accuracy on held-out slices, latency on the device, memory used. The ratio is a means, never the result.</p>
+
+<div class="keybox"><span class="sym">q = round(w / s), then ŵ = q · s</span><p>A scale turns a continuous weight into a grid index and back. The error is bounded by half a grid step.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— compression</span></h2>
+<p>Six steps: baseline, grid, granularity, calibration, distillation, evaluation.</p>
+
+<h3>Part 1 — Measure the uncompressed model first</h3>
+<p>Record accuracy overall and on the slices you care about, latency on the target hardware, peak memory and artifact size. A compression claim without a baseline is a vibe.</p>
+<p><strong>Why:</strong> the trade can be good or bad, and you cannot judge it with one side measured.</p>
+
+<h3>Part 2 — Build the grid with one scale</h3>
+<p>For symmetric INT8, take the largest absolute weight <code>max|w|</code> and set <code>s = max|w| / 127</code>. Then <code>q = round(w / s)</code>, clamped to [−127, 127], and the restored value is <code>ŵ = q · s</code>.</p>
+<p><strong>Why:</strong> every stored code is read through the scale, so one bad scale corrupts the whole group.</p>
+
+<h3>Part 3 — Choose per-tensor or per-channel</h3>
+<p>Per-tensor uses one scale for the matrix. Per-channel uses one per output channel, so an outlier no longer stretches the grid for all the others; it costs a few more numbers.</p>
+<p><strong>Why:</strong> a single weight of 10 makes <code>s</code> large, and every weight near 0.1 then rounds to a handful of codes.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-quant-t f-quant-d">
+    <title id="f-quant-t">A weight snapped to the nearest grid point</title>
+    <desc id="f-quant-d">A number line from minus 1.2 to 1.2. A true weight of 0.45 becomes code 48 and is restored as 0.4536.</desc>
+    <line x1="90" y1="210" x2="650" y2="210" stroke="var(--ink-faint)" stroke-width="1.4"/>
+    <line x1="90" y1="204" x2="90" y2="216" stroke="var(--ink-faint)"/>
+    <line x1="650" y1="204" x2="650" y2="216" stroke="var(--ink-faint)"/>
+    <text x="90" y="240" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">−1.2</text>
+    <text x="370" y="240" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0</text>
+    <text x="650" y="240" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1.2</text>
+    <line x1="370" y1="204" x2="370" y2="216" stroke="var(--ink-faint)"/>
+    <circle cx="475" cy="210" r="6" fill="none" stroke="var(--sym-data)" stroke-width="2"/>
+    <circle cx="475" cy="160" r="6" fill="var(--sym-opt)"/>
+    <line x1="475" y1="204" x2="475" y2="166" stroke="var(--ink-faint)" stroke-dasharray="3 3"/>
+    <text x="489" y="205" font-size="12" fill="var(--sym-data)" font-family="ui-monospace, monospace">w = 0.450</text>
+    <text x="489" y="153" font-size="12" fill="var(--sym-opt)" font-family="ui-monospace, monospace">ŵ = 48 × s = 0.454</text>
+    <text x="360" y="300" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">s = 1.2 / 127 = 0.00945 · error ≤ 0.0047</text>
+  </svg>
+  <figcaption><strong>One grid for the whole tensor.</strong> A weight lands on the nearest of 255 codes and is stored as that integer. The restored value is close, but every downstream activation sees the small shift.</figcaption>
+</figure>
+
+<h3>Part 4 — Calibrate, or train through the rounding</h3>
+<p><strong>Post-training quantization</strong> runs representative data through the model to choose activation ranges, then rounds. <strong>Quantization-aware training</strong> simulates rounding in the forward pass so weights adapt. QAT costs more and usually recovers more accuracy.</p>
+<p><strong>Why:</strong> activations need ranges too, and a range chosen on wrong data clips the cases you care about.</p>
+
+<h3>Part 5 — Distil when the architecture, not just precision, is too big</h3>
+<p>The teacher produces logits <code>z</code>. Soften them with temperature: <code>softmax(z / T)</code>. The student mixes soft targets with true labels, often <code>α · CE(hard) + (1 − α) · T² · KL(soft)</code><span class="say" data-sym="α">(alpha)</span>. Higher <code>T</code> exposes more uncertainty about near-miss classes.</p>
+<p><strong>Why:</strong> hard labels say only "class 3"; soft labels add that class 7 was plausible — supervision the teacher paid to learn.</p>
+
+<h3>Part 6 — Evaluate on the device and on slices</h3>
+<p>Run the compressed model on held-out data, report per-slice accuracy, measure latency with the real runtime, and check memory. A fourfold smaller file the kernel does not accelerate is not a serving win.</p>
+<p><strong>Why:</strong> compression damage is rarely uniform; it concentrates on rare classes and unusual values, which an aggregate score hides.</p>
+
+<h2>Worked example<span class="h2-topic">— compression</span></h2>
+<p>Five weights: <code>[−0.9, −0.3, 0.0, 0.45, 1.2]</code>. The largest magnitude is 1.2, so <code>s = 1.2 / 127 = 0.00945</code>.</p>
+
+<table>
+  <tr><th class="num">w</th><th class="num">w / s</th><th class="num">q = round</th><th class="num">ŵ = q · s</th><th class="num">error</th></tr>
+  <tr><td class="num">−0.90</td><td class="num">−95.24</td><td class="num">−95</td><td class="num">−0.8977</td><td class="num">+0.0023</td></tr>
+  <tr><td class="num">−0.30</td><td class="num">−31.75</td><td class="num">−32</td><td class="num">−0.3024</td><td class="num">−0.0024</td></tr>
+  <tr><td class="num">0.00</td><td class="num">0.00</td><td class="num">0</td><td class="num">0.0000</td><td class="num">0.0000</td></tr>
+  <tr><td class="num">0.45</td><td class="num">47.62</td><td class="num">48</td><td class="num">0.4536</td><td class="num">+0.0036</td></tr>
+  <tr><td class="num">1.20</td><td class="num">127.00</td><td class="num">127</td><td class="num">1.2000</td><td class="num">0.0000</td></tr>
+</table>
+
+<p><strong>Step 1 — check the bound.</strong> Half a grid step is <code>s / 2 = 0.0047</code>, and every error above is smaller. That is a bound per weight, not per model: a million small errors still move an activation.</p>
+
+<p><strong>Step 2 — count the memory.</strong> One million weights at four bytes is 4 MB; at one byte each they are 1 MB plus a 4-byte scale. The ratio is 4×; the model did not get four times faster.</p>
+
+<p><strong>Step 3 — soften the teacher.</strong> Logits <code>[4.0, 1.0, 0.5]</code> at <code>T = 1</code> give <code>[0.926, 0.046, 0.028]</code>; at <code>T = 2</code>, <code>[0.716, 0.160, 0.124]</code>. The second class rises from 4.6% to 16%.</p>
+
+<p><strong>What to notice.</strong> At <code>T = 2</code> the second and third classes are 16% and 12%; their 1.3-to-1 ratio is the dark knowledge distillation transfers, absent from a one-hot label.</p>
+
+<h2>The trap<span class="h2-topic">— compression</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"INT8 is four times smaller, so it is four times faster."</strong> It feels right because it is the same model at a quarter of the bytes. But speed depends on bandwidth, vector instructions and fast kernels; some layers get slower.</p>
+  <p>A second version treats distillation as pruning: pruning removes weights from the same architecture, while distillation trains a smaller model to copy behaviour.</p>
+  <p><strong>Correction:</strong> report baseline and compressed results on the same hardware and held-out slices — accuracy, p95 latency, memory.</p>
+</div>
+<p><strong>The tell:</strong> a compression table with size and no latency, or accuracy measured on the calibration set used to choose ranges. One aggregate score with no per-slice check is the second tell.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>Smaller bytes mean proportionally faster inference.</td><td>Bytes fall 4×; speed depends on kernels, bandwidth and the layer.</td></tr>
+  <tr><td>Distillation and pruning are the same trick.</td><td>One trains a smaller model; the other removes weights from the existing one.</td></tr>
+</table>
+
+<h2>Retrieval check<span class="h2-topic">— compression</span></h2>
+<ol class="quiz">
+  <li>Weights span [−2, 2]. What is the symmetric INT8 scale and the maximum rounding error?
+    <details><summary>Answer</summary>
+      <p><code>s = 2 / 127 = 0.01575</code>; the error is at most <code>0.00787</code> per weight.</p>
+    </details>
+  </li>
+  <li>Why does per-channel quantization usually beat per-tensor?
+    <details><summary>Answer</summary>
+      <p>One large outlier channel no longer sets the scale for every other channel, so ordinary weights keep more distinct codes.</p>
+    </details>
+  </li>
+  <li>What does raising the distillation temperature do to the teacher's targets?
+    <details><summary>Answer</summary>
+      <p>It softens the distribution: the top class loses mass, near-miss classes gain it, exposing similarity hard labels hide.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/059.html">Solve it · 059 — Symmetric INT8 quantization</a></p>
+<h2>Build it in Colab<span class="h2-topic">— compression</span></h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/059-quantization-and-distillation.ipynb">open the notebook in Colab</a> · <a href="../notebooks/059-quantization-and-distillation.ipynb">local copy</a>. Add an outlier weight and watch every other error grow.</p>
+<pre><code>import numpy as np
+w = np.array([-0.9, -0.3, 0.0, 0.45, 1.2])       # one tensor
+s = np.abs(w).max() / 127                         # symmetric scale
+q = np.clip(np.round(w / s), -127, 127)           # integer codes
+w_hat = q * s                                     # restored weights
+print(&quot;scale&quot;, round(s, 5), &quot;max error&quot;, round(np.abs(w - w_hat).max(), 5))</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— compression</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Symmetric INT8 scale for max |w| = 2.0 is…", "o": ["2.0 / 127", "2.0 / 128", "127 / 2.0", "2.0"], "a": 0, "why": "Symmetric int8 uses 127 levels on each side of zero."}, {"q": "Raising distillation temperature makes targets…", "o": ["Softer", "One-hot", "Uniform", "Harder"], "a": 0, "why": "Dividing logits by a larger T flattens the softmax."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → 060 · Monitoring, drift &amp; data quality.</strong> A small model still meets a changing world. The last lesson watches the inputs and outcomes after deployment.</p>
+  <div class="pager">
+    <a href="058-serving-and-latency.html">← 58 · Serving &amp; latency</a>
+    <a href="060-monitoring-drift-data-quality.html">Next · 60 · Monitoring, drift &amp; data quality</a>
+  </div>
+</div>
+
+<p class="source">Primary source: Jacob et al., <a href="https://arxiv.org/abs/1712.05877">Quantization and training of neural networks for efficient integer-arithmetic-only inference</a> (2018), and Hinton et al., <a href="https://arxiv.org/abs/1503.02531">Distilling the knowledge in a neural network</a> (2015).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

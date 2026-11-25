@@ -614,7 +614,7 @@
         "001"
       ],
       "level": "advanced",
-      "planned": true
+      "planned": false
     },
     "037": {
       "title": "Norms & distances",
@@ -626,7 +626,7 @@
         "001"
       ],
       "level": "intermediate",
-      "planned": true
+      "planned": false
     },
     "038": {
       "title": "Distributions & sampling",
@@ -638,7 +638,7 @@
         "003"
       ],
       "level": "intermediate",
-      "planned": true
+      "planned": false
     },
     "039": {
       "title": "Estimation & bias–variance",
@@ -651,7 +651,7 @@
         "005"
       ],
       "level": "advanced",
-      "planned": true
+      "planned": false
     },
     "040": {
       "title": "kNN & the curse of dimensionality",
@@ -664,7 +664,7 @@
         "037"
       ],
       "level": "intermediate",
-      "planned": true
+      "planned": false
     },
     "041": {
       "title": "SVM & kernels",
@@ -678,7 +678,7 @@
         "006"
       ],
       "level": "advanced",
-      "planned": true
+      "planned": false
     },
     "042": {
       "title": "Clustering: k-means & GMM",
@@ -691,7 +691,7 @@
         "038"
       ],
       "level": "intermediate",
-      "planned": true
+      "planned": false
     },
     "043": {
       "title": "PCA & dimensionality reduction",
@@ -704,7 +704,7 @@
         "036"
       ],
       "level": "advanced",
-      "planned": true
+      "planned": false
     },
     "044": {
       "title": "Feature engineering, leakage & imbalance",
@@ -717,7 +717,7 @@
         "005"
       ],
       "level": "advanced",
-      "planned": true
+      "planned": false
     },
     "045": {
       "title": "Convolutions & CNNs",
@@ -729,7 +729,7 @@
         "009"
       ],
       "level": "intermediate",
-      "planned": true
+      "planned": false
     },
     "046": {
       "title": "Initialization & normalization",
@@ -741,7 +741,7 @@
         "013"
       ],
       "level": "advanced",
-      "planned": true
+      "planned": false
     },
     "047": {
       "title": "Optimizers: SGD → Adam",
@@ -754,7 +754,7 @@
         "011"
       ],
       "level": "advanced",
-      "planned": true
+      "planned": false
     },
     "048": {
       "title": "Subword tokenizers (BPE)",
@@ -766,7 +766,7 @@
         "015"
       ],
       "level": "intermediate",
-      "planned": true
+      "planned": false
     },
     "049": {
       "title": "Decoding & sampling",
@@ -778,7 +778,7 @@
         "028"
       ],
       "level": "intermediate",
-      "planned": true
+      "planned": false
     },
     "050": {
       "title": "Multi-head attention & positions",
@@ -790,7 +790,7 @@
         "026"
       ],
       "level": "advanced",
-      "planned": true
+      "planned": false
     },
     "051": {
       "title": "Evaluating language models",
@@ -804,7 +804,7 @@
         "032"
       ],
       "level": "advanced",
-      "planned": true
+      "planned": false
     },
     "052": {
       "title": "RAG & tool use",
@@ -818,7 +818,7 @@
         "051"
       ],
       "level": "advanced",
-      "planned": true
+      "planned": false
     },
     "053": {
       "title": "MDPs & dynamic programming",
@@ -830,7 +830,7 @@
         "020"
       ],
       "level": "intermediate",
-      "planned": true
+      "planned": false
     },
     "054": {
       "title": "Bandits beyond ε-greedy",
@@ -842,7 +842,7 @@
         "021"
       ],
       "level": "advanced",
-      "planned": true
+      "planned": false
     },
     "055": {
       "title": "Offline RL & imitation",
@@ -855,7 +855,7 @@
         "025"
       ],
       "level": "advanced",
-      "planned": true
+      "planned": false
     },
     "056": {
       "title": "Fairness & bias measurement",
@@ -868,7 +868,7 @@
         "032"
       ],
       "level": "intermediate",
-      "planned": true
+      "planned": false
     },
     "057": {
       "title": "Calibration & uncertainty",
@@ -881,7 +881,7 @@
         "032"
       ],
       "level": "advanced",
-      "planned": true
+      "planned": false
     },
     "058": {
       "title": "Serving & latency",
@@ -894,7 +894,7 @@
         "014"
       ],
       "level": "beginner",
-      "planned": true
+      "planned": false
     },
     "059": {
       "title": "Quantization & distillation",
@@ -906,7 +906,7 @@
         "027"
       ],
       "level": "intermediate",
-      "planned": true
+      "planned": false
     },
     "060": {
       "title": "Monitoring, drift & data quality",
@@ -920,7 +920,7 @@
         "057"
       ],
       "level": "advanced",
-      "planned": true
+      "planned": false
     }
   }
 }

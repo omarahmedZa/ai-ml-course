@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>048 — Subword tokenizers (BPE)</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can run BPE merges by hand and explain why vocabulary size trades against sequence length.">
+</head>
+<body data-page="lesson" data-lesson="048" data-book="language" data-book-number="4">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 48 / 50</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 4 · Language & Transformers · lesson 9 of 13</p>
+  <h1>Subword tokenizers (BPE)</h1>
+  <p class="objective">You can run BPE merges by hand and explain why vocabulary size trades against sequence length.</p>
+</header>
+<p class="bookline"><a href="../paths/language.html">Language &amp; Transformers</a><span class="chip">Tokens &amp; Decoding</span></p>
+
+<h2>Why this matters<span class="h2-topic">— tokenization</span></h2>
+<p class="lede">A language model never sees text. It sees a sequence of integer IDs, and the tokenizer is the only component that decides how text becomes those IDs. That choice fixes the sequence length, the size of the embedding matrix, and how much of the context window a document consumes. Two models with identical architecture can differ by a factor of two in cost and effective memory purely because of their tokenizers.</p>
+<p><strong>The failure it prevents.</strong> An exam asks why "unhappiness" becomes three tokens instead of one. "Because the vocabulary is limited" is a start; the marks come from saying the vocabulary is built from frequent substrings, so a rare word falls back to pieces it shares with common words. In code the same gap is a token count you assumed was words: a 4,000-token budget fills after 2,000 words, and a context window that looked generous overflows halfway through.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>256</b><span>byte values every byte-level tokenizer starts from</span></div>
+  <div><b>50,257</b><span>GPT-2 vocabulary: 256 bytes, 50,000 merges, 1 end-of-text token</span></div>
+  <div><b>19 → 5</b><span>characters to tokens after four merges on a five-word corpus</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— tokenization</span></h2>
+<p>Start with single characters, then repeatedly glue together the most common neighbouring pair. That is byte-pair encoding (BPE). Write <code>V</code> for the vocabulary — the set of strings the tokenizer can emit — and <code>M</code> for the number of merges you perform. Each merge adds exactly one new symbol to <code>V</code>, so <code>|V| = 256 + M</code> for a byte-level start. The corpus decides which pairs are worth gluing: frequent sequences like <code>th</code> or <code>ing</code> become single tokens, while a rare name stays as several pieces.</p>
+<p>In one line: <strong>BPE compresses frequent strings into single symbols until the vocabulary hits its budget.</strong> A 50,000-merge tokenizer has 50,256 symbols, turns common English words into one or two tokens, and never fails on an unseen word because the 256 single bytes can spell anything.</p>
+
+<div class="keybox"><span class="sym">count pairs → merge the winner → repeat</span><p>Frequency picks the merge; the vocabulary budget stops it. Encoding replays the learned merges in rank order.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— tokenization</span></h2>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-bpe-t f-bpe-d">
+    <title id="f-bpe-t">Four merges turn characters into subwords</title>
+    <desc id="f-bpe-d">The word lowest starts as six character boxes, then merge ranks one and two reduce it to low, e, s, t. A fourth box shows the final four tokens and the vocabulary count.</desc>
+    <text x="40" y="48" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">start · 6 characters</text>
+    <rect x="40" y="60" width="46" height="40" rx="6" fill="none" stroke="var(--sym-data)" stroke-width="1.4"/>
+    <text x="63" y="86" text-anchor="middle" font-size="16" fill="var(--sym-data)" font-family="ui-monospace, monospace">l</text>
+    <rect x="94" y="60" width="46" height="40" rx="6" fill="none" stroke="var(--sym-data)" stroke-width="1.4"/>
+    <text x="117" y="86" text-anchor="middle" font-size="16" fill="var(--sym-data)" font-family="ui-monospace, monospace">o</text>
+    <rect x="148" y="60" width="46" height="40" rx="6" fill="none" stroke="var(--sym-data)" stroke-width="1.4"/>
+    <text x="171" y="86" text-anchor="middle" font-size="16" fill="var(--sym-data)" font-family="ui-monospace, monospace">w</text>
+    <rect x="202" y="60" width="46" height="40" rx="6" fill="none" stroke="var(--sym-data)" stroke-width="1.4"/>
+    <text x="225" y="86" text-anchor="middle" font-size="16" fill="var(--sym-data)" font-family="ui-monospace, monospace">e</text>
+    <rect x="256" y="60" width="46" height="40" rx="6" fill="none" stroke="var(--sym-data)" stroke-width="1.4"/>
+    <text x="279" y="86" text-anchor="middle" font-size="16" fill="var(--sym-data)" font-family="ui-monospace, monospace">s</text>
+    <rect x="310" y="60" width="46" height="40" rx="6" fill="none" stroke="var(--sym-data)" stroke-width="1.4"/>
+    <text x="333" y="86" text-anchor="middle" font-size="16" fill="var(--sym-data)" font-family="ui-monospace, monospace">t</text>
+    <text x="40" y="150" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">after rank 1 · merge l + o</text>
+    <rect x="40" y="162" width="92" height="40" rx="6" fill="none" stroke="var(--sym-opt)" stroke-width="1.6"/>
+    <text x="86" y="188" text-anchor="middle" font-size="16" fill="var(--sym-opt)" font-family="ui-monospace, monospace">lo</text>
+    <rect x="140" y="162" width="46" height="40" rx="6" fill="none" stroke="var(--sym-data)" stroke-width="1.2"/>
+    <text x="163" y="188" text-anchor="middle" font-size="16" fill="var(--sym-data)" font-family="ui-monospace, monospace">w</text>
+    <rect x="194" y="162" width="46" height="40" rx="6" fill="none" stroke="var(--sym-data)" stroke-width="1.2"/>
+    <text x="217" y="188" text-anchor="middle" font-size="16" fill="var(--sym-data)" font-family="ui-monospace, monospace">e</text>
+    <rect x="248" y="162" width="46" height="40" rx="6" fill="none" stroke="var(--sym-data)" stroke-width="1.2"/>
+    <text x="271" y="188" text-anchor="middle" font-size="16" fill="var(--sym-data)" font-family="ui-monospace, monospace">s</text>
+    <rect x="302" y="162" width="46" height="40" rx="6" fill="none" stroke="var(--sym-data)" stroke-width="1.2"/>
+    <text x="325" y="188" text-anchor="middle" font-size="16" fill="var(--sym-data)" font-family="ui-monospace, monospace">t</text>
+    <text x="390" y="150" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">after rank 2 · merge lo + w</text>
+    <rect x="390" y="162" width="138" height="40" rx="6" fill="none" stroke="var(--sym-loss)" stroke-width="1.6"/>
+    <text x="459" y="188" text-anchor="middle" font-size="16" fill="var(--sym-loss)" font-family="ui-monospace, monospace">low</text>
+    <rect x="536" y="162" width="46" height="40" rx="6" fill="none" stroke="var(--sym-data)" stroke-width="1.2"/>
+    <text x="559" y="188" text-anchor="middle" font-size="16" fill="var(--sym-data)" font-family="ui-monospace, monospace">e</text>
+    <rect x="590" y="162" width="46" height="40" rx="6" fill="none" stroke="var(--sym-data)" stroke-width="1.2"/>
+    <text x="613" y="188" text-anchor="middle" font-size="16" fill="var(--sym-data)" font-family="ui-monospace, monospace">s</text>
+    <rect x="644" y="162" width="46" height="40" rx="6" fill="none" stroke="var(--sym-data)" stroke-width="1.2"/>
+    <text x="667" y="188" text-anchor="middle" font-size="16" fill="var(--sym-data)" font-family="ui-monospace, monospace">t</text>
+    <rect x="40" y="248" width="300" height="76" rx="8" fill="none" stroke="var(--sym-pred)" stroke-width="1.4"/>
+    <text x="190" y="274" text-anchor="middle" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">encode result: [low] [e] [s] [t]</text>
+    <text x="190" y="300" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">4 tokens, not 1 and not 6</text>
+    <text x="420" y="274" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">vocabulary · 256 + merges</text>
+    <text x="420" y="300" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">rank order is the rule</text>
+    <text x="360" y="348" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">merges apply in the order they were learned</text>
+  </svg>
+  <figcaption><strong>Unseen words are not unknown words.</strong> "lowest" was never merged as a whole, but the learned pieces cover it, so the fallback is four tokens rather than an error.</figcaption>
+</figure>
+
+<p>Six parts: the base symbols, the counting, the merge, the stopping rule, the encoding, and the trade-off.</p>
+
+<h3>Part 1 — Start from bytes</h3>
+<p>A byte-level tokenizer begins with the 256 possible byte values, so every UTF-8 string is representable. A character-level tokenizer begins with the alphabet it saw, plus an unknown token. Bytes never produce an unknown token; characters produce one whenever a new script appears. <strong>Why this part exists:</strong> the base set is what makes fallback possible, and it sets the floor for the vocabulary size.</p>
+
+<h3>Part 2 — Count adjacent pairs, weighted by frequency</h3>
+<p>Split every training word into symbols, then count each adjacent pair. If "low" appears three times and "lower" twice, <code>(l, o)</code> gets a count of 5. Counting word types instead of occurrences would over-weight rare words. <strong>Why this part exists:</strong> the count decides what becomes a token, so a corpus unlike the target text gives the wrong vocabulary.</p>
+
+<h3>Part 3 — Merge the winner</h3>
+<p>Take the highest-count pair, replace every occurrence with a new symbol, and record the merge with its rank. <code>(l, o)</code> becomes <code>lo</code>; the next count sees <code>lo</code> as one unit. Ties are broken deterministically — often by taking the lexicographically smallest pair — so the same corpus always gives the same vocabulary. <strong>Why this part exists:</strong> this is the learning step; without a fixed tie-break, two runs on the same data produce different token IDs.</p>
+
+<h3>Part 4 — Stop at the vocabulary budget</h3>
+<p>Repeat until the vocabulary reaches its target size. A budget of 50,000 merges gives 50,256 byte-level symbols. More merges mean longer tokens and shorter sequences, but a larger embedding matrix and a larger output layer. <strong>Why this part exists:</strong> this is the one dial you set before training, and it cannot be changed afterwards without retraining the model.</p>
+
+<h3>Part 5 — Encoding replays the merges by rank</h3>
+<p>To tokenize new text, split it into bytes and apply the learned merges in rank order, earliest first. The result depends on the ranks, not on finding the longest match. The same word with a leading space is usually a different token. <strong>Why this part exists:</strong> encoding must match the merges used at training time, or the IDs mean nothing.</p>
+
+<h3>Part 6 — The trade-off you are actually choosing</h3>
+<p>Vocabulary size <code>|V|</code> and sequence length <code>n</code> trade against each other. The embedding matrix costs <code>|V| × d</code> parameters, where <code>d</code> is the model width, while attention costs grow with <code>n²</code>. A 50,000-token vocabulary with <code>d = 768</code> is 38.4 million embedding parameters; a 256-token vocabulary would shrink that to 0.2 million but triple the sequence length. <strong>Why this part exists:</strong> tokenizer choice is an architecture decision with a measurable parameter and compute bill.</p>
+
+<h2>Worked example<span class="h2-topic">— tokenization</span></h2>
+
+<h3>1. Four merges on a five-word corpus</h3>
+<p>The corpus is "low" three times and "lower" twice, written without spaces for clarity. Start from characters, so the initial symbol count is <code>3 × 3 + 2 × 5 = 19</code>.</p>
+
+<table>
+  <tr><th>Merge</th><th>Pair counts before</th><th>Winner</th><th>Tokens after</th></tr>
+  <tr><td>1</td><td><code>(l,o): 5 · (o,w): 5 · (w,e): 2 · (e,r): 2</code></td><td><code>lo</code></td><td>lo w / lo w e r</td></tr>
+  <tr><td>2</td><td><code>(lo,w): 5 · (w,e): 2 · (e,r): 2</code></td><td><code>low</code></td><td>low / low e r</td></tr>
+  <tr><td>3</td><td><code>(low,e): 2 · (e,r): 2</code></td><td><code>er</code></td><td>low / low er</td></tr>
+  <tr><td>4</td><td><code>(low,er): 2</code></td><td><code>lower</code></td><td>low / lower</td></tr>
+</table>
+
+<p><strong>Read the table as a sentence.</strong> After merge 1, the five occurrences of "low" share the symbol <code>lo</code>, so the corpus drops from 19 symbols to 14. Merge 2 makes <code>low</code>, dropping to 9. Merge 3 has a tie at 2; the rule picks <code>er</code>, giving 7. Merge 4 makes <code>lower</code>, giving 5 tokens — exactly one per word occurrence. The vocabulary is <code>256 + 4 = 260</code> symbols.</p>
+<p><strong>Now encode a word that was never in the corpus.</strong> "lowest" starts as <code>l o w e s t</code>. Merge 1 applies to <code>l o</code>, giving <code>lo w e s t</code>. Merge 2 applies to <code>lo w</code>, giving <code>low e s t</code>. Merges 3 and 4 need <code>e r</code> and <code>low er</code>, neither of which appears, so encoding stops at four tokens. Nothing failed; the word was covered by pieces.</p>
+
+<h3>2. What the budget costs</h3>
+<p>Take a 50,000-merge tokenizer and a model width of <code>d = 768</code>. The embedding matrix has one row per symbol: <code>50,256 × 768 = 38,596,608</code> parameters, about 38.6 million. If the same text averages 1.3 tokens per word, a 3,000-word document is roughly 3,900 tokens — already most of a 4,096-token context window.</p>
+<p>A 10,000-merge tokenizer would have 10,256 rows and 7.9 million embedding parameters, but the same document might take 5,200 tokens and no longer fit. That is the trade in one comparison: 30 million parameters saved against 1,300 extra positions of context spent.</p>
+
+<h2>The trap<span class="h2-topic">— tokenization</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A token is a word, so token counts and word counts are the same."</strong> A token is a substring chosen by frequency. Common words are one token, rare words are several, numbers often split digit by digit, and a leading space is part of the token. The ratio is language-dependent: English averages about 1.3 tokens per word, while Hindi or Thai can exceed 3, so the same context window holds far less text.</p>
+  <p>It feels right because tokenizers demo beautifully on English prose, where most words are indeed one token. The gap appears on names, code, numbers and non-English text — exactly the inputs where a silent truncation costs you the answer.</p>
+  <p><strong>Correction:</strong> measure in tokens, not words. Before trusting a context budget, tokenize a sample of the real input and look at the distribution of tokens per document; if the tail exceeds the window, chunk deliberately instead of truncating silently.</p>
+</div>
+<p><strong>The tell:</strong> an estimated cost that is 40% low, or a prompt that "should fit" being cut off mid-sentence. A second is a model that spells out arithmetic digit by digit while handling words fluently — the tokenizer split the number. A third is a multilingual benchmark collapsing on one language at equal word counts.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>4,000 tokens is about 4,000 words.</td><td>It is about 3,000 English words, fewer in many other languages.</td></tr>
+  <tr><td>Unknown words break the tokenizer.</td><td>Byte fallback always succeeds; the cost is more tokens, not an error.</td></tr>
+</table>
+
+<h2>Retrieval check<span class="h2-topic">— tokenization</span></h2>
+<ol class="quiz">
+  <li>Why does byte-level BPE never need an unknown token?
+    <details><summary>Answer</summary>
+      <p>Its base vocabulary is all 256 byte values, and every UTF-8 string is a sequence of bytes. Any input can be spelled from single bytes.</p>
+    </details>
+  </li>
+  <li>After 8,000 merges from a byte-level start, what is the vocabulary size?
+    <details><summary>Answer</summary>
+      <p>8,256: the 256 bytes plus one symbol per merge. Special tokens such as end-of-text would add to that.</p>
+    </details>
+  </li>
+  <li>Two tokenizers have vocabularies of 32k and 64k. What happens to sequence length and embedding parameters?
+    <details><summary>Answer</summary>
+      <p>The 64k one gives shorter sequences but roughly doubles the embedding matrix. The compute saving depends on how much the sequence shortens.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/048.html">Solve it · 048 — Most common adjacent pair</a></p>
+<h2>Build it in Colab<span class="h2-topic">— tokenization</span></h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/048-subword-tokenizers-bpe.ipynb">open the notebook in Colab</a> · <a href="../notebooks/048-subword-tokenizers-bpe.ipynb">local copy</a>. Sections, plots and line-by-line notes — run the cells in order, then change the corpus and rerun.</p>
+<pre><code>from collections import Counter
+words = {&quot;low&quot;: 3, &quot;lower&quot;: 2}                 # word -&gt; frequency
+tokens = {tuple(w): f for w, f in words.items()}  # split into characters
+pairs = Counter()                              # adjacent pair counts
+for symbols, f in tokens.items():
+    for a, b in zip(symbols, symbols[1:]):
+        pairs[(a, b)] += f                     # weight by word frequency
+print(pairs.most_common(1))                    # ((&#x27;l&#x27;, &#x27;o&#x27;), 5)</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— tokenization</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "A tokenizer has 256 bytes and 12,000 merges. Vocabulary size?", "o": ["12,256", "12,000", "256", "12,512"], "a": 0, "why": "Each merge adds one symbol, and the base is 256 bytes."}, {"q": "Why can the same word cost 1 token in one model and 4 in another?", "o": ["Different merge vocabularies", "Different spelling", "Different Unicode", "Different file format"], "a": 0, "why": "Token boundaries come from each tokenizer's learned merges, not from the word itself."}]</script></div>
+
+<div class="next">
+  <p>Text is now a sequence of token IDs. Topic 49 turns the model's next-token scores into actual text, with temperature, top-k and top-p.</p>
+  <div class="pager">
+    <a href="047-optimizers-sgd-adam.html">← 47 · Optimizers: SGD → Adam</a>
+    <a href="049-decoding-and-sampling.html">Next · 49 · Decoding &amp; sampling</a>
+  </div>
+</div>
+
+<p class="source">Primary source: Sennrich, Haddow &amp; Birch, <a href="https://arxiv.org/abs/1508.07909">Neural Machine Translation of Rare Words with Subword Units</a> (2015).</p>
+
+</main>
+  <script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

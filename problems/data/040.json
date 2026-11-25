@@ -1,0 +1,30 @@
+{
+  "id": "040",
+  "lesson": "040",
+  "book": "foundations",
+  "title": "Debug the nearest-neighbour vote",
+  "difficulty": "medium",
+  "shape": "debug",
+  "categories": [
+    "classical-ml"
+  ],
+  "statement_md": "`knn_predict(points, labels, query, k)` should take the **nearest** `k` points and return the majority label.\n\nThe current implementation uses the farthest points. Fix it, and add the missing checks:\n\n- raise `ValueError` if `k < 1`, if `k > len(points)`, or if `labels` and `points` differ in length\n- distances are Euclidean\n- return the label as given (do not convert it)",
+  "entry": "knn_predict",
+  "signature": "def knn_predict(points, labels, query, k):",
+  "starter": "import math\n\n\ndef knn_predict(points, labels, query, k):\n    \"\"\"Return the majority label among the k nearest points.\"\"\"\n    d = [math.dist(p, query) for p in points]\n    order = sorted(range(len(points)), key=lambda i: d[i])\n    nearest = order[-k:]          # BUG: this takes the farthest k\n    votes = {}\n    for i in nearest:\n        votes[labels[i]] = votes.get(labels[i], 0) + 1\n    return max(votes, key=votes.get)\n",
+  "visible": [
+    "test_nearest_wins",
+    "test_majority"
+  ],
+  "hidden": [
+    "test_k_too_large",
+    "test_k_zero",
+    "test_length_mismatch",
+    "test_far_query"
+  ],
+  "tests_py": "def test_nearest_wins():\n    assert solution.knn_predict([[0, 0], [10, 10]], [\"a\", \"b\"], [0.1, 0.1], 1) == \"a\"\n\ndef test_majority():\n    pts = [[1, 1], [2, 3], [4, 2], [3, 4], [0, 1]]\n    labels = [\"A\", \"B\", \"A\", \"B\", \"A\"]\n    assert solution.knn_predict(pts, labels, [2, 2], 3) == \"A\"\n\ndef test_k_too_large():\n    try:\n        solution.knn_predict([[0, 0]], [\"a\"], [0, 0], 2)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_k_zero():\n    try:\n        solution.knn_predict([[0, 0]], [\"a\"], [0, 0], 0)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_length_mismatch():\n    try:\n        solution.knn_predict([[0, 0], [1, 1]], [\"a\"], [0, 0], 1)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_far_query():\n    assert solution.knn_predict([[0, 0], [10, 10]], [\"a\", \"b\"], [9.5, 9.5], 1) == \"b\"\n",
+  "mutations": [
+    "return labels[0]",
+    "return labels[-1]"
+  ]
+}

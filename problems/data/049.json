@@ -1,0 +1,30 @@
+{
+  "id": "049",
+  "lesson": "049",
+  "book": "language",
+  "title": "Nucleus filtering on top of softmax",
+  "difficulty": "medium",
+  "shape": "extend",
+  "categories": [
+    "decoding"
+  ],
+  "statement_md": "`softmax` is implemented. Add `nucleus_indices(probs, p)`, which returns the token ids top-p sampling would keep.\n\n- sort ids by probability, highest first; break ties by smaller id\n- keep adding ids until the running total reaches at least `p`\n- always keep at least one id\n- `p >= 1` keeps every id; `p <= 0` keeps only the first\n- return ids in that sorted order; do not mutate `probs`\n\nDo not change `softmax`.",
+  "entry": "nucleus_indices",
+  "signature": "def nucleus_indices(probs, p):",
+  "starter": "import math\n\n\ndef softmax(logits):\n    top = max(logits)\n    exps = [math.exp(z - top) for z in logits]\n    total = sum(exps)\n    return [e / total for e in exps]\n\n\ndef nucleus_indices(probs, p):\n    # Your code here: sort, accumulate, stop at p.\n    pass\n",
+  "visible": [
+    "test_top_two",
+    "test_dominant_token"
+  ],
+  "hidden": [
+    "test_p_one_keeps_all",
+    "test_p_zero_keeps_first",
+    "test_tie_order",
+    "test_does_not_mutate"
+  ],
+  "tests_py": "def test_top_two():\n    probs = [0.5, 0.3, 0.15, 0.05]\n    assert solution.nucleus_indices(probs, 0.8) == [0, 1]\n\ndef test_dominant_token():\n    assert solution.nucleus_indices([0.95, 0.03, 0.02], 0.9) == [0]\n\ndef test_p_one_keeps_all():\n    assert solution.nucleus_indices([0.25, 0.25, 0.25, 0.25], 1.0) == [0, 1, 2, 3]\n\ndef test_p_zero_keeps_first():\n    assert solution.nucleus_indices([0.2, 0.5, 0.3], 0.0) == [1]\n\ndef test_tie_order():\n    assert solution.nucleus_indices([0.5, 0.5], 0.5) == [0]\n    assert solution.nucleus_indices([0.5, 0.5], 0.75) == [0, 1]\n\ndef test_does_not_mutate():\n    probs = [0.4, 0.35, 0.25]\n    before = probs[:]\n    out = solution.nucleus_indices(probs, 0.7)\n    assert probs == before\n    assert out is not probs\n",
+  "mutations": [
+    "return list(range(len(probs)))",
+    "return [max(range(len(probs)), key=lambda i: probs[i])] if probs else []"
+  ]
+}

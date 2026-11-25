@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>039 — Debug the bias–variance sum</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Debug the bias–variance sum — a graded problem on probability-statistics.">
+</head>
+<body data-page="problem" data-problem="039">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">039 · easy</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 039 · debug</p>
+  <h1>Debug the bias–variance sum</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Probability Statistics</span><a href="../lessons/039-estimation-bias-variance.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>mse_from_terms</code> should return the expected squared error of an estimator:</p>
+<p><code>bias**2 + variance + noise</code></p>
+<p>The current implementation is wrong. Fix it without changing the signature. <code>noise</code> defaults to <code>0.0</code>, and the result must be a <code>float</code>.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def mse_from_terms(bias, variance, noise=0.0):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def mse_from_terms(bias, variance, noise=0.0):
+    &quot;&quot;&quot;Return bias squared plus variance plus irreducible noise.&quot;&quot;&quot;
+    return bias + variance + noise   # BUG: the bias term is not squared
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_zero_bias</code></li><li><code>test_basic</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 039
+# edit work/039/solution.py
+python3 dml.py run 039
+python3 dml.py submit 039</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-039">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-039" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="038.html">← 038 · Standard error, extended</a><a href="040.html">040 · Debug the nearest-neighbour vote →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

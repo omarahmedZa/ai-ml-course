@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>060 — Monitoring, drift &amp; data quality</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can compute a two-sample KS statistic, separate a data-quality break from real drift, and choose a monitoring response.">
+</head>
+<body data-page="lesson" data-lesson="060" data-book="systems" data-book-number="7">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 60 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 7 · Systems · lesson 3 of 3</p>
+  <h1>Monitoring, drift &amp; data quality</h1>
+  <p class="objective">You can compute a two-sample KS statistic, separate a data-quality break from real drift, and choose a monitoring response.</p>
+</header>
+<p class="bookline"><a href="../paths/systems.html">Systems</a><span class="chip">Systems</span></p>
+
+<h2>Why this matters<span class="h2-topic">— drift</span></h2>
+<p class="lede">A trained model is a snapshot of one distribution. After it ships, prices change, the user mix shifts, an upstream job writes cents where the model expects dollars. Last year's test set says nothing about today's traffic, and the failure is silent: the service keeps returning confident answers.</p>
+<p><strong>The failure it prevents.</strong> An exam asks "drift was detected, so you retrain — yes?" and "yes" skips the first question: drift or a broken pipeline? A unit change looks like a distribution shift to a test, and retraining on corrupted inputs bakes the bug in.</p>
+
+<h2>The one core idea<span class="h2-topic">— drift</span></h2>
+<p>Monitoring compares a frozen <strong>reference</strong> <code>R</code> — the training period or a known-good week — with the <strong>current</strong> window <code>C</code>, on inputs, predictions and outcomes, after checking data quality.</p>
+<p>Drift is a signal to investigate, not an instruction to retrain. A shift can be harmless, helpful, or a schema break in disguise.</p>
+
+<div class="keybox"><span class="sym">compare now with a frozen reference</span><p>Quality gate first, then input, prediction and outcome drift — each with a threshold and an owner.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— drift</span></h2>
+<p>Six steps: freeze a reference, gate on quality, test inputs, test predictions, wait for outcomes, route the alert.</p>
+
+<h3>Part 1 — Freeze a reference window</h3>
+<p>Store the training schema, feature summaries, score distribution and evaluation slices. Keep the window fixed; a rolling reference cannot tell you what changed.</p>
+<p><strong>Why:</strong> every drift number is a distance, and one end must stay still.</p>
+
+<h3>Part 2 — Gate on data quality first</h3>
+<p>Check schema, types, ranges, missingness, duplicates and units before any drift statistic. A feature jumping from 2% to 12% missing is a pipeline event that moves every downstream distribution.</p>
+<p><strong>Why:</strong> a test cannot distinguish "users changed" from "the loader broke"; a quality gate can.</p>
+
+<h3>Part 3 — Test numeric inputs with KS</h3>
+<p>The two-sample <strong>Kolmogorov–Smirnov statistic</strong> is the largest vertical gap between the two empirical cumulative distribution functions:</p>
+<span class="formula">D = max_x |F_R(x) − F_C(x)|</span>
+<p><code>F_R(x)</code> is the share of reference values at or below <code>x</code>. <code>D</code> runs from 0 (identical) to 1 (separated); thresholds are 0.05 for a look, 0.10 for an alert.</p>
+<p><strong>Why:</strong> it compares whole distributions, so a change in spread or a new cluster is visible.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-drift-t f-drift-d">
+    <title id="f-drift-t">Two cumulative distributions with a maximum gap of 0.20</title>
+    <desc id="f-drift-d">Reference and current CDFs rise. At value 50 the reference is at 0.5 and the current at 0.7, so the largest gap is D = 0.20.</desc>
+    <line x1="80" y1="300" x2="80" y2="40" stroke="var(--ink-faint)" stroke-width="1.2"/>
+    <line x1="80" y1="300" x2="670" y2="300" stroke="var(--ink-faint)" stroke-width="1.2"/>
+    <text x="70" y="44" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1.0</text>
+    <text x="70" y="304" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0</text>
+    <text x="80" y="322" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">10</text>
+    <text x="670" y="322" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">100</text>
+    <text x="375" y="344" text-anchor="middle" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">feature value</text>
+    <polyline points="80,274 146,248 211,222 277,196 342,170 408,144 473,118 539,92 604,66 670,40" fill="none" stroke="var(--sym-data)" stroke-width="2"/>
+    <polyline points="80,274 146,248 211,222 277,196 342,118 408,92 473,66 539,40 670,40" fill="none" stroke="var(--sym-pred)" stroke-width="2" stroke-dasharray="6 4"/>
+    <line x1="342" y1="170" x2="342" y2="118" stroke="var(--sym-opt)" stroke-width="2.5"/>
+    <text x="354" y="146" font-size="12" fill="var(--sym-opt)" font-family="ui-monospace, monospace">D = 0.20</text>
+    <text x="500" y="80" font-size="11" fill="var(--sym-data)" font-family="ui-monospace, monospace">reference</text>
+    <text x="500" y="64" font-size="11" fill="var(--sym-pred)" font-family="ui-monospace, monospace">current</text>
+  </svg>
+  <figcaption><strong>The largest gap, not the average gap.</strong> At value 50 the reference has 50% of its mass below and the current window has 70%, so D = 0.20. KS reports that single worst point and ignores the rest of the curve.</figcaption>
+</figure>
+
+<h3>Part 4 — Test categorical inputs with PSI</h3>
+<p>The <strong>population stability index</strong> compares category shares:</p>
+<span class="formula">PSI = Σ_b (c_b − r_b) · ln(c_b / r_b)</span><span class="say" data-sym="Σ">(sigma)</span>
+<p><code>r_b</code> and <code>c_b</code> are shares of bin <code>b</code>. Rough reading: below 0.1 stable, 0.1–0.25 worth a look, above 0.25 major. Zero shares need a floor.</p>
+<p><strong>Why:</strong> KS assumes an order categories do not have; PSI works on shares.</p>
+
+<h3>Part 5 — Watch predictions, then outcomes</h3>
+<p>Monitor score distribution and calibration before labels arrive: a shift in mean score or above-threshold share is an early warning. When labels arrive, track accuracy per slice; a loan defaults months later, so leading indicators carry the first alert.</p>
+<p><strong>Why:</strong> outcomes are ground truth but arrive too late to be the only signal.</p>
+
+<h3>Part 6 — Route the alert to a decision</h3>
+<p>Every threshold needs an owner and one of four responses: investigate, roll back, retrain, or accept and document. Record the choice.</p>
+<p><strong>Why:</strong> an alert with no decision rule becomes noise.</p>
+
+<h2>Worked example<span class="h2-topic">— drift</span></h2>
+<p>Reference window <code>R</code> and current window <code>C</code>, ten observations each:</p>
+<p><code>R = 10, 20, 30, 40, 50, 60, 70, 80, 90, 100</code><br>
+<code>C = 10, 20, 30, 40, 50, 50, 50, 60, 70, 80</code></p>
+
+<table>
+  <tr><th class="num">x</th><th class="num">F_R(x)</th><th class="num">F_C(x)</th><th class="num">|gap|</th></tr>
+  <tr><td class="num">40</td><td class="num">0.4</td><td class="num">0.4</td><td class="num">0.0</td></tr>
+  <tr><td class="num">50</td><td class="num">0.5</td><td class="num">0.7</td><td class="num">0.2</td></tr>
+  <tr><td class="num">60</td><td class="num">0.6</td><td class="num">0.8</td><td class="num">0.2</td></tr>
+  <tr><td class="num">80</td><td class="num">0.8</td><td class="num">1.0</td><td class="num">0.2</td></tr>
+  <tr><td class="num">90</td><td class="num">0.9</td><td class="num">1.0</td><td class="num">0.1</td></tr>
+</table>
+
+<p><strong>Step 1 — build the CDFs.</strong> At 50, five of ten reference values are at or below, so <code>F_R = 0.5</code>; seven current values are, because 50 appears three times, so <code>F_C = 0.7</code>. The gap is 0.20, and stays 0.20 at 60 and 80, so <code>D = 0.20</code>.</p>
+
+<p><strong>Step 2 — compare centres.</strong> Reference mean <code>550/10 = 55</code>; current mean <code>460/10 = 46</code>; medians 55 and 50. It moved left and piled up at 50.</p>
+
+<p><strong>Step 3 — compute PSI.</strong> Shares <code>[0.5, 0.3, 0.2]</code> versus <code>[0.4, 0.3, 0.3]</code>; only the ends differ: <code>−0.1 ln(0.8) + 0.1 ln(1.5) = 0.063</code>. Below 0.1, so the category is stable while the numeric feature moved.</p>
+
+<p><strong>Step 4 — read the quality gate.</strong> Missingness rose from 2% to 12%. A tenth of the rows vanished, so the shift may be caused by which rows are missing. Investigate the loader first.</p>
+
+<p><strong>What to notice.</strong> D says shift, PSI says stable, missingness says pipeline. First investigate quality: retraining on a broken window bakes the break in.</p>
+
+<h2>The trap<span class="h2-topic">— drift</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Drift alert means retrain."</strong> It feels right because retraining is the action the team knows, and a new model usually moves the metric. But a unit change, a duplicated join or a missing file all look like drift to a test.</p>
+  <p>A second version monitors only accuracy. It is the slowest signal: labels arrive late and an aggregate hides the broken slice.</p>
+  <p><strong>Correction:</strong> gate on quality, compare with a frozen reference, report the statistic with window and sample size, then choose investigate, roll back, retrain or accept — and record it.</p>
+</div>
+<p><strong>The tell:</strong> forty features crossing their threshold on the same day. Real drift is gradual and uneven; a simultaneous jump points upstream. A retrain that fixes the metric for one day is the second tell.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>A drift alert is an order to retrain.</td><td>It is a signal to investigate; the cause may be a broken pipeline.</td></tr>
+  <tr><td>Accuracy is the monitoring metric.</td><td>It arrives late and hides slices; quality and score drift lead it.</td></tr>
+</table>
+
+<h2>Retrieval check<span class="h2-topic">— drift</span></h2>
+<ol class="quiz">
+  <li>What range does the KS statistic take, and what does 0 mean?
+    <details><summary>Answer</summary>
+      <p>0 to 1. Zero means the empirical CDFs coincide, so the samples are indistinguishable at every value.</p>
+    </details>
+  </li>
+  <li>A categorical feature has PSI = 0.3. What is the rough reading, and what would you check first?
+    <details><summary>Answer</summary>
+      <p>Above 0.25 is a major shift. Check category definitions, encoding and missing-value handling before calling it behavioural change.</p>
+    </details>
+  </li>
+  <li>Forty features alert on the same morning. What is the likely cause?
+    <details><summary>Answer</summary>
+      <p>A pipeline or schema event — a unit change, broken join or new null convention — not forty independent behavioural changes.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/060.html">Solve it · 060 — KS drift, comparing CDFs</a></p>
+<h2>Build it in Colab<span class="h2-topic">— drift</span></h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/060-monitoring-drift-data-quality.ipynb">open the notebook in Colab</a> · <a href="../notebooks/060-monitoring-drift-data-quality.ipynb">local copy</a>. Shift the current window and watch D rise.</p>
+<pre><code>import numpy as np
+ref = np.array([10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
+cur = np.array([10, 20, 30, 40, 50, 50, 50, 60, 70, 80])
+grid = np.sort(np.concatenate([ref, cur]))        # every observed value
+d = 0.0
+for x in grid:
+    gap = abs((ref &lt;= x).mean() - (cur &lt;= x).mean())   # CDF gap
+    d = max(d, gap)
+print(&quot;KS D =&quot;, round(d, 3))                       # 0.20</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— drift</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "KS D = 0.20 means…", "o": ["The CDFs differ by at most 0.20", "Accuracy fell 20 points", "The means differ by 0.20", "20% of rows are missing"], "a": 0, "why": "KS is the maximum vertical gap between the two empirical CDFs."}, {"q": "Forty features alert at once. Check first…", "o": ["The upstream pipeline and units", "The learning rate", "The batch size", "The test split"], "a": 0, "why": "A simultaneous jump points to a shared data source, not forty real shifts."}]</script></div>
+
+<div class="next">
+  <p><strong>Book 7 complete.</strong> You can measure a distribution, shrink the model, serve it under load and watch it after deployment. Next: pick a real service and write its first three monitors.</p>
+  <div class="pager">
+    <a href="059-quantization-and-distillation.html">← 59 · Quantization &amp; distillation</a>
+  </div>
+</div>
+
+<p class="source">Primary source: Gama et al., <a href="https://dl.acm.org/doi/10.1145/2523813">A survey on concept drift adaptation</a> (2014), and Sculley et al., <a href="https://papers.nips.cc/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html">Hidden technical debt in machine learning systems</a> (2015).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

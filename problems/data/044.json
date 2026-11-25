@@ -1,0 +1,31 @@
+{
+  "id": "044",
+  "lesson": "044",
+  "book": "classical-ml",
+  "title": "Standardise without leaking",
+  "difficulty": "medium",
+  "shape": "debug",
+  "categories": [
+    "classical-ml",
+    "evaluation"
+  ],
+  "statement_md": "`standardize(train, test)` is supposed to scale every column using the mean and standard deviation of the **training rows only** (divide by `n`, and use `1.0` when a column has zero spread).\n\nIt currently computes its statistics from `train + test`, so the test rows leak into the transform. Fix it.\n\n- keep the signature and the return shape: `(scaled_train, scaled_test)`\n- raise `ValueError` for an empty training set or a row with the wrong number of columns\n- do not mutate either input",
+  "entry": "standardize",
+  "signature": "def standardize(train, test):",
+  "starter": "def standardize(train, test):\n    \"\"\"Scale columns using the mean and std of the training rows.\"\"\"\n    rows = train + test\n    n = len(rows)\n    d = len(rows[0])\n    means = [sum(r[j] for r in rows) / n for j in range(d)]\n    stds = []\n    for j in range(d):\n        var = sum((r[j] - means[j]) ** 2 for r in rows) / n\n        stds.append(var ** 0.5 or 1.0)\n\n    def scale(data):\n        return [[(r[j] - means[j]) / stds[j] for j in range(d)] for r in data]\n\n    return scale(train), scale(test)\n",
+  "visible": [
+    "test_train_scaled",
+    "test_test_uses_train_stats"
+  ],
+  "hidden": [
+    "test_zero_variance",
+    "test_shape_mismatch",
+    "test_empty_train",
+    "test_no_mutation"
+  ],
+  "tests_py": "def test_train_scaled():\n    tr, te = solution.standardize([[1.0, 2.0], [3.0, 4.0]], [])\n    assert tr == [[-1.0, -1.0], [1.0, 1.0]]\n    assert te == []\n\ndef test_test_uses_train_stats():\n    tr, te = solution.standardize([[0.0], [2.0]], [[4.0]])\n    assert tr == [[-1.0], [1.0]]\n    assert abs(te[0][0] - 3.0) < 1e-9\n\ndef test_zero_variance():\n    tr, te = solution.standardize([[5.0], [5.0]], [[7.0]])\n    assert tr == [[0.0], [0.0]]\n    assert abs(te[0][0] - 2.0) < 1e-9\n\ndef test_shape_mismatch():\n    try:\n        solution.standardize([[1.0, 2.0]], [[1.0]])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_empty_train():\n    try:\n        solution.standardize([], [[1.0]])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_no_mutation():\n    tr = [[1.0], [2.0]]\n    te = [[3.0]]\n    solution.standardize(tr, te)\n    assert tr == [[1.0], [2.0]] and te == [[3.0]]\n",
+  "mutations": [
+    "return _apply(a[0], *_stats(list(a[0]) + list(a[1]))), _apply(a[1], *_stats(list(a[0]) + list(a[1])))",
+    "return _apply(a[0], *_stats(a[0])), _apply(a[1], *_stats(a[1]))"
+  ]
+}

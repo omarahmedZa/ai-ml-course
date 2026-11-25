@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>041 — Mean hinge loss</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Mean hinge loss — a graded problem on classical-ml.">
+</head>
+<body data-page="problem" data-problem="041">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">041 · hard</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 041 · from scratch</p>
+  <h1>Mean hinge loss</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Classical Ml</span><span class="chip">Svm</span><a href="../lessons/041-svm-and-kernels.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p>Write <code>hinge_loss(scores, labels)</code> returning the <strong>mean</strong> hinge loss.</p>
+<ul><li>one label per score, each label either <code>+1</code> or <code>-1</code></li><li>per row the loss is <code>max(0, 1 - label * score)</code></li><li>raise <code>ValueError</code> when the lengths differ or a label is not <code>+1</code>/<code>-1</code></li><li>return <code>0.0</code> for empty inputs</li></ul>
+<p>Loops are fine; no NumPy needed.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def hinge_loss(scores, labels):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def hinge_loss(scores, labels):
+    &quot;&quot;&quot;Return the mean hinge loss of scores against +1/-1 labels.&quot;&quot;&quot;
+    # Your code here.
+    pass
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_perfect</code></li><li><code>test_basic</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 041
+# edit work/041/solution.py
+python3 dml.py run 041
+python3 dml.py submit 041</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-041">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-041" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="040.html">← 040 · Debug the nearest-neighbour vote</a><a href="042.html">042 · Assign points to centroids →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>058 — Serving &amp; latency</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can read p50, p95 and p99 latency, compute them by hand, and explain why the average hides the requests users complain about.">
+</head>
+<body data-page="lesson" data-lesson="058" data-book="systems" data-book-number="7">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 58 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 7 · Systems · lesson 1 of 3</p>
+  <h1>Serving &amp; latency</h1>
+  <p class="objective">You can read p50, p95 and p99 latency, compute them by hand, and explain why the average hides the requests users complain about.</p>
+</header>
+<p class="bookline"><a href="../paths/systems.html">Systems</a><span class="chip">Systems</span></p>
+
+<h2>Why this matters<span class="h2-topic">— latency</span></h2>
+<p class="lede">One slow request is what a user remembers. If ninety-nine requests take 40 milliseconds and one takes two seconds, the average still looks fine — and the person who waited is the one who closes the app. Serving is where the clock matters as much as the score.</p>
+<p><strong>The failure it prevents.</strong> An exam asks "average latency is 70 ms; is the service healthy?" and "yes" misses the point: an average says nothing about the slowest requests, and those time out. A laptop benchmark with one request at a time reports 20 ms while production gives some users half a second.</p>
+
+<h2>The one core idea<span class="h2-topic">— latency</span></h2>
+<p>Latency is not one number. It is a <strong>distribution</strong>: collect many request times, sort them, and look where the slow ones sit. The <strong>p95</strong> is the time 95% of requests beat — one request in twenty is slower.</p>
+<p><strong>Throughput</strong> is how many requests the service finishes per second. Latency and throughput trade against each other: batching more work raises throughput and usually raises waiting time too.</p>
+
+<div class="keybox"><span class="sym">p95 = the time 95% of requests beat</span><p>Report several percentiles, not one average. The tail is where timeouts and complaints live.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— latency</span></h2>
+<p>Six steps: start the clock correctly, collect samples, sort, take percentiles, watch utilisation, then fix the tail.</p>
+
+<h3>Part 1 — Start the clock in the right place</h3>
+<p>Begin when the request reaches the edge of your system and stop when the last byte of the response leaves. That includes queueing, compute, database calls and network. Timing only the forward pass measures something no user experiences.</p>
+<p><strong>Why:</strong> most of a slow request is waiting, not arithmetic.</p>
+
+<h3>Part 2 — Collect enough samples</h3>
+<p>Record every request for a fixed window — say ten minutes — and keep the count. A p99 needs a few hundred samples; with 50 requests it is just the slowest one.</p>
+<p><strong>Why:</strong> percentiles are positions in a list; with too few positions, the one you care about is noise.</p>
+
+<h3>Part 3 — Sort the times</h3>
+<p>Put the millisecond values in ascending order. Now "the slowest 5%" is a region at the right end of the list, and you can point at it. The nearest-rank method needs no distribution maths.</p>
+<p><strong>Why:</strong> sorting turns a vague question about "slow" into an index you can count.</p>
+
+<h3>Part 4 — Take the nearest-rank percentile</h3>
+<p>For a percentile <code>q</code> and <code>n</code> samples, compute <code>rank = ceil(q / 100 × n)</code> and take the value at that 1-based position. For 20 values, p95 needs <code>ceil(0.95 × 20) = 19</code>, so it is the 19th value.</p>
+<p><strong>Why:</strong> the rounding rule decides whether p100 is the last value or an error; writing it down keeps two teams consistent.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-lat-t f-lat-d">
+    <title id="f-lat-t">Latency by percentile, with the tail rising sharply</title>
+    <desc id="f-lat-d">Response time against percentile. The median is 45 ms, p95 is 150 ms and p99 is 400 ms; the right edge climbs far above the middle.</desc>
+    <line x1="80" y1="300" x2="80" y2="40" stroke="var(--ink-faint)" stroke-width="1.2"/>
+    <line x1="80" y1="300" x2="670" y2="300" stroke="var(--ink-faint)" stroke-width="1.2"/>
+    <text x="70" y="304" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0</text>
+    <text x="70" y="48" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">400 ms</text>
+    <text x="80" y="322" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0</text>
+    <text x="670" y="322" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">100th</text>
+    <text x="375" y="344" text-anchor="middle" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">percentile of requests</text>
+    <polyline points="110,281 139,279 169,279 198,277 228,277 257,275 287,274 316,273 346,273 375,271 405,269 434,268 464,266 493,264 523,261 552,255 582,245 611,229 641,203 670,40" fill="none" stroke="var(--sym-pred)" stroke-width="2"/>
+    <line x1="375" y1="271" x2="375" y2="300" stroke="var(--ink-faint)" stroke-dasharray="3 3"/>
+    <line x1="641" y1="203" x2="641" y2="300" stroke="var(--ink-faint)" stroke-dasharray="3 3"/>
+    <line x1="670" y1="40" x2="670" y2="300" stroke="var(--ink-faint)" stroke-dasharray="3 3"/>
+    <text x="382" y="265" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">p50 45</text>
+    <text x="632" y="195" text-anchor="end" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">p95 150</text>
+    <text x="662" y="105" text-anchor="end" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">p99 400</text>
+  </svg>
+  <figcaption><strong>The middle looks calm; the edge does not.</strong> Half finish near 45 ms, but one in twenty takes 150 ms or more and one in a hundred 400 ms or more. The 72.6 ms average describes neither.</figcaption>
+</figure>
+
+<h3>Part 5 — Watch how busy the server is</h3>
+<p>Utilisation <code>ρ</code> is the share of capacity in use. As <code>ρ</code> approaches 1, waiting time grows much faster than load. Running at 50–60% leaves room for bursts; 95% turns a small spike into a long queue.</p>
+<p><strong>Why:</strong> the same model is fast on an idle machine and slow on a busy one.</p>
+
+<h3>Part 6 — Fix the tail</h3>
+<p>Cache repeated work, shrink batches, set timeouts, shed load you cannot serve, and add replicas before the queue forms. Then measure again with the same clock and window.</p>
+<p><strong>Why:</strong> the average is dominated by fast requests, so improving those can leave the tail untouched.</p>
+
+<h2>Worked example<span class="h2-topic">— latency</span></h2>
+<p>Twenty request times in milliseconds, already sorted:</p>
+<p><code>30, 32, 33, 35, 36, 38, 40, 41, 42, 45, 47, 50, 52, 55, 60, 70, 85, 110, 150, 400</code></p>
+
+<table>
+  <tr><th>Statistic</th><th>Working</th><th class="num">Value</th></tr>
+  <tr><td>Sum</td><td>add all twenty values</td><td class="num">1,451</td></tr>
+  <tr><td>Mean</td><td><code>1451 / 20</code></td><td class="num">72.6 ms</td></tr>
+  <tr><td>p50</td><td>rank <code>ceil(0.50 × 20) = 10</code></td><td class="num">45 ms</td></tr>
+  <tr><td>p95</td><td>rank <code>ceil(0.95 × 20) = 19</code></td><td class="num">150 ms</td></tr>
+  <tr><td>p99</td><td>rank <code>ceil(0.99 × 20) = 20</code></td><td class="num">400 ms</td></tr>
+</table>
+
+<p><strong>Step 1 — find the ranks.</strong> Half of 20 is 10, so p50 is the 10th value: 45. Ninety-five percent of 20 is 19, so p95 is the 19th value: 150. Ninety-nine percent of 20 is 19.8, which rounds up to 20: 400.</p>
+
+<p><strong>Step 2 — compare mean and tail.</strong> The mean is 72.6, below p95. Nineteen fast requests pull it down while the 400 ms one sits far right. Without it the mean would be <code>1051 / 19 = 55.3</code>, so one request adds about 17 ms.</p>
+
+<p><strong>Step 3 — scale it to a day.</strong> At one million requests, 5% beyond p95 is 50,000 and 1% beyond p99 is 10,000 — the requests that hit timeouts, retries and tickets.</p>
+
+<p><strong>What to notice.</strong> The p50 says quick, the p99 says not; both are true. A mean hides the 400 ms request.</p>
+
+<h2>The trap<span class="h2-topic">— latency</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Our benchmark says 20 ms, so production is fine."</strong> It feels right because the number came from the same code. But the benchmark probably ran one request at a time, idle, with no network and no queue — none of which is true for a user.</p>
+  <p>A second version reports p99 below p95, or averages percentiles across machines — arithmetic that cannot describe one request stream.</p>
+  <p><strong>Correction:</strong> measure end-to-end, publish p50/p95/p99 with sample count and window, and state the load. "p95 = 150 ms over 100,000 requests at 40 per second" is reproducible.</p>
+</div>
+<p><strong>The tell:</strong> a latency slide with no percentiles, or a p99 equal to the slowest request on a tiny sample. A benchmark that never mentions concurrency is the second tell — with one client there is no queue.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>The average is the user experience.</td><td>The average is dominated by fast requests; the tail is what times out.</td></tr>
+  <tr><td>A laptop benchmark predicts production.</td><td>It omits queueing, network and load, which is where the tail comes from.</td></tr>
+</table>
+
+<h2>Retrieval check<span class="h2-topic">— latency</span></h2>
+<ol class="quiz">
+  <li>You have 100 sorted request times. Which position is p95?
+    <details><summary>Answer</summary>
+      <p><code>ceil(0.95 × 100) = 95</code>, so the 95th value. Five values are slower, which is the 5% above p95.</p>
+    </details>
+  </li>
+  <li>How can the mean be 72 ms while p95 is 150 ms?
+    <details><summary>Answer</summary>
+      <p>Most requests are fast and a few are very slow. The many small values pull the mean down while the slow tail sets the high percentiles.</p>
+    </details>
+  </li>
+  <li>Batching doubles throughput. What usually happens to latency?
+    <details><summary>Answer</summary>
+      <p>It rises, especially at the tail: requests wait for a batch to fill and then to finish. Throughput and latency are a trade.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/058.html">Solve it · 058 — Nearest-rank percentile, off the end</a></p>
+<h2>Build it in Colab<span class="h2-topic">— latency</span></h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/058-serving-and-latency.ipynb">open the notebook in Colab</a> · <a href="../notebooks/058-serving-and-latency.ipynb">local copy</a>. Change the 400 ms request and watch the percentiles move.</p>
+<pre><code>import numpy as np
+lat = np.array([30, 32, 33, 35, 36, 38, 40, 41, 42, 45,
+                47, 50, 52, 55, 60, 70, 85, 110, 150, 400])
+for q in (50, 95, 99):
+    rank = int(np.ceil(q / 100 * len(lat)))          # 1-based position
+    print(f&quot;p{q} = {np.sort(lat)[rank - 1]} ms&quot;)    # nearest rank
+print(&quot;mean =&quot;, lat.mean().round(1), &quot;ms&quot;)          # for contrast</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— latency</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "p99 = 400 ms means…", "o": ["1% of requests are slower than 400 ms", "99% take 400 ms", "The average is 400 ms", "The maximum is 400 ms"], "a": 0, "why": "99% finish at or below 400 ms; the remaining 1% are slower."}, {"q": "Batching usually…", "o": ["Raises throughput and tail latency", "Lowers both", "Raises latency only", "Has no effect"], "a": 0, "why": "Larger batches improve hardware use but make requests wait for the batch."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → 059 · Quantization &amp; distillation.</strong> Latency is also a function of model size. The next lesson shrinks the model without throwing away its behaviour.</p>
+  <div class="pager">
+    <a href="057-calibration-and-uncertainty.html">← 57 · Calibration &amp; uncertainty</a>
+    <a href="059-quantization-and-distillation.html">Next · 59 · Quantization &amp; distillation</a>
+  </div>
+</div>
+
+<p class="source">Primary source: Google SRE Book, <a href="https://sre.google/sre-book/handling-overload/">Handling overload</a>, and Dean &amp; Barroso, <a href="https://research.google/pubs/pub40801/">The tail at scale</a> (2013).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

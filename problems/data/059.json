@@ -1,0 +1,32 @@
+{
+  "id": "059",
+  "lesson": "059",
+  "book": "systems",
+  "title": "Symmetric INT8 quantization",
+  "difficulty": "medium",
+  "shape": "scratch",
+  "categories": [
+    "systems",
+    "compression"
+  ],
+  "statement_md": "Write `quantize_int8(values)` returning `(codes, scale)` for symmetric per-tensor INT8.\n\n- `scale = max(abs(v)) / 127`\n- each code is `round(v / scale)`, clamped to `[-127, 127]`, stored as an `int`\n- an all-zero input returns all-zero codes and `scale == 0.0`\n\nRaise `ValueError` for an empty sequence. Return the codes in input order and do not mutate `values`. A code restored as `q * scale` must be within `scale / 2` of the original.",
+  "entry": "quantize_int8",
+  "signature": "def quantize_int8(values):",
+  "starter": "def quantize_int8(values):\n    \"\"\"Return (codes, scale) for symmetric INT8 quantization.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_known_values",
+    "test_peak_scale"
+  ],
+  "hidden": [
+    "test_all_zero",
+    "test_error_bound",
+    "test_empty",
+    "test_no_mutation",
+    "test_clamped"
+  ],
+  "tests_py": "def test_known_values():\n    codes, scale = solution.quantize_int8([0.0, 127.0, -127.0])\n    assert scale == 1.0 and codes == [0, 127, -127]\n\ndef test_peak_scale():\n    codes, scale = solution.quantize_int8([-0.5, 0.2])\n    assert abs(scale - 0.5 / 127) < 1e-15\n    assert codes[0] == -127\n\ndef test_all_zero():\n    assert solution.quantize_int8([0.0, 0.0]) == ([0, 0], 0.0)\n\ndef test_error_bound():\n    w = [-0.9, -0.3, 0.0, 0.45, 1.2]\n    codes, scale = solution.quantize_int8(w)\n    for original, q in zip(w, codes):\n        assert abs(original - q * scale) <= scale / 2 + 1e-12\n\ndef test_empty():\n    try:\n        solution.quantize_int8([])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_no_mutation():\n    w = [0.1, -0.2, 0.3]\n    solution.quantize_int8(w)\n    assert w == [0.1, -0.2, 0.3]\n\ndef test_clamped():\n    codes, scale = solution.quantize_int8([1.2, -1.2])\n    assert codes == [127, -127]\n    assert scale > 0\n",
+  "mutations": [
+    "return ([0] * len(values), 0.0)",
+    "return ([int(v) for v in values], 1.0)"
+  ]
+}

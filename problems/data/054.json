@@ -1,0 +1,31 @@
+{
+  "id": "054",
+  "lesson": "054",
+  "book": "rl",
+  "title": "UCB with unpulled arms",
+  "difficulty": "hard",
+  "shape": "debug",
+  "categories": [
+    "rl",
+    "bandits"
+  ],
+  "statement_md": "`ucb_scores` divides by zero when an arm has never been pulled, and it never checks its inputs. Fix it.\n\n- return `float('inf')` for any arm with `counts[i] == 0`\n- otherwise return `mean + sqrt(2 * log(sum(counts)) / count)`\n- raise `ValueError` if the two lists have different lengths\n- raise `ValueError` if the total number of pulls is zero\n- return a list of floats",
+  "entry": "ucb_scores",
+  "signature": "def ucb_scores(means, counts):",
+  "starter": "import math\n\n\ndef ucb_scores(means, counts):\n    \"\"\"Return the UCB index for each arm.\"\"\"\n    t = sum(counts)\n    scores = []\n    for m, n in zip(means, counts):\n        bonus = math.sqrt(2 * math.log(t) / n)   # BUG: n can be zero\n        scores.append(m + bonus)\n    return scores\n",
+  "visible": [
+    "test_unpulled_is_infinite",
+    "test_uncertain_arm_first"
+  ],
+  "hidden": [
+    "test_no_pulls_raises",
+    "test_length_mismatch",
+    "test_bonus_shrinks",
+    "test_returns_floats"
+  ],
+  "tests_py": "import math\n\ndef test_unpulled_is_infinite():\n    s = solution.ucb_scores([0.5, 0.6], [10, 0])\n    assert s[1] == float(\"inf\")\n\ndef test_uncertain_arm_first():\n    s = solution.ucb_scores([0.6, 0.55], [100, 4])\n    assert s[1] > s[0]\n\ndef test_no_pulls_raises():\n    try:\n        solution.ucb_scores([0.5, 0.5], [0, 0])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_length_mismatch():\n    try:\n        solution.ucb_scores([0.5], [1, 2])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_bonus_shrinks():\n    s = solution.ucb_scores([0.5, 0.5], [10, 100])\n    assert s[0] > s[1]\n\ndef test_returns_floats():\n    s = solution.ucb_scores([0.5], [10])\n    assert all(isinstance(v, float) for v in s)\n",
+  "mutations": [
+    "return [float(m) for m in a[0]]",
+    "return [float('inf') for _ in a[0]]"
+  ]
+}

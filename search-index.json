@@ -460,6 +460,338 @@
   "symbols": []
  },
  {
+  "type": "lesson",
+  "id": "036",
+  "title": "Eigenvalues, eigenvectors & SVD",
+  "book": "foundations",
+  "bookTitle": "Foundations",
+  "categories": [
+   "linear-algebra"
+  ],
+  "summary": "You can find the directions a matrix only stretches, read the stretch factors, and use the SVD to compress or summarise a matrix.",
+  "url": "lessons/036-eigen-svd.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "037",
+  "title": "Norms & distances",
+  "book": "foundations",
+  "bookTitle": "Foundations",
+  "categories": [
+   "linear-algebra"
+  ],
+  "summary": "You can compute L1, L2 and max distances on real numbers, explain what each one measures, and say when standardising features changes the answer.",
+  "url": "lessons/037-norms-and-distances.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "038",
+  "title": "Distributions & sampling",
+  "book": "foundations",
+  "bookTitle": "Foundations",
+  "categories": [
+   "probability-statistics"
+  ],
+  "summary": "You can compute a standard error, read a confidence interval, and say how much a mean would move if the data were collected again.",
+  "url": "lessons/038-distributions-and-sampling.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "039",
+  "title": "Estimation & bias–variance",
+  "book": "foundations",
+  "bookTitle": "Foundations",
+  "categories": [
+   "probability-statistics"
+  ],
+  "summary": "You can split an estimator's expected error into bias squared plus variance, and choose between two estimators on that total.",
+  "url": "lessons/039-estimation-bias-variance.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "040",
+  "title": "kNN & the curse of dimensionality",
+  "book": "classical-ml",
+  "bookTitle": "Classical ML",
+  "categories": [
+   "classical-ml"
+  ],
+  "summary": "You can run k-nearest-neighbours by hand, choose k, and explain why adding features can make neighbours meaningless.",
+  "url": "lessons/040-knn-curse-of-dimensionality.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "041",
+  "title": "SVM & kernels",
+  "book": "classical-ml",
+  "bookTitle": "Classical ML",
+  "categories": [
+   "classical-ml",
+   "calculus-optimization"
+  ],
+  "summary": "You can explain what a margin is, why only support vectors set it, and how a kernel makes a linear classifier non-linear.",
+  "url": "lessons/041-svm-and-kernels.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "042",
+  "title": "Clustering: k-means & GMM",
+  "book": "classical-ml",
+  "bookTitle": "Classical ML",
+  "categories": [
+   "classical-ml"
+  ],
+  "summary": "You can run k-means by hand, say what it optimises, and explain when a Gaussian mixture is the better model.",
+  "url": "lessons/042-clustering-kmeans-gmm.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "043",
+  "title": "PCA & dimensionality reduction",
+  "book": "classical-ml",
+  "bookTitle": "Classical ML",
+  "categories": [
+   "linear-algebra",
+   "classical-ml"
+  ],
+  "summary": "You can centre a matrix, read a covariance, and explain what a principal component's eigenvalue measures.",
+  "url": "lessons/043-pca-dimensionality-reduction.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "044",
+  "title": "Feature engineering, leakage & imbalance",
+  "book": "classical-ml",
+  "bookTitle": "Classical ML",
+  "categories": [
+   "classical-ml"
+  ],
+  "summary": "You can name the moment a feature becomes available, spot leakage in a pipeline, and choose a metric that survives a 2% positive rate.",
+  "url": "lessons/044-feature-engineering-leakage-imbalance.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "045",
+  "title": "Convolutions & CNNs",
+  "book": "neural-networks",
+  "bookTitle": "Neural Networks",
+  "categories": [
+   "deep-learning"
+  ],
+  "summary": "You can compute a convolution by hand, size its output, and count its parameters without counting pixels.",
+  "url": "lessons/045-convolutions-cnns.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "046",
+  "title": "Initialization & normalization",
+  "book": "neural-networks",
+  "bookTitle": "Neural Networks",
+  "categories": [
+   "deep-learning"
+  ],
+  "summary": "You can pick a weight initialization, say what variance it preserves, and explain what normalization fixes.",
+  "url": "lessons/046-initialization-and-normalization.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "047",
+  "title": "Optimizers: SGD → Adam",
+  "book": "neural-networks",
+  "bookTitle": "Neural Networks",
+  "categories": [
+   "calculus-optimization",
+   "deep-learning"
+  ],
+  "summary": "You can explain what momentum, RMSProp and Adam add to SGD, and choose a learning rate for a new run.",
+  "url": "lessons/047-optimizers-sgd-adam.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "048",
+  "title": "Subword tokenizers (BPE)",
+  "book": "language",
+  "bookTitle": "Language & Transformers",
+  "categories": [
+   "nlp-transformers"
+  ],
+  "summary": "You can run BPE merges by hand and explain why vocabulary size trades against sequence length.",
+  "url": "lessons/048-subword-tokenizers-bpe.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "049",
+  "title": "Decoding & sampling",
+  "book": "language",
+  "bookTitle": "Language & Transformers",
+  "categories": [
+   "nlp-transformers"
+  ],
+  "summary": "You can turn logits into a token with greedy, top-k, top-p and temperature, and say what each knob does.",
+  "url": "lessons/049-decoding-and-sampling.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "050",
+  "title": "Multi-head attention & positions",
+  "book": "language",
+  "bookTitle": "Language & Transformers",
+  "categories": [
+   "nlp-transformers"
+  ],
+  "summary": "You can compute one attention head, say what multiple heads buy, and explain how position enters the model.",
+  "url": "lessons/050-multi-head-attention-positions.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "051",
+  "title": "Evaluating language models",
+  "book": "language",
+  "bookTitle": "Language & Transformers",
+  "categories": [
+   "nlp-transformers",
+   "evaluation-metrics"
+  ],
+  "summary": "You can compute perplexity and a benchmark's error bar, and say what each one does not measure.",
+  "url": "lessons/051-evaluating-language-models.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "052",
+  "title": "RAG & tool use",
+  "book": "language",
+  "bookTitle": "Language & Transformers",
+  "categories": [
+   "nlp-transformers",
+   "systems"
+  ],
+  "summary": "You can explain how retrieval fills the context window and how a tool call becomes an action, including what each one can break.",
+  "url": "lessons/052-rag-and-tool-use.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "053",
+  "title": "MDPs & dynamic programming",
+  "book": "rl",
+  "bookTitle": "Reinforcement Learning",
+  "categories": [
+   "reinforcement-learning"
+  ],
+  "summary": "You can write an MDP's five parts and run value iteration on a three-state chain by hand.",
+  "url": "lessons/053-mdps-and-dynamic-programming.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "054",
+  "title": "Bandits beyond ε (epsilon)-greedy",
+  "book": "rl",
+  "bookTitle": "Reinforcement Learning",
+  "categories": [
+   "reinforcement-learning"
+  ],
+  "summary": "You can compute a UCB index by hand, explain Thompson sampling, and say why regret grows linearly under ε-greedy.",
+  "url": "lessons/054-bandits-beyond-epsilon-greedy.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "055",
+  "title": "Offline RL & imitation",
+  "book": "rl",
+  "bookTitle": "Reinforcement Learning",
+  "categories": [
+   "reinforcement-learning"
+  ],
+  "summary": "You can explain why a max over unseen actions breaks offline Q-learning, and compute the cost of compounding imitation error.",
+  "url": "lessons/055-offline-rl-and-imitation.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "056",
+  "title": "Fairness & bias measurement",
+  "book": "trust",
+  "bookTitle": "Trust, Privacy & Scale",
+  "categories": [
+   "evaluation-metrics",
+   "explainability"
+  ],
+  "summary": "You can compute selection-rate and true-positive-rate gaps between groups and say which fairness claim each one supports.",
+  "url": "lessons/056-fairness-and-bias-measurement.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "057",
+  "title": "Calibration & uncertainty",
+  "book": "trust",
+  "bookTitle": "Trust, Privacy & Scale",
+  "categories": [
+   "evaluation-metrics"
+  ],
+  "summary": "You can measure expected calibration error and explain what temperature scaling fixes and what it leaves alone.",
+  "url": "lessons/057-calibration-and-uncertainty.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "058",
+  "title": "Serving & latency",
+  "book": "systems",
+  "bookTitle": "Systems",
+  "categories": [
+   "systems"
+  ],
+  "summary": "You can read p50, p95 and p99 latency, compute them by hand, and explain why the average hides the requests users complain about.",
+  "url": "lessons/058-serving-and-latency.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "059",
+  "title": "Quantization & distillation",
+  "book": "systems",
+  "bookTitle": "Systems",
+  "categories": [
+   "systems"
+  ],
+  "summary": "You can compute an INT8 scale, bound its rounding error, and explain what a distilled student learns from soft targets.",
+  "url": "lessons/059-quantization-and-distillation.html",
+  "symbols": []
+ },
+ {
+  "type": "lesson",
+  "id": "060",
+  "title": "Monitoring, drift & data quality",
+  "book": "systems",
+  "bookTitle": "Systems",
+  "categories": [
+   "systems",
+   "evaluation-metrics"
+  ],
+  "summary": "You can compute a two-sample KS statistic, separate a data-quality break from real drift, and choose a monitoring response.",
+  "url": "lessons/060-monitoring-drift-data-quality.html",
+  "symbols": []
+ },
+ {
   "type": "lab",
   "id": "002a",
   "title": "η (eta) — how far one step goes",
@@ -1462,6 +1794,346 @@
   ],
   "summary": "`likelihood(probs, labels)` already multiplies probabilities — and underflows to zero.\n\nAdd `log_likelihood(probs, label",
   "url": "problems/003.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "036",
+  "title": "Power iteration, step by step",
+  "book": "foundations",
+  "bookTitle": "Problems",
+  "categories": [
+   "linear-algebra"
+  ],
+  "summary": "Write `dominant_direction(A, steps=20)` returning the **unit vector** that power iteration converges to for a square mat",
+  "url": "problems/036.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "037",
+  "title": "Three distances, one function",
+  "book": "foundations",
+  "bookTitle": "Problems",
+  "categories": [
+   "linear-algebra"
+  ],
+  "summary": "Write `distance(a, b, kind=\"l2\")` returning the distance between two 1-D sequences.\n\n- `\"l1\"`: sum of absolute differenc",
+  "url": "problems/037.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "038",
+  "title": "Standard error, extended",
+  "book": "foundations",
+  "bookTitle": "Problems",
+  "categories": [
+   "probability-statistics"
+  ],
+  "summary": "`sample_sd(values)` already computes the sample standard deviation with `n - 1` in the denominator.\n\nAdd `standard_error",
+  "url": "problems/038.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "039",
+  "title": "Debug the bias–variance sum",
+  "book": "foundations",
+  "bookTitle": "Problems",
+  "categories": [
+   "probability-statistics"
+  ],
+  "summary": "`mse_from_terms` should return the expected squared error of an estimator:\n\n`bias**2 + variance + noise`\n\nThe current im",
+  "url": "problems/039.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "040",
+  "title": "Debug the nearest-neighbour vote",
+  "book": "foundations",
+  "bookTitle": "Problems",
+  "categories": [
+   "classical-ml"
+  ],
+  "summary": "`knn_predict(points, labels, query, k)` should take the **nearest** `k` points and return the majority label.\n\nThe curre",
+  "url": "problems/040.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "041",
+  "title": "Mean hinge loss",
+  "book": "classical-ml",
+  "bookTitle": "Problems",
+  "categories": [
+   "classical-ml",
+   "svm"
+  ],
+  "summary": "Write `hinge_loss(scores, labels)` returning the **mean** hinge loss.\n\n- one label per score, each label either `+1` or ",
+  "url": "problems/041.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "042",
+  "title": "Assign points to centroids",
+  "book": "classical-ml",
+  "bookTitle": "Problems",
+  "categories": [
+   "classical-ml",
+   "clustering"
+  ],
+  "summary": "Write `assign_clusters(points, centroids)` returning, for each point, the index of its nearest centroid.\n\n- distance is ",
+  "url": "problems/042.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "043",
+  "title": "Project onto principal components",
+  "book": "classical-ml",
+  "bookTitle": "Problems",
+  "categories": [
+   "classical-ml",
+   "dimensionality-reduction"
+  ],
+  "summary": "Write `project(X, components)` returning the coordinates of the **centred** rows of `X` along each component.\n\n- subtrac",
+  "url": "problems/043.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "044",
+  "title": "Standardise without leaking",
+  "book": "classical-ml",
+  "bookTitle": "Problems",
+  "categories": [
+   "classical-ml",
+   "evaluation"
+  ],
+  "summary": "`standardize(train, test)` is supposed to scale every column using the mean and standard deviation of the **training row",
+  "url": "problems/044.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "045",
+  "title": "2-D convolution with stride and padding",
+  "book": "neural-networks",
+  "bookTitle": "Problems",
+  "categories": [
+   "neural-networks",
+   "convolution"
+  ],
+  "summary": "`conv1d` already computes a valid 1-D convolution. Add `conv2d(image, kernel, stride=1, padding=0)` for a square kernel.",
+  "url": "problems/045.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "046",
+  "title": "He initialization, debugged",
+  "book": "neural-networks",
+  "bookTitle": "Problems",
+  "categories": [
+   "neural-networks"
+  ],
+  "summary": "The snippet should return the **He initialization** standard deviation `sqrt(2 / fan_in)`, but it returns the Xavier val",
+  "url": "problems/046.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "047",
+  "title": "Add Adam to the update loop",
+  "book": "neural-networks",
+  "bookTitle": "Problems",
+  "categories": [
+   "optimization"
+  ],
+  "summary": "`sgd_step` already takes one plain gradient step. Add `adam_step`, which returns the new weight plus the updated first a",
+  "url": "problems/047.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "048",
+  "title": "Most common adjacent pair",
+  "book": "language",
+  "bookTitle": "Problems",
+  "categories": [
+   "tokenization"
+  ],
+  "summary": "Write `most_common_pair(words)` for one BPE merge step.\n\n- `words` is a list of symbol lists, e.g. `[[\"l\", \"o\", \"w\"]]`\n-",
+  "url": "problems/048.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "049",
+  "title": "Nucleus filtering on top of softmax",
+  "book": "language",
+  "bookTitle": "Problems",
+  "categories": [
+   "decoding"
+  ],
+  "summary": "`softmax` is implemented. Add `nucleus_indices(probs, p)`, which returns the token ids top-p sampling would keep.\n\n- sor",
+  "url": "problems/049.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "050",
+  "title": "Scaled attention weights from scratch",
+  "book": "language",
+  "bookTitle": "Problems",
+  "categories": [
+   "attention"
+  ],
+  "summary": "Write `attention_weights(q, keys)` for one attention head.\n\n- `q` is a query vector and `keys` is a list of key vectors\n",
+  "url": "problems/050.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "051",
+  "title": "Perplexity, checked",
+  "book": "language",
+  "bookTitle": "Problems",
+  "categories": [
+   "evaluation",
+   "language-models"
+  ],
+  "summary": "Write `perplexity(log_probs)` returning the perplexity of a sequence of natural-log token probabilities: `exp(-mean(log_",
+  "url": "problems/051.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "052",
+  "title": "Context budget",
+  "book": "language",
+  "bookTitle": "Problems",
+  "categories": [
+   "retrieval",
+   "language-models"
+  ],
+  "summary": "`score` and `top_k` already rank chunks by cosine similarity.\n\nAdd `select_context(query, chunks, k, budget)` returning ",
+  "url": "problems/052.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "053",
+  "title": "Value iteration on a chain",
+  "book": "rl",
+  "bookTitle": "Problems",
+  "categories": [
+   "rl",
+   "mdp"
+  ],
+  "summary": "Write `value_iteration(n_states, actions, next_state, reward, gamma, tol=1e-9)` for a deterministic MDP.\n\n- `actions[s]`",
+  "url": "problems/053.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "054",
+  "title": "UCB with unpulled arms",
+  "book": "rl",
+  "bookTitle": "Problems",
+  "categories": [
+   "rl",
+   "bandits"
+  ],
+  "summary": "`ucb_scores` divides by zero when an arm has never been pulled, and it never checks its inputs. Fix it.\n\n- return `float",
+  "url": "problems/054.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "055",
+  "title": "Discounted returns, backwards",
+  "book": "rl",
+  "bookTitle": "Problems",
+  "categories": [
+   "rl",
+   "offline-rl"
+  ],
+  "summary": "`discounted_returns` walks the rewards forwards, so `G_t` is built from the wrong tail. Fix it.\n\n- return `G_t = r_t + g",
+  "url": "problems/055.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "056",
+  "title": "Fairness gaps from a decision table",
+  "book": "trust",
+  "bookTitle": "Problems",
+  "categories": [
+   "evaluation-metrics",
+   "fairness"
+  ],
+  "summary": "Write `bias_gaps(y_true, y_pred, groups)` returning a dict with two floats:\n\n- `demographic_parity`: the largest selecti",
+  "url": "problems/056.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "057",
+  "title": "Expected calibration error, weighted",
+  "book": "trust",
+  "bookTitle": "Problems",
+  "categories": [
+   "evaluation-metrics",
+   "calibration"
+  ],
+  "summary": "`brier_score(probs, labels)` already works. Add `expected_calibration_error(probs, labels, bins=10)` returning the weigh",
+  "url": "problems/057.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "058",
+  "title": "Nearest-rank percentile, off the end",
+  "book": "systems",
+  "bookTitle": "Problems",
+  "categories": [
+   "systems",
+   "latency"
+  ],
+  "summary": "`percentile(values, q)` should return the nearest-rank percentile: sort ascending, set `rank = ceil(q / 100 * n)`, and r",
+  "url": "problems/058.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "059",
+  "title": "Symmetric INT8 quantization",
+  "book": "systems",
+  "bookTitle": "Problems",
+  "categories": [
+   "systems",
+   "compression"
+  ],
+  "summary": "Write `quantize_int8(values)` returning `(codes, scale)` for symmetric per-tensor INT8.\n\n- `scale = max(abs(v)) / 127`\n-",
+  "url": "problems/059.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "060",
+  "title": "KS drift, comparing CDFs",
+  "book": "systems",
+  "bookTitle": "Problems",
+  "categories": [
+   "systems",
+   "monitoring"
+  ],
+  "summary": "`ks_statistic(a, b)` should return the two-sample Kolmogorov-Smirnov statistic: the largest absolute gap between the emp",
+  "url": "problems/060.html",
   "symbols": []
  }
 ]

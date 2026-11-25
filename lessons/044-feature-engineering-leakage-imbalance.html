@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>044 — Feature engineering, leakage &amp; imbalance</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can name the moment a feature becomes available, spot leakage in a pipeline, and choose a metric that survives a 2% positive rate.">
+</head>
+<body data-page="lesson" data-lesson="044" data-book="classical-ml" data-book-number="2">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 44 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 2 · Classical ML · lesson 9 of 9</p>
+  <h1>Feature engineering, leakage &amp; imbalance</h1>
+  <p class="objective">You can name the moment a feature becomes available, spot leakage in a pipeline, and choose a metric that survives a 2% positive rate.</p>
+</header>
+<p class="bookline"><a href="../paths/classical-ml.html">Classical ML</a><span class="chip">Classical ML</span></p>
+
+<h2>Why this matters<span class="h2-topic">— features</span></h2>
+<p class="lede">The model is usually the easy part. What decides whether a fraud system works is whether "number of failed logins in the last hour" exists as a column, whether it is computed from data available before the transaction, and whether anyone reports recall instead of accuracy. Feature work sets the ceiling; evaluation tells you whether you reached it. Both fail quietly, which is why they deserve their own lesson.</p>
+<p><strong>The failure it prevents.</strong> A team predicts loan default with "date the account was closed" in the table. Training accuracy is 96% and launch is approved; in production nothing closes before the decision, so the column is empty and the model is a coin flip. The second is arithmetic: with 2% positives, always saying "no" scores 98% and catches nothing.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>98%</b><span>accuracy of a model that never predicts the positive class</span></div>
+  <div><b>10%</b><span>precision of the example model below</span></div>
+  <div><b>50%</b><span>recall of that same model</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— features</span></h2>
+<p>A feature is a promise: <em>this number will be computable, the same way, at the moment a prediction is needed</em>. Every statistic used to build it — a mean, a category rate, a scaler's standard deviation — has to be learned from training data only. And when the positive class is rare, the metric has to price the rare class, because accuracy mostly measures the majority.</p>
+<p>In one line: <strong>ask "could I have known this before the outcome?" and "does this score move when I catch the thing I care about?"</strong> The first question catches leakage; the second catches the accuracy trap.</p>
+
+<div class="keybox"><span class="sym">available before the label → fitted on train only</span><p>A feature that fails either test will produce a beautiful offline number and a useless system.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— features</span></h2>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-leak-t f-leak-d">
+    <title id="f-leak-t">Fit a transform on the training rows only</title>
+    <desc id="f-leak-d">A scaler box sits above a dataset split into training rows on the left and test rows on the right. A solid arrow runs from the scaler into the training rows, and a dashed arrow runs to the test rows labelled transform. A red cross marks the forbidden arrow from the test rows back into the scaler.</desc>
+    <rect x="70" y="150" width="250" height="120" rx="8" fill="none" stroke="var(--sym-pred)" stroke-width="1.8"/>
+    <text x="195" y="185" text-anchor="middle" font-size="15" fill="var(--sym-pred)" font-family="ui-monospace, monospace">train rows</text>
+    <text x="195" y="210" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">fit here</text>
+    <rect x="400" y="150" width="250" height="120" rx="8" fill="none" stroke="var(--sym-data)" stroke-width="1.8"/>
+    <text x="525" y="185" text-anchor="middle" font-size="15" fill="var(--sym-data)" font-family="ui-monospace, monospace">test rows</text>
+    <text x="525" y="210" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">transform only</text>
+    <rect x="180" y="40" width="220" height="60" rx="8" fill="none" stroke="var(--sym-param)" stroke-width="1.8"/>
+    <text x="290" y="66" text-anchor="middle" font-size="13" fill="var(--sym-param)" font-family="ui-monospace, monospace">scaler / encoder</text>
+    <text x="290" y="84" text-anchor="middle" font-size="10" fill="var(--ink-faint)" font-family="ui-monospace, monospace">means, rates, weights</text>
+    <line x1="195" y1="100" x2="195" y2="142" stroke="var(--ink-faint)" stroke-width="1.6"/>
+    <polygon points="195,142 190,132 200,132" fill="var(--ink-faint)"/>
+    <line x1="400" y1="70" x2="470" y2="70" stroke="var(--ink-faint)" stroke-width="1.4" stroke-dasharray="4 4"/>
+    <line x1="470" y1="70" x2="470" y2="140" stroke="var(--ink-faint)" stroke-width="1.4" stroke-dasharray="4 4"/>
+    <polygon points="470,144 465,134 475,134" fill="var(--ink-faint)"/>
+    <text x="478" y="120" font-size="10" fill="var(--ink-faint)" font-family="ui-monospace, monospace">transform</text>
+    <line x1="525" y1="150" x2="390" y2="112" stroke="var(--sym-param)" stroke-width="2"/>
+    <line x1="470" y1="135" x2="482" y2="120" stroke="var(--sym-param)" stroke-width="3"/>
+    <line x1="470" y1="120" x2="482" y2="135" stroke="var(--sym-param)" stroke-width="3"/>
+    <text x="530" y="300" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">never fit on test rows</text>
+  </svg>
+  <figcaption><strong>Takeaway.</strong> Learn the transform on train, apply the frozen version to test and to production. The crossed arrow is the leak.</figcaption>
+</figure>
+
+<h3>Part 1 — Features that exist at decision time</h3>
+<p>Start with the timestamp of the decision and ask what is known at that instant. "Days since last purchase" is available; "days until next purchase" is not. "Account closed date" is available only if the account closed earlier. The same rule covers aggregates: a customer's average spend over the previous 30 days is fair, while their average over the whole dataset includes the future.</p>
+<p>Useful transforms are usually simple: one-hot encode categories, bucket a long-tailed count, split a timestamp into hour and weekday, add ratios such as spend per order, and count prior events. Each one must be reproducible from the raw record.</p>
+
+<h3>Part 2 — Leakage is a pipeline bug</h3>
+<p>Any step that learns a number from rows must be fitted on training rows and then applied unchanged. That includes imputation values, scaler means and standard deviations, one-hot vocabularies, target-encoding rates, feature selection, and PCA rotations. Put them in a pipeline so the same frozen object transforms validation, test and production.</p>
+<p>The split itself needs care. Random rows leak when one customer contributes many rows: the same person appears in train and test, so the model recognises them. Split by group — customer, patient, device. For time series, split by date, never at random, or the model trains on tomorrow to predict yesterday.</p>
+
+<h3>Part 3 — Read the confusion matrix first</h3>
+<p>With <code>1</code> as the positive class, four counts cover every prediction: true positives <code>TP</code>, false positives <code>FP</code>, false negatives <code>FN</code>, true negatives <code>TN</code>. From them:</p>
+<span class="formula">accuracy = (TP + TN) / n · precision = TP / (TP + FP) · recall = TP / (TP + FN)</span>
+<p><strong>Precision</strong> answers "when the model says positive, how often is it right?" <strong>Recall</strong> answers "of the real positives, how many did it find?" <strong>F1</strong> is their harmonic mean, <code>2PR / (P + R)</code>, which is low if either one is low. Accuracy appears first only because it is familiar; it is the least informative of the four when the classes are uneven.</p>
+
+<h3>Part 4 — Imbalance and the metric that survives it</h3>
+<p>Imbalance is not a property of the algorithm; it is a mismatch between the base rate and the cost of mistakes. Class weights tell the loss that a missed positive costs more; resampling changes the training rows. Do both inside the training fold only, never before the split, or synthetic positives leak into validation.</p>
+<p>Report precision and recall at the threshold you will deploy, plus a threshold-free summary such as <strong>PR-AUC</strong> (area under the precision–recall curve). ROC-AUC stays optimistic under extreme imbalance because the false-positive rate divides by a huge <code>TN</code>. Finally, choose the threshold from costs: a fraud review team can handle 100 alerts a day, so pick the cutoff that yields 100.</p>
+
+<h2>Worked example<span class="h2-topic">— features</span></h2>
+
+<h3>1. One thousand rows, twenty positives</h3>
+<p>A model flags 100 transactions. Of those, 10 are fraud; of the 20 real frauds, 10 are missed. The rest are legitimate and mostly cleared, giving <code>TN = 890</code>.</p>
+<table>
+  <tr><th>Quantity</th><th>Arithmetic</th><th class="num">Value</th></tr>
+  <tr><td>Accuracy</td><td><code>(10 + 890) / 1000</code></td><td class="num">90%</td></tr>
+  <tr><td>Precision</td><td><code>10 / (10 + 90)</code></td><td class="num">10%</td></tr>
+  <tr><td>Recall</td><td><code>10 / (10 + 10)</code></td><td class="num">50%</td></tr>
+  <tr><td>F1</td><td><code>2(0.10)(0.50) / 0.60</code></td><td class="num">0.167</td></tr>
+</table>
+<p><strong>Read it as a sentence.</strong> Nine times in ten the model is right, which sounds excellent until you notice that 90 of its 100 alarms are false. It finds half the fraud and wastes 90 reviews. A model that says "legitimate" to everything scores 98% accuracy, has recall 0, and cannot compute precision because it raises no alarms — the 98% is a statement about the majority, not about fraud.</p>
+<p><strong>Now compare two thresholds.</strong> Lowering the cutoff to catch 18 of 20 frauds might raise <code>FP</code> to 300: recall becomes 90%, precision <code>18/318 = 5.7%</code>. Raising it to 20 alarms might catch 6: precision 30%, recall 30%. Neither is better in the abstract; review capacity decides.</p>
+
+<h3>2. Target encoding that memorises</h3>
+<p>Replace a category with its mean target. A rare category "A" appears once, with <code>y = 1</code>, so its encoded value is <code>1.0</code> — the label itself. A tree splits on that column, and on training data the split is perfect. The feature has learned nothing that transfers.</p>
+<p><strong>Smooth it.</strong> Blend the category mean with the global mean <code>0.2</code>, using strength <code>m = 10</code>:</p>
+<table>
+  <tr><th>Step</th><th>Arithmetic</th><th class="num">Value</th></tr>
+  <tr><td>Smoothed encoding</td><td><code>(1 × 1 + 10 × 0.2) / (1 + 10)</code></td><td class="num">0.273</td></tr>
+  <tr><td>Same category, 100 rows</td><td><code>(30 + 2) / 110</code></td><td class="num">0.291</td></tr>
+</table>
+<p><strong>Read it as a sentence.</strong> One observation pulls the estimate only a little away from 0.2; a hundred observations are trusted almost fully. Smoothing is not a fix for leakage on its own — the encoding still has to be computed out-of-fold — but it stops a single row from becoming a perfect feature.</p>
+
+<h2>The trap<span class="h2-topic">— features</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"98% accuracy means the model works."</strong> Accuracy is the share of all rows answered correctly, and with a 2% positive rate the all-negative model already owns 98%. The number is dominated by the majority class, so it can rise while the model gets worse at the only thing you care about.</p>
+  <p>It feels right because 98% sounds like an A. But a metric that barely moves when you catch a fraud is not measuring fraud; the confusion matrix shows <code>TP = 0</code> while accuracy looks healthy.</p>
+  <p><strong>Correction:</strong> report the base rate, the confusion matrix, precision, recall and PR-AUC at the deployed threshold. Then check the split: was every transform fitted on training rows only, and were rows grouped by customer and ordered by time?</p>
+</div>
+<p><strong>The tell:</strong> accuracy near the base rate of the majority class, zero true positives, or a test score that jumps when a column is removed. For leakage, the tell is a feature whose importance is implausibly high and whose values would be missing at prediction time.</p>
+
+<h2>Retrieval check<span class="h2-topic">— features</span></h2>
+<ol class="quiz">
+  <li>You scale features before splitting into train and test. What is wrong, and what is the fix?
+    <details><summary>Answer</summary>
+      <p>The scaler's mean and standard deviation were computed from test rows, so information crossed the boundary. Fit the scaler on training rows, then apply that frozen transform to test rows and production.</p>
+    </details>
+  </li>
+  <li>A fraud model has recall 0.9 and precision 0.06. Describe what it does in one sentence.
+    <details><summary>Answer</summary>
+      <p>It catches 90% of fraud but only 6% of its alerts are real, so the review team spends most of its time on false alarms. That may still be the right trade if a miss is expensive and reviews are cheap.</p>
+    </details>
+  </li>
+  <li>Why can ROC-AUC look strong when the positive class is 1% of the data?
+    <details><summary>Answer</summary>
+      <p>The false-positive rate divides by the large negative count, so a model can accumulate many false positives while the rate stays small. Precision divides by the alerts raised, which is why PR-AUC exposes the problem.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/044.html">Solve it · 044 — Standardise without leaking</a></p>
+<h2>Build it in Colab<span class="h2-topic">— features</span></h2>
+<p>Runnable, NumPy-only: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/044-feature-engineering-leakage-imbalance.ipynb">open the notebook in Colab</a> · <a href="../notebooks/044-feature-engineering-leakage-imbalance.ipynb">local copy</a>. It builds a confusion matrix, computes four metrics, and demonstrates smoothed target encoding.</p>
+<pre><code>import numpy as np
+tp, fp, fn, tn = 10, 90, 10, 890                 # counts from the example
+precision = tp / (tp + fp)                       # 0.10
+recall = tp / (tp + fn)                          # 0.50
+f1 = 2 * precision * recall / (precision + recall)  # 0.167
+accuracy = (tp + tn) / (tp + fp + fn + tn)       # 0.90
+print(accuracy, precision, recall, round(f1, 3))</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— features</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "1,000 rows, 10 positives. The model raises 50 alerts and 8 are real positives. What are precision and recall?", "o": ["Precision 16%, recall 80%", "Precision 80%, recall 16%", "Precision 8%, recall 50%", "Precision 50%, recall 8%"], "a": 0, "why": "Precision = 8/50 = 0.16; recall = 8/10 = 0.80."}, {"q": "You compute a category's mean target on the full dataset, then cross-validate. What happens?", "o": ["Nothing, target encoding is safe", "Each row's encoding contains its own label, so validation scores are inflated", "The categories become one-hot encoded", "Recall becomes undefined"], "a": 1, "why": "The encoding is fitted on rows that are later used for validation, so the label leaks into the feature. Compute it out-of-fold."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → Topic 45: Convolutions &amp; CNNs.</strong> Book 2 is done. Book 3 starts using the same evaluation discipline on images, where a small filter slides across pixels instead of columns.</p>
+  <div class="pager">
+    <a href="043-pca-dimensionality-reduction.html">← 43 · PCA &amp; dimensionality reduction</a>
+    <a href="045-convolutions-cnns.html">Next · 45 · Convolutions &amp; CNNs</a>
+  </div>
+</div>
+
+<p class="source">Primary source: <a href="https://scikit-learn.org/stable/common_pitfalls.html">scikit-learn — Common pitfalls</a> (leakage, inconsistent preprocessing and imbalanced evaluation).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

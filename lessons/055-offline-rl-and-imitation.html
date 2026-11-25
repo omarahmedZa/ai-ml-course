@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>055 — Offline RL &amp; imitation</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can explain why a max over unseen actions breaks offline Q-learning, and compute the cost of compounding imitation error.">
+</head>
+<body data-page="lesson" data-lesson="055" data-book="rl" data-book-number="5">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 55 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 5 · Reinforcement Learning · lesson 10 of 10</p>
+  <h1>Offline RL &amp; imitation</h1>
+  <p class="objective">You can explain why a max over unseen actions breaks offline Q-learning, and compute the cost of compounding imitation error.</p>
+</header>
+<p class="bookline"><a href="../paths/rl.html">Reinforcement Learning</a><span class="chip">RL</span></p>
+
+<h2>Why this matters<span class="h2-topic">— the constraint</span></h2>
+<p class="lede">Sometimes the agent cannot try things: a hospital has treatment logs but cannot run exploratory trials, and a driving stack has demonstrations but cannot crash on purpose. <strong>Offline RL</strong> learns a policy from a fixed dataset with no new interaction; <strong>imitation</strong> copies the logged actions and ignores rewards.</p>
+<p><strong>The failure it prevents.</strong> A policy trained by behaviour cloning gets 90% of actions right on held-out frames. Deployed, it swerves off the road in eight seconds. Each mistake puts the car in a state the data never covered, where the next is more likely — and 90% per step compounds to <code>0.9¹⁰ = 0.35</code> over ten steps.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>0.107</b><span>success after 10 steps at 80%</span></div>
+  <div><b>0.599</b><span>success after 10 steps at 95%</span></div>
+  <div><b>5.0</b><span>Q-value for an absent action</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— the support</span></h2>
+<p>The dataset <code>D</code> is a set of transitions <code>(s, a, r, s′)</code> collected by some behaviour policy <code>μ</code><span class="say" data-sym="μ">(mu)</span>. It covers a region of state–action space — the <strong>support</strong>. Inside that region you have evidence; outside it you have only a network's guess, and a Q-network asked about an action it never saw will return a number anyway.</p>
+<p>In one line: <strong>only trust values for actions the data supports, and be pessimistic where it does not.</strong> Behaviour cloning stays inside the support by never scoring actions. Offline Q-learning must be constrained or penalised, because its target contains a <code>max</code> that selects unsupported actions with invented values.</p>
+
+<div class="keybox"><span class="sym">target = r + γ maxₐ′ Q(s′, a′)</span><p>The <code>max</code> is the danger: if <code>a′</code> is absent from <code>D</code>, its Q-value is extrapolation, and the policy will chase it.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— the loop</span></h2>
+<p>Five parts, from a log file to a policy you can defend.</p>
+
+<h3>Part 1 — Treat the dataset as the environment</h3>
+<p>Each row is <code>(s, a, r, s′)</code>. Record the behaviour policy and how often each pair appears. <strong>Why this part exists:</strong> coverage is the only guarantee you have; a rare action has a Q-value from a handful of rows, and a missing action has none.</p>
+
+<h3>Part 2 — Start with behaviour cloning</h3>
+<p>Train <code>π_θ(a | s)</code><span class="say" data-sym="θ,π">(theta, pi)</span> with cross-entropy against logged actions, exactly like classification: no reward, no bootstrapping. <strong>Why this part exists:</strong> it is stable and cheap, and often enough when the data is expert and the task forgiving.</p>
+
+<h3>Part 3 — Add rewards with offline Q-learning</h3>
+<p>Fit <code>Q(s, a)</code> to the TD target using only rows in <code>D</code>. The backup is unchanged; what changed is that the next state's best action is chosen from imagination rather than tried. <strong>Why this part exists:</strong> rewards let the policy improve past the behaviour policy.</p>
+
+<h3>Part 4 — Constrain or penalise the unseen</h3>
+<p>Three families: restrict the policy to actions near the data, penalise high Q-values on unseen actions (CQL), or avoid querying them by regressing toward in-data actions (IQL). <strong>Why this part exists:</strong> without one, the max is an exploit waiting to happen.</p>
+
+<h3>Part 5 — Evaluate without interacting</h3>
+<p>Use a held-out split of <code>D</code>, and report per-step error alongside a closed-loop estimate: importance-weighted returns, a learned simulator, or a guarded live test. <strong>Why this part exists:</strong> accuracy does not measure compounding drift.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-offline-t f-offline-d">
+    <title id="f-offline-t">The support of the dataset and a policy reaching outside it</title>
+    <desc id="f-offline-d">A shaded region holds the state-action pairs present in the dataset. A policy arrow points from inside the region to an unsupported action outside it, where the learned Q-value is an unconstrained guess. A penalty pushes the policy back toward the shaded support.</desc>
+    <defs>
+      <marker id="f-offline-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--sym-opt)"/>
+      </marker>
+      <marker id="f-offline-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--sym-loss)"/>
+      </marker>
+    </defs>
+
+    <line x1="70" y1="300" x2="680" y2="300" stroke="var(--rule)" stroke-width="1.4"/>
+    <line x1="70" y1="50" x2="70" y2="300" stroke="var(--rule)" stroke-width="1.4"/>
+    <text x="375" y="336" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">action</text>
+    <text x="34" y="175" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace" transform="rotate(-90 34 175)">state</text>
+
+    <path d="M110 250 C150 130, 300 100, 390 130 C470 156, 470 250, 390 268 C300 288, 160 300, 110 250 Z" fill="var(--accent-soft)" stroke="var(--sym-data)" stroke-width="1.6"/>
+    <text x="250" y="210" text-anchor="middle" font-size="12" fill="var(--sym-data)" font-family="ui-monospace, monospace">support of D</text>
+
+    <circle cx="170" cy="230" r="3" fill="var(--sym-data)"/>
+    <circle cx="220" cy="190" r="3" fill="var(--sym-data)"/>
+    <circle cx="290" cy="175" r="3" fill="var(--sym-data)"/>
+    <circle cx="340" cy="205" r="3" fill="var(--sym-data)"/>
+    <circle cx="380" cy="165" r="3" fill="var(--sym-data)"/>
+    <circle cx="410" cy="230" r="3" fill="var(--sym-data)"/>
+    <circle cx="260" cy="240" r="3" fill="var(--sym-data)"/>
+
+    <circle cx="560" cy="120" r="10" fill="none" stroke="var(--sym-loss)" stroke-width="2"/>
+    <text x="560" y="96" text-anchor="middle" font-size="12" fill="var(--sym-loss)" font-family="ui-monospace, monospace">unseen a′</text>
+    <text x="560" y="148" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">Q = 5.0 (invented)</text>
+
+    <path d="M300 200 C400 180, 470 150, 546 126" fill="none" stroke="var(--sym-opt)" stroke-width="2" marker-end="url(#f-offline-a)"/>
+    <text x="430" y="186" text-anchor="middle" font-size="12" fill="var(--sym-opt)" font-family="ui-monospace, monospace">max picks this</text>
+
+    <path d="M530 150 C470 210, 430 240, 380 240" fill="none" stroke="var(--sym-loss)" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#f-offline-p)"/>
+    <text x="470" y="272" text-anchor="middle" font-size="12" fill="var(--sym-loss)" font-family="ui-monospace, monospace">penalty / constraint</text>
+
+    <text x="360" y="40" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">outside the cloud, Q is a guess — and the max seeks it out</text>
+  </svg>
+  <figcaption><strong>Offline RL fails at the edge of the data.</strong> The policy is drawn toward the highest predicted value, and the highest prediction is usually for an action nobody tried. Pessimism is what makes that action unattractive again.</figcaption>
+</figure>
+
+<h2>Worked example<span class="h2-topic">— the arithmetic</span></h2>
+
+<h3>1. Discounted returns, backwards</h3>
+<p>Rewards <code>[0, 1, 1]</code> at three steps, <code>γ = 0.9</code><span class="say" data-sym="γ">(gamma)</span>. The return at each step is the reward there plus 0.9 times the return after it, so you compute from the end.</p>
+
+<table>
+  <tr><th>Step</th><th class="num">r</th><th>Arithmetic</th><th class="num">G</th></tr>
+  <tr><td>3</td><td class="num">1</td><td class="num">1</td><td class="num">1.00</td></tr>
+  <tr><td>2</td><td class="num">1</td><td><code>1 + 0.9(1.00)</code></td><td class="num">1.90</td></tr>
+  <tr><td>1</td><td class="num">0</td><td><code>0 + 0.9(1.90)</code></td><td class="num">1.71</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The first step pays nothing yet is worth 1.71, more than any single reward. Running forwards gives 1.0, 1.9, 2.71 — rising the wrong way.</p>
+
+<h3>2. Compounding imitation error</h3>
+<p>Behaviour cloning is scored per step. If the policy is right 80% of the time and one mistake ends the episode, ten independent steps succeed with probability <code>0.8¹⁰</code>.</p>
+
+<table>
+  <tr><th>Per-step accuracy</th><th>Arithmetic</th><th class="num">10-step success</th></tr>
+  <tr><td>0.80</td><td><code>0.8¹⁰</code></td><td class="num">0.107</td></tr>
+  <tr><td>0.90</td><td><code>0.9¹⁰</code></td><td class="num">0.349</td></tr>
+  <tr><td>0.95</td><td><code>0.95¹⁰</code></td><td class="num">0.599</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> A 15-point gain per step — 80% to 95% — raises ten-step success from 11% to 60%, a factor of 5.6. Compounding is not a detail of the metric; it is the metric. That is why imitation is paired with a correction that returns the policy to the data's states.</p>
+
+<h3>3. The invented Q-value</h3>
+<p>At state <code>s</code>, the data contains two actions with returns 2.0 and 2.2, so <code>Q(s, a₁) = 2.0</code> and <code>Q(s, a₂) = 2.2</code>. The next state's target takes a <code>max</code> over every action the network can score. An action <code>a₃</code> never appears in <code>D</code>, and the network outputs <code>Q(s′, a₃) = 5.0</code> because nothing corrected it.</p>
+<p>The target becomes <code>r + 0.9(5.0)</code> instead of <code>r + 0.9(2.2) = 1.98 + r</code>, so every update pushes <code>Q(s, a)</code> up and the greedy policy selects <code>a₃</code>. The loss on the data still looks fine while the policy leaves the support. A CQL penalty on <code>a₃</code>, or a constraint that ranks only seen actions, removes the incentive.</p>
+
+<h2>The trap<span class="h2-topic">— the drift</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Offline RL is supervised learning with extra columns."</strong> The extra columns are easy; the difficulty is that the policy changes which states come next, and they may not be in the data.</p>
+  <p>It feels right because the loop really is regression on fixed rows, and the loss falls. But a supervised model is judged on its training distribution; a policy is judged on the distribution it creates. One bad action shifts the input, and the next prediction is off-distribution.</p>
+  <p><strong>Correction:</strong> judge the policy by estimated return under its own state distribution, not by accuracy on logged rows. If the estimate relies on Q-values for actions the data never contains, it is extrapolation dressed as evaluation.</p>
+</div>
+<p><strong>The tell:</strong> Q-values for rare actions climb while TD loss on the data falls — the curves diverge because the max is fed by imagination. A second tell is a policy choosing actions present in under 1% of rows. A third is 90% held-out accuracy with poor closed-loop success.</p>
+
+<h2>Retrieval check<span class="h2-topic">— recall</span></h2>
+<ol class="quiz">
+  <li>Why is the <code>max</code> in the offline TD target dangerous?
+    <details><summary>Answer</summary>
+      <p>It can select an action absent from the data, whose Q-value is an unconstrained guess. Training reinforces it and the policy seeks it out.</p>
+    </details>
+  </li>
+  <li>When is behaviour cloning enough?
+    <details><summary>Answer</summary>
+      <p>When the data is competent, small errors are tolerable, and the policy recovers inside the data's states. It cannot improve past the demonstrator.</p>
+    </details>
+  </li>
+  <li>Per-step accuracy is 0.9 over 10 steps. What is the success probability, and what does it miss?
+    <details><summary>Answer</summary>
+      <p><code>0.9¹⁰ ≈ 0.35</code> if steps are independent. Real drift is worse, because an error moves the agent to states where the next error is more likely.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/055.html">Solve it · 055 — Discounted returns, backwards</a></p>
+<h2>Build it in Colab<span class="h2-topic">— the notebook</span></h2>
+<p>Runnable, NumPy-only: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/055-offline-rl-and-imitation.ipynb">open the notebook in Colab</a> · <a href="../notebooks/055-offline-rl-and-imitation.ipynb">local copy</a>. It computes returns backwards and makes the extrapolation error visible.</p>
+<pre><code>import numpy as np
+rewards, gamma = [0., 1., 1.], 0.9
+G, returns = 0., [0.] * len(rewards)
+for t in reversed(range(len(rewards))):     # backwards, not forwards
+    G = rewards[t] + gamma * G
+    returns[t] = G
+print(np.round(returns, 2))                 # [1.71 1.9 1.]
+print(0.8 ** 10, 0.95 ** 10)                # 0.107 0.599</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— drill</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "The offline TD target's max selects an action absent from D. The result is…", "o": ["extrapolation error", "a retrieval miss", "overfitting to states", "a smaller return"], "a": 0, "why": "The Q-value for that action is an unconstrained guess, and the max chases it."}, {"q": "Per-step accuracy 0.9 over 10 steps gives success near…", "o": ["0.35", "0.90", "0.99", "0.09"], "a": 0, "why": "0.9¹⁰ ≈ 0.349; errors compound multiplicatively."}]</script></div>
+
+<div class="next">
+  <p><strong>End of Book 5.</strong> You can write an MDP, compute values, explore with a bonus, and learn from a fixed log without leaving its support. Book 6 turns to trust: explanations, fairness, and privacy.</p>
+  <div class="pager">
+    <a href="054-bandits-beyond-epsilon-greedy.html">← 54 · Bandits beyond ε <span class="say" data-sym="ε">(epsilon)</span>-greedy</a>
+  </div>
+</div>
+
+<p class="source">Primary source: Levine et al., <a href="https://arxiv.org/abs/2005.01643">Offline reinforcement learning: tutorial, review, and perspectives</a> (2020).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

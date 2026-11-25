@@ -1,0 +1,30 @@
+{
+  "id": "047",
+  "lesson": "047",
+  "book": "neural-networks",
+  "title": "Add Adam to the update loop",
+  "difficulty": "medium",
+  "shape": "extend",
+  "categories": [
+    "optimization"
+  ],
+  "statement_md": "`sgd_step` already takes one plain gradient step. Add `adam_step`, which returns the new weight plus the updated first and second moments.\n\n```\nm = beta1 * m + (1 - beta1) * g\nv = beta2 * v + (1 - beta2) * g * g\nw = w - lr * (m / (1 - beta1**t)) / (sqrt(v / (1 - beta2**t)) + eps)\n```\n\nReturn `(w, m, v)` as floats. Do not change `sgd_step`.",
+  "entry": "adam_step",
+  "signature": "def adam_step(w, g, m, v, t, lr=0.001, beta1=0.9, beta2=0.999, eps=1e-8):",
+  "starter": "import math\n\n\ndef sgd_step(w, g, lr):\n    return w - lr * g\n\n\ndef adam_step(w, g, m, v, t, lr=0.001, beta1=0.9, beta2=0.999, eps=1e-8):\n    # Your code here: update m and v, correct both, then step w.\n    pass\n",
+  "visible": [
+    "test_first_step",
+    "test_returns_three_floats"
+  ],
+  "hidden": [
+    "test_second_step",
+    "test_bias_correction",
+    "test_zero_grad_leaves_w",
+    "test_custom_betas"
+  ],
+  "tests_py": "import math\n\ndef test_first_step():\n    w, m, v = solution.adam_step(1.0, 2.0, 0.0, 0.0, 1, lr=0.1)\n    assert abs(w - 0.9) < 1e-9\n    assert abs(m - 0.2) < 1e-12\n    assert abs(v - 0.004) < 1e-12\n\ndef test_returns_three_floats():\n    out = solution.adam_step(1.0, 1.0, 0.0, 0.0, 1)\n    assert isinstance(out, tuple) and len(out) == 3\n    assert all(isinstance(x, float) for x in out)\n\ndef test_second_step():\n    w, m, v = solution.adam_step(0.9, -1.0, 0.2, 0.004, 2, lr=0.1)\n    assert abs(w - 0.873366) < 1e-4\n    assert abs(m - 0.08) < 1e-12\n    assert abs(v - 0.004996) < 1e-12\n\ndef test_bias_correction():\n    w, m, v = solution.adam_step(0.0, 3.0, 0.0, 0.0, 1, lr=0.1)\n    assert abs(w + 0.1) < 1e-6\n\ndef test_zero_grad_leaves_w():\n    w, m, v = solution.adam_step(0.5, 0.0, 0.0, 0.0, 1, lr=0.1)\n    assert abs(w - 0.5) < 1e-12\n\ndef test_custom_betas():\n    w, m, v = solution.adam_step(2.0, 1.0, 0.0, 0.0, 1, lr=0.5, beta1=0.5, beta2=0.5)\n    assert abs(m - 0.5) < 1e-12\n    assert abs(v - 0.5) < 1e-12\n    assert abs(w - 1.5) < 1e-6\n",
+  "mutations": [
+    "return w, m, v",
+    "return w - lr * m / (math.sqrt(v) + eps), m, v"
+  ]
+}

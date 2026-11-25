@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>045 — Convolutions &amp; CNNs</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can compute a convolution by hand, size its output, and count its parameters without counting pixels.">
+</head>
+<body data-page="lesson" data-lesson="045" data-book="neural-networks" data-book-number="3">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 45 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 3 · Neural Networks · lesson 8 of 10</p>
+  <h1>Convolutions &amp; CNNs</h1>
+  <p class="objective">You can compute a convolution by hand, size its output, and count its parameters without counting pixels.</p>
+</header>
+<p class="bookline"><a href="../paths/neural-networks.html">Neural Networks</a><span class="chip">Deep Learning</span></p>
+
+<h2>Why this matters<span class="h2-topic">— convolutions</span></h2>
+<p class="lede">An image is not a spreadsheet with shuffled columns. A pixel means something because of the pixels beside it, and the same edge or patch of fur can appear anywhere in the frame. A dense layer knows neither fact: it gives every position its own weights and ignores the grid. A convolution bakes both facts in, which is why it needs a thousandth of the parameters.</p>
+<p><strong>The failure it prevents.</strong> Connect a 224×224 colour image to 64 hidden units with a dense layer and you need <code>224 × 224 × 3 × 64 = 9,633,792</code> weights before the bias. The model memorises positions rather than patterns, and a cat moved 40 pixels to the left becomes a different input. An exam question asks for the parameter count of a convolutional layer; "9.6 million" is the answer that reveals the wrong architecture.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>9 + 1</b><span>weights and bias in one 3×3 grey filter</span></div>
+  <div><b>1,792</b><span>parameters for a 3×3 filter, 3 channels in, 64 out</span></div>
+  <div><b>7 × 7</b><span>receptive field after three 3×3 convolutions</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— convolutions</span></h2>
+<p>A convolution takes a small filter — a 3×3 grid of weights is typical — and slides it across the image. At each position it multiplies the filter by the patch underneath, adds the nine products, and writes one number into a <strong>feature map</strong>. The same nine weights are used at every position, so the layer learns one detector for "vertical edge" rather than a separate detector for every location.</p>
+<p>In one line: <strong>a convolution is a dot product applied to a patch, repeated everywhere with shared weights.</strong> Stack the maps and the next filter combines their outputs, so a 3×3 filter at layer two sees a 5×5 region of the original image; by layer four the model is looking at whole objects.</p>
+
+<div class="keybox"><span class="sym">local patch + shared weights</span><p>Locality says nearby pixels interact; sharing says a pattern matters wherever it appears.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— convolutions</span></h2>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-conv-t f-conv-d">
+    <title id="f-conv-t">A 3 by 3 filter sliding over a 5 by 5 image</title>
+    <desc id="f-conv-d">A five by five grid of image values has a three by three patch highlighted. The same nine filter weights sit to its right, and an arrow leads to the resulting three by three feature map, where each cell is one dot product of the filter with a patch.</desc>
+    <g font-family="ui-monospace, monospace" font-size="13">
+      <rect x="60" y="70" width="250" height="250" rx="4" fill="none" stroke="var(--ink-faint)" stroke-width="1.4"/>
+      <line x1="110" y1="70" x2="110" y2="320" stroke="var(--ink-faint)"/>
+      <line x1="160" y1="70" x2="160" y2="320" stroke="var(--ink-faint)"/>
+      <line x1="210" y1="70" x2="210" y2="320" stroke="var(--ink-faint)"/>
+      <line x1="260" y1="70" x2="260" y2="320" stroke="var(--ink-faint)"/>
+      <line x1="60" y1="120" x2="310" y2="120" stroke="var(--ink-faint)"/>
+      <line x1="60" y1="170" x2="310" y2="170" stroke="var(--ink-faint)"/>
+      <line x1="60" y1="220" x2="310" y2="220" stroke="var(--ink-faint)"/>
+      <line x1="60" y1="270" x2="310" y2="270" stroke="var(--ink-faint)"/>
+      <rect x="60" y="70" width="150" height="150" fill="var(--sym-pred)" opacity="0.12"/>
+      <rect x="60" y="70" width="150" height="150" fill="none" stroke="var(--sym-pred)" stroke-width="2.4"/>
+      <text x="85" y="99" fill="var(--ink)">0</text><text x="135" y="99" fill="var(--ink)">0</text><text x="185" y="99" fill="var(--ink)">1</text><text x="235" y="99" fill="var(--ink)">1</text><text x="285" y="99" fill="var(--ink)">1</text>
+      <text x="85" y="149" fill="var(--ink)">0</text><text x="135" y="149" fill="var(--ink)">0</text><text x="185" y="149" fill="var(--ink)">1</text><text x="235" y="149" fill="var(--ink)">1</text><text x="285" y="149" fill="var(--ink)">1</text>
+      <text x="85" y="199" fill="var(--ink)">0</text><text x="135" y="199" fill="var(--ink)">0</text><text x="185" y="199" fill="var(--ink)">1</text><text x="235" y="199" fill="var(--ink)">1</text><text x="285" y="199" fill="var(--ink)">1</text>
+      <text x="85" y="249" fill="var(--ink)">0</text><text x="135" y="249" fill="var(--ink)">0</text><text x="185" y="249" fill="var(--ink)">1</text><text x="235" y="249" fill="var(--ink)">1</text><text x="285" y="249" fill="var(--ink)">1</text>
+      <text x="85" y="299" fill="var(--ink)">0</text><text x="135" y="299" fill="var(--ink)">0</text><text x="185" y="299" fill="var(--ink)">1</text><text x="235" y="299" fill="var(--ink)">1</text><text x="285" y="299" fill="var(--ink)">1</text>
+      <rect x="370" y="110" width="120" height="120" rx="4" fill="none" stroke="var(--sym-param)" stroke-width="1.6"/>
+      <line x1="410" y1="110" x2="410" y2="230" stroke="var(--ink-faint)"/>
+      <line x1="450" y1="110" x2="450" y2="230" stroke="var(--ink-faint)"/>
+      <line x1="370" y1="150" x2="490" y2="150" stroke="var(--ink-faint)"/>
+      <line x1="370" y1="190" x2="490" y2="190" stroke="var(--ink-faint)"/>
+      <text x="382" y="138" fill="var(--sym-param)">−1</text><text x="422" y="138" fill="var(--sym-param)">0</text><text x="462" y="138" fill="var(--sym-param)">1</text>
+      <text x="382" y="178" fill="var(--sym-param)">−1</text><text x="422" y="178" fill="var(--sym-param)">0</text><text x="462" y="178" fill="var(--sym-param)">1</text>
+      <text x="382" y="218" fill="var(--sym-param)">−1</text><text x="422" y="218" fill="var(--sym-param)">0</text><text x="462" y="218" fill="var(--sym-param)">1</text>
+      <text x="430" y="86" text-anchor="middle" font-size="11" fill="var(--sym-param)">filter (shared)</text>
+      <line x1="510" y1="170" x2="555" y2="170" stroke="var(--ink-faint)" stroke-width="1.6"/>
+      <polygon points="555,170 545,165 545,175" fill="var(--ink-faint)"/>
+      <rect x="575" y="95" width="105" height="105" rx="4" fill="none" stroke="var(--sym-opt)" stroke-width="1.6"/>
+      <line x1="610" y1="95" x2="610" y2="200" stroke="var(--ink-faint)"/>
+      <line x1="645" y1="95" x2="645" y2="200" stroke="var(--ink-faint)"/>
+      <line x1="575" y1="130" x2="680" y2="130" stroke="var(--ink-faint)"/>
+      <line x1="575" y1="165" x2="680" y2="165" stroke="var(--ink-faint)"/>
+      <text x="590" y="119" fill="var(--sym-opt)">3</text><text x="625" y="119" fill="var(--sym-opt)">3</text><text x="660" y="119" fill="var(--sym-opt)">0</text>
+      <text x="590" y="154" fill="var(--sym-opt)">3</text><text x="625" y="154" fill="var(--sym-opt)">3</text><text x="660" y="154" fill="var(--sym-opt)">0</text>
+      <text x="590" y="189" fill="var(--sym-opt)">3</text><text x="625" y="189" fill="var(--sym-opt)">3</text><text x="660" y="189" fill="var(--sym-opt)">0</text>
+      <text x="627" y="228" text-anchor="middle" font-size="11" fill="var(--sym-opt)">feature map</text>
+    </g>
+    <text x="360" y="345" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">output size = (5 − 3)/1 + 1 = 3</text>
+  </svg>
+  <figcaption><strong>Takeaway.</strong> One filter, nine weights, nine dot products. The highlighted patch produces the top-left cell; the next patch starts one column over.</figcaption>
+</figure>
+
+<h3>Part 1 — The patch and the dot product</h3>
+<p>An image is a tensor of shape <code>H × W × C</code>: height, width, channels. A filter has shape <code>k × k × C</code> — the same depth as its input — and a bias. At one position, the response is the sum of elementwise products over the patch plus the bias, then passed through a nonlinearity such as ReLU, which replaces negatives with zero. This is exactly the neuron from Book 3, except its inputs are a patch of pixels rather than a whole row.</p>
+<p>Why the depth matches: a colour edge is a pattern across red, green and blue together. The filter carries one weight per channel per position, so it can respond to "red high, blue low" as one pattern.</p>
+
+<h3>Part 2 — Output size, stride and padding</h3>
+<p>With input size <code>H</code>, kernel <code>k</code>, padding <code>p</code> pixels on each side, and stride <code>s</code> pixels between positions, the output side is</p>
+<span class="formula">H_out = ⌊(H + 2p − k) / s⌋ + 1</span>
+<p><strong>Padding</strong> adds a border of zeros so the filter can centre on edge pixels; without it, each convolution shrinks the image by <code>k − 1</code>. <strong>Stride</strong> skips positions, shrinking the output and enlarging the region each later neuron sees.</p>
+
+<h3>Part 3 — Channels and parameter count</h3>
+<p>One filter produces one output channel. To produce <code>C_out</code> channels you use <code>C_out</code> filters, and the layer's parameter count is</p>
+<span class="formula">C_out × (C_in × k × k + 1)</span>
+<p>The <code>+1</code> is the bias per filter. Notice what is absent: the image size. A 3×3 filter from 3 channels to 64 needs <code>64 × (3 × 9 + 1) = 1,792</code> parameters at 224×224 and at 32×32 alike; the dense layer's count grows with every pixel.</p>
+
+<h3>Part 4 — Depth, receptive field and pooling</h3>
+<p>Each 3×3 convolution adds two pixels to the reach of a neuron. Three stacked 3×3 convolutions give a 7×7 receptive field: <code>3 → 5 → 7</code>. That is why CNNs build simple detectors first — edges, colour blobs — and combine them into textures, parts, then objects.</p>
+<p><strong>Pooling</strong> takes the maximum (or mean) over a small window, usually 2×2 with stride 2, halving the map. It buys some tolerance to small shifts and cuts compute. It does not make the network invariant to large moves, and global average pooling discards location entirely — useful for "is there a cat?", useless for "where is the cat?".</p>
+
+<h2>Worked example<span class="h2-topic">— convolutions</span></h2>
+
+<h3>1. A vertical-edge filter on a 5×5 image</h3>
+<p>Every row of the image is <code>0, 0, 1, 1, 1</code>. The filter is a vertical edge detector with rows <code>−1, 0, 1</code>. With no padding and stride 1, the output is 3×3.</p>
+<table>
+  <tr><th>Output cell</th><th>Patch columns</th><th>Arithmetic</th><th class="num">Value</th></tr>
+  <tr><td>top-left</td><td>0–2</td><td><code>3 × (−1×0 + 0×0 + 1×1)</code></td><td class="num">3</td></tr>
+  <tr><td>top-middle</td><td>1–3</td><td><code>3 × (−1×0 + 0×1 + 1×1)</code></td><td class="num">3</td></tr>
+  <tr><td>top-right</td><td>2–4</td><td><code>3 × (−1×1 + 0×1 + 1×1)</code></td><td class="num">0</td></tr>
+</table>
+<p><strong>Read it as a sentence.</strong> The filter sums the right column and subtracts the left. A window that sees mostly zeros on the left and ones on the right scores 3; a window sitting entirely inside the ones scores <code>−1 + 1 = 0</code>. The full map is three identical rows of <code>3, 3, 0</code>.</p>
+<p><strong>Change the stride to 2.</strong> The output side becomes <code>⌊(5 − 3)/2⌋ + 1 = 2</code>, sampling patches at columns 0 and 2, rows 0 and 2: <code>[[3, 0], [3, 0]]</code>. Stride 2 kept every other response and halved the map.</p>
+
+<h3>2. Counting parameters</h3>
+<p>A layer takes 3 input channels and produces 8 output channels with a 3×3 kernel.</p>
+<table>
+  <tr><th>Step</th><th>Arithmetic</th><th class="num">Count</th></tr>
+  <tr><td>Weights per filter</td><td><code>3 × 3 × 3</code></td><td class="num">27</td></tr>
+  <tr><td>With bias</td><td><code>27 + 1</code></td><td class="num">28</td></tr>
+  <tr><td>Eight filters</td><td><code>8 × 28</code></td><td class="num">224</td></tr>
+</table>
+<p><strong>Read it as a sentence.</strong> 224 numbers define the whole layer, whether it runs on a 32×32 thumbnail or a 4K frame. The dense alternative at 224×224 needs 9,633,792 weights for only 64 outputs — about 5,376 times more.</p>
+<p><strong>What to notice.</strong> The convolutional layer is cheaper because it makes two assumptions: that nearby pixels interact (locality) and that a pattern is worth detecting everywhere (weight sharing). When those assumptions are false — shuffled tabular columns — the saving disappears and the architecture is the wrong tool.</p>
+
+<h2>The trap<span class="h2-topic">— convolutions</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A CNN learns a separate detector for each location, and pooling makes it see the whole image."</strong> The filter is one set of weights reused at every position; that is the entire saving. And a neuron early in the network sees only its local patch — the receptive field grows with depth, not with pooling alone.</p>
+  <p>It feels right because the feature map is the same size as the image, so it looks as though each output cell had its own private weights. It also feels right because a cat is still recognised after moving, which sounds like invariance; in truth the response <em>moves with</em> the cat (equivariance), and only pooling or global pooling turns that into partial invariance.</p>
+  <p><strong>Correction:</strong> say "shared filter, local patch, growing receptive field". Translation equivariance is built in; invariance to rotation, scale or large shifts is not, and needs augmentation, pooling, or more depth.</p>
+</div>
+<p><strong>The tell:</strong> the parameter count does not change when you double the image size, a shift of the input shifts the feature map rather than scrambling it, and the same filter responds to the same pattern in the corner and the centre. If a model instead degrades sharply when an object moves ten pixels, suspect a dense layer where a convolution belongs.</p>
+
+<h2>Retrieval check<span class="h2-topic">— convolutions</span></h2>
+<ol class="quiz">
+  <li>A 32×32 image goes through a 5×5 filter with padding 2 and stride 1. What is the output size?
+    <details><summary>Answer</summary>
+      <p><code>(32 + 4 − 5)/1 + 1 = 32</code>. Padding 2 on each side exactly compensates for a 5×5 kernel, so the map keeps the input size.</p>
+    </details>
+  </li>
+  <li>How many parameters in a 3×3 layer with 3 input channels and 16 output channels, bias included?
+    <details><summary>Answer</summary>
+      <p><code>16 × (3 × 3 × 3 + 1) = 16 × 28 = 448</code>. Each of the 16 filters has 27 weights plus one bias.</p>
+    </details>
+  </li>
+  <li>Does a convolution give translation invariance? Be precise.
+    <details><summary>Answer</summary>
+      <p>It gives translation equivariance: shift the input and the feature map shifts by the same amount. Invariance — the same output regardless of position — requires pooling, global pooling, or training that encourages it, and is only approximate.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/045.html">Solve it · 045 — 2-D convolution with stride and padding</a></p>
+<h2>Build it in Colab<span class="h2-topic">— convolutions</span></h2>
+<p>Runnable, NumPy-only: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/045-convolutions-cnns.ipynb">open the notebook in Colab</a> · <a href="../notebooks/045-convolutions-cnns.ipynb">local copy</a>. It convolves a small image with an edge filter, plots the feature map, and checks the output-size formula.</p>
+<pre><code>import numpy as np
+img = np.zeros((5, 5))                  # a blank grey image
+img[:, 2:] = 1.0                        # a bright right-hand side
+k = np.array([[-1., 0., 1.], [-1., 0., 1.], [-1., 0., 1.]])  # vertical edge
+out = np.zeros((3, 3))                  # valid convolution, stride 1
+for i in range(3):                      # three output rows
+    for j in range(3):                  # three output columns
+        out[i, j] = (img[i:i+3, j:j+3] * k).sum()  # patch dot filter
+print(out)</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— convolutions</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "A 28×28 image goes through a 3×3 filter with padding 1 and stride 2. What is the output side?", "o": ["13", "14", "15", "28"], "a": 1, "why": "⌊(28 + 2 − 3)/2⌋ + 1 = ⌊27/2⌋ + 1 = 13 + 1 = 14."}, {"q": "Why does a 3×3 convolution need far fewer weights than a dense layer on the same image?", "o": ["It uses fewer pixels", "The same filter is shared across all positions", "It has no bias terms", "It always uses stride 2"], "a": 1, "why": "Weight sharing means one small filter serves every location; a dense layer needs a separate weight per input-output pair."}]</script></div>
+
+<div class="next">
+  <p><strong>End of Book 3, lesson 8.</strong> You can now size a convolution and count its parameters. Next comes what happens to those activations during training: initialization and normalization.</p>
+  <div class="pager">
+    <a href="044-feature-engineering-leakage-imbalance.html">← 44 · Feature engineering, leakage &amp; imbalance</a>
+  </div>
+</div>
+
+<p class="source">Primary source: <a href="https://cs231n.github.io/convolutional-networks/">CS231n — Convolutional networks</a> (the output-size formula, parameter sharing and receptive fields).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

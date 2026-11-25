@@ -1,0 +1,30 @@
+{
+  "id": "048",
+  "lesson": "048",
+  "book": "language",
+  "title": "Most common adjacent pair",
+  "difficulty": "medium",
+  "shape": "scratch",
+  "categories": [
+    "tokenization"
+  ],
+  "statement_md": "Write `most_common_pair(words)` for one BPE merge step.\n\n- `words` is a list of symbol lists, e.g. `[[\"l\", \"o\", \"w\"]]`\n- count every adjacent pair across all words\n- return the pair with the highest total count\n- break ties by choosing the lexicographically smallest pair\n- return `None` when there are no pairs\n- do not mutate `words`",
+  "entry": "most_common_pair",
+  "signature": "def most_common_pair(words):",
+  "starter": "def most_common_pair(words):\n    \"\"\"Return the most frequent adjacent pair, ties lexicographic.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_basic",
+    "test_repeated_word"
+  ],
+  "hidden": [
+    "test_tie_break",
+    "test_no_pairs",
+    "test_frequency_beats_alphabet",
+    "test_does_not_mutate"
+  ],
+  "tests_py": "def test_basic():\n    words = [[\"a\", \"b\", \"c\"], [\"a\", \"b\", \"d\"], [\"a\", \"b\", \"e\"]]\n    assert solution.most_common_pair(words) == (\"a\", \"b\")\n\ndef test_repeated_word():\n    assert solution.most_common_pair([[\"x\", \"y\"], [\"x\", \"y\"]]) == (\"x\", \"y\")\n\ndef test_tie_break():\n    assert solution.most_common_pair([[\"b\", \"c\"], [\"a\", \"d\"]]) == (\"a\", \"d\")\n\ndef test_no_pairs():\n    assert solution.most_common_pair([]) is None\n    assert solution.most_common_pair([[\"a\"], [\"b\"]]) is None\n\ndef test_frequency_beats_alphabet():\n    words = [[\"a\", \"b\"], [\"z\", \"z\"], [\"z\", \"z\"]]\n    assert solution.most_common_pair(words) == (\"z\", \"z\")\n\ndef test_does_not_mutate():\n    words = [[\"a\", \"b\"], [\"c\", \"d\"]]\n    before = [w[:] for w in words]\n    solution.most_common_pair(words)\n    assert words == before\n",
+  "mutations": [
+    "return max(counts, key=counts.get) if counts else None",
+    "return sorted(counts)[0] if counts else None"
+  ]
+}

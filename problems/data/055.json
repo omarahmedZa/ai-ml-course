@@ -1,0 +1,31 @@
+{
+  "id": "055",
+  "lesson": "055",
+  "book": "rl",
+  "title": "Discounted returns, backwards",
+  "difficulty": "hard",
+  "shape": "debug",
+  "categories": [
+    "rl",
+    "offline-rl"
+  ],
+  "statement_md": "`discounted_returns` walks the rewards forwards, so `G_t` is built from the wrong tail. Fix it.\n\n- return `G_t = r_t + gamma * G_{t+1}` for every step, in the original order\n- return `[]` for empty input\n- raise `ValueError` when `gamma` is outside `[0, 1]`\n- return a list of floats",
+  "entry": "discounted_returns",
+  "signature": "def discounted_returns(rewards, gamma):",
+  "starter": "def discounted_returns(rewards, gamma):\n    \"\"\"Return G_t for each step, discounted by gamma.\"\"\"\n    total = 0.0\n    out = []\n    for r in rewards:          # BUG: walks forwards\n        total = r + gamma * total\n        out.append(total)\n    return out\n",
+  "visible": [
+    "test_three_steps",
+    "test_single"
+  ],
+  "hidden": [
+    "test_gamma_zero",
+    "test_empty",
+    "test_invalid_gamma",
+    "test_gamma_one"
+  ],
+  "tests_py": "def test_three_steps():\n    g = solution.discounted_returns([0.0, 1.0, 1.0], 0.9)\n    assert abs(g[0] - 1.71) < 1e-9\n    assert abs(g[1] - 1.9) < 1e-9\n    assert abs(g[2] - 1.0) < 1e-9\n\ndef test_single():\n    assert solution.discounted_returns([5.0], 0.9) == [5.0]\n\ndef test_gamma_zero():\n    assert solution.discounted_returns([1, 2], 0.0) == [1.0, 2.0]\n\ndef test_empty():\n    assert solution.discounted_returns([], 0.9) == []\n\ndef test_invalid_gamma():\n    try:\n        solution.discounted_returns([1.0], -0.1)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_gamma_one():\n    assert solution.discounted_returns([1, 1, 1], 1.0) == [3.0, 2.0, 1.0]\n",
+  "mutations": [
+    "return [float(r) for r in a[0]]",
+    "return [float(r) + a[1] * sum(a[0]) for r in a[0]]"
+  ]
+}

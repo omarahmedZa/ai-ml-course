@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>047 — Optimizers: SGD → Adam</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can explain what momentum, RMSProp and Adam add to SGD, and choose a learning rate for a new run.">
+</head>
+<body data-page="lesson" data-lesson="047" data-book="neural-networks" data-book-number="3">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 47 / 50</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 3 · Neural Networks · lesson 10 of 10</p>
+  <h1>Optimizers: SGD → Adam</h1>
+  <p class="objective">You can explain what momentum, RMSProp and Adam each add, and choose a learning rate for a new run.</p>
+</header>
+<p class="bookline"><a href="../paths/neural-networks.html">Neural Networks</a><span class="chip">Training Deep Nets</span></p>
+
+<h2>Why this matters<span class="h2-topic">— optimization</span></h2>
+<p class="lede">Backpropagation hands you a gradient: numbers saying which way each weight should move. It says nothing about how far. That decision — the update rule — separates a model that reaches a good loss in an hour from one that oscillates, crawls, or diverges. Every optimizer from plain SGD to Adam is the same loop with a smarter answer to "how big a step, and in which direction?"</p>
+<p><strong>The failure it prevents.</strong> An exam asks why Adam converges faster than SGD on a sparse embedding layer. "Adam is adaptive" is a label; the marks come from naming the per-coordinate scaling by a running average of squared gradients. In practice the same gap is a training curve that falls for ten steps then flatlines too high, because the rate was copied from another architecture.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>0.9</b><span>momentum decay <code>β₁</code><span class="say" data-sym="β">(beta)</span>, averaging roughly the last 10 gradients</span></div>
+  <div><b>3×10⁻⁴</b><span>a sane first Adam learning rate for a transformer</span></div>
+  <div><b>10⁻⁸</b><span><code>ε</code><span class="say" data-sym="ε">(epsilon)</span> (epsilon), the guard against dividing by zero</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— optimization</span></h2>
+<p>All four optimizers compute the same thing and differ in how they smooth it. Write <code>θ</code><span class="say" data-sym="θ">(theta)</span> (theta) for the parameters, <code>g</code> for the gradient of the loss with respect to <code>θ</code>, and <code>η</code><span class="say" data-sym="η">(eta)</span> (eta) for the learning rate. Plain gradient descent does <code>θ ← θ − η·g</code>. <strong>Momentum</strong> averages recent gradients, so a persistent direction is amplified and a flip-flopping one cancels. <strong>RMSProp</strong> divides each coordinate by the typical size of its own gradients, so a weight with tiny gradients still moves. <strong>Adam</strong> does both, with a correction for averages that start at zero.</p>
+<p>In one line: <strong>the gradient gives the direction; the optimizer decides how much history to remember and whether to trust each coordinate equally.</strong> Adam's defaults are <code>η = 3×10⁻⁴</code>, <code>β₁ = 0.9</code>, <code>β₂ = 0.999</code>, <code>ε = 10⁻⁸</code> — worth knowing by heart.</p>
+
+<div class="keybox"><span class="sym">SGD: θ ← θ − ηg · Adam: per-coordinate, history-smoothed steps</span><p>Momentum smooths the direction; RMSProp normalizes the size; Adam combines them and corrects the startup bias.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— optimization</span></h2>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-opt-t f-opt-d">
+    <title id="f-opt-t">Three routes down the same valley</title>
+    <desc id="f-opt-d">A curved valley runs from upper left to lower right. SGD zigzags across it, momentum follows a smoothed path, and Adam takes per-coordinate steps that stay inside the valley.</desc>
+    <path d="M60,70 C200,120 260,250 660,300" fill="none" stroke="var(--ink-faint)" stroke-width="1.2" stroke-dasharray="5 5"/>
+    <path d="M60,250 C210,260 300,120 660,90" fill="none" stroke="var(--ink-faint)" stroke-width="1.2" stroke-dasharray="5 5"/>
+    <text x="80" y="52" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">high loss</text>
+    <text x="620" y="330" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">low loss</text>
+    <polyline points="90,90 170,215 240,150 310,215 375,180 435,210 490,196" fill="none" stroke="var(--sym-loss)" stroke-width="2.2"/>
+    <text x="120" y="150" font-size="12" fill="var(--sym-loss)" font-family="ui-monospace, monospace">SGD</text>
+    <path d="M90,90 C240,150 380,230 560,268" fill="none" stroke="var(--sym-opt)" stroke-width="2.2"/>
+    <text x="300" y="245" font-size="12" fill="var(--sym-opt)" font-family="ui-monospace, monospace">momentum</text>
+    <path d="M90,300 C220,292 360,282 560,276" fill="none" stroke="var(--sym-pred)" stroke-width="2.2"/>
+    <text x="300" y="300" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">Adam</text>
+    <circle cx="90" cy="90" r="4" fill="var(--ink)"/>
+    <text x="90" y="78" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">start</text>
+    <circle cx="560" cy="276" r="5" fill="var(--sym-opt)"/>
+    <text x="590" y="266" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">good loss</text>
+  </svg>
+  <figcaption><strong>The valley is narrow across and long along.</strong> Raw SGD wastes steps bouncing across the narrow axis; momentum damps the bounce, and Adam rescales each axis separately.</figcaption>
+</figure>
+
+<p>Six parts: the objects, the plain step, momentum, RMSProp, Adam, and the practical settings.</p>
+
+<h3>Part 1 — Two lists of the same shape</h3>
+<p><code>θ</code> is every learnable number in the model, flattened into one list; <code>g</code> has the same length, because each parameter gets its own derivative. The loss is a surface over that list — 1,000 parameters mean a 1,000-dimensional surface nobody can picture, which every optimizer treats identically.</p>
+<p><strong>Why this part exists:</strong> gradients are per parameter, so "the learning rate is too high" means "too high for some coordinates" — exactly what adaptive methods exploit.</p>
+
+<h3>Part 2 — Plain SGD and the learning rate</h3>
+<p>SGD takes the step <code>θ ← θ − η·g</code> and repeats. The batch is a sample, so <code>g</code> is noisy; smaller batches need smaller steps. The surface is usually a narrow valley: the gradient across it is large and alternates sign, while the gradient along it is small and consistent.</p>
+<p><strong>Why this part exists:</strong> it is the baseline for every other optimizer, and it explains the zigzag — one step size cannot suit both axes.</p>
+
+<h3>Part 3 — Momentum remembers direction</h3>
+<p>Keep a velocity <code>v</code> the same shape as <code>θ</code> and update it with <code>v ← β₁·v + g</code>, then step <code>θ ← θ − η·v</code>. With <code>β₁ = 0.9</code>, the velocity is roughly a weighted average of the last 10 gradients: consistent directions add up, alternating ones cancel.</p>
+<p><strong>Why this part exists:</strong> it fixes oscillation without changing the step size, which is why momentum is the cheapest upgrade to SGD.</p>
+
+<h3>Part 4 — RMSProp rescales each coordinate</h3>
+<p>Keep a second average <code>s ← β₂·s + (1 − β₂)·g²</code>, elementwise, and step with <code>θ ← θ − η·g / (√s + ε)</code><span class="say" data-sym="√">(square root)</span>. A coordinate whose gradients are typically 0.01 is divided by 0.1, so its effective step is ten times larger; one with gradients of 10 is divided by 10.</p>
+<p><strong>Why this part exists:</strong> embeddings and biases have gradients far smaller than dense weights, and one global rate cannot serve both.</p>
+
+<h3>Part 5 — Adam combines them, then corrects the start</h3>
+<p>Adam tracks both averages: <code>m</code> for the gradient and <code>v</code> for its square. Because both start at zero, early estimates are biased low, so it divides by <code>1 − β₁ᵗ</code> and <code>1 − β₂ᵗ</code> at step <code>t</code>. The update is <code>θ ← θ − η·m̂ / (√v̂ + ε)</code>, with hats for the corrected averages.</p>
+<p><strong>Why this part exists:</strong> without correction the first step is about ten times too small; with it, the first step is roughly <code>η</code> times the sign of the gradient.</p>
+
+<h3>Part 6 — Weight decay and the knobs you actually set</h3>
+<p>L2 regularization adds <code>λθ</code><span class="say" data-sym="λ">(lambda)</span> to the gradient, which Adam scales by <code>1/√v̂</code>, so heavily updated weights decay less. <strong>AdamW</strong> decouples it: shrink <code>θ</code> by <code>η·λ</code>, then apply the Adam step. Set <code>η</code> first, add warmup for transformers, and clip gradient norm to 1.0.</p>
+<p><strong>Why this part exists:</strong> these settings cause most "Adam does not generalize" reports.</p>
+
+<h2>Worked example<span class="h2-topic">— optimization</span></h2>
+
+<h3>1. Two gradients, three optimizers</h3>
+<p>One parameter starts at <code>w = 1.0</code>. The gradient is <code>g₁ = 2</code> on the first step and <code>g₂ = −1</code> on the second, so the true minimum lies to the left and then slightly back to the right. Use <code>η = 0.1</code>.</p>
+
+<table>
+  <tr><th>Optimizer</th><th>After step 1</th><th>After step 2</th></tr>
+  <tr><td>SGD</td><td><code>1.0 − 0.1(2) = 0.80</code></td><td><code>0.80 − 0.1(−1) = 0.90</code></td></tr>
+  <tr><td>Momentum, <code>β₁ = 0.9</code></td><td><code>v = 2</code>, <code>w = 0.80</code></td><td><code>v = 0.9(2) − 1 = 0.8</code>, <code>w = 0.72</code></td></tr>
+  <tr><td>Adam, <code>η = 0.1</code></td><td><code>w = 0.90</code></td><td><code>w = 0.873</code></td></tr>
+</table>
+
+<p><strong>Read the momentum row.</strong> On step 2 the gradient points right, yet momentum moves left, from 0.80 to 0.72. The velocity carried 0.8 units of leftward motion, and one rightward gradient could not reverse it. A one-step reversal is treated as noise, not a new direction — which also means momentum can overshoot.</p>
+
+<h3>2. Adam's first two steps, number by number</h3>
+<p>Same <code>w = 1.0</code>, <code>g₁ = 2</code>, <code>g₂ = −1</code>, <code>η = 0.1</code>, <code>β₁ = 0.9</code>, <code>β₂ = 0.999</code>, <code>ε = 10⁻⁸</code>.</p>
+
+<table>
+  <tr><th>Step</th><th><code>m</code></th><th><code>v</code></th><th><code>m̂</code></th><th><code>v̂</code></th><th class="num"><code>w</code></th></tr>
+  <tr><td>1</td><td>0.2</td><td>0.004</td><td>2.0</td><td>4.0</td><td class="num">0.900</td></tr>
+  <tr><td>2</td><td>0.08</td><td>0.004996</td><td>0.421</td><td>2.499</td><td class="num">0.873</td></tr>
+</table>
+
+<p><strong>Step 1, in full.</strong> <code>m = 0.9(0) + 0.1(2) = 0.2</code>, <code>v = 0.999(0) + 0.001(4) = 0.004</code>. Correct the start: <code>m̂ = 0.2/0.1 = 2.0</code>, <code>v̂ = 0.004/0.001 = 4.0</code>. The step is <code>0.1 × 2.0/(√4.0 + ε) = 0.1</code>, so <code>w = 0.9</code>. Without correction it would be <code>0.1 × 0.2/0.0632 = 0.316</code> — three times too large.</p>
+<p><strong>Step 2.</strong> <code>m = 0.9(0.2) + 0.1(−1) = 0.08</code>, <code>v = 0.999(0.004) + 0.001(1) = 0.004996</code>. Correct with <code>1 − 0.9² = 0.19</code> and <code>1 − 0.999² = 0.001999</code>: <code>m̂ = 0.421</code>, <code>v̂ = 2.499</code>, so the step is <code>0.0266</code> and <code>w = 0.873</code>. The gradient flipped and the step shrank to a quarter — damping driven by gradient size rather than direction.</p>
+
+<h2>The trap<span class="h2-topic">— optimization</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Adam is the best optimizer, so switch to it and stop tuning the learning rate."</strong> Adam is the most forgiving optimizer at the start, not the best at the end. Its per-coordinate scaling can fit training data faster while landing in a flatter, worse-generalizing minimum than tuned SGD with momentum; and because it normalizes by gradient size, the learning rate still sets every step. Leaving <code>η = 0.001</code> because "that is Adam's default" is still a choice.</p>
+  <p>It feels right because Adam's loss curve is smoother and reaches low training loss quickly. The validation curve decides, and it often separates later.</p>
+  <p><strong>Correction:</strong> treat the optimizer as two decisions — direction smoothing and step size. Pick AdamW for transformers, tune <code>η</code> over a factor of ten, add warmup, and compare against SGD with momentum on validation before claiming an improvement.</p>
+</div>
+<p><strong>The tell:</strong> training loss falling while validation loss is flat or rising — that is capacity or regularization, not the optimizer. A second tell is divergence at <code>η = 10⁻²</code> with Adam but not at <code>10⁻³</code>; adaptive scaling does not remove the step bound. A third is weight norms growing when you asked for decay.</p>
+
+<table class="trap-table">
+  <tr><th>What it feels like</th><th>What is true</th></tr>
+  <tr><td>Adam means no learning-rate tuning.</td><td>Adam rescales coordinates; <code>η</code> still sets the overall step and still needs a sweep.</td></tr>
+  <tr><td>Faster training loss means a better model.</td><td>It means a better fit; only held-out loss says whether the model improved.</td></tr>
+</table>
+
+<h2>Retrieval check<span class="h2-topic">— optimization</span></h2>
+<ol class="quiz">
+  <li>What does momentum do to a gradient that alternates sign every step, and why?
+    <details><summary>Answer</summary>
+      <p>It cancels it. The velocity averages recent gradients, so +g and −g contributions annihilate partly, leaving a small consistent step.</p>
+    </details>
+  </li>
+  <li>Why does Adam divide by <code>1 − β₁ᵗ</code> on step <code>t</code>?
+    <details><summary>Answer</summary>
+      <p>Because <code>m</code> starts at zero, early values are biased low. Dividing by <code>1 − 0.9ᵗ</code> rescales the estimate to the right magnitude.</p>
+    </details>
+  </li>
+  <li>AdamW differs from Adam with L2 in what way?
+    <details><summary>Answer</summary>
+      <p>It applies decay directly to the weights instead of adding it to the gradient, so Adam's denominator does not rescale it.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/047.html">Solve it · 047 — Add Adam to the update loop</a></p>
+<h2>Build it in Colab<span class="h2-topic">— optimization</span></h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/047-optimizers-sgd-adam.ipynb">open the notebook in Colab</a> · <a href="../notebooks/047-optimizers-sgd-adam.ipynb">local copy</a>. Sections, plots and line-by-line notes — run the cells in order, then change the learning rate and rerun.</p>
+<pre><code>import numpy as np
+w, lr, b1, b2, eps = 1.0, 0.1, 0.9, 0.999, 1e-8
+m = v = 0.0                                # Adam's two running averages
+for t, g in enumerate([2.0, -1.0], start=1):
+    m = b1 * m + (1 - b1) * g              # smoothed gradient
+    v = b2 * v + (1 - b2) * g * g          # smoothed squared gradient
+    mh, vh = m / (1 - b1**t), v / (1 - b2**t)
+    w -= lr * mh / (np.sqrt(vh) + eps)     # the Adam step
+    print(f&quot;t={t} w={w:.3f}&quot;)</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— optimization</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "A parameter receives gradients +1, -1, +1, -1 with momentum beta=0.9. What happens to its velocity?", "o": ["It stays near zero", "It doubles each step", "It grows linearly", "It becomes negative"], "a": 0, "why": "Alternating signs cancel in the running average, so the velocity stays small."}, {"q": "Training loss falls, validation loss rises. First thing to change?", "o": ["Regularization or capacity", "The optimizer", "The random seed", "The batch order"], "a": 0, "why": "The gap is overfitting; the optimizer is not the cause of a train-validation divergence."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → Topic 48: Subword tokenizers.</strong> The network can now be initialized and trained. Topic 48 moves up a level, to the text it reads: how a sentence becomes a sequence of subword tokens.</p>
+  <div class="pager">
+    <a href="046-initialization-and-normalization.html">← 46 · Initialization &amp; normalization</a>
+    <a href="048-subword-tokenizers-bpe.html">Next · 48 · Subword tokenizers (BPE)</a>
+  </div>
+</div>
+
+<p class="source">Primary source: Kingma &amp; Ba, <a href="https://arxiv.org/abs/1412.6980">Adam: A Method for Stochastic Optimization</a> (2014), and Loshchilov &amp; Hutter, <a href="https://arxiv.org/abs/1711.05101">Decoupled Weight Decay Regularization</a> (2017).</p>
+
+</main>
+  <script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

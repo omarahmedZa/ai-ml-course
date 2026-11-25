@@ -1,0 +1,31 @@
+{
+  "id": "043",
+  "lesson": "043",
+  "book": "classical-ml",
+  "title": "Project onto principal components",
+  "difficulty": "medium",
+  "shape": "scratch",
+  "categories": [
+    "classical-ml",
+    "dimensionality-reduction"
+  ],
+  "statement_md": "Write `project(X, components)` returning the coordinates of the **centred** rows of `X` along each component.\n\n- subtract each column's mean of `X` before projecting\n- for each row, the coordinate on a component is the dot product of the centred row with that component\n- return one list per row, with one coordinate per component, in the given order\n- return `[]` when `X` is empty\n- raise `ValueError` when a component's length differs from the number of columns\n\nInputs are small; loops are fine.",
+  "entry": "project",
+  "signature": "def project(X, components):",
+  "starter": "def project(X, components):\n    \"\"\"Centre X, then project each row onto each component.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_single_component",
+    "test_identity_components"
+  ],
+  "hidden": [
+    "test_centres_the_data",
+    "test_bad_component_length",
+    "test_empty",
+    "test_no_mutation"
+  ],
+  "tests_py": "def test_single_component():\n    X = [[1.0, 1.0], [3.0, 3.0]]\n    c = [[0.7071067811865476, 0.7071067811865476]]\n    got = solution.project(X, c)\n    assert len(got) == 2 and len(got[0]) == 1\n    assert abs(got[0][0] + 1.4142135623730951) < 1e-9\n    assert abs(got[1][0] - 1.4142135623730951) < 1e-9\n\ndef test_identity_components():\n    X = [[1.0, 2.0], [3.0, 6.0]]\n    got = solution.project(X, [[1.0, 0.0], [0.0, 1.0]])\n    assert got == [[-1.0, -2.0], [1.0, 2.0]]\n\ndef test_centres_the_data():\n    X = [[11.0, 11.0], [13.0, 13.0]]\n    c = [[0.7071067811865476, 0.7071067811865476]]\n    got = solution.project(X, c)\n    assert abs(got[0][0] + 1.4142135623730951) < 1e-9\n    assert abs(got[1][0] - 1.4142135623730951) < 1e-9\n\ndef test_bad_component_length():\n    try:\n        solution.project([[1.0, 2.0]], [[1.0]])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_empty():\n    assert solution.project([], [[1.0, 0.0]]) == []\n\ndef test_no_mutation():\n    X = [[1.0, 2.0]]\n    solution.project(X, [[1.0, 0.0]])\n    assert X == [[1.0, 2.0]]\n",
+  "mutations": [
+    "return [[sum(row[j] * c[j] for j in range(len(c))) for row in a[0]] for c in a[1]]",
+    "return [[sum((row[j] - sum(r[j] for r in a[0]) / len(a[0])) * c[j] for j in range(len(c))) for row in a[0]] for c in a[1]]"
+  ]
+}

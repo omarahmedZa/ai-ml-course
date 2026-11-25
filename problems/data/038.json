@@ -1,0 +1,30 @@
+{
+  "id": "038",
+  "lesson": "038",
+  "book": "foundations",
+  "title": "Standard error, extended",
+  "difficulty": "medium",
+  "shape": "extend",
+  "categories": [
+    "probability-statistics"
+  ],
+  "statement_md": "`sample_sd(values)` already computes the sample standard deviation with `n - 1` in the denominator.\n\nAdd `standard_error(values)` returning the standard error of the mean: `sample_sd(values) / sqrt(n)`.\n\n- raise `ValueError` for fewer than 2 values\n- return a `float`\n- do not mutate `values` and do not change `sample_sd`",
+  "entry": "standard_error",
+  "signature": "def standard_error(values):",
+  "starter": "import math\n\n\ndef sample_mean(values):\n    return sum(values) / len(values)\n\n\ndef sample_sd(values):\n    m = sample_mean(values)\n    return math.sqrt(sum((x - m) ** 2 for x in values) / (len(values) - 1))\n\n\ndef standard_error(values):\n    # Your code here: divide the sample sd by the square root of n.\n    pass\n",
+  "visible": [
+    "test_known_values",
+    "test_matches_formula"
+  ],
+  "hidden": [
+    "test_single_value_raises",
+    "test_returns_float",
+    "test_no_mutation",
+    "test_more_data_is_tighter"
+  ],
+  "tests_py": "import math\n\ndef test_known_values():\n    assert abs(solution.standard_error([2, 4, 6, 8, 10]) - 1.41421356) < 1e-6\n\ndef test_matches_formula():\n    values = [1.0, 2.0, 3.0, 4.0, 10.0]\n    want = solution.sample_sd(values) / math.sqrt(len(values))\n    assert abs(solution.standard_error(values) - want) < 1e-12\n\ndef test_single_value_raises():\n    try:\n        solution.standard_error([5.0])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_returns_float():\n    assert isinstance(solution.standard_error([1, 2, 3]), float)\n\ndef test_no_mutation():\n    values = [1.0, 2.0, 3.0]\n    solution.standard_error(values)\n    assert values == [1.0, 2.0, 3.0]\n\ndef test_more_data_is_tighter():\n    values = [1.0, 2.0, 3.0, 4.0]\n    assert solution.standard_error(values * 4) < solution.standard_error(values)\n",
+  "mutations": [
+    "return sample_sd(values)",
+    "return sample_sd(values) / len(values)"
+  ]
+}

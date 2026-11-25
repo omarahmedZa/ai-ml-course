@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>040 — kNN &amp; the curse of dimensionality</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can run k-nearest-neighbours by hand, choose k, and explain why adding features can make neighbours meaningless.">
+</head>
+<body data-page="lesson" data-lesson="040" data-book="foundations" data-book-number="1">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 40 / 40</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 2 · Classical ML · lesson 5 of 9</p>
+  <h1>kNN &amp; the curse of dimensionality</h1>
+  <p class="objective">You can run k-nearest-neighbours by hand, choose k, and explain why adding features can make neighbours meaningless.</p>
+</header>
+<p class="bookline"><a href="../paths/foundations.html">Foundations</a><span class="chip">Classical ML</span></p>
+
+<h2>Why this matters<span class="h2-topic">— neighbours in high dimensions</span></h2>
+<p class="lede">k-nearest-neighbours is the most honest model in machine learning: to predict a label, find the <code>k</code> training points closest to the query and let them vote. No parameters are fitted, no assumption is made about the shape of the boundary, and the whole training phase is storing the data. It is the baseline every other classifier has to beat, and the idea underneath recommender systems, embedding search and retrieval-augmented generation.</p>
+<p><strong>The failure it prevents.</strong> A team adds 200 sensor features to a working 5-feature kNN and accuracy collapses. Nothing is broken: in 200 dimensions every point is roughly the same distance from every other, so "nearest" stops meaning "similar".</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>3</b><span>neighbours voting in the worked example</span></div>
+  <div><b>0.98</b><span>fraction of each axis needed to capture 10% of a 100-D cube</span></div>
+  <div><b>5.77</b><span>typical distance to a corner when <code>d = 100</code></span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— neighbours in high dimensions</span></h2>
+<p>Store every training point with its label. For a new query <code>q</code>, compute the distance to all of them, sort, take the <code>k</code> smallest, and return the majority label — or the average target for regression. That is the entire algorithm.</p>
+<p>The knob is <code>k</code>. With <code>k = 1</code> the prediction follows the closest single point, so one mislabelled example creates a wrong answer: low bias, high variance. With <code>k = n</code> every query gets the global majority: high bias, low variance. Small <code>k</code> draws a jagged boundary; large <code>k</code> draws a smooth one.</p>
+<p>The curse is separate. Even with a perfect <code>k</code>, the method assumes nearby points have similar labels. As dimensions grow, the distance to the nearest point approaches the distance to the farthest, and that assumption loses its content.</p>
+
+<div class="keybox"><span class="sym">ŷ = majority{ yᵢ : i ∈ k nearest to q }</span><p>k controls the bias–variance trade. Dimension controls whether "nearest" means anything.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— neighbours in high dimensions</span></h2>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-knn-t f-knn-d">
+    <title id="f-knn-t">Three neighbours vote, and the axis fraction needed with dimension</title>
+    <desc id="f-knn-d">Left: a scatter plot with five labelled points, a query at two-two, and a dashed circle of radius two containing its three nearest neighbours. Right: a bar chart showing the fraction of each axis needed to capture ten percent of a cube rising toward one as dimension grows.</desc>
+    <line x1="88" y1="290" x2="380" y2="290" stroke="var(--ink-faint)" stroke-width="1"/>
+    <line x1="100" y1="45" x2="100" y2="296" stroke="var(--ink-faint)" stroke-width="1"/>
+    <text x="372" y="308" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">x₁</text>
+    <text x="108" y="52" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">x₂</text>
+    <circle cx="210" cy="180" r="115" fill="none" stroke="var(--ink-faint)" stroke-width="1.4" stroke-dasharray="5 4"/>
+    <circle cx="155" cy="235" r="5" fill="var(--sym-data)"/>
+    <text x="142" y="252" font-size="12" fill="var(--sym-data)" font-family="ui-monospace, monospace">A</text>
+    <circle cx="210" cy="125" r="5" fill="var(--sym-param)"/>
+    <text x="218" y="118" font-size="12" fill="var(--sym-param)" font-family="ui-monospace, monospace">B</text>
+    <circle cx="320" cy="180" r="5" fill="var(--sym-data)"/>
+    <text x="328" y="174" font-size="12" fill="var(--sym-data)" font-family="ui-monospace, monospace">A</text>
+    <circle cx="265" cy="70" r="5" fill="var(--sym-param)"/>
+    <text x="273" y="64" font-size="12" fill="var(--sym-param)" font-family="ui-monospace, monospace">B</text>
+    <circle cx="100" cy="235" r="5" fill="var(--sym-data)"/>
+    <text x="76" y="230" font-size="12" fill="var(--sym-data)" font-family="ui-monospace, monospace">A</text>
+    <rect x="205" y="175" width="10" height="10" fill="var(--sym-pred)"/>
+    <text x="220" y="198" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">query</text>
+    <text x="60" y="330" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">k = 3: two A, one B</text>
+    <line x1="405" y1="300" x2="690" y2="300" stroke="var(--ink-faint)" stroke-width="1"/>
+    <line x1="405" y1="60" x2="405" y2="305" stroke="var(--ink-faint)" stroke-width="1"/>
+    <rect x="430" y="278" width="26" height="22" fill="var(--sym-data)"/>
+    <rect x="475" y="230" width="26" height="70" fill="var(--sym-data)"/>
+    <rect x="520" y="161" width="26" height="139" fill="var(--sym-data)"/>
+    <rect x="565" y="126" width="26" height="174" fill="var(--sym-data)"/>
+    <rect x="610" y="91" width="26" height="209" fill="var(--sym-data)"/>
+    <rect x="655" y="85" width="26" height="215" fill="var(--sym-data)"/>
+    <text x="443" y="318" text-anchor="middle" font-size="10" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1</text>
+    <text x="488" y="318" text-anchor="middle" font-size="10" fill="var(--ink-faint)" font-family="ui-monospace, monospace">2</text>
+    <text x="533" y="318" text-anchor="middle" font-size="10" fill="var(--ink-faint)" font-family="ui-monospace, monospace">5</text>
+    <text x="578" y="318" text-anchor="middle" font-size="10" fill="var(--ink-faint)" font-family="ui-monospace, monospace">10</text>
+    <text x="623" y="318" text-anchor="middle" font-size="10" fill="var(--ink-faint)" font-family="ui-monospace, monospace">50</text>
+    <text x="668" y="318" text-anchor="middle" font-size="10" fill="var(--ink-faint)" font-family="ui-monospace, monospace">100</text>
+    <text x="540" y="338" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">dimension d</text>
+    <text x="410" y="78" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1.0</text>
+    <text x="410" y="190" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.5</text>
+    <text x="540" y="46" text-anchor="middle" font-size="11" fill="var(--ink)" font-family="ui-monospace, monospace">axis fraction for 10% of points</text>
+  </svg>
+  <figcaption><strong>Takeaway.</strong> Three labelled neighbours give a majority vote in two dimensions; in 100 dimensions a "local" neighbourhood has grown to almost the whole cube.</figcaption>
+</figure>
+
+<h3>Part 1 — Measure, sort, vote</h3>
+<p>Distance is usually Euclidean: <code>d(q,x) = √Σ(qⱼ − xⱼ)²</code><span class="say" data-sym="Σ,√">(sigma, square root)</span>, summed over features <code>j</code>. Subtract, square, add, take the root. Scale matters enormously here, which is why features are standardised before kNN — a column measured in thousands will dominate every distance.</p>
+<p>Why this matters: kNN cannot learn which features matter, so the norm and scaling <em>are</em> its assumptions.</p>
+
+<h3>Part 2 — Choose k by validation, not by taste</h3>
+<p>Try several values and pick the one with the lowest validation error. Use an odd <code>k</code> for two-class problems so votes cannot tie. A common starting point is <code>k ≈ √n</code>: 10 for 100 training points, 32 for 1,000. Distance-weighting — letting closer neighbours count more — often helps when the data are dense.</p>
+<p>Why this matters: <code>k</code> is the only capacity dial. Too small follows noise; too large erases structure.</p>
+
+<h3>Part 3 — Watch the volume explode</h3>
+<p>A cube with side 1 has volume 1 whatever the dimension. To capture 10% of its points you need 10% of its volume, so each axis must cover <code>0.1^(1/d)</code>. At <code>d = 2</code> that is 0.32; at <code>d = 10</code>, 0.79; at <code>d = 100</code>, 0.977. A "local" neighbourhood in 100 dimensions spans almost the entire range of every feature.</p>
+<p>Distances behave the same way. A uniform point in the unit cube sits about <code>√(d/3)</code> from the origin: 0.82 at <code>d = 2</code>, 5.77 at <code>d = 100</code>. The spread around that average stays near 0.13 whatever the dimension, so at <code>d = 100</code> distances vary by about 2%.</p>
+
+<h3>Part 4 — Fix it with fewer dimensions, not more data</h3>
+<p>The responses are: scale and drop features; reduce with PCA before kNN; learn a metric that pulls same-label points together; or switch to a parametric model. More rows help the estimate inside a neighbourhood, not the neighbourhood's locality.</p>
+<p>Why this matters: doubling <code>n</code> in 100 dimensions barely changes the fraction of the cube your neighbours occupy.</p>
+
+<h2>Worked example<span class="h2-topic">— neighbours in high dimensions</span></h2>
+
+<h3>1. Five points, three values of k</h3>
+<p>Training points: <code>A(1,1)</code>, <code>B(2,3)</code>, <code>A(4,2)</code>, <code>B(3,4)</code>, <code>A(0,1)</code>. Query <code>q = (2,2)</code>.</p>
+<table>
+  <tr><th>Point</th><th>Label</th><th class="num">Difference</th><th class="num">Distance</th><th class="num">Rank</th></tr>
+  <tr><td><code>(1,1)</code></td><td>A</td><td class="num">(1, 1)</td><td class="num">1.414</td><td class="num">2</td></tr>
+  <tr><td><code>(2,3)</code></td><td>B</td><td class="num">(0, 1)</td><td class="num">1.000</td><td class="num">1</td></tr>
+  <tr><td><code>(4,2)</code></td><td>A</td><td class="num">(−2, 0)</td><td class="num">2.000</td><td class="num">3</td></tr>
+  <tr><td><code>(3,4)</code></td><td>B</td><td class="num">(−1, −2)</td><td class="num">2.236</td><td class="num">4</td></tr>
+  <tr><td><code>(0,1)</code></td><td>A</td><td class="num">(2, 1)</td><td class="num">2.236</td><td class="num">5</td></tr>
+</table>
+<p><strong>Read it as a sentence.</strong> At <code>k = 1</code> the answer is B, because <code>(2,3)</code> is one unit away. At <code>k = 3</code> the neighbours are B, A, A, so the vote is A by two to one. At <code>k = 5</code> the count is A: 3, B: 2, still A. One extra neighbour flips the <code>k = 1</code> answer, which is exactly the variance that larger <code>k</code> removes.</p>
+
+<h3>2. Why the third neighbour is on the fence</h3>
+<p>The circle in the figure has radius 2, and <code>(4,2)</code> sits at exactly 2.000. A rounding error pushing it to 2.001 would leave B, A, B and flip the prediction. Boundary cases like this are why odd <code>k</code> exists.</p>
+
+<h3>3. The same data in 100 dimensions</h3>
+<p>Add 95 noise features drawn uniformly from 0 to 1. Two independent draws differ by <code>1/6 = 0.17</code> squared on average, so <code>95 × 0.17 = 16</code> swamps the signal's 2. Every distance now sits near <code>√18 = 4.24</code>, and the true neighbour is indistinguishable from a random point. The vote approaches a coin flip although the first two features still separate A from B.</p>
+
+<h2>The trap<span class="h2-topic">— neighbours in high dimensions</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"More features give kNN more information."</strong> Features only help if they vary in a way that correlates with the label and varies less than the noise. Otherwise each one adds a little distance to every pair of points and dilutes the dimensions that were doing the work.</p>
+  <p>It feels right because in two dimensions an extra feature genuinely sharpens the picture. But the geometry changes with dimension: volume grows exponentially, so the data become sparse, and distances concentrate until the nearest point is barely nearer than a random one.</p>
+  <p><strong>Correction:</strong> judge a feature by validation error, not by whether it is informative in principle. Keep the count modest, scale and select, and reduce dimension before trusting kNN.</p>
+</div>
+<p><strong>The tell:</strong> validation accuracy falls when you add features that should be relevant, and the distance to the 1st neighbour is nearly the distance to the 100th. A second tell is that kNN loses to logistic regression on the same table — the signal is there, but the geometry has stopped being local.</p>
+
+<h2>Retrieval check<span class="h2-topic">— neighbours in high dimensions</span></h2>
+<ol class="quiz">
+  <li>Why is an odd <code>k</code> preferred for two classes, and what happens with <code>k = 2</code>?
+    <details><summary>Answer</summary>
+      <p>An odd <code>k</code> cannot split evenly, so no tie-break rule is needed. With <code>k = 2</code> one vote each is possible, and the prediction then depends on an arbitrary tie-break such as the smaller index.</p>
+    </details>
+  </li>
+  <li>At <code>d = 2</code> the axis fraction for 10% of a cube is 0.32. What is it at <code>d = 4</code>, and what does that say about locality?
+    <details><summary>Answer</summary>
+      <p><code>0.1^(1/4) = 0.562</code>. Just doubling the dimension forces the neighbourhood to cover more than half of each axis, so "local" is already weakening.</p>
+    </details>
+  </li>
+  <li>Your 1-NN classifier gets 95% on training data and 61% on validation. Is the problem variance, bias, or distance concentration?
+    <details><summary>Answer</summary>
+      <p>Most likely variance: with <code>k = 1</code> each training point predicts itself perfectly, so training accuracy is meaningless. Raise <code>k</code> or add data; if validation stays near chance, suspect distance concentration instead.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/040.html">Solve it · 040 — Debug the nearest-neighbour vote</a></p>
+<h2>Build it in Colab<span class="h2-topic">— neighbours in high dimensions</span></h2>
+<p>Runnable, NumPy-only: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/040-knn-curse-of-dimensionality.ipynb">open the notebook in Colab</a> · <a href="../notebooks/040-knn-curse-of-dimensionality.ipynb">local copy</a>. It computes the five distances, runs the vote for three values of <code>k</code>, and plots validation accuracy as noise features are added.</p>
+<pre><code>import numpy as np
+X = np.array([[1,1],[2,3],[4,2],[3,4],[0,1]],float)
+y = np.array(["A","B","A","B","A"])
+q = np.array([2.,2.])
+d = np.linalg.norm(X - q,axis=1)
+order = np.argsort(d)
+for k in (1,3,5):
+    labels,counts = np.unique(y[order[:k]],return_counts=True)
+    print(k,labels[counts.argmax()])</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— neighbours in high dimensions</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "You have 400 training points. Which k is the usual starting point, and why?", "o": ["k = 1, to stay local", "k = 20, since √400 = 20", "k = 400, to use all data", "k = 3, always"], "a": 1, "why": "The √n heuristic gives 20 here: large enough to average noise, small enough to stay local."}, {"q": "In 100 dimensions, the nearest and farthest of many random points are almost equidistant. What follows for kNN?", "o": ["It becomes more accurate", "Neighbour votes approach the global class balance", "Distances become negative", "k must be reduced to 1"], "a": 1, "why": "If all distances are nearly equal, the k neighbours are effectively random, so the vote reflects the base rate rather than local structure."}]</script></div>
+
+<div class="next">
+  <p><strong>End of Book 1.</strong> You now have the four foundations: linear algebra that finds directions, norms that define nearness, sampling that puts error bars on numbers, and the bias–variance split that explains why more capacity is not always better.</p>
+  <div class="pager">
+    <a href="039-estimation-bias-variance.html">← 39 · Estimation &amp; bias–variance</a>
+  </div>
+</div>
+
+<p class="source">Primary source: <a href="https://scikit-learn.org/stable/modules/neighbors.html">scikit-learn — Nearest neighbours</a> (the algorithm, its parameters, and the dimensionality warning).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

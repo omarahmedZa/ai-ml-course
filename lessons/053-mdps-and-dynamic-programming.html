@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>053 — MDPs &amp; dynamic programming</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can write an MDP's five parts and run value iteration on a three-state chain by hand.">
+</head>
+<body data-page="lesson" data-lesson="053" data-book="rl" data-book-number="5">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 53 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 5 · Reinforcement Learning · lesson 8 of 10</p>
+  <h1>MDPs &amp; dynamic programming</h1>
+  <p class="objective">You can write an MDP's five parts and run value iteration on a three-state chain by hand.</p>
+</header>
+<p class="bookline"><a href="../paths/rl.html">Reinforcement Learning</a><span class="chip">RL</span></p>
+
+<h2>Why this matters<span class="h2-topic">— the model</span></h2>
+<p class="lede">A reinforcement-learning problem needs a precise description before any algorithm can run. The description is a <strong>Markov decision process</strong>: states, actions, transition probabilities, rewards and a discount. Write those five parts and a vague task becomes a table you can compute with.</p>
+<p><strong>The failure it prevents.</strong> An agent is rewarded for each item it ships and learns to ship everything immediately, emptying the warehouse. The reward was attached to the wrong event; no amount of training fixes that. "Find the optimal policy" answered with the action that pays most right now is a one-step answer to an infinite-horizon question.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>3</b><span>states in the chain</span></div>
+  <div><b>0.9</b><span>discount per step; a reward ten steps away counts 0.35</span></div>
+  <div><b>0.9</b><span>value of the best first action, versus 0.5 for the tempting one</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— the Bellman backup</span></h2>
+<p>An MDP is the tuple <code>(S, A, P, R, γ)</code><span class="say" data-sym="γ,P">(gamma, P)</span>: <code>S</code> is the set of states, <code>A</code> the actions, <code>P(s′ | s, a)</code> the probability of landing in <code>s′</code>, <code>R(s, a)</code> the reward for a transition, and <code>γ</code> a number in [0, 1) that prices the future. A policy <code>π(a | s)</code><span class="say" data-sym="π">(pi)</span> says what to do in each state. Its value is the expected discounted return, not the next reward.</p>
+<p>In one line: <strong>the value of a state is its best one-step reward plus the discounted value of wherever you land.</strong> That sentence is the Bellman equation, and dynamic programming is what you get when you apply it to every state over and over until the numbers stop moving.</p>
+
+<div class="keybox"><span class="sym">V(s) ← maxₐ [ R(s,a) + γ Σₛ′ P(s′|s,a) V(s′) ]</span><p>The backup: look one step ahead, borrow the current estimate for the next state, and keep the better action.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— the sweep</span></h2>
+<p>Five parts to specify, then one loop to solve.</p>
+
+<h3>Part 1 — List the states, including the terminal one</h3>
+<p>Every distinguishable situation gets a state. Add an absorbing terminal state with value 0 so episodes can end. <strong>Why this part exists:</strong> a missing state merges two situations, and the agent behaves as if they were one.</p>
+
+<h3>Part 2 — List the actions and the transitions</h3>
+<p>For each state, list legal actions and, for each, the next states with probabilities summing to 1. <strong>Why this part exists:</strong> the transition table is the environment's physics; without it you can sample, not compute.</p>
+
+<h3>Part 3 — Put rewards on transitions</h3>
+<p>A reward belongs to <code>(s, a, s′)</code>, not to a state alone. Write down which event pays and how much. <strong>Why this part exists:</strong> placement defines behaviour — reward "shipping" and the agent empties the shelf.</p>
+
+<h3>Part 4 — Choose the discount γ</h3>
+<p><code>γ = 0.9</code> prices a reward one step away at 0.9, two steps at 0.81, ten steps at 0.35; <code>γ = 0</code> is myopic. <strong>Why this part exists:</strong> it is the exchange rate between now and later, and decides whether a slow good plan beats a fast mediocre one.</p>
+
+<h3>Part 5 — Sweep until the values settle</h3>
+<p>Initialise values at 0, apply the backup to every state, and repeat. Stop when the largest change is below a small threshold, then read the policy as the argmax action. <strong>Why this part exists:</strong> the Bellman equation is a fixed point, and repeated application converges to it when γ &lt; 1.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-mdp-t f-mdp-d">
+    <title id="f-mdp-t">A three-state chain with two actions at the first state</title>
+    <desc id="f-mdp-d">State A offers a shortcut to B with reward 0 and a scenic route to C with reward 0.5. State B leads to terminal state C with reward 1. The terminal state has value 0. Discounting makes the shortcut worth 0.9 and the scenic route 0.5.</desc>
+    <defs>
+      <marker id="f-mdp-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--ink-faint)"/>
+      </marker>
+      <marker id="f-mdp-k" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--sym-param)"/>
+      </marker>
+    </defs>
+
+    <circle cx="100" cy="180" r="42" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.8"/>
+    <text x="100" y="176" text-anchor="middle" font-size="17" fill="var(--sym-data)" font-family="ui-monospace, monospace">A</text>
+    <text x="100" y="196" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">start</text>
+
+    <circle cx="360" cy="100" r="42" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.8"/>
+    <text x="360" y="96" text-anchor="middle" font-size="17" fill="var(--sym-pred)" font-family="ui-monospace, monospace">B</text>
+    <text x="360" y="116" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">V = 1.0</text>
+
+    <circle cx="620" cy="180" r="42" fill="var(--card)" stroke="var(--sym-loss)" stroke-width="1.8"/>
+    <text x="620" y="176" text-anchor="middle" font-size="17" fill="var(--sym-loss)" font-family="ui-monospace, monospace">C</text>
+    <text x="620" y="196" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">terminal</text>
+
+    <path d="M142 168 C220 140, 270 118, 314 106" fill="none" stroke="var(--ink-faint)" stroke-width="1.8" marker-end="url(#f-mdp-a)"/>
+    <text x="210" y="116" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">shortcut · r = 0</text>
+
+    <path d="M138 196 C260 250, 380 280, 500 224" fill="none" stroke="var(--ink-faint)" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#f-mdp-a)"/>
+    <text x="330" y="278" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">scenic · r = 0.5</text>
+
+    <path d="M402 112 C480 130, 540 150, 578 166" fill="none" stroke="var(--ink-faint)" stroke-width="1.8" marker-end="url(#f-mdp-a)"/>
+    <text x="510" y="118" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">go · r = 1</text>
+
+    <rect x="36" y="300" width="300" height="44" rx="8" fill="none" stroke="var(--sym-param)" stroke-width="1.4"/>
+    <text x="186" y="318" text-anchor="middle" font-size="12" fill="var(--sym-param)" font-family="ui-monospace, monospace">Q(A, shortcut) = 0 + 0.9 × 1.0</text>
+    <text x="186" y="335" text-anchor="middle" font-size="12" fill="var(--sym-param)" font-family="ui-monospace, monospace">= 0.9</text>
+
+    <rect x="384" y="300" width="300" height="44" rx="8" fill="none" stroke="var(--sym-loss)" stroke-width="1.4"/>
+    <text x="534" y="318" text-anchor="middle" font-size="12" fill="var(--sym-loss)" font-family="ui-monospace, monospace">Q(A, scenic) = 0.5 + 0.9 × 0</text>
+    <text x="534" y="335" text-anchor="middle" font-size="12" fill="var(--sym-loss)" font-family="ui-monospace, monospace">= 0.5</text>
+  </svg>
+  <figcaption><strong>A reward now can lose to a larger reward one step later.</strong> The 0.5 is paid immediately; the shortcut pays nothing but reaches a state worth 1.0, which discounting turns into 0.9.</figcaption>
+</figure>
+
+<h2>Worked example<span class="h2-topic">— the arithmetic</span></h2>
+
+<h3>1. The five parts, written down</h3>
+<p>States <code>S = {A, B, C}</code> with C terminal. Actions: at A, <em>shortcut</em> or <em>scenic</em>; at B, <em>go</em>. Transitions are deterministic, so each probability is 1 or 0. Rewards are 0 for shortcut, 0.5 for scenic, 1 for go. Discount <code>γ = 0.9</code>.</p>
+
+<h3>2. Values by hand</h3>
+<p>Work backwards. The terminal state is worth 0. B pays 1 and then ends: <code>V(B) = 1 + 0.9(0) = 1.0</code>. At A, compare the two actions.</p>
+
+<table>
+  <tr><th>Action at A</th><th>Immediate</th><th>Next value</th><th class="num">Q</th></tr>
+  <tr><td>shortcut</td><td class="num">0</td><td class="num">0 + 0.9 × 1.0</td><td class="num">0.90</td></tr>
+  <tr><td>scenic</td><td class="num">0.5</td><td class="num">0.5 + 0.9 × 0</td><td class="num">0.50</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The greedy action is shortcut, worth 0.90, though scenic pays more immediately. The extra 0.5 cannot compensate for landing in a state worth 0 instead of 1.0.</p>
+
+<h3>3. Value iteration from an empty table</h3>
+<p>Start with <code>V = [0, 0, 0]</code> and apply the backup to A, B, C in that order. The table shows each sweep and the largest change.</p>
+
+<table>
+  <tr><th class="num">Sweep</th><th class="num">V(A)</th><th class="num">V(B)</th><th class="num">V(C)</th><th class="num">max Δ <span class="say" data-sym="Δ">(delta)</span></th></tr>
+  <tr><td class="num">0</td><td class="num">0.00</td><td class="num">0.00</td><td class="num">0.00</td><td class="num">—</td></tr>
+  <tr><td class="num">1</td><td class="num">0.50</td><td class="num">1.00</td><td class="num">0.00</td><td class="num">1.00</td></tr>
+  <tr><td class="num">2</td><td class="num">0.90</td><td class="num">1.00</td><td class="num">0.00</td><td class="num">0.40</td></tr>
+  <tr><td class="num">3</td><td class="num">0.90</td><td class="num">1.00</td><td class="num">0.00</td><td class="num">0.00</td></tr>
+</table>
+
+<p><strong>Sweep 1.</strong> With all next values at 0, A compares <code>0 + 0.9(0) = 0</code> against <code>0.5 + 0.9(0) = 0.5</code>, so scenic wins and <code>V(A) = 0.5</code>. B gets <code>1 + 0.9(0) = 1.0</code>.</p>
+<p><strong>Sweep 2.</strong> Now B is worth 1.0, so A compares <code>0 + 0.9(1.0) = 0.9</code> against <code>0.5 + 0.9(0) = 0.5</code>. Shortcut wins, <code>V(A) = 0.9</code>, and the largest change is 0.4.</p>
+<p><strong>Sweep 3.</strong> Nothing moves: 0.9 and 1.0 reproduce themselves. The loop stops, and the policy is shortcut at A, go at B.</p>
+
+<h2>The trap<span class="h2-topic">— the horizon</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"V(s) is the reward of being in state s."</strong> Value is the expected discounted return from that state onward, under a policy, and it includes rewards not yet received.</p>
+  <p>It feels right because the number is attached to a state and often equals a reward in the simplest chain. But the same state can be worth different amounts under different policies, and its value changes when γ changes even though every reward is untouched. A state with no reward can be the most valuable one on the board.</p>
+  <p><strong>Correction:</strong> read <code>V(s)</code> as "what I expect to collect from here", and <code>Q(s,a)</code> as "what I expect to collect if I take this action first". Neither is a property of the state alone.</p>
+</div>
+<p><strong>The tell:</strong> a value exceeds the largest single reward — 0.9 is fine here, but 8.0 with a maximum reward of 1.0 means the future is being accumulated, not double-counted. The second tell is a policy that changes when you alter only γ. The third is a zero in a non-terminal state, meaning the backup never reached it.</p>
+
+<h2>Retrieval check<span class="h2-topic">— recall</span></h2>
+<ol class="quiz">
+  <li>Name the five parts of an MDP.
+    <details><summary>Answer</summary>
+      <p>States, actions, transition probabilities <code>P(s′|s,a)</code>, rewards <code>R(s,a)</code>, and discount <code>γ</code>.</p>
+    </details>
+  </li>
+  <li>Why does value iteration start from zeros and still converge?
+    <details><summary>Answer</summary>
+      <p>The Bellman operator is a contraction when <code>γ &lt; 1</code>, so repeated backups shrink the error toward a unique fixed point from any start.</p>
+    </details>
+  </li>
+  <li>With γ = 0.9, what is a reward of 1 worth two steps away?
+    <details><summary>Answer</summary>
+      <p><code>0.9² = 0.81</code>. Each step multiplies by another 0.9, so distance is priced exponentially.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/053.html">Solve it · 053 — Value iteration on a chain</a></p>
+<h2>Build it in Colab<span class="h2-topic">— the notebook</span></h2>
+<p>Runnable, NumPy-only: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/053-mdps-and-dynamic-programming.ipynb">open the notebook in Colab</a> · <a href="../notebooks/053-mdps-and-dynamic-programming.ipynb">local copy</a>. It runs value iteration on this chain and prints each sweep.</p>
+<pre><code>import numpy as np
+V = np.zeros(3)                      # A, B, C(terminal)
+gamma = 0.9
+for sweep in range(10):
+    V[0] = max(0 + gamma * V[1], 0.5 + gamma * V[2])   # A
+    V[1] = 1 + gamma * V[2]                            # B
+    print(sweep, V.round(2))         # 0.5 1.0 0.0, then 0.9 1.0 0.0</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— drill</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "With γ = 0.9, a reward of 1 three steps away is worth…", "o": ["0.729", "0.9", "3.0", "0.271"], "a": 0, "why": "0.9 × 0.9 × 0.9 = 0.729; discounting compounds per step."}, {"q": "A policy grabs 0.5 now instead of 0.9 next step. With γ = 0.9 it…", "o": ["loses 0.4 in value", "is optimal", "ties", "gains 0.5"], "a": 0, "why": "0.5 versus 0.9 × 1.0 = 0.9, so the impatient policy is 0.4 worse."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → Topic 54: Bandits beyond ε <span class="say" data-sym="ε">(epsilon)</span>-greedy.</strong> Dynamic programming assumes you know the transitions. The next lesson removes the table and asks how to explore when every pull teaches you something.</p>
+  <div class="pager">
+    <a href="052-rag-and-tool-use.html">← 52 · RAG &amp; tool use</a>
+    <a href="054-bandits-beyond-epsilon-greedy.html">Next · 54 · Bandits beyond ε-greedy</a>
+  </div>
+</div>
+
+<p class="source">Primary source: Sutton &amp; Barto, <a href="http://incompleteideas.net/book/the-book-2nd.html">Reinforcement Learning: An Introduction</a>, chapters 3–4.</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

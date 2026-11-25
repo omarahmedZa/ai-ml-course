@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>039 — Estimation &amp; bias–variance</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can split an estimator's expected error into bias squared plus variance, and choose between two estimators on that total.">
+</head>
+<body data-page="lesson" data-lesson="039" data-book="foundations" data-book-number="1">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 39 / 40</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 1 · Foundations · lesson 7 of 7</p>
+  <h1>Estimation &amp; bias–variance</h1>
+  <p class="objective">You can split an estimator's expected error into bias squared plus variance, and choose between two estimators on that total.</p>
+</header>
+<p class="bookline"><a href="../paths/foundations.html">Foundations</a><span class="chip">Probability &amp; Statistics</span></p>
+
+<h2>Why this matters<span class="h2-topic">— the two errors</span></h2>
+<p class="lede">An estimator is a recipe: feed it a sample, get a number. The sample mean is a recipe for a centre; a fitted polynomial is a recipe for a curve. Recipes differ in two ways — some aim at the wrong target, and some wobble from sample to sample. Knowing which is which tells you whether more data will help, whether a simpler model will help, and why the model with the best training score is often not the one to ship.</p>
+<p><strong>The failure it prevents.</strong> A team sees training error fall from 4.0 to 0.01 as they increase polynomial degree, and concludes that degree 12 is best. On held-out data it scores 9.5. Nothing was wrong with the fitting code; the recipe had become so sensitive to the particular sample that it memorised noise. Bias–variance is the accounting that predicts this before the test set does.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>1.00</b><span>MSE of the sample mean in the worked example</span></div>
+  <div><b>0.99</b><span>MSE of a slightly biased estimator</span></div>
+  <div><b>0.09</b><span>the bias squared that bought the improvement</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— the two errors</span></h2>
+<p>Pick a target <code>θ</code><span class="say" data-sym="θ">(theta)</span> (theta) — a true mean, a true curve, a true probability. An estimator <code>θ̂</code> (theta-hat) is a random quantity, because it is computed from a random sample. Its expected error has three parts:</p>
+<span class="formula">E[(θ̂ − θ)²] = bias² + variance + noise</span>
+<p><strong>Bias</strong> is how far the average estimate sits from the truth: <code>bias = E[θ̂] − θ</code>. <strong>Variance</strong> is how far estimates scatter around their own average: <code>E[(θ̂ − E[θ̂])²]</code>. <strong>Noise</strong> is the irreducible part, the randomness in the data that no estimator can remove.</p>
+<p>The first two are a trade-off. A rigid recipe has low variance and high bias; a flexible one has low bias and high variance. Total error is their sum, so the best model is usually neither the simplest nor the most flexible, but the one at the bottom of the U.</p>
+
+<div class="keybox"><span class="sym">Error = bias² + variance + noise</span><p>Bias is aiming wrong. Variance is wobbling. More data shrinks variance, not bias.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— the two errors</span></h2>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-bv-t f-bv-d">
+    <title id="f-bv-t">Bias, variance and total error against complexity</title>
+    <desc id="f-bv-d">Axes with model complexity on the horizontal axis and error on the vertical. A falling curve is labelled bias squared, a rising curve is labelled variance, and their sum is a U-shaped curve labelled total test error with a minimum in the middle.</desc>
+    <line x1="80" y1="300" x2="530" y2="300" stroke="var(--ink-faint)" stroke-width="1.2"/>
+    <line x1="80" y1="40" x2="80" y2="305" stroke="var(--ink-faint)" stroke-width="1.2"/>
+    <polygon points="530,300 522,296 522,304" fill="var(--ink-faint)"/>
+    <polygon points="80,40 76,48 84,48" fill="var(--ink-faint)"/>
+    <text x="530" y="320" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">complexity</text>
+    <text x="88" y="34" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">error</text>
+    <polyline points="80,102 102,130 124,153 146,173 168,190 190,205 212,217 234,228 256,237 278,245 300,251 322,257 344,262 366,266 388,269 410,272 432,275 454,277 476,279 498,280 520,281" fill="none" stroke="var(--sym-loss)" stroke-width="2"/>
+    <polyline points="80,291 102,291 124,289 146,287 168,283 190,279 212,273 234,267 256,260 278,251 300,242 322,231 344,220 366,208 388,194 410,180 432,164 454,148 476,131 498,113 520,93" fill="none" stroke="var(--sym-pred)" stroke-width="2"/>
+    <polyline points="80,93 102,120 124,142 146,160 168,174 190,184 212,191 234,195 256,197 278,196 300,193 322,188 344,182 366,173 388,163 410,152 432,139 454,125 476,109 498,93 520,75" fill="none" stroke="var(--sym-data)" stroke-width="2.6"/>
+    <circle cx="300" cy="193" r="4" fill="var(--sym-data)"/>
+    <text x="310" y="186" font-size="11" fill="var(--sym-data)" font-family="ui-monospace, monospace">best test error</text>
+    <text x="90" y="96" font-size="11" fill="var(--sym-loss)" font-family="ui-monospace, monospace">bias²</text>
+    <text x="440" y="106" font-size="11" fill="var(--sym-pred)" font-family="ui-monospace, monospace">variance</text>
+    <text x="120" y="82" font-size="11" fill="var(--sym-data)" font-family="ui-monospace, monospace">total</text>
+    <text x="210" y="330" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">simple</text>
+    <text x="430" y="330" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">flexible</text>
+  </svg>
+  <figcaption><strong>Takeaway.</strong> The total is the U. Moving left trades variance for bias, moving right trades bias for variance, and only the sum tells you which direction is downhill.</figcaption>
+</figure>
+
+<h3>Part 1 — Bias is a systematic miss</h3>
+<p>Sample the heights of 100 people and report the average. That estimator is unbiased: repeat the study many times and the average of your averages equals the true mean. Now report <code>max(height)</code> instead. It is always below the true population maximum, so its average is below too — a bias that more data cannot fix, because the largest value in a larger sample only creeps upward.</p>
+<p>Why this matters: bias points somewhere. If labels are noisy, predictions are pulled toward the middle, and extra rows do not remove that pull.</p>
+
+<h3>Part 2 — Variance is a wobble</h3>
+<p>Fit the same model to two samples of 100 and the coefficients differ. Variance measures how much. A degree-12 polynomial through 20 points swings wildly when one point moves; a straight line barely moves. High variance is a recipe that reads the sample too literally.</p>
+<p>Why this matters: variance falls as <code>1/n</code>, so adding rows or averaging models reduces it.</p>
+
+<h3>Part 3 — Regularisation buys bias to cut variance</h3>
+<p>Adding a penalty <code>λ‖w‖²</code><span class="say" data-sym="λ">(lambda)</span> (lambda) shrinks weights toward zero. The model can no longer fit every wrinkle, so bias rises, but the fitted curve stops chasing individual points, so variance falls. Ridge regression is exactly this trade, controlled by one dial.</p>
+<p>Why this matters: it is the practical lever. When test error climbs while training error falls, increase the penalty.</p>
+
+<h3>Part 4 — Estimate the split in practice</h3>
+<p>Train many models on resampled datasets at one input point. The gap between their average and the truth estimates bias²; their spread estimates variance.</p>
+<p>Why this matters: it turns a vague complaint about overfitting into two quantities, and says which dominates.</p>
+
+<h2>Worked example<span class="h2-topic">— the two errors</span></h2>
+
+<h3>1. A biased estimator that wins</h3>
+<p>True mean <code>μ = 10</code><span class="say" data-sym="μ">(mu)</span> (mu), population spread <code>σ = 2</code><span class="say" data-sym="σ">(sigma)</span>, sample size <code>n = 4</code>. The sample mean has standard error <code>σ/√n = 1</code><span class="say" data-sym="√">(square root)</span>, so its variance is 1 and its bias is 0. Total MSE: <code>0 + 1 = 1.00</code>.</p>
+<p>Now consider the shrunken estimator <code>θ̂ = 0.95x̄ + 0.2</code>. Its average is <code>0.95(10) + 0.2 = 9.7</code>, so bias is <code>−0.3</code> and bias² is <code>0.09</code>. Its variance is <code>0.95² × 1 = 0.9025</code>. Total: <code>0.09 + 0.9025 = 0.9925</code>.</p>
+
+<table>
+  <tr><th>Estimator</th><th class="num">Bias</th><th class="num">Bias²</th><th class="num">Variance</th><th class="num">MSE</th></tr>
+  <tr><td><code>x̄</code></td><td class="num">0.00</td><td class="num">0.00</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+  <tr><td><code>0.95x̄ + 0.2</code></td><td class="num">−0.30</td><td class="num">0.09</td><td class="num">0.903</td><td class="num"><strong>0.993</strong></td></tr>
+  <tr><td><code>0.8x̄ + 1</code></td><td class="num">−1.00</td><td class="num">1.00</td><td class="num">0.640</td><td class="num">1.640</td></tr>
+</table>
+
+<p><strong>Read it as a sentence.</strong> Pulling the estimate 5% toward 9.7 costs 0.09 in squared bias and saves 0.0975 in variance, so total error falls slightly. Pulling harder costs 1.00 to save 0.36, and loses badly. The optimum is a small amount of bias.</p>
+
+<h3>2. The same U in model degree</h3>
+<p>Fit polynomials to 20 noisy points from a smooth curve. Training error falls monotonically with degree: 4.0 at degree 1, 1.1 at degree 3, 0.01 at degree 12. Test error does not: 4.2, 1.3, then 9.5.</p>
+<p><strong>What to notice.</strong> Degree 1 cannot bend, so both errors are high — bias. Degree 12 bends through every point, so a new sample gives a different curve — variance. Degree 3 sits near the bottom of the U, and only the test set reveals this.</p>
+
+<h3>3. More data moves the whole curve</h3>
+<p>With 200 points instead of 20, the variance of the degree-12 fit falls to roughly <code>20/200 = 0.1</code> of its former size, and test error may drop from 9.5 to 2.0. Overfitting is a property of a model <em>at a sample size</em>.</p>
+
+<h2>The trap<span class="h2-topic">— the two errors</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"An unbiased estimator is always better."</strong> Unbiasedness is one virtue, not the only one. MSE cares about the sum, and a small bias can buy a large reduction in variance. The table above has an unbiased estimator losing to a biased one.</p>
+  <p>It feels right because bias sounds like a defect and zero sounds like a target. But the unbiased recipe can be so noisy that any single estimate is far off, while a slightly shrunken one is close on average. Shrinkage is the basis of ridge regression, James–Stein estimation and the empirical-Bayes methods behind modern hierarchical models.</p>
+  <p><strong>Correction:</strong> compare estimators by expected squared error, not by bias alone. Report both terms, and say which one your sample size makes dominant.</p>
+</div>
+<p><strong>The tell:</strong> training error falls while test error rises — variance is winning. Both errors stay high and adding data barely helps — bias is winning. The first calls for more data or regularisation; the second calls for a richer model or better features.</p>
+
+<h2>Retrieval check<span class="h2-topic">— the two errors</span></h2>
+<ol class="quiz">
+  <li>An estimator has bias 0.4, variance 0.25 and the data noise is 0.1. What is its MSE?
+    <details><summary>Answer</summary>
+      <p><code>0.4² + 0.25 + 0.1 = 0.16 + 0.25 + 0.1 = 0.51</code>. Squaring the bias is the step people skip.</p>
+    </details>
+  </li>
+  <li>Training error 0.02, test error 4.8, and the gap grows with model size. Which term dominates, and what are two fixes?
+    <details><summary>Answer</summary>
+      <p>Variance dominates. Fixes: more training data (variance falls as <code>1/n</code>), or restrict the model — stronger regularisation, fewer features, a simpler class.</p>
+    </details>
+  </li>
+  <li>Why can adding data never remove bias?
+    <details><summary>Answer</summary>
+      <p>Bias is a property of the estimator's target, not of sample size. Averaging more draws narrows the distribution around <code>E[θ̂]</code>, but if that centre is not <code>θ</code>, the gap stays.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/039.html">Solve it · 039 — Debug the bias–variance sum</a></p>
+<h2>Build it in Colab<span class="h2-topic">— the two errors</span></h2>
+<p>Runnable, NumPy-only: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/039-estimation-bias-variance.ipynb">open the notebook in Colab</a> · <a href="../notebooks/039-estimation-bias-variance.ipynb">local copy</a>. It simulates many datasets, plots bias², variance and total error, and finds the degree at the bottom of the U.</p>
+<pre><code>import numpy as np
+mu,sigma,n = 10.0,2.0,4
+rng = np.random.default_rng(0)
+draws = rng.normal(mu,sigma,size=(20000,n)).mean(axis=1)
+print(draws.mean())                  # about 10,bias near 0
+print(draws.var())                   # about 1.0
+shrunk = 0.95 * draws + 0.2
+print(((shrunk - mu) ** 2).mean())   # about 0.99</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— the two errors</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Estimator A has bias 0 and variance 4. Estimator B has bias 1 and variance 1. Which has lower MSE, ignoring noise?", "o": ["A, because it is unbiased", "B, because 1 + 1 = 2 < 4", "They tie", "Cannot be compared"], "a": 1, "why": "MSE is bias² + variance: A gives 4, B gives 1 + 1 = 2. A small bias can be worth a large variance reduction."}, {"q": "Test error is high and identical for the simplest and most complex model, and doubling the data changes neither. What is the diagnosis?", "o": ["High variance", "High bias", "Label leakage", "The test set is too large"], "a": 1, "why": "A flat curve and no response to more data point to bias: the model class cannot represent the pattern."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → Topic 40: kNN &amp; the curse of dimensionality.</strong> Bias and variance become concrete when the model is "copy your neighbours". Topic 40 shows why that recipe collapses as features are added.</p>
+  <div class="pager">
+    <a href="038-distributions-and-sampling.html">← 38 · Distributions &amp; sampling</a>
+    <a href="040-knn-curse-of-dimensionality.html">Next · 40 · kNN &amp; the curse of dimensionality</a>
+  </div>
+</div>
+
+<p class="source">Primary source: <a href="https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html">scikit-learn — learning curves</a> (train and validation error against sample size).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

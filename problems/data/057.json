@@ -1,0 +1,32 @@
+{
+  "id": "057",
+  "lesson": "057",
+  "book": "trust",
+  "title": "Expected calibration error, weighted",
+  "difficulty": "medium",
+  "shape": "extend",
+  "categories": [
+    "evaluation-metrics",
+    "calibration"
+  ],
+  "statement_md": "`brier_score(probs, labels)` already works. Add `expected_calibration_error(probs, labels, bins=10)` returning the weighted average gap between confidence and observed frequency.\n\n- bin index is `min(int(p * bins), bins - 1)`, so `p == 1.0` lands in the last bin\n- for each non-empty bin, gap is `abs(mean(probs) - mean(labels))` and weight is `count / n`\n- ECE is the sum of `weight * gap`\n\nRaise `ValueError` if the sequences differ in length, are empty, `bins < 1`, or any probability lies outside `[0, 1]`. Do not change `brier_score`.",
+  "entry": "expected_calibration_error",
+  "signature": "def expected_calibration_error(probs, labels, bins=10):",
+  "starter": "def brier_score(probs, labels):\n    total = 0.0\n    for p, y in zip(probs, labels):\n        total += (p - y) ** 2\n    return total / len(probs)\n\n\ndef expected_calibration_error(probs, labels, bins=10):\n    # Your code here: bin, measure each gap, weight by bin size.\n    pass\n",
+  "visible": [
+    "test_perfect",
+    "test_single_bin"
+  ],
+  "hidden": [
+    "test_two_bins",
+    "test_length_mismatch",
+    "test_invalid_prob",
+    "test_invalid_bins",
+    "test_brier_unchanged"
+  ],
+  "tests_py": "def test_perfect():\n    p = [0.0, 0.0, 1.0, 1.0]\n    y = [0, 0, 1, 1]\n    assert abs(solution.expected_calibration_error(p, y) - 0.0) < 1e-12\n\ndef test_single_bin():\n    p = [0.2, 0.2, 0.2, 0.2]\n    y = [0, 0, 1, 1]\n    assert abs(solution.expected_calibration_error(p, y) - 0.3) < 1e-12\n\ndef test_two_bins():\n    p = [0.1, 0.1, 0.9, 0.9]\n    y = [1, 0, 0, 1]\n    assert abs(sum(p) / len(p) - sum(y) / len(y)) < 1e-12\n    assert abs(solution.expected_calibration_error(p, y) - 0.4) < 1e-12\n\ndef test_length_mismatch():\n    try:\n        solution.expected_calibration_error([0.2, 0.8], [1])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_invalid_prob():\n    try:\n        solution.expected_calibration_error([1.2], [1])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_invalid_bins():\n    try:\n        solution.expected_calibration_error([0.5], [1], bins=0)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_brier_unchanged():\n    assert abs(solution.brier_score([0.9], [1]) - 0.01) < 1e-12\n",
+  "mutations": [
+    "return 0.0",
+    "return abs(sum(probs) / len(probs) - sum(labels) / len(labels))"
+  ]
+}

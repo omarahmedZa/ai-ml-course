@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>057 — Expected calibration error, weighted</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Expected calibration error, weighted — a graded problem on evaluation-metrics.">
+</head>
+<body data-page="problem" data-problem="057">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">057 · medium</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 057 · extend</p>
+  <h1>Expected calibration error, weighted</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Evaluation Metrics</span><span class="chip">Calibration</span><a href="../lessons/057-calibration-and-uncertainty.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>brier_score(probs, labels)</code> already works. Add <code>expected_calibration_error(probs, labels, bins=10)</code> returning the weighted average gap between confidence and observed frequency.</p>
+<ul><li>bin index is <code>min(int(p * bins), bins - 1)</code>, so <code>p == 1.0</code> lands in the last bin</li><li>for each non-empty bin, gap is <code>abs(mean(probs) - mean(labels))</code> and weight is <code>count / n</code></li><li>ECE is the sum of <code>weight * gap</code></li></ul>
+<p>Raise <code>ValueError</code> if the sequences differ in length, are empty, <code>bins &lt; 1</code>, or any probability lies outside <code>[0, 1]</code>. Do not change <code>brier_score</code>.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def expected_calibration_error(probs, labels, bins=10):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def brier_score(probs, labels):
+    total = 0.0
+    for p, y in zip(probs, labels):
+        total += (p - y) ** 2
+    return total / len(probs)
+
+
+def expected_calibration_error(probs, labels, bins=10):
+    # Your code here: bin, measure each gap, weight by bin size.
+    pass
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_perfect</code></li><li><code>test_single_bin</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 057
+# edit work/057/solution.py
+python3 dml.py run 057
+python3 dml.py submit 057</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-057">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-057" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="056.html">← 056 · Fairness gaps from a decision table</a><a href="058.html">058 · Nearest-rank percentile, off the end →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

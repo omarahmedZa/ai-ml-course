@@ -1,0 +1,32 @@
+{
+  "id": "056",
+  "lesson": "056",
+  "book": "trust",
+  "title": "Fairness gaps from a decision table",
+  "difficulty": "medium",
+  "shape": "scratch",
+  "categories": [
+    "evaluation-metrics",
+    "fairness"
+  ],
+  "statement_md": "Write `bias_gaps(y_true, y_pred, groups)` returning a dict with two floats:\n\n- `demographic_parity`: the largest selection rate minus the smallest, where a group's selection rate is the share of its rows with `y_pred == 1`\n- `equal_opportunity`: the same gap computed over true-positive rates, where a group's TPR is the share predicted 1 among rows with `y_true == 1`\n\nGroups with no positive labels are skipped when computing equal opportunity; if fewer than two groups remain, report `0.0` for it.\n\nRaise `ValueError` when the three sequences differ in length or fewer than two distinct groups are present. Do not mutate the inputs.",
+  "entry": "bias_gaps",
+  "signature": "def bias_gaps(y_true, y_pred, groups):",
+  "starter": "def bias_gaps(y_true, y_pred, groups):\n    \"\"\"Return demographic-parity and equal-opportunity gaps.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_parity_gap",
+    "test_opportunity_gap"
+  ],
+  "hidden": [
+    "test_length_mismatch",
+    "test_single_group",
+    "test_no_positive_group",
+    "test_unequal_group_sizes",
+    "test_no_mutation"
+  ],
+  "tests_py": "def test_parity_gap():\n    y = [1, 1, 0, 0, 1, 0, 1, 0]\n    p = [1, 1, 0, 0, 1, 0, 0, 0]\n    g = [\"A\"] * 4 + [\"B\"] * 4\n    r = solution.bias_gaps(y, p, g)\n    assert abs(r[\"demographic_parity\"] - 0.25) < 1e-12\n\ndef test_opportunity_gap():\n    y = [1, 1, 0, 0, 1, 0, 1, 0]\n    p = [1, 1, 0, 0, 1, 0, 0, 0]\n    g = [\"A\"] * 4 + [\"B\"] * 4\n    r = solution.bias_gaps(y, p, g)\n    assert abs(r[\"equal_opportunity\"] - 0.5) < 1e-12\n\ndef test_length_mismatch():\n    try:\n        solution.bias_gaps([1, 0], [1], [\"A\", \"B\"])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_single_group():\n    try:\n        solution.bias_gaps([1, 0], [1, 0], [\"A\", \"A\"])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_no_positive_group():\n    y = [1, 1, 0, 0, 0, 0, 0, 0]\n    p = [1, 1, 0, 0, 1, 0, 0, 0]\n    g = [\"A\"] * 4 + [\"B\"] * 4\n    r = solution.bias_gaps(y, p, g)\n    assert abs(r[\"demographic_parity\"] - 0.25) < 1e-12\n    assert r[\"equal_opportunity\"] == 0.0\n\ndef test_unequal_group_sizes():\n    y = [1, 1, 0, 0, 1, 1]\n    p = [1, 0, 0, 0, 1, 1]\n    g = [\"A\"] * 4 + [\"B\"] * 2\n    r = solution.bias_gaps(y, p, g)\n    assert abs(r[\"demographic_parity\"] - 0.75) < 1e-12\n    assert abs(r[\"equal_opportunity\"] - 0.5) < 1e-12\n\ndef test_no_mutation():\n    y, p, g = [1, 0, 1, 0], [1, 0, 0, 0], [\"A\", \"A\", \"B\", \"B\"]\n    solution.bias_gaps(y, p, g)\n    assert y == [1, 0, 1, 0] and p == [1, 0, 0, 0] and g == [\"A\", \"A\", \"B\", \"B\"]\n\n",
+  "mutations": [
+    "return {\"demographic_parity\": 0.0, \"equal_opportunity\": _tpr_gap(y_true, y_pred, groups)}",
+    "return {\"demographic_parity\": _selection_gap(y_pred, groups), \"equal_opportunity\": 0.0}"
+  ]
+}

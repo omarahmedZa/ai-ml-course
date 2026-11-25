@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>043 — PCA &amp; dimensionality reduction</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can centre a matrix, read a covariance, and explain what a principal component's eigenvalue measures.">
+</head>
+<body data-page="lesson" data-lesson="043" data-book="classical-ml" data-book-number="2">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 43 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 2 · Classical ML · lesson 8 of 9</p>
+  <h1>PCA &amp; dimensionality reduction</h1>
+  <p class="objective">You can centre a matrix, read a covariance, and explain what a principal component's eigenvalue measures.</p>
+</header>
+<p class="bookline"><a href="../paths/classical-ml.html">Classical ML</a><span class="chip">Classical ML</span></p>
+
+<h2>Why this matters<span class="h2-topic">— variance</span></h2>
+<p class="lede">A 28×28 image is 784 numbers, but the pixels are not independent: neighbouring pixels move together, and most of the variation lives in a few directions — overall brightness, contrast, a handful of strokes. PCA finds those directions. It compresses the table, makes it plottable, and removes directions that are mostly noise. The same rotation sits inside image compression, feature whitening, and the first layer of many older vision pipelines.</p>
+<p><strong>The failure it prevents.</strong> An exam question gives a covariance matrix and asks how much variance the first component explains. Without eigenvalues you can only say "a lot". With them the answer is a ratio: <code>5.24 / 6.00 = 87%</code>. The same gap appears in code: PCA run before a train/test split peeks at the test rows, and a downstream score that looked strong collapses when the model meets genuinely new data.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>784</b><span>pixels in one 28×28 image</span></div>
+  <div><b>2</b><span>components you can plot</span></div>
+  <div><b>87%</b><span>variance on the first axis, in the example below</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— variance</span></h2>
+<p>Centre the data so its mean sits at the origin, then look for the direction along which the points are most spread out. That direction is the first <strong>principal component</strong>. Project every point onto it and you have replaced <code>d</code> coordinates with one. Then find the direction orthogonal to the first that carries the most remaining spread, and repeat.</p>
+<p>In one line: <strong>PCA rotates the axes to line up with the variance, then throws away the axes with little of it.</strong> Each new axis is a weighted sum of the old features, and its eigenvalue is exactly the variance of the data along that axis.</p>
+
+<div class="keybox"><span class="sym">variance → direction → eigenvalue</span><p>The component is where the spread points; the eigenvalue is how much spread is there.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— variance</span></h2>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-pca-t f-pca-d">
+    <title id="f-pca-t">A cloud, its principal axes, and the variance they capture</title>
+    <desc id="f-pca-d">A tilted cloud of grey points lies inside a dashed ellipse. A long arrow labelled PC1 runs along the cloud and a short perpendicular arrow labelled PC2 crosses it. PC1 captures most of the spread; PC2 captures the thin direction left over.</desc>
+    <line x1="70" y1="300" x2="650" y2="300" stroke="var(--ink-faint)" stroke-width="1.2"/>
+    <line x1="70" y1="300" x2="70" y2="55" stroke="var(--ink-faint)" stroke-width="1.2"/>
+    <ellipse cx="390" cy="175" rx="175" ry="52" transform="rotate(-27 390 175)" fill="none" stroke="var(--ink-faint)" stroke-width="1.3" stroke-dasharray="6 5"/>
+    <circle cx="285" cy="235" r="5" fill="var(--sym-data)"/>
+    <circle cx="320" cy="222" r="5" fill="var(--sym-data)"/>
+    <circle cx="338" cy="200" r="5" fill="var(--sym-data)"/>
+    <circle cx="365" cy="190" r="5" fill="var(--sym-data)"/>
+    <circle cx="390" cy="175" r="5" fill="var(--sym-data)"/>
+    <circle cx="420" cy="158" r="5" fill="var(--sym-data)"/>
+    <circle cx="452" cy="133" r="5" fill="var(--sym-data)"/>
+    <circle cx="472" cy="122" r="5" fill="var(--sym-data)"/>
+    <circle cx="505" cy="100" r="5" fill="var(--sym-data)"/>
+    <circle cx="530" cy="88" r="5" fill="var(--sym-data)"/>
+    <line x1="230" y1="255" x2="560" y2="78" stroke="var(--sym-pred)" stroke-width="2.6"/>
+    <polygon points="560,78 548,80 554,89" fill="var(--sym-pred)"/>
+    <text x="520" y="66" font-size="13" fill="var(--sym-pred)" font-family="ui-monospace, monospace">PC1 · 87%</text>
+    <line x1="368" y1="196" x2="416" y2="140" stroke="var(--sym-opt)" stroke-width="2.2"/>
+    <polygon points="416,140 406,143 412,150" fill="var(--sym-opt)"/>
+    <text x="424" y="134" font-size="13" fill="var(--sym-opt)" font-family="ui-monospace, monospace">PC2 · 13%</text>
+    <text x="330" y="330" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">the long axis is where the variance lives</text>
+  </svg>
+  <figcaption><strong>Takeaway.</strong> PCA does not choose axes that separate classes; it chooses axes that explain spread. PC2 is short here, so dropping it loses only 13% of the variance.</figcaption>
+</figure>
+
+<h3>Part 1 — Centre the columns</h3>
+<p>For each feature, subtract its column mean. If <code>x̄ⱼ</code> is the mean of column <code>j</code>, the centred entry is <code>xᵢⱼ − x̄ⱼ</code>. The centred matrix <code>Xc</code> has mean zero in every column. Skipping this step leaves the data sitting away from the origin, and the "direction of maximum variance" then points at the offset rather than at the spread.</p>
+
+<h3>Part 2 — Build the covariance matrix</h3>
+<p>The covariance matrix <code>C</code> is <code>d × d</code>. Its diagonal entry <code>Cⱼⱼ</code> is the variance of feature <code>j</code>; its off-diagonal entry <code>Cⱼₖ</code> says how features <code>j</code> and <code>k</code> move together. Computed from centred rows,</p>
+<span class="formula">C = (1 / (n − 1)) Σᵢ xᵢ xᵢᵀ</span>
+<p>with <code>n</code> rows and <code>xᵢ</code> written as a column. A positive off-diagonal means the two features rise together; a negative one means one rises as the other falls.</p>
+
+<h3>Part 3 — Eigenvectors and eigenvalues</h3>
+<p>A vector <code>v</code> is an eigenvector of <code>C</code> when <code>Cv = λv</code><span class="say" data-sym="λ">(lambda)</span>: multiplying by <code>C</code> leaves its direction alone and scales its length by <code>λ</code>. For a symmetric covariance matrix, eigenvectors are perpendicular and can be chosen unit length. The eigenvector is a direction in feature space; its eigenvalue <code>λ</code> is the variance of the projected data along it. Sort by <code>λ</code> descending, and the share of total variance on component <code>k</code> is <code>λₖ / Σⱼ λⱼ</code><span class="say" data-sym="Σ">(sigma)</span>.</p>
+<p>Why this matters: "first principal component" is not a metaphor. It is the eigenvector with the largest eigenvalue, and that eigenvalue is a number you can compare with the total.</p>
+
+<h3>Part 4 — Project, then reconstruct</h3>
+<p>Stack the top <code>k</code> eigenvectors as rows of a matrix <code>V</code> of shape <code>k × d</code>. The compressed coordinates are <code>Z = Xc Vᵀ</code>, one row per example and <code>k</code> columns. To return to the original space, <code>X̂ = Z V + x̄</code>. The reconstruction error is the squared distance between <code>X</code> and <code>X̂</code>, and it equals the sum of the eigenvalues you discarded — which is why keeping 90% of the variance keeps 90% of the squared structure.</p>
+<p>In practice you compute this with the singular value decomposition <code>Xc = U S Vᵀ</code>. The columns of <code>V</code> are the principal directions and the squared singular values divided by <code>n − 1</code> are the eigenvalues; no covariance matrix needs to be formed.</p>
+
+<h3>Part 5 — Choosing how many components</h3>
+<p>Plot the eigenvalues largest first — a <strong>scree plot</strong> — and keep enough to reach a target such as 90% or 95% of the total. Two warnings. First, variance is not usefulness: a direction can be low-variance and still separate two classes. Second, the components are only as meaningful as the scaling you fed in; a feature measured in thousands will own PC1 by unit size alone.</p>
+
+<h2>Worked example<span class="h2-topic">— variance</span></h2>
+
+<h3>1. Five points on a line</h3>
+<p>Take five two-dimensional points: <code>(1,1), (2,2), (3,3), (4,4), (5,5)</code>. The mean is <code>(3,3)</code>, and the centred rows are <code>(−2,−2), (−1,−1), (0,0), (1,1), (2,2)</code>.</p>
+<table>
+  <tr><th>Step</th><th>Arithmetic</th><th class="num">Result</th></tr>
+  <tr><td>Variance of one column</td><td><code>(4+1+0+1+4)/4</code></td><td class="num">2.5</td></tr>
+  <tr><td>Covariance of the pair</td><td><code>(4+1+0+1+4)/4</code></td><td class="num">2.5</td></tr>
+  <tr><td>Covariance matrix</td><td><code>[[2.5, 2.5], [2.5, 2.5]]</code></td><td class="num">—</td></tr>
+  <tr><td>Eigenvalues</td><td><code>trace 5, determinant 0</code></td><td class="num">5 and 0</td></tr>
+  <tr><td>Explained variance</td><td><code>5 / (5 + 0)</code></td><td class="num">100%</td></tr>
+</table>
+<p><strong>Read it as a sentence.</strong> Every point lies on the line <code>y = x</code>, so one direction explains everything and the perpendicular direction explains nothing. The first eigenvector is <code>(1,1)/√2</code><span class="say" data-sym="√">(square root)</span> and its eigenvalue is 5: that is the variance of the projected coordinates, not of a single column.</p>
+<p><strong>Project one point.</strong> For <code>(4,4)</code>, the centred vector is <code>(1,1)</code>. Its coordinate on PC1 is the dot product <code>(1)(0.707) + (1)(0.707) = 1.414</code>. Reconstruct: <code>(3,3) + 1.414 × (0.707, 0.707) = (4,4)</code>. With two components kept, the error is zero.</p>
+
+<h3>2. A two-component case</h3>
+<p>Suppose a different dataset gives <code>C = [[4, 2], [2, 2]]</code>. The trace is 6 and the determinant is <code>8 − 4 = 4</code>.</p>
+<table>
+  <tr><th>Step</th><th>Arithmetic</th><th class="num">Value</th></tr>
+  <tr><td>Largest eigenvalue</td><td><code>(6 + √(36 − 16)) / 2</code></td><td class="num">5.236</td></tr>
+  <tr><td>Smallest eigenvalue</td><td><code>(6 − √20) / 2</code></td><td class="num">0.764</td></tr>
+  <tr><td>Share on PC1</td><td><code>5.236 / 6</code></td><td class="num">87.3%</td></tr>
+</table>
+<p><strong>Read it as a sentence.</strong> One axis carries 87% of the spread and the other 13%. Keeping only PC1 shrinks two columns to one while discarding a seventh of the variance. That is the trade PCA asks you to make explicit.</p>
+
+<h2>The trap<span class="h2-topic">— variance</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"PCA keeps the features that matter for prediction."</strong> PCA never looks at the labels. It keeps the directions with the most spread, and the direction that separates two classes can be the quietest one in the cloud. A dataset where two classes differ by a small shift along a low-variance axis will lose exactly that axis when you keep the top two components.</p>
+  <p>It feels right because the first components usually do carry most of the visual structure, and a 2-D scatter of them looks like a sensible summary. But "most variance" and "most useful" are different questions, and only one of them involves <code>y</code>.</p>
+  <p><strong>Correction:</strong> use PCA for compression, denoising and plotting, and say so. If the goal is classification, compare against the raw features and against a supervised projection; standardise columns first, and fit the rotation on training rows only.</p>
+</div>
+<p><strong>The tell:</strong> PC1 is almost exactly the column with the largest units, the first two components show no class structure while the labels are easily separated, or a model's score drops sharply after PCA. Fitting PCA before splitting is the other tell — the rotation has already seen the test rows.</p>
+
+<h2>Retrieval check<span class="h2-topic">— variance</span></h2>
+<ol class="quiz">
+  <li>Why subtract the column mean before computing the covariance?
+    <details><summary>Answer</summary>
+      <p>Covariance is spread around the mean. Without centring, the second moment includes the squared offset of the mean, so the largest "direction" can simply point from the origin to the data's centre.</p>
+    </details>
+  </li>
+  <li>What does an eigenvalue of 5 mean when the eigenvalues sum to 20?
+    <details><summary>Answer</summary>
+      <p>The data's variance along that eigenvector is 5, and the component explains <code>5/20 = 25%</code> of the total variance. The eigenvalues are variances, so they add.</p>
+    </details>
+  </li>
+  <li>Two columns are measured in dollars and in years. What must you do before PCA, and why?
+    <details><summary>Answer</summary>
+      <p>Standardise them to comparable units. Otherwise the dollar column's variance dominates, and PC1 is essentially that one column regardless of how informative the other is.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/043.html">Solve it · 043 — Project onto principal components</a></p>
+<h2>Build it in Colab<span class="h2-topic">— variance</span></h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/043-pca-dimensionality-reduction.ipynb">open the notebook in Colab</a> · <a href="../notebooks/043-pca-dimensionality-reduction.ipynb">local copy</a>. It centres a small matrix, takes its SVD, and plots the projection and the variance each component keeps.</p>
+<pre><code>import numpy as np
+X = np.array([[1., 1.], [2., 2.], [3., 3.], [4., 4.], [5., 5.]])  # five rows
+Xc = X - X.mean(0)                       # centre every column
+U, S, Vt = np.linalg.svd(Xc, full_matrices=False)  # singular value decomposition
+var = S ** 2 / (len(X) - 1)              # eigenvalues, largest first
+print(var, var / var.sum())              # [5. 0.] [1. 0.]</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— variance</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "A 2-D covariance matrix has eigenvalues 5.236 and 0.764. What share of variance does the first component explain?", "o": ["13%", "50%", "87%", "100%"], "a": 2, "why": "5.236 / (5.236 + 0.764) = 5.236 / 6 ≈ 0.873."}, {"q": "You standardise, then fit PCA on all rows before splitting train and test. What is the problem?", "o": ["PCA cannot handle standardised data", "The rotation has seen the test rows, so the evaluation leaks", "The eigenvalues will be negative", "Nothing — PCA is unsupervised"], "a": 1, "why": "The means and rotation are estimated from every row. Fit them on training data and apply the same transform to test data."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → Topic 44: Feature engineering, leakage &amp; imbalance.</strong> PCA is one feature transform among many. Topic 44 shows how transforms leak, and why a 98%-accurate model can be worse than useless.</p>
+  <div class="pager">
+    <a href="042-clustering-kmeans-gmm.html">← 42 · Clustering: k-means &amp; GMM</a>
+    <a href="044-feature-engineering-leakage-imbalance.html">Next · 44 · Feature engineering, leakage &amp; imbalance</a>
+  </div>
+</div>
+
+<p class="source">Primary source: <a href="https://scikit-learn.org/stable/modules/decomposition.html#pca">scikit-learn — PCA</a> (centring, explained variance and the <code>svd_solver</code> options).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>060 — KS drift, comparing CDFs</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="KS drift, comparing CDFs — a graded problem on systems.">
+</head>
+<body data-page="problem" data-problem="060">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">060 · hard</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 060 · debug</p>
+  <h1>KS drift, comparing CDFs</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Systems</span><span class="chip">Monitoring</span><a href="../lessons/060-monitoring-drift-data-quality.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>ks_statistic(a, b)</code> should return the two-sample Kolmogorov-Smirnov statistic: the largest absolute gap between the empirical CDFs of the two samples.</p>
+<p>The starter compares paired sorted values, which is not a CDF and breaks when the samples have different lengths. Fix it. Raise <code>ValueError</code> if either sample is empty. Do not mutate the inputs, and the result must be symmetric in <code>a</code> and <code>b</code>.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def ks_statistic(a, b):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def ks_statistic(a, b):
+    &quot;&quot;&quot;Return the two-sample Kolmogorov-Smirnov statistic.&quot;&quot;&quot;
+    xs, ys = sorted(a), sorted(b)
+    return max(abs(x - y) for x, y in zip(xs, ys))
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_identical</code></li><li><code>test_separated</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 060
+# edit work/060/solution.py
+python3 dml.py run 060
+python3 dml.py submit 060</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-060">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-060" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="059.html">← 059 · Symmetric INT8 quantization</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

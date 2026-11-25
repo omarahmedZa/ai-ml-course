@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>054 — UCB with unpulled arms</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="UCB with unpulled arms — a graded problem on rl.">
+</head>
+<body data-page="problem" data-problem="054">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">054 · hard</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 054 · debug</p>
+  <h1>UCB with unpulled arms</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Rl</span><span class="chip">Bandits</span><a href="../lessons/054-bandits-beyond-epsilon-greedy.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>ucb_scores</code> divides by zero when an arm has never been pulled, and it never checks its inputs. Fix it.</p>
+<ul><li>return <code>float('inf')</code> for any arm with <code>counts[i] == 0</code></li><li>otherwise return <code>mean + sqrt(2 * log(sum(counts)) / count)</code></li><li>raise <code>ValueError</code> if the two lists have different lengths</li><li>raise <code>ValueError</code> if the total number of pulls is zero</li><li>return a list of floats</li></ul>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def ucb_scores(means, counts):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>import math
+
+
+def ucb_scores(means, counts):
+    &quot;&quot;&quot;Return the UCB index for each arm.&quot;&quot;&quot;
+    t = sum(counts)
+    scores = []
+    for m, n in zip(means, counts):
+        bonus = math.sqrt(2 * math.log(t) / n)   # BUG: n can be zero
+        scores.append(m + bonus)
+    return scores
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_unpulled_is_infinite</code></li><li><code>test_uncertain_arm_first</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 054
+# edit work/054/solution.py
+python3 dml.py run 054
+python3 dml.py submit 054</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-054">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-054" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="053.html">← 053 · Value iteration on a chain</a><a href="055.html">055 · Discounted returns, backwards →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

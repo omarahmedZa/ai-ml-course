@@ -1,0 +1,31 @@
+{
+  "id": "046",
+  "lesson": "046",
+  "book": "neural-networks",
+  "title": "He initialization, debugged",
+  "difficulty": "easy",
+  "shape": "debug",
+  "categories": [
+    "neural-networks"
+  ],
+  "statement_md": "The snippet should return the **He initialization** standard deviation `sqrt(2 / fan_in)`, but it returns the Xavier value and crashes on invalid input.\n\n- return `sqrt(2 / fan_in)` for `fan_in >= 1`\n- raise `ValueError` when `fan_in < 1`\n\nFix the function; do not change its name or signature.",
+  "entry": "he_std",
+  "signature": "def he_std(fan_in):",
+  "starter": "import math\n\n\ndef he_std(fan_in):\n    \"\"\"Return the He initialization standard deviation.\"\"\"\n    return math.sqrt(1.0 / fan_in)\n",
+  "visible": [
+    "test_fan_in_256",
+    "test_fan_in_16"
+  ],
+  "hidden": [
+    "test_fan_in_2",
+    "test_zero_raises",
+    "test_negative_raises",
+    "test_large",
+    "test_returns_float"
+  ],
+  "tests_py": "import math\n\ndef test_fan_in_256():\n    assert abs(solution.he_std(256) - math.sqrt(2 / 256)) < 1e-12\n\ndef test_fan_in_16():\n    assert abs(solution.he_std(16) - 0.35355339059327373) < 1e-9\n\ndef test_fan_in_2():\n    assert abs(solution.he_std(2) - 1.0) < 1e-12\n\ndef test_zero_raises():\n    try:\n        solution.he_std(0)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_negative_raises():\n    try:\n        solution.he_std(-4)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_large():\n    assert abs(solution.he_std(1024) - math.sqrt(2 / 1024)) < 1e-12\n\ndef test_returns_float():\n    assert isinstance(solution.he_std(8), float)\n",
+  "mutations": [
+    "return math.sqrt(1.0 / fan_in) if fan_in >= 1 else float('nan')",
+    "return math.sqrt(2.0 / fan_in) - 1e-3"
+  ]
+}

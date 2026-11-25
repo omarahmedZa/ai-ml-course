@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>036 — Eigenvalues, eigenvectors &amp; SVD</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can find the directions a matrix only stretches, read the stretch factors, and use the SVD to compress or summarise a matrix.">
+</head>
+<body data-page="lesson" data-lesson="036" data-book="foundations" data-book-number="1">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 36 / 40</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 1 · Foundations · lesson 4 of 7</p>
+  <h1>Eigenvalues, eigenvectors &amp; SVD</h1>
+  <p class="objective">You can find the directions a matrix only stretches, read off the stretch factors, and use the SVD to compress a matrix or summarise what it does.</p>
+</header>
+<p class="bookline"><a href="../paths/foundations.html">Foundations</a><span class="chip">Linear Algebra</span></p>
+
+<h2>Why this matters<span class="h2-topic">— directions that survive a matrix</span></h2>
+<p class="lede">Most numbers in a trained model live in one big matrix, and much of that matrix is redundant. A 1,000 × 1,000 weight matrix holds a million entries, but often ten directions explain almost all of it. Eigenvalues and the singular value decomposition find those directions. They are how PCA turns 784 pixels per digit into 30 numbers.</p>
+<p><strong>The failure it prevents.</strong> A model trains, the loss looks fine, then a matrix inverse explodes or an approximation destroys accuracy. Both are visible in the singular values before anything breaks. An exam question asking for eigenvalues tests whether you can read the algebra as geometry.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>2</b><span>stretch directions in a 2 × 2 symmetric matrix</span></div>
+  <div><b>4, 2</b><span>the two eigenvalues of <code>[[3,1],[1,3]]</code></span></div>
+  <div><b>44.7%</b><span>error when the smaller of those two is dropped</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— directions that survive a matrix</span></h2>
+<p>Multiplying a vector by a matrix usually turns it and changes its length. A few special vectors only change length. Those are the <strong>eigenvectors</strong>; the factor by which their length changes is the <strong>eigenvalue</strong>.</p>
+<p>Write the matrix as <code>A</code>, the vector as <code>v</code>, the stretch as <code>λ</code><span class="say" data-sym="λ">(lambda)</span> (lambda). The whole idea is one equation: <code>A v = λ v</code>. The left side applies the matrix; the right side only scales the same vector.</p>
+<p>The <strong>SVD</strong> extends this to every matrix. It says any matrix is three moves: rotate, stretch along perpendicular axes, rotate again. The stretch amounts are the <strong>singular values</strong> <code>σ₁ ≥ σ₂ ≥ … ≥ 0</code><span class="say" data-sym="σ">(sigma)</span> (sigma), always real and never negative.</p>
+
+<div class="keybox"><span class="sym">A v = λ v &nbsp;·&nbsp; A = U Σ Vᵀ</span><p>Eigenvectors are directions that survive; singular values are the sizes of the stretch.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— directions that survive a matrix</span></h2>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-ellipse-t f-ellipse-d">
+    <title id="f-ellipse-t">A unit circle stretched into an ellipse</title>
+    <desc id="f-ellipse-d">Axes with the unit circle drawn dashed. A matrix stretches it into an ellipse whose long and short axes are the two singular directions, labelled sigma-one and sigma-two.</desc>
+    <line x1="60" y1="180" x2="420" y2="180" stroke="var(--ink-faint)" stroke-width="1"/>
+    <line x1="240" y1="30" x2="240" y2="320" stroke="var(--ink-faint)" stroke-width="1"/>
+    <polygon points="420,180 412,176 412,184" fill="var(--ink-faint)"/>
+    <polygon points="240,30 236,38 244,38" fill="var(--ink-faint)"/>
+    <text x="412" y="200" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">x</text>
+    <text x="250" y="42" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">y</text>
+    <circle cx="240" cy="180" r="58" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" stroke-dasharray="5 5"/>
+    <text x="240" y="258" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">unit circle</text>
+    <g transform="rotate(-20 240 180)">
+      <ellipse cx="240" cy="180" rx="98" ry="49" fill="none" stroke="var(--sym-data)" stroke-width="2.2"/>
+    </g>
+    <line x1="240" y1="180" x2="332" y2="146" stroke="var(--sym-param)" stroke-width="2"/>
+    <polygon points="332,146 323,147 326,155" fill="var(--sym-param)"/>
+    <text x="338" y="138" font-size="12" fill="var(--sym-param)" font-family="ui-monospace, monospace">σ₁ = 4</text>
+    <line x1="240" y1="180" x2="257" y2="226" stroke="var(--sym-pred)" stroke-width="2"/>
+    <polygon points="257,226 249,221 255,217" fill="var(--sym-pred)"/>
+    <text x="264" y="242" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">σ₂ = 2</text>
+    <text x="520" y="120" font-size="13" fill="var(--ink)" font-family="ui-monospace, monospace">A = U Σ Vᵀ</text>
+    <text x="520" y="148" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">U: output directions</text>
+    <text x="520" y="168" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">Σ: stretch amounts</text>
+    <text x="520" y="188" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">Vᵀ: input directions</text>
+    <text x="520" y="230" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">long axis = σ₁</text>
+    <text x="520" y="250" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">short axis = σ₂</text>
+  </svg>
+  <figcaption><strong>Takeaway.</strong> The matrix does not scramble every direction: it stretches the two perpendicular axes of the ellipse and leaves the rest as combinations of them.</figcaption>
+</figure>
+
+<h3>Part 1 — Find an eigenvector by testing directions</h3>
+<p>Take <code>A = [[3,1],[1,3]]</code> and try <code>v = (1,1)</code>. The first row gives <code>3(1) + 1(1) = 4</code>; the second gives <code>1(1) + 3(1) = 4</code>. So <code>A v = (4,4) = 4v</code>: no turn, length multiplied by 4. Try <code>v = (1,−1)</code>: the rows give <code>2</code> and <code>−2</code>, so <code>A v = 2v</code>. Two directions, two stretches, and together they explain everything the matrix does.</p>
+<p>Why this matters: each eigenvector is a coordinate the matrix treats independently, so powers and inverses simplify.</p>
+
+<h3>Part 2 — Solve for the eigenvalues</h3>
+<p>Guessing works only for friendly matrices. Since <code>A v = λ v</code> means <code>(A − λI) v = 0</code>, with <code>I</code> the identity, a non-zero <code>v</code> exists only when the determinant of <code>A − λI</code> is zero. Here that is <code>(3 − λ)² − 1 = 0</code>, so <code>3 − λ = ±1</code> and <code>λ = 4</code> or <code>λ = 2</code>. The polynomial has one root per dimension.</p>
+<p>Why this matters: symmetric matrices always give real roots and perpendicular eigenvectors, which makes covariance matrices safe to decompose.</p>
+
+<h3>Part 3 — Factor any matrix with the SVD</h3>
+<p>Rectangular matrices have no square eigenvectors. The SVD avoids the problem: <code>A = U Σ Vᵀ</code><span class="say" data-sym="Σ">(sigma)</span>. <code>U</code> holds output directions, <code>V</code> input directions, and <code>Σ</code> is diagonal with <code>σ₁,σ₂,…</code> sorted largest first. For a 500 × 20 matrix, <code>U</code> is 500 × 20 and <code>Σ</code>, <code>V</code> are 20 × 20. The singular values are the square roots of the eigenvalues of <code>AᵀA</code>.</p>
+<p>Why this matters: truncating the factorisation gives the best possible low-rank approximation — the Eckart–Young theorem. Keeping the top <code>k</code> terms is not a heuristic; no rank-<code>k</code> matrix is closer.</p>
+
+<h3>Part 4 — Truncate to compress</h3>
+<p>The SVD writes <code>A</code> as a sum of rank-one pieces: <code>A = σ₁u₁v₁ᵀ + σ₂u₂v₂ᵀ + …</code>. Each piece is one direction pair weighted by its singular value. If <code>σ₃</code> is tiny next to <code>σ₁</code>, that piece contributes little and can be dropped. Storing the top <code>k</code> pieces of a 1,000 × 1,000 matrix costs <code>k(2,000 + 1)</code> numbers; at <code>k = 10</code> that is 20,010 instead of 1,000,000, a 98% saving.</p>
+<p>Why this matters: the error is fixed by the singular values you discard, so compression becomes a budget decision.</p>
+
+<h2>Worked example<span class="h2-topic">— directions that survive a matrix</span></h2>
+
+<h3>1. Two directions, by hand</h3>
+<p>Start from <code>A = [[3,1],[1,3]]</code>. For <code>λ = 4</code>, <code>(A − 4I) v = 0</code> becomes <code>[[−1,1],[1,−1]] v = 0</code>, so <code>v₁ = v₂</code>; pick <code>v = (1,1)</code>. For <code>λ = 2</code>, <code>[[1,1],[1,1]] v = 0</code>, so <code>v₂ = −v₁</code>; pick <code>v = (1,−1)</code>. Normalise by dividing by <code>√2 = 1.414</code><span class="say" data-sym="√">(square root)</span>: <code>u₁ = (0.707,0.707)</code>, <code>u₂ = (0.707,−0.707)</code>, perpendicular as promised.</p>
+
+<table>
+  <tr><th>Direction</th><th class="num">A v</th><th class="num">λ v</th><th class="num">Stretch</th></tr>
+  <tr><td><code>(1,1)</code></td><td class="num">(4, 4)</td><td class="num">(4, 4)</td><td class="num">4.0</td></tr>
+  <tr><td><code>(1,−1)</code></td><td class="num">(2, −2)</td><td class="num">(2, −2)</td><td class="num">2.0</td></tr>
+  <tr><td><code>(1,0)</code></td><td class="num">(3, 1)</td><td class="num">—</td><td class="num">3.16</td></tr>
+</table>
+
+<p><strong>Read the last row.</strong> <code>(1,0)</code> comes out as <code>(3,1)</code>, length <code>√10 = 3.16</code>, and it also turned. Only the two special directions keep their orientation.</p>
+
+<h3>2. Rebuild the matrix from its pieces</h3>
+<p>The reconstruction is <code>A = λ₁u₁u₁ᵀ + λ₂u₂u₂ᵀ</code>. The first outer product has every entry <code>0.707 × 0.707 = 0.5</code>, so <code>4 × that = [[2,2],[2,2]]</code>. The second has alternating signs: <code>u₂u₂ᵀ = [[0.5,−0.5],[−0.5,0.5]]</code>, so <code>2 × that = [[1,−1],[−1,1]]</code>. Add them and you get <code>[[3,1],[1,3]]</code> back, exactly.</p>
+<p><strong>Now drop the small piece.</strong> Keeping only <code>σ₁ = 4</code> gives <code>[[2,2],[2,2]]</code>. The leftover <code>[[1,−1],[−1,1]]</code> has size <code>√4 = 2</code>, while the original had size <code>√20 = 4.47</code>, so the relative error is <code>2 / 4.47 = 44.7%</code>. That is bad here because 2 is half of 4; with singular values 40 and 2, the same move would cost 5%.</p>
+
+<h2>The trap<span class="h2-topic">— directions that survive a matrix</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Eigenvalues and singular values are the same thing."</strong> They coincide only for symmetric matrices with non-negative eigenvalues. Eigenvalues describe what a matrix does to its own special directions; singular values describe how much it stretches any direction at all.</p>
+  <p>Take <code>A = [[0,2],[0,0]]</code>. Its characteristic polynomial is <code>λ²</code>, so both eigenvalues are 0 — read carelessly, the matrix does nothing. But <code>A</code> sends <code>(0,1)</code> to <code>(2,0)</code>: it doubles a vector. Its singular values are 2 and 0.</p>
+  <p><strong>Correction:</strong> eigenvalues can be negative or complex and measure stretch only along eigenvectors; singular values are always real, non-negative, and bound the stretch of the whole unit sphere.</p>
+</div>
+<p><strong>The tell:</strong> a covariance matrix with a negative eigenvalue is not a valid covariance matrix. All-zero eigenvalues beside a non-zero output mean you are reading the wrong decomposition. Both are caught by checking <code>A v</code> against <code>λ v</code> on one vector.</p>
+
+<h2>Retrieval check<span class="h2-topic">— directions that survive a matrix</span></h2>
+<ol class="quiz">
+  <li>For <code>A = [[2,0],[0,5]]</code>, name the eigenvectors and eigenvalues without solving anything.
+    <details><summary>Answer</summary>
+      <p><code>(1,0)</code> with <code>λ = 2</code>, and <code>(0,1)</code> with <code>λ = 5</code>. A diagonal matrix already acts independently on each axis, so the axes are the eigenvectors and the diagonal entries are the stretches.</p>
+    </details>
+  </li>
+  <li>You keep the top 10 of 200 singular values and all discarded ones are below 0.01. Is the approximation safe?
+    <details><summary>Answer</summary>
+      <p>Almost certainly. The Frobenius error is at most <code>√(190 × 0.0001) = 0.138</code>. Compare that with the largest singular value, not with zero.</p>
+    </details>
+  </li>
+  <li>Why can a 300 × 4 matrix have at most four non-zero singular values?
+    <details><summary>Answer</summary>
+      <p>Because there is one singular value per column of <code>Σ</code>, and rank cannot exceed the smaller dimension. The matrix maps 4-dimensional space into 300 dimensions, so its image is at most 4-dimensional.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/036.html">Solve it · 036 — Power iteration, step by step</a></p>
+<h2>Build it in Colab<span class="h2-topic">— directions that survive a matrix</span></h2>
+<p>Runnable, NumPy-only: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/036-eigen-svd.ipynb">open the notebook in Colab</a> · <a href="../notebooks/036-eigen-svd.ipynb">local copy</a>. It checks <code>A v = λ v</code> numerically and rebuilds a matrix from its top singular value.</p>
+<pre><code>import numpy as np
+A = np.array([[3.,1.],[1.,3.]])
+vals,vecs = np.linalg.eigh(A)        # symmetric: real values
+print(vals)                            # [2. 4.]
+U,S,Vt = np.linalg.svd(A)
+print(S)                               # [4. 2.]
+print(vecs[:,-1] @ A @ vecs[:,-1])   # 4.0</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— directions that survive a matrix</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "A 2 × 2 matrix has eigenvalues 3 and −1. What are its singular values?", "o": ["3 and 1", "3 and −1", "9 and 1", "Cannot be determined from eigenvalues alone"], "a": 0, "why": "Singular values are stretch lengths: |3| = 3 and |−1| = 1. Signs disappear because length is never negative."}, {"q": "A 1000 × 1000 matrix has singular values 50, 40, 0.5, then 0.01 and below. How many pieces do you keep for a 99%-of-energy approximation?", "o": ["1", "2", "3", "All 1000"], "a": 1, "why": "Energy is the squared singular value. 50² + 40² = 4100 out of 4100.25, over 99.99%; two pieces suffice."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → Topic 37: Norms &amp; distances.</strong> Singular values are lengths in disguise. Topic 37 makes length precise and shows why the norm you pick changes which points count as neighbours.</p>
+  <div class="pager">
+    <a href="003-probability-expectation-likelihood.html">← 03 · Probability, expectation, likelihood</a>
+    <a href="037-norms-and-distances.html">Next · 37 · Norms &amp; distances</a>
+  </div>
+</div>
+
+<p class="source">Primary source: <a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.svd.html">NumPy — <code>linalg.svd</code></a> (the full-matrices option returns <code>U</code>, <code>S</code>, <code>Vᵀ</code>).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

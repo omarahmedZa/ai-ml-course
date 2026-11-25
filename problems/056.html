@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>056 — Fairness gaps from a decision table</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Fairness gaps from a decision table — a graded problem on evaluation-metrics.">
+</head>
+<body data-page="problem" data-problem="056">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">056 · medium</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 056 · from scratch</p>
+  <h1>Fairness gaps from a decision table</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Evaluation Metrics</span><span class="chip">Fairness</span><a href="../lessons/056-fairness-and-bias-measurement.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p>Write <code>bias_gaps(y_true, y_pred, groups)</code> returning a dict with two floats:</p>
+<ul><li><code>demographic_parity</code>: the largest selection rate minus the smallest, where a group's selection rate is the share of its rows with <code>y_pred == 1</code></li><li><code>equal_opportunity</code>: the same gap computed over true-positive rates, where a group's TPR is the share predicted 1 among rows with <code>y_true == 1</code></li></ul>
+<p>Groups with no positive labels are skipped when computing equal opportunity; if fewer than two groups remain, report <code>0.0</code> for it.</p>
+<p>Raise <code>ValueError</code> when the three sequences differ in length or fewer than two distinct groups are present. Do not mutate the inputs.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def bias_gaps(y_true, y_pred, groups):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def bias_gaps(y_true, y_pred, groups):
+    &quot;&quot;&quot;Return demographic-parity and equal-opportunity gaps.&quot;&quot;&quot;
+    # Your code here.
+    pass
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_parity_gap</code></li><li><code>test_opportunity_gap</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 056
+# edit work/056/solution.py
+python3 dml.py run 056
+python3 dml.py submit 056</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-056">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-056" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="055.html">← 055 · Discounted returns, backwards</a><a href="057.html">057 · Expected calibration error, weighted →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>057 — Calibration &amp; uncertainty</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can measure expected calibration error and explain what temperature scaling fixes and what it leaves alone.">
+</head>
+<body data-page="lesson" data-lesson="057" data-book="trust" data-book-number="6">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 57 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 6 · Trust, Privacy & Scale · lesson 8 of 8</p>
+  <h1>Calibration &amp; uncertainty</h1>
+  <p class="objective">You can measure expected calibration error and explain what temperature scaling fixes and what it leaves alone.</p>
+</header>
+<p class="bookline"><a href="../paths/trust.html">Trust, Privacy &amp; Scale</a><span class="chip">Evaluation &amp; Metrics</span></p>
+
+<h2>Why this matters<span class="h2-topic">— calibration</span></h2>
+<p class="lede">A model that says 0.9 and is right 60% of the time is not giving a probability; it is giving a mood. A 0.5 cut-off, a triage queue and a risk score shown to a doctor all assume the number means a frequency. Calibration measures whether it does.</p>
+<p><strong>The failure it prevents.</strong> An exam asks "the model is 94% accurate, are its probabilities trustworthy?" and "yes" earns nothing: accuracy only records which side of 0.5 a prediction landed on. An overconfident score also changes behaviour, because staff act on 0.9 differently from 0.6.</p>
+
+<h2>The one core idea<span class="h2-topic">— calibration</span></h2>
+<p>A probability <code>p</code> is a promise: among cases where the model says <code>p</code>, about <code>p × 100%</code> should be positive. Calibration checks that promise in bins. It differs from <strong>accuracy</strong> (is 0.5 the right cut?) and <strong>sharpness</strong> (how far predictions sit from base rate).</p>
+<p>A model can rank perfectly and be overconfident: push every score toward 1 and the order survives while the numbers stop meaning frequencies.</p>
+
+<div class="keybox"><span class="sym">0.8 should happen 80% of the time</span><p>Calibration is a frequency claim about each confidence level; sharpness and accuracy are different questions.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— calibration</span></h2>
+<p>Six steps: hold out data, bin, compare confidence with frequency, summarise, pair with a proper score, then repair and re-measure.</p>
+
+<h3>Part 1 — Measure on held-out data</h3>
+<p>Use a calibration set from the deployment distribution, with a few dozen examples per bin. Training rows make a model look better calibrated than it is.</p>
+<p><strong>Why:</strong> calibration is a property of model plus population, and training data is the one population you know is wrong.</p>
+
+<h3>Part 2 — Bin by predicted probability</h3>
+<p>Split [0, 1] into equal-width bins, ten by default, and assign each prediction to <code>b = min(⌊p × 10⌋, 9)</code>; the last bin includes <code>p = 1.0</code>.</p>
+<p><strong>Why:</strong> a global average hides where the errors sit. Only bins separate 0.9 from 0.6.</p>
+
+<h3>Part 3 — Compare confidence with frequency</h3>
+<p>For each bin, take the mean prediction (confidence) and the mean label (observed frequency). Plot confidence against frequency: perfect calibration is the diagonal <code>y = x</code>, points below are overconfident, points above are underconfident.</p>
+<p><strong>Why:</strong> the reliability diagram is the diagnosis; a single score says something is wrong but not where.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-cal-t f-cal-d">
+    <title id="f-cal-t">A reliability diagram that bends below the diagonal</title>
+    <desc id="f-cal-d">Confidence on the x-axis, observed frequency on the y-axis. Points at 0.15, 0.45, 0.75 and 0.95 fall below the diagonal.</desc>
+    <line x1="90" y1="300" x2="90" y2="40" stroke="var(--ink-faint)" stroke-width="1.2"/>
+    <line x1="90" y1="300" x2="650" y2="300" stroke="var(--ink-faint)" stroke-width="1.2"/>
+    <line x1="90" y1="300" x2="650" y2="40" stroke="var(--ink-faint)" stroke-width="1.2" stroke-dasharray="5 5"/>
+    <text x="80" y="42" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1.0</text>
+    <text x="80" y="304" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0</text>
+    <text x="90" y="322" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0</text>
+    <text x="650" y="322" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1.0</text>
+    <text x="370" y="344" text-anchor="middle" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace">predicted confidence</text>
+    <text x="24" y="170" font-size="11" fill="var(--ink-soft)" font-family="ui-monospace, monospace" transform="rotate(-90 24 170)">observed frequency</text>
+    <circle cx="174" cy="274" r="5" fill="var(--sym-pred)"/>
+    <circle cx="342" cy="190.8" r="5" fill="var(--sym-pred)"/>
+    <circle cx="510" cy="149.2" r="5" fill="var(--sym-pred)"/>
+    <circle cx="622" cy="71.2" r="5" fill="var(--sym-pred)"/>
+    <polyline points="174,274 342,190.8 510,149.2 622,71.2" fill="none" stroke="var(--sym-pred)" stroke-width="1.8"/>
+  </svg>
+  <figcaption><strong>Confidence outruns accuracy at the top.</strong> The 0.75 bin is right 58% of the time, the 0.95 bin 88% — the gap a threshold and a reviewer inherit.</figcaption>
+</figure>
+
+<h3>Part 4 — Summarise with expected calibration error</h3>
+<p>For bin <code>b</code>, let <code>n_b</code> be its count, <code>conf_b</code> its mean prediction and <code>acc_b</code> its observed positive rate:</p>
+<span class="formula">ECE = Σ_b (n_b / n) · |conf_b − acc_b|</span><span class="say" data-sym="Σ">(sigma)</span>
+<p>A weighted gap. ECE 0.09 means the typical bin is nine points from its promise, not that 9% of predictions are wrong.</p>
+
+<h3>Part 5 — Pair it with a proper score</h3>
+<p>The <strong>Brier score</strong> is <code>mean((p − y)²)</code>, lower is better. It rewards calibration and sharpness together, so two models can tie while one is calibrated-but-vague and the other sharp-but-overconfident. Report ECE and Brier, not either alone.</p>
+<p><strong>Why:</strong> predicting the base rate everywhere gives ECE 0 — calibrated but useless.</p>
+
+<h3>Part 6 — Repair, then re-measure</h3>
+<p><strong>Temperature scaling</strong> divides the logits by one learned number <code>T</code> and re-applies softmax: <code>p' = softmax(z / T)</code>. With <code>T &gt; 1</code> probabilities soften and the ranking and argmax stay put. Isotonic regression is more flexible but needs more data. Measure again on a fresh split.</p>
+<p><strong>Why:</strong> calibration is rarely a training objective, and a repair that reordered cases would break your threshold.</p>
+
+<h2>Worked example<span class="h2-topic">— calibration</span></h2>
+<p>200 held-out predictions in five bins. Each row gives a count, a confidence, an observed frequency, and that row's share of the total gap.</p>
+
+<table>
+  <tr><th>Bin</th><th class="num">n</th><th class="num">Conf.</th><th class="num">Observed</th><th class="num">Gap</th><th class="num">Weight × gap</th></tr>
+  <tr><td>0.0–0.2</td><td class="num">20</td><td class="num">0.15</td><td class="num">0.10</td><td class="num">0.05</td><td class="num">0.0050</td></tr>
+  <tr><td>0.2–0.4</td><td class="num">30</td><td class="num">0.30</td><td class="num">0.25</td><td class="num">0.05</td><td class="num">0.0075</td></tr>
+  <tr><td>0.4–0.6</td><td class="num">50</td><td class="num">0.50</td><td class="num">0.52</td><td class="num">0.02</td><td class="num">0.0050</td></tr>
+  <tr><td>0.6–0.8</td><td class="num">60</td><td class="num">0.70</td><td class="num">0.55</td><td class="num">0.15</td><td class="num">0.0450</td></tr>
+  <tr><td>0.8–1.0</td><td class="num">40</td><td class="num">0.90</td><td class="num">0.75</td><td class="num">0.15</td><td class="num">0.0300</td></tr>
+  <tr><td><strong>Total</strong></td><td class="num"><strong>200</strong></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num"><strong>0.0925</strong></td></tr>
+</table>
+
+<p><strong>Step 1 — weight a row.</strong> The 0.6–0.8 bin holds 60 of 200 rows, so its weight is <code>0.30</code>. Its gap is <code>|0.70 − 0.55| = 0.15</code>, contributing <code>0.30 × 0.15 = 0.045</code>.</p>
+
+<p><strong>Step 2 — add the bins.</strong> <code>0.005 + 0.0075 + 0.005 + 0.045 + 0.030 = 0.0925</code>. An average prediction is about nine points too confident.</p>
+
+<p><strong>Step 3 — read the whole model.</strong> Accuracy is <code>(2 + 7.5 + 26 + 33 + 30)/200 = 0.4925</code>; mean confidence is <code>(3 + 9 + 25 + 42 + 36)/200 = 0.575</code>. It says "58% likely" and is right 49% of the time.</p>
+
+<p><strong>Step 4 — a Brier check.</strong> Predictions <code>[0.9, 0.8, 0.3, 0.1]</code> against labels <code>[1, 1, 0, 0]</code> give squared errors 0.01, 0.04, 0.09 and 0.01: <code>Brier = 0.15/4 = 0.0375</code>. A constant 0.5 predictor scores 0.25.</p>
+
+<p><strong>What to notice.</strong> Low bins are mildly underconfident and high bins badly overconfident, so one global correction would help the top and hurt the bottom. That is why the fix is fitted, and why the plot is checked afterwards.</p>
+
+<h2>The trap<span class="h2-topic">— calibration</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"94% accuracy means the probabilities are trustworthy."</strong> It feels right because accuracy and confidence usually rise together. But accuracy only asks whether <code>p &gt; 0.5</code> matched the label; it never asks whether 0.9 meant 90%.</p>
+  <p>A second version confuses confidence with correctness. A model that says 0.99 on everything is not more knowledgeable — it has lost the ability to express doubt.</p>
+  <p><strong>Correction:</strong> report ECE and Brier on held-out data, show the reliability diagram, and state the population. Calibration is local to a distribution; a new site can break it without changing accuracy.</p>
+</div>
+<p><strong>The tell:</strong> a confidence histogram with one tall bar at 0.99, or a log loss far worse than accuracy suggests. A calibration plot drawn on training data is the second tell — it looks excellent and means nothing.</p>
+
+<h2>Retrieval check<span class="h2-topic">— calibration</span></h2>
+<ol class="quiz">
+  <li>An ECE of 0.09 — what does it mean, and what does it not mean?
+    <details><summary>Answer</summary>
+      <p>The average bin is nine probability points from its promised frequency, weighted by bin size. It does not mean 9% of predictions are wrong, and it hides direction.</p>
+    </details>
+  </li>
+  <li>What does temperature scaling change, and what does it preserve?
+    <details><summary>Answer</summary>
+      <p>It changes probabilities by dividing logits by <code>T</code>. It preserves ranking and argmax, so threshold accuracy is unchanged while ECE can improve.</p>
+    </details>
+  </li>
+  <li>A model predicts 0.5 for everything and the base rate is 50%. Calibrated? Useful?
+    <details><summary>Answer</summary>
+      <p>Calibrated, because the 0.5 bin really is half positive. Not useful: it has no sharpness or resolution and cannot separate cases.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/057.html">Solve it · 057 — Expected calibration error, weighted</a></p>
+<h2>Build it in Colab<span class="h2-topic">— calibration</span></h2>
+<p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/057-calibration-and-uncertainty.ipynb">open the notebook in Colab</a> · <a href="../notebooks/057-calibration-and-uncertainty.ipynb">local copy</a>. Run the cells, then move one prediction into a neighbouring bin and watch ECE move.</p>
+<pre><code>import numpy as np
+p = np.array([.9, .8, .6, .3, .1, .95, .4, .7])   # probabilities
+y = np.array([1, 1, 0, 0, 0, 1, 0, 1])            # labels
+b = np.minimum((p * 10).astype(int), 9)           # bin 0..9
+ece = 0.0
+for k in range(10):
+    m = b == k                                    # rows in this bin
+    if m.any():
+        ece += m.mean() * abs(p[m].mean() - y[m].mean())
+print(&quot;ECE&quot;, round(ece, 3))                       # weighted mean gap</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— calibration</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "ECE = 0.09 means…", "o": ["Bins average 9 points off", "9% of labels are wrong", "Accuracy is 91%", "The model is sharp"], "a": 0, "why": "ECE is a weighted average gap between confidence and observed frequency."}, {"q": "Temperature scaling preserves…", "o": ["The ranking of cases", "The ECE", "The logits", "The base rate"], "a": 0, "why": "Dividing all logits by one T is monotone, so order and argmax stay put."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → 058 · Serving &amp; latency.</strong> A probability is only useful if the answer arrives in time. The next book follows the model out of the notebook and into a request path.</p>
+  <div class="pager">
+    <a href="056-fairness-and-bias-measurement.html">← 56 · Fairness &amp; bias measurement</a>
+    <a href="058-serving-and-latency.html">Next · 58 · Serving &amp; latency</a>
+  </div>
+</div>
+
+<p class="source">Primary source: Guo et al., <a href="https://arxiv.org/abs/1706.04599">On calibration of modern neural networks</a> (2017).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{
+  "id": "051",
+  "lesson": "051",
+  "book": "language",
+  "title": "Perplexity, checked",
+  "difficulty": "hard",
+  "shape": "scratch",
+  "categories": [
+    "evaluation",
+    "language-models"
+  ],
+  "statement_md": "Write `perplexity(log_probs)` returning the perplexity of a sequence of natural-log token probabilities: `exp(-mean(log_probs))`.\n\n- raise `ValueError` for an empty sequence\n- raise `ValueError` if any log-probability is positive\n- return a `float`\n\nA certain token has log-probability `0`; a uniform choice over ten tokens has `-log(10)`.",
+  "entry": "perplexity",
+  "signature": "def perplexity(log_probs):",
+  "starter": "import math\n\n\ndef perplexity(log_probs):\n    \"\"\"Return exp of the mean negative log-probability.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_four_tokens",
+    "test_single_token"
+  ],
+  "hidden": [
+    "test_uniform_ten",
+    "test_empty_raises",
+    "test_positive_raises",
+    "test_returns_float"
+  ],
+  "tests_py": "import math\n\ndef test_four_tokens():\n    logs = [0.0, -math.log(2), -math.log(2), -math.log(4)]\n    assert abs(solution.perplexity(logs) - 2.0) < 1e-9\n\ndef test_single_token():\n    assert solution.perplexity([0.0]) == 1.0\n\ndef test_uniform_ten():\n    logs = [-math.log(10)] * 10\n    assert abs(solution.perplexity(logs) - 10.0) < 1e-9\n\ndef test_empty_raises():\n    try:\n        solution.perplexity([])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_positive_raises():\n    try:\n        solution.perplexity([0.1, -0.2])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_returns_float():\n    assert isinstance(solution.perplexity([-1.0]), float)\n",
+  "mutations": [
+    "return math.exp(-sum(log_probs) / (len(log_probs) + 1))",
+    "return math.exp(sum(log_probs) / len(log_probs))"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "050",
+  "lesson": "050",
+  "book": "language",
+  "title": "Scaled attention weights from scratch",
+  "difficulty": "hard",
+  "shape": "scratch",
+  "categories": [
+    "attention"
+  ],
+  "statement_md": "Write `attention_weights(q, keys)` for one attention head.\n\n- `q` is a query vector and `keys` is a list of key vectors\n- raise `ValueError` when `keys` is empty or any key's length differs from `len(q)`\n- score each key with the dot product divided by `sqrt(len(q))`\n- return the softmax of those scores as a list of floats, summing to 1\n- use a numerically stable softmax (subtract the maximum score)\n\nDo not mutate the inputs.",
+  "entry": "attention_weights",
+  "signature": "def attention_weights(q, keys):",
+  "starter": "import math\n\n\ndef attention_weights(q, keys):\n    \"\"\"Return softmax(q . k / sqrt(d)) for every key.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_two_keys",
+    "test_single_key"
+  ],
+  "hidden": [
+    "test_sums_to_one",
+    "test_prefers_aligned",
+    "test_dimension_mismatch",
+    "test_empty_keys",
+    "test_scaled_scores"
+  ],
+  "tests_py": "import math\n\ndef test_two_keys():\n    w = solution.attention_weights([1.0, 0.0], [[1.0, 0.0], [0.0, 1.0]])\n    assert abs(w[0] - 0.6698) < 1e-3\n    assert abs(w[1] - 0.3302) < 1e-3\n\ndef test_single_key():\n    assert abs(solution.attention_weights([1.0, 1.0], [[1.0, 1.0]])[0] - 1.0) < 1e-12\n\ndef test_sums_to_one():\n    w = solution.attention_weights([0.5, -0.5], [[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])\n    assert abs(sum(w) - 1.0) < 1e-12\n\ndef test_prefers_aligned():\n    w = solution.attention_weights([1.0, 0.0], [[1.0, 0.0], [0.0, 1.0]])\n    assert w[0] > 0.6\n\ndef test_dimension_mismatch():\n    try:\n        solution.attention_weights([1.0, 0.0], [[1.0, 0.0], [1.0]])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_empty_keys():\n    try:\n        solution.attention_weights([1.0], [])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_scaled_scores():\n    w = solution.attention_weights([3.0, 0.0], [[1.0, 0.0], [0.0, 1.0]])\n    assert abs(w[0] - 0.8935) < 1e-3\n",
+  "mutations": [
+    "return [1.0 / len(keys) for _ in keys]",
+    "return [1.0] + [0.0] * (len(keys) - 1)"
+  ]
+}

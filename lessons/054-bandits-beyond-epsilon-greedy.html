@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>054 — Bandits beyond ε-greedy</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can compute a UCB index by hand, explain Thompson sampling, and say why regret grows linearly under ε-greedy.">
+</head>
+<body data-page="lesson" data-lesson="054" data-book="rl" data-book-number="5">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 54 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 5 · Reinforcement Learning · lesson 9 of 10</p>
+  <h1>Bandits beyond ε <span class="say" data-sym="ε">(epsilon)</span>-greedy</h1>
+  <p class="objective">You can compute a UCB index by hand, explain Thompson sampling, and say why regret grows linearly under ε-greedy.</p>
+</header>
+<p class="bookline"><a href="../paths/rl.html">Reinforcement Learning</a><span class="chip">RL</span></p>
+
+<h2>Why this matters<span class="h2-topic">— the trade</span></h2>
+<p class="lede">A bandit is the smallest reinforcement-learning problem: one state, several actions, and a reward you see only for the action you took. Choosing an ad, a treatment, or a headline is a bandit. The question is always: exploit the best-looking arm, or explore one that might be better?</p>
+<p><strong>The failure it prevents.</strong> With 10 arms and 1,000 pulls, <code>ε = 0.1</code> spends about 100 pulls on uniformly random arms. If 9 are bad, roughly 90 of those pulls buy nothing. The loss is the policy, which explores at a fixed rate no matter what it already knows.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>100</b><span>pulls at t = 100</span></div>
+  <div><b>1.56</b><span>index of the least-sampled arm</span></div>
+  <div><b>60</b><span>pulls of regret at 0.54 average, not 0.60</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— optimism</span></h2>
+<p>Each arm has an unknown mean reward <code>μ_a</code><span class="say" data-sym="μ">(mu)</span>. After <code>n_a</code> pulls you have an estimate <code>μ̂_a</code>, and a mean from 3 pulls is worth less than one from 300. Good exploration spends pulls where the estimate is uncertain <em>and</em> could plausibly be the best — not uniformly across all arms.</p>
+<p>In one line: <strong>act as if every arm were as good as its most optimistic plausible value.</strong> Upper confidence bound (UCB) adds an explicit bonus that shrinks as an arm is sampled; Thompson sampling draws a whole plausible mean from a posterior and acts on the draw.</p>
+
+<div class="keybox"><span class="sym">index(a) = μ̂_a + √( 2 ln t / n_a )</span><p>Mean plus a bonus. The bonus falls as <code>n_a</code> grows, so an arm must eventually prove itself or lose.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— the index</span></h2>
+<p>Five parts, then one assumption to check.</p>
+
+<h3>Part 1 — Keep a mean and a count per arm</h3>
+<p>After each pull, update <code>n_a ← n_a + 1</code> and <code>μ̂_a ← μ̂_a + (r − μ̂_a) / n_a</code>. Two numbers per arm are the whole memory. <strong>Why this part exists:</strong> the count is what tells the method how much it does not know.</p>
+
+<h3>Part 2 — Pull every arm once</h3>
+<p>An arm with <code>n_a = 0</code> gets an infinite index, so UCB tries each arm before comparing. <strong>Why this part exists:</strong> with no observation there is no estimate, and dividing by zero is not a policy.</p>
+
+<h3>Part 3 — Add the shrinking bonus</h3>
+<p>At step <code>t</code>, arm <code>a</code> scores <code>μ̂_a + √(2 ln t / n_a)</code><span class="say" data-sym="√">(square root)</span>. The numerator grows like log time, slowly; the denominator grows with pulls, quickly. <strong>Why this part exists:</strong> the bonus stands in for "how far above its mean could this arm be", and shrinks exactly when evidence arrives.</p>
+
+<h3>Part 4 — Or sample from a posterior</h3>
+<p>For a 0/1 reward, keep <code>Beta(α, β)</code><span class="say" data-sym="α">(alpha)</span> with <code>α = 1 + successes</code> and <code>β = 1 + failures</code><span class="say" data-sym="β">(beta)</span>. Draw one value per arm, pick the largest, and update only the arm you pulled. <strong>Why this part exists:</strong> sampling explores in proportion to the probability that an arm is best, without banning any arm outright.</p>
+
+<h3>Part 5 — Measure regret, not just reward</h3>
+<p>Regret after <code>T</code> pulls is <code>T μ* − Σ r_t</code><span class="say" data-sym="Σ">(sigma)</span>, where <code>μ*</code> is the best arm's true mean. <strong>Why this part exists:</strong> average reward hides the cost of exploration; regret makes it the quantity being minimised.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-bandit-t f-bandit-d">
+    <title id="f-bandit-t">Three arms with means, confidence bonuses, and UCB indices</title>
+    <desc id="f-bandit-d">Arm one has mean 0.50 after 40 pulls and a small bonus. Arm two has mean 0.60 after only 10 pulls and a large bonus, giving the highest index. Arm three has mean 0.55 after 50 pulls and a small bonus. UCB picks arm two despite arm three having more evidence.</desc>
+    <defs>
+      <marker id="f-bandit-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--ink-faint)"/>
+      </marker>
+    </defs>
+
+    <line x1="70" y1="290" x2="680" y2="290" stroke="var(--rule)" stroke-width="1.4"/>
+    <line x1="70" y1="60" x2="70" y2="290" stroke="var(--rule)" stroke-width="1.4"/>
+    <text x="58" y="70" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">1.0</text>
+    <text x="58" y="290" text-anchor="end" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">0.0</text>
+
+    <text x="180" y="318" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">arm 1 · n = 40</text>
+    <text x="360" y="318" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">arm 2 · n = 10</text>
+    <text x="540" y="318" text-anchor="middle" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">arm 3 · n = 50</text>
+
+    <line x1="180" y1="136" x2="180" y2="290" stroke="var(--sym-data)" stroke-width="10" opacity="0.55"/>
+    <text x="180" y="128" text-anchor="middle" font-size="12" fill="var(--sym-data)" font-family="ui-monospace, monospace">0.50</text>
+
+    <line x1="360" y1="60" x2="360" y2="290" stroke="var(--sym-opt)" stroke-width="10" opacity="0.55"/>
+    <text x="360" y="52" text-anchor="middle" font-size="12" fill="var(--sym-opt)" font-family="ui-monospace, monospace">0.60</text>
+
+    <line x1="540" y1="96" x2="540" y2="290" stroke="var(--sym-pred)" stroke-width="10" opacity="0.55"/>
+    <text x="540" y="88" text-anchor="middle" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">0.55</text>
+
+    <line x1="180" y1="136" x2="180" y2="60" stroke="var(--sym-data)" stroke-width="1.4" stroke-dasharray="4 3"/>
+    <line x1="360" y1="60" x2="360" y2="10" stroke="var(--sym-opt)" stroke-width="1.4" stroke-dasharray="4 3"/>
+    <line x1="540" y1="96" x2="540" y2="60" stroke="var(--sym-pred)" stroke-width="1.4" stroke-dasharray="4 3"/>
+
+    <text x="180" y="50" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">+0.48</text>
+    <text x="392" y="24" text-anchor="start" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">+0.96</text>
+    <text x="540" y="50" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">+0.43</text>
+
+    <rect x="200" y="222" width="320" height="52" rx="8" fill="none" stroke="var(--sym-opt)" stroke-width="1.5"/>
+    <text x="360" y="244" text-anchor="middle" font-size="12" fill="var(--sym-opt)" font-family="ui-monospace, monospace">indices: 0.98 · 1.56 · 0.98</text>
+    <text x="360" y="263" text-anchor="middle" font-size="12" fill="var(--sym-opt)" font-family="ui-monospace, monospace">pick arm 2 — it is uncertain, not proven</text>
+  </svg>
+  <figcaption><strong>UCB prefers a good arm it is unsure about over a slightly worse arm it has measured well.</strong> The bonus decides this pull; after enough samples it shrinks and the true best arm wins.</figcaption>
+</figure>
+
+<h2>Worked example<span class="h2-topic">— the arithmetic</span></h2>
+
+<h3>1. Three indices at t = 100</h3>
+<p><code>ln 100 = 4.605</code>, so <code>2 ln t = 9.21</code>. Each arm's bonus is <code>√(9.21 / n_a)</code>.</p>
+
+<table>
+  <tr><th>Arm</th><th class="num">μ̂</th><th class="num">n</th><th>Bonus arithmetic</th><th class="num">Index</th></tr>
+  <tr><td>1</td><td class="num">0.50</td><td class="num">40</td><td><code>√(9.21 / 40) = √0.230 = 0.48</code></td><td class="num">0.98</td></tr>
+  <tr><td>2</td><td class="num">0.60</td><td class="num">10</td><td><code>√(9.21 / 10) = √0.921 = 0.96</code></td><td class="num">1.56</td></tr>
+  <tr><td>3</td><td class="num">0.55</td><td class="num">50</td><td><code>√(9.21 / 50) = √0.184 = 0.43</code></td><td class="num">0.98</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> Arms 1 and 3 tie at 0.98 despite different means, because their bonuses compensate: arm 3 is better but better known. Arm 2 wins at 1.56 with only 10 pulls. An index above 1.0 is impossible for a probability — it is an optimistic score, not an estimate.</p>
+
+<h3>2. What happens after 40 more pulls</h3>
+<p>Arm 2 is pulled 40 more times and its mean falls to 0.58. Now <code>n = 50</code>, so its bonus is 0.43 and its index is <code>0.58 + 0.43 = 1.01</code>. Arm 1, untouched, sits near 0.98. Arm 2 stays ahead, but the gap has collapsed from 0.58 to 0.03: evidence shrinks the bonus, and the arm must hold its lead on merit.</p>
+
+<h3>3. Regret for 1,000 pulls</h3>
+<p>Suppose the best arm truly pays 0.60 and a policy earns 0.54 on average. Regret is <code>1,000 × (0.60 − 0.54) = 60</code> reward units, which reads as "60 pulls wasted". Under ε-greedy with <code>ε = 0.1</code> and 9 suboptimal arms, nearly every exploratory pull is wasted, so those pulls keep accumulating: about 90 of every 1,000 pulls are wasted. UCB's bonus shrinks, so its regret grows like <code>ln T</code>.</p>
+<p><strong>Why the logarithm.</strong> The bonus falls as <code>1/√n</code>, so an arm needs exponentially more pulls to earn the same reduction. Sampling continues where it might change the decision, and stops where it cannot.</p>
+
+<h2>The trap<span class="h2-topic">— the assumption</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Exploration means pulling every arm equally."</strong> Uniform exploration is the crudest option, and it keeps paying for information you already have. Exploration is only worth buying where it could change the decision.</p>
+  <p>It feels right because ε-greedy comes first and a fixed ε looks principled. But the rate cannot tell 5 pulls from 500; it spends the same 10% on both, and its regret is linear in <code>T</code>.</p>
+  <p><strong>Correction:</strong> exploration should be proportional to uncertainty and to the chance that the uncertain arm is best. UCB does this with a bonus; Thompson does it by sampling a posterior. Both reduce pulls on arms that are probably bad.</p>
+</div>
+<p><strong>The tell:</strong> cumulative regret is a straight line rather than a flattening curve. A second tell is one arm taking 900 of 1,000 pulls while its interval is still wide — early luck taken for evidence. A third is a non-stationary bandit: UCB assumes fixed means, so a small bonus keeps an old arm on top after it stopped paying.</p>
+
+<h2>Retrieval check<span class="h2-topic">— recall</span></h2>
+<ol class="quiz">
+  <li>Why does an unpulled arm get an infinite UCB index?
+    <details><summary>Answer</summary>
+      <p>With <code>n_a = 0</code> there is no evidence and the bonus is undefined; treating it as infinite forces one trial of every arm.</p>
+    </details>
+  </li>
+  <li>Arm A has mean 0.6 from 100 pulls; arm B has mean 0.55 from 4. Which does UCB prefer, and why?
+    <details><summary>Answer</summary>
+      <p>Usually B: its bonus is much larger because 4 pulls leave real uncertainty. UCB is optimistic about the unknown.</p>
+    </details>
+  </li>
+  <li>What does a Thompson sample represent?
+    <details><summary>Answer</summary>
+      <p>One plausible value of the arm's true mean, drawn from the current posterior. Acting on the largest draw automatically balances exploit and explore.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/054.html">Solve it · 054 — UCB with unpulled arms</a></p>
+<h2>Build it in Colab<span class="h2-topic">— the notebook</span></h2>
+<p>Runnable, NumPy-only: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/054-bandits-beyond-epsilon-greedy.ipynb">open the notebook in Colab</a> · <a href="../notebooks/054-bandits-beyond-epsilon-greedy.ipynb">local copy</a>. It runs UCB and ε-greedy on the same three arms and plots cumulative regret.</p>
+<pre><code>import numpy as np
+means = np.array([0.50, 0.60, 0.55])
+counts = np.zeros(3); values = np.zeros(3)
+for t in range(1, 101):
+    bonus = np.sqrt(2 * np.log(t) / np.maximum(counts, 1))
+    a = int(np.argmax(values + bonus))   # optimistic choice
+    r = np.random.rand() &lt; means[a]
+    counts[a] += 1
+    values[a] += (r - values[a]) / counts[a]</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— drill</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "At t = 100, an arm with n = 25 gets which bonus?", "o": ["√(9.21/25) ≈ 0.61", "√(100/25) = 2.0", "0.25", "ln(100/25) ≈ 1.39"], "a": 0, "why": "The bonus is √(2 ln t / n); 2 ln 100 = 9.21, and 9.21/25 = 0.368, whose root is 0.61."}, {"q": "ε-greedy with fixed ε has regret that grows…", "o": ["linearly in T", "like ln T", "as 1/T", "not at all"], "a": 0, "why": "A fixed fraction of pulls goes to random arms forever, so the per-step loss never vanishes."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → Topic 55: Offline RL &amp; imitation.</strong> Bandits explore by pulling. The last lesson removes that option: learn from a fixed dataset, with no new interaction at all.</p>
+  <div class="pager">
+    <a href="053-mdps-and-dynamic-programming.html">← 53 · MDPs &amp; dynamic programming</a>
+    <a href="055-offline-rl-and-imitation.html">Next · 55 · Offline RL &amp; imitation</a>
+  </div>
+</div>
+
+<p class="source">Primary source: Auer, Cesa-Bianchi &amp; Fischer, <a href="https://homes.di.unimi.it/~cesabian/Pubblicazioni/ml-02.pdf">Finite-time analysis of the multiarmed bandit problem</a> (2002).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

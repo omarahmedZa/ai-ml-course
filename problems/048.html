@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>048 — Most common adjacent pair</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Most common adjacent pair — a graded problem on tokenization.">
+</head>
+<body data-page="problem" data-problem="048">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">048 · medium</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 048 · from scratch</p>
+  <h1>Most common adjacent pair</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Tokenization</span><a href="../lessons/048-subword-tokenizers-bpe.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p>Write <code>most_common_pair(words)</code> for one BPE merge step.</p>
+<ul><li><code>words</code> is a list of symbol lists, e.g. <code>[["l", "o", "w"]]</code></li><li>count every adjacent pair across all words</li><li>return the pair with the highest total count</li><li>break ties by choosing the lexicographically smallest pair</li><li>return <code>None</code> when there are no pairs</li><li>do not mutate <code>words</code></li></ul>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def most_common_pair(words):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def most_common_pair(words):
+    &quot;&quot;&quot;Return the most frequent adjacent pair, ties lexicographic.&quot;&quot;&quot;
+    # Your code here.
+    pass
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_basic</code></li><li><code>test_repeated_word</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 048
+# edit work/048/solution.py
+python3 dml.py run 048
+python3 dml.py submit 048</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-048">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-048" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="047.html">← 047 · Add Adam to the update loop</a><a href="049.html">049 · Nucleus filtering on top of softmax →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

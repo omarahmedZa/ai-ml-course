@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>052 — RAG &amp; tool use</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can explain how retrieval fills the context window and how a tool call becomes an action, including what each one can break.">
+</head>
+<body data-page="lesson" data-lesson="052" data-book="language" data-book-number="4">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 52 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 4 · Language & Transformers · lesson 13 of 13</p>
+  <h1>RAG &amp; tool use</h1>
+  <p class="objective">You can explain how retrieval fills the context window and how a tool call becomes an action, including what each one can break.</p>
+</header>
+<p class="bookline"><a href="../paths/language.html">Language &amp; Transformers</a><span class="chip">NLP &amp; Transformers</span></p>
+
+<h2>Why this matters<span class="h2-topic">— the interface</span></h2>
+<p class="lede">After training, a model's weights are frozen. It cannot learn your refund policy, see today's orders, or send email unless something puts that information in front of it. Two mechanisms do it. <strong>Retrieval-augmented generation</strong> (RAG) finds relevant text and writes it into the prompt. <strong>Tool use</strong> lets the model emit a structured request that outside code executes.</p>
+<p><strong>The failure it prevents.</strong> A support bot is asked about a refund after 45 days. Without help it invents a plausible 30-day policy, because the text is not in its weights. With retrieval, the real clause enters the context; with a tool, the bot can check the order date. The language ability was never the problem.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>2,000</b><span>token context window</span></div>
+  <div><b>1,100</b><span>tokens left for retrieved chunks</span></div>
+  <div><b>0.28</b><span>cosine of the irrelevant chunk</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— the context</span></h2>
+<p>The context window is the model's only writable memory at inference. Everything it knows about your question is in the tokens in front of it. RAG and tool use are two ways of choosing those tokens well: RAG chooses <em>documents</em>, tools choose <em>observations</em> from outside. Neither changes the weights.</p>
+<p>In one line: <strong>retrieve what is relevant, fit it in the budget, and let the model cite or call — not guess.</strong> Retrieval is a ranking problem followed by a packing problem; tool use is a parsing and permission problem around a function call.</p>
+
+<div class="keybox"><span class="sym">context = top-k chunks, packed to fit B tokens</span><p>Rank by similarity, then admit chunks in order until the budget is spent. Relevance without a budget check overflows the window.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— the loop</span></h2>
+<p>Six parts: four for retrieval, two for tools.</p>
+
+<h3>Part 1 — Chunk the documents</h3>
+<p>Split each document into passages of roughly 300–500 tokens, with a little overlap so a boundary sentence survives whole. Store source and position with every chunk. A whole manual blurs in one vector; a lone sentence loses the context that makes it true.</p>
+
+<h3>Part 2 — Embed the query and the chunks</h3>
+<p>An embedding maps text to a vector of numbers, placing similar meanings close together. Embed chunks once, offline; embed the query at request time. Comparing vectors is arithmetic; comparing meanings in text is not.</p>
+
+<h3>Part 3 — Rank by cosine similarity</h3>
+<p>Cosine measures the angle between vectors and ignores length: <code>cos = (a · b) / (‖a‖‖b‖)</code>, from −1 to 1. Take the top <code>k</code>, usually 3 to 10. It gives a cheap, sortable relevance score for every chunk.</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-rag-t f-rag-d">
+    <title id="f-rag-t">The retrieval path and the tool-use loop</title>
+    <desc id="f-rag-d">Top row: a question is embedded, matched against a chunk index, ranked, and packed into a prompt with a budget, which the model turns into a cited answer. Bottom row: the model emits a tool call, a validator checks it against a schema and limits, an external API runs it, and the observation is appended to the context.</desc>
+    <defs>
+      <marker id="f-rag-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="var(--ink-faint)"/>
+      </marker>
+    </defs>
+
+    <text x="24" y="38" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">retrieval · choose documents</text>
+
+    <rect x="24" y="58" width="118" height="58" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+    <text x="83" y="83" text-anchor="middle" font-size="12" fill="var(--sym-data)" font-family="ui-monospace, monospace">question</text>
+    <text x="83" y="101" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">embed → q</text>
+
+    <rect x="182" y="58" width="118" height="58" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+    <text x="241" y="83" text-anchor="middle" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">chunk index</text>
+    <text x="241" y="101" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">cosine top-k</text>
+
+    <rect x="340" y="58" width="150" height="58" rx="8" fill="var(--card)" stroke="var(--sym-loss)" stroke-width="1.6"/>
+    <text x="415" y="83" text-anchor="middle" font-size="12" fill="var(--sym-loss)" font-family="ui-monospace, monospace">pack to budget</text>
+    <text x="415" y="101" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">system + chunks + q</text>
+
+    <rect x="530" y="58" width="166" height="58" rx="8" fill="var(--card)" stroke="var(--sym-opt)" stroke-width="1.6"/>
+    <text x="613" y="83" text-anchor="middle" font-size="12" fill="var(--sym-opt)" font-family="ui-monospace, monospace">model → answer</text>
+    <text x="613" y="101" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">with citations</text>
+
+    <path d="M142 87 H182" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-rag-a)"/>
+    <path d="M300 87 H340" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-rag-a)"/>
+    <path d="M490 87 H530" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-rag-a)"/>
+
+    <line x1="24" y1="160" x2="696" y2="160" stroke="var(--rule)" stroke-width="1"/>
+
+    <text x="24" y="196" font-size="12" fill="var(--ink-soft)" font-family="ui-monospace, monospace">tool use · choose actions</text>
+
+    <rect x="24" y="216" width="140" height="60" rx="8" fill="var(--card)" stroke="var(--sym-opt)" stroke-width="1.6"/>
+    <text x="94" y="242" text-anchor="middle" font-size="12" fill="var(--sym-opt)" font-family="ui-monospace, monospace">model emits</text>
+    <text x="94" y="260" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">{tool, args}</text>
+
+    <rect x="204" y="216" width="140" height="60" rx="8" fill="var(--card)" stroke="var(--sym-loss)" stroke-width="1.6"/>
+    <text x="274" y="242" text-anchor="middle" font-size="12" fill="var(--sym-loss)" font-family="ui-monospace, monospace">validator</text>
+    <text x="274" y="260" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">schema · limits</text>
+
+    <rect x="384" y="216" width="140" height="60" rx="8" fill="var(--card)" stroke="var(--sym-data)" stroke-width="1.6"/>
+    <text x="454" y="242" text-anchor="middle" font-size="12" fill="var(--sym-data)" font-family="ui-monospace, monospace">external API</text>
+    <text x="454" y="260" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">refund(order)</text>
+
+    <rect x="564" y="216" width="132" height="60" rx="8" fill="var(--card)" stroke="var(--sym-pred)" stroke-width="1.6"/>
+    <text x="630" y="242" text-anchor="middle" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">observation</text>
+    <text x="630" y="260" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">appended</text>
+
+    <path d="M164 246 H204" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-rag-a)"/>
+    <path d="M344 246 H384" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-rag-a)"/>
+    <path d="M524 246 H564" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#f-rag-a)"/>
+    <path d="M630 276 C630 320, 94 320, 94 280" fill="none" stroke="var(--sym-param)" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#f-rag-a)"/>
+
+    <text x="360" y="344" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">retrieval adds text once; tool use adds a round trip</text>
+  </svg>
+  <figcaption><strong>Retrieval chooses documents; tool use chooses actions.</strong> Both work by changing the tokens the model sees next — one from an index, one from an API — and neither changes a weight.</figcaption>
+</figure>
+
+<h3>Part 4 — Pack the chunks into the token budget</h3>
+<p>Count tokens, not words. From the window, subtract system prompt, question and answer reserve, then admit ranked chunks until the remainder is spent. Skip a chunk that does not fit; never truncate mid-sentence. Overflow silently drops the oldest tokens, often the instruction.</p>
+
+<h3>Part 5 — Make the answer checkable</h3>
+<p>Instruct the model to cite a chunk id per claim and to say "not in the provided documents" when the chunks do not answer. A citation is a pointer you can verify; a confident sentence is not.</p>
+
+<h3>Part 6 — Wrap every tool in a validator</h3>
+<p>Publish a schema per tool; the model emits a call; your code checks the tool is allowed, fields are present, values are within limits, and the user has permission. Execute, append the result, continue. The model proposes; your code decides.</p>
+
+<h2>Worked example<span class="h2-topic">— the arithmetic</span></h2>
+
+<h3>1. Ranking three chunks</h3>
+<p>Query vector <code>q = [0.6, 0.8]</code>. Three unit-length chunks: A <code>[0.6, 0.8]</code>, B <code>[0.8, 0.6]</code>, C <code>[−0.6, 0.8]</code>. Because every vector has length 1, the cosine is just the dot product.</p>
+
+<table>
+  <tr><th>Chunk</th><th>Dot product</th><th class="num">Cosine</th><th>Rank</th></tr>
+  <tr><td>A</td><td><code>0.6(0.6) + 0.8(0.8) = 1.00</code></td><td class="num">1.00</td><td>1</td></tr>
+  <tr><td>B</td><td><code>0.6(0.8) + 0.8(0.6) = 0.96</code></td><td class="num">0.96</td><td>2</td></tr>
+  <tr><td>C</td><td><code>0.6(−0.6) + 0.8(0.8) = 0.28</code></td><td class="num">0.28</td><td>3</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> A and B are nearly tied at 1.00 and 0.96, so returning only the top 1 drops a chunk almost as relevant as the winner. C is still positive at 0.28 — cosine has no threshold meaning "irrelevant".</p>
+
+<h3>2. Fitting the budget</h3>
+<p>Window 2,000 tokens. System prompt 250, question 50, answer reserve 600. That leaves <code>2,000 − 250 − 50 − 600 = 1,100</code> tokens for chunks. Ranked chunks are A 400, B 500, C 300, D 200.</p>
+
+<table>
+  <tr><th>Chunk</th><th class="num">Tokens</th><th class="num">Remaining after</th><th>Decision</th></tr>
+  <tr><td>A</td><td class="num">400</td><td class="num">700</td><td>admit</td></tr>
+  <tr><td>B</td><td class="num">500</td><td class="num">200</td><td>admit</td></tr>
+  <tr><td>C</td><td class="num">300</td><td class="num">200</td><td>skip — does not fit</td></tr>
+  <tr><td>D</td><td class="num">200</td><td class="num">0</td><td>admit</td></tr>
+</table>
+
+<p><strong>What to notice.</strong> The selected set is A, B, D: 1,100 tokens exactly. C outranks D but is skipped because 300 &gt; 200. Stopping at the first misfit would waste 200 tokens; truncating C would cut a sentence. Ranking order and fit order differ.</p>
+
+<h3>3. One tool call</h3>
+<p>The model emits <code>{"tool": "refund", "args": {"order": "A17", "amount": 40}}</code>. The validator checks the tool is allowed, <code>amount</code> is a number, and <code>40 ≤ 100</code>, the per-call limit. All pass, so the API returns <code>{"status": "ok", "refunded": 40}</code>, which is appended and becomes the reply. An amount of 400 would fail and never reach the API.</p>
+
+<h2>The trap<span class="h2-topic">— the seam</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"RAG grounds the model, so it cannot hallucinate."</strong> Retrieval changes the prompt, not the model. If the right chunk is missing, the model answers from its weights in the same fluent voice; if the chunk is present but ambiguous, it can still misread it.</p>
+  <p>It feels right because the answer cites a source, and a citation looks like evidence. But the citation is generated text too: the model can attach a real chunk id to a claim that chunk never makes.</p>
+  <p><strong>Correction:</strong> measure retrieval separately from generation. Recall@k asks whether the needed chunk reached the context; faithfulness asks whether the answer is supported by what was retrieved. A generation fix cannot repair a retrieval miss.</p>
+</div>
+<p><strong>The tell:</strong> the answer cites document 3, and document 3 does not contain the quoted sentence. The second tell is an ablation: set <code>k = 0</code> and the answer barely changes, meaning the chunks were never used. A third is a question answered in chunk 9 while <code>k = 5</code>.</p>
+
+<h2>Retrieval check<span class="h2-topic">— recall</span></h2>
+<ol class="quiz">
+  <li>Why is cosine preferred to raw dot product for chunk ranking?
+    <details><summary>Answer</summary>
+      <p>It divides out both lengths, so a long chunk is not favoured for its norm. It compares direction — meaning — not magnitude.</p>
+    </details>
+  </li>
+  <li>Your budget allows 1,000 tokens and the top chunk is 1,200. What should happen?
+    <details><summary>Answer</summary>
+      <p>Skip it and try the next chunk, or split it during chunking. Truncating loses the end of the claim; sending it overflows the window.</p>
+    </details>
+  </li>
+  <li>Where must a tool call be validated — in the prompt or in code?
+    <details><summary>Answer</summary>
+      <p>In code. The prompt can ask for valid arguments, but only a parser and permission check outside the model can guarantee that nothing dangerous executes.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/052.html">Solve it · 052 — Context budget</a></p>
+<h2>Build it in Colab<span class="h2-topic">— the notebook</span></h2>
+<p>Runnable, NumPy-only: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/052-rag-and-tool-use.ipynb">open the notebook in Colab</a> · <a href="../notebooks/052-rag-and-tool-use.ipynb">local copy</a>. It scores chunks with cosine and packs them into a budget you can change.</p>
+<pre><code>import numpy as np
+q = np.array([0.6, 0.8])
+chunks = {&quot;A&quot;: np.array([0.6, 0.8]), &quot;B&quot;: np.array([0.8, 0.6]), &quot;C&quot;: np.array([-0.6, 0.8])}
+for name, v in chunks.items():
+    cos = q @ v / (np.linalg.norm(q) * np.linalg.norm(v))
+    print(name, round(float(cos), 2))       # A 1.00, B 0.96, C 0.28</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— drill</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "A top-ranked chunk does not fit the remaining budget. Best move?", "o": ["Skip it and try the next chunk", "Truncate it mid-sentence", "Send it and hope", "Increase temperature"], "a": 0, "why": "Skipping preserves whole sentences and may still admit a smaller relevant chunk."}, {"q": "The answer cites a chunk that does not contain the claim. This is…", "o": ["an unfaithful citation", "a retrieval miss", "a context overflow", "correct grounding"], "a": 0, "why": "The chunk was retrieved but does not support the sentence, so the link is fabricated."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → Topic 53: MDPs &amp; dynamic programming.</strong> Book 5 returns to decisions with consequences: write the five-tuple, then compute exact values by sweeping a table.</p>
+  <div class="pager">
+    <a href="051-evaluating-language-models.html">← 51 · Evaluating language models</a>
+    <a href="053-mdps-and-dynamic-programming.html">Next · 53 · MDPs &amp; dynamic programming</a>
+  </div>
+</div>
+
+<p class="source">Primary source: Lewis et al., <a href="https://arxiv.org/abs/2005.11401">Retrieval-augmented generation for knowledge-intensive NLP</a> (2020).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

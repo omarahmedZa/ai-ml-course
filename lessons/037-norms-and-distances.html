@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>037 — Norms &amp; distances</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can compute L1, L2 and max distances on real numbers, explain what each one measures, and say when standardising features changes the answer.">
+</head>
+<body data-page="lesson" data-lesson="037" data-book="foundations" data-book-number="1">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 37 / 40</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 1 · Foundations · lesson 5 of 7</p>
+  <h1>Norms &amp; distances</h1>
+  <p class="objective">You can compute L1, L2 and max distances on real numbers, say what each one measures, and explain when standardising features changes the answer.</p>
+</header>
+<p class="bookline"><a href="../paths/foundations.html">Foundations</a><span class="chip">Linear Algebra</span></p>
+
+<h2>Why this matters<span class="h2-topic">— the shape of distance</span></h2>
+<p class="lede">Every nearest-neighbour search, clustering run and embedding comparison comes down to one question: how far apart are two points? The answer is never neutral. The rule you choose decides which items count as similar, and in a model with mixed units it can decide the output. A recommender that says two films are close, a fraud system that flags an outlier, a vector database returning ten documents — each is a norm wearing different clothes.</p>
+<p><strong>The failure it prevents.</strong> A housing model compares area in square feet with price in pounds. Price differs by hundreds of thousands while area differs by hundreds, so Euclidean distance is almost entirely price. The model looks reasonable and quietly ignores the feature you cared about.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>5</b><span>L2 length of <code>(3,4)</code></span></div>
+  <div><b>7</b><span>L1 length of the same vector</span></div>
+  <div><b>4</b><span>L∞ length of the same vector</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— the shape of distance</span></h2>
+<p>A <strong>norm</strong> turns a vector into a single non-negative number that says how big it is. Write it <code>‖v‖</code> with double bars. It must be zero only for the zero vector, it must scale with the vector, and it must obey the triangle inequality: going straight from A to C is never longer than going through B.</p>
+<p>A <strong>distance</strong> between two points is the norm of their difference: <code>d(a,b) = ‖a − b‖</code>. So the whole subject reduces to picking a norm, subtracting, and measuring.</p>
+<p>Three norms cover most practice. <strong>L2</strong> squares each entry, adds, and takes the root — straight-line length. <strong>L1</strong> adds absolute values — the distance a taxi drives on a grid. <strong>L∞</strong> takes the largest absolute entry — the worst single feature. For <code>v = (3,4)</code>: L1 is 7, L2 is 5, L∞ is 4.</p>
+
+<div class="keybox"><span class="sym">d(a,b) = ‖a − b‖₂ &nbsp;·&nbsp; ‖v‖₁ = Σ|vᵢ| &nbsp;·&nbsp; ‖v‖∞ = max|vᵢ|</span><p>Same points, three answers. The norm is a modelling choice, not a fact.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— the shape of distance</span></h2>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-balls-t f-balls-d">
+    <title id="f-balls-t">The unit balls of three norms</title>
+    <desc id="f-balls-d">Axes showing a diamond for the L1 unit ball, a circle for L2, and a square for the maximum norm, all at the same radius of one, with a legend naming each.</desc>
+    <line x1="50" y1="180" x2="430" y2="180" stroke="var(--ink-faint)" stroke-width="1"/>
+    <line x1="240" y1="20" x2="240" y2="330" stroke="var(--ink-faint)" stroke-width="1"/>
+    <text x="420" y="200" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">x₁</text>
+    <text x="250" y="34" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">x₂</text>
+    <polygon points="240,90 330,180 240,270 150,180" fill="none" stroke="var(--sym-loss)" stroke-width="2"/>
+    <circle cx="240" cy="180" r="90" fill="none" stroke="var(--sym-data)" stroke-width="2"/>
+    <rect x="150" y="90" width="180" height="180" fill="none" stroke="var(--sym-pred)" stroke-width="2"/>
+    <text x="332" y="270" font-size="11" fill="var(--sym-loss)" font-family="ui-monospace, monospace">L1</text>
+    <text x="334" y="166" font-size="11" fill="var(--sym-data)" font-family="ui-monospace, monospace">L2</text>
+    <text x="336" y="104" font-size="11" fill="var(--sym-pred)" font-family="ui-monospace, monospace">L∞</text>
+    <text x="480" y="86" font-size="13" fill="var(--ink)" font-family="ui-monospace, monospace">all three have size 1</text>
+    <text x="480" y="118" font-size="12" fill="var(--sym-loss)" font-family="ui-monospace, monospace">L1: diamond</text>
+    <text x="480" y="138" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">|x₁| + |x₂| = 1</text>
+    <text x="480" y="172" font-size="12" fill="var(--sym-data)" font-family="ui-monospace, monospace">L2: circle</text>
+    <text x="480" y="192" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">x₁² + x₂² = 1</text>
+    <text x="480" y="226" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">L∞: square</text>
+    <text x="480" y="246" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">max(|x₁|, |x₂|) = 1</text>
+    <text x="480" y="292" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">nested: L1 ⊂ L2 ⊂ L∞</text>
+  </svg>
+  <figcaption><strong>Takeaway.</strong> A "unit" step is a different set of points under each norm, so the same pair of vectors can be near under one and far under another.</figcaption>
+</figure>
+
+<h3>Part 1 — The L2 norm and straight-line distance</h3>
+<p>For <code>a = (1,2)</code> and <code>b = (4,6)</code>, subtract to get <code>a − b = (−3,−4)</code>. Square each entry: 9 and 16. Add: 25. Take the root: 5. That is Pythagoras applied one coordinate at a time, and it is the distance a ruler would measure on a flat page.</p>
+<p>Why this matters: L2 is differentiable and rotation-invariant, so least squares and PCA use it; but squaring lets one huge coordinate dominate.</p>
+
+<h3>Part 2 — The L1 norm and grid distance</h3>
+<p>For the same pair, add absolute differences: <code>3 + 4 = 7</code>. This is the distance a taxi travels on a street grid, or the number of edits between two strings when each edit changes one symbol. It never discounts a large difference the way squaring does; every unit counts once.</p>
+<p>Why this matters: L1 resists wild coordinates and produces sparse solutions, so it sits behind Lasso.</p>
+
+<h3>Part 3 — The L∞ norm and worst-case distance</h3>
+<p>For the same pair, the largest absolute difference is 4. This asks a different question: not "how much error in total" but "how bad is the single worst feature". A factory checks every dimension this way — one part outside tolerance fails the batch, no matter how good the others are.</p>
+<p>Why this matters: when a guarantee must hold feature by feature, an average hides the violation.</p>
+
+<h3>Part 4 — Cosine similarity and standardisation</h3>
+<p>Sometimes direction matters and length does not. Two documents about the same topic should be close even if one is ten times longer. <strong>Cosine similarity</strong> divides the dot product by both lengths: <code>cos(a,b) = (a·b)/(‖a‖₂‖b‖₂)</code>. It runs from −1 to 1, and the angle between the vectors is <code>arccos</code> of it. For <code>a = (1,0)</code> and <code>b = (1,1)</code>: dot 1, lengths 1 and 1.414, so cosine 0.707 and angle 45°.</p>
+<p><strong>Standardisation</strong> rescales each column to mean 0 and spread 1 before measuring: <code>z = (x − mean)/sd</code>. No column then wins by being recorded in smaller numbers.</p>
+
+<h2>Worked example<span class="h2-topic">— the shape of distance</span></h2>
+
+<h3>1. Three distances between two points</h3>
+<p>Take <code>a = (3,4)</code> and <code>b = (6,8)</code>. The difference is <code>(−3,−4)</code>, so the numbers from the numstrip apply directly.</p>
+
+<table>
+  <tr><th>Norm</th><th>Arithmetic</th><th class="num">Distance</th></tr>
+  <tr><td>L2</td><td class="num"><code>√(9 + 16)</code><span class="say" data-sym="√">(square root)</span></td><td class="num">5.00</td></tr>
+  <tr><td>L1</td><td class="num"><code>3 + 4</code></td><td class="num">7.00</td></tr>
+  <tr><td>L∞</td><td class="num"><code>max(3,4)</code></td><td class="num">4.00</td></tr>
+  <tr><td>Cosine</td><td class="num"><code>50 / (5 × 10)</code></td><td class="num">1.00</td></tr>
+</table>
+
+<p><strong>Read it as a sentence.</strong> The points sit 5 units apart in a straight line, 7 along a grid, and differ by at most 4 in any one coordinate. Cosine says 1.00 because <code>b</code> is exactly <code>a</code> doubled — same direction, different length. If your task is "are these the same topic", cosine calls them identical; if it is "are these the same size", it says nothing at all.</p>
+
+<h3>2. Why the answer changes with units</h3>
+<p>Take area in hundreds of square feet and price in hundreds of thousands of pounds: <code>p = (1,2)</code>, <code>q = (2,1)</code>. L2 distance is <code>√2 = 1.414</code>. Record price in pounds instead and the second coordinate becomes 200,000 against 100,000, so the distance is <code>√(1 + 10¹⁰) ≈ 100,000</code>. The area difference of 1 is invisible.</p>
+<p><strong>Standardise first.</strong> If area has mean 1.5 and spread 0.5, the values become <code>−1</code> and <code>+1</code>. If price has mean 150,000 and spread 50,000, it also gives <code>+1</code> and <code>−1</code>. The difference is now <code>(−2,2)</code>, L2 distance <code>√8 = 2.83</code>, and both features count equally.</p>
+
+<h3>3. When L1 and L2 disagree about the nearest neighbour</h3>
+<p>Query <code>q = (0,0)</code>, candidates <code>p = (3,3)</code> and <code>r = (0,5)</code>. L2 puts <code>p</code> at <code>√18 = 4.24</code> and <code>r</code> at 5, so <code>p</code> is nearer. L1 puts <code>p</code> at 6 and <code>r</code> at 5, so <code>r</code> wins. L∞ puts <code>p</code> at 3 and <code>r</code> at 5, so <code>p</code> wins. Only the norm changed.</p>
+
+<h2>The trap<span class="h2-topic">— the shape of distance</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"Distance is a property of the data."</strong> Distance is a property of the data <em>plus</em> the norm <em>plus</em> the units. Euclidean distance feels like the neutral default because it matches the page, but the page is not the model's world.</p>
+  <p>Adding a copy of one feature, measured in millimetres instead of metres, multiplies that direction's contribution by 1,000. The points have not moved; the geometry has.</p>
+  <p><strong>Correction:</strong> fix the units and name the norm before computing. Standardise columns with no shared scale; use L1 when outliers must not dominate, L∞ for worst-case error, cosine when only direction matters.</p>
+</div>
+<p><strong>The tell:</strong> the nearest neighbour changes when you convert a column's units or add a duplicate column. Both are unit bugs. Compute the distance on raw and standardised columns and compare the neighbour lists.</p>
+
+<h2>Retrieval check<span class="h2-topic">— the shape of distance</span></h2>
+<ol class="quiz">
+  <li>Compute all three norms of <code>(−6,8)</code>.
+    <details><summary>Answer</summary>
+      <p>L1 is <code>6 + 8 = 14</code>; L2 is <code>√(36 + 64) = 10</code>; L∞ is <code>max(6,8) = 8</code>. The signs vanish because every norm uses absolute value or a square.</p>
+    </details>
+  </li>
+  <li>Two vectors point in exactly opposite directions. What is their cosine similarity, and what are their L2 and L1 distances if both have length 1?
+    <details><summary>Answer</summary>
+      <p>Cosine is −1. Their difference has length 2, so L2 distance is 2 and L1 distance is 2 as well — for opposite unit vectors the two norms agree.</p>
+    </details>
+  </li>
+  <li>A colleague standardises the features and then reports that L1 and L2 give the same neighbour. Is that a contradiction?
+    <details><summary>Answer</summary>
+      <p>No. Standardising changes the geometry, and different norms can agree on a particular dataset. The norms still define different balls; the points just happen to fall where the answers coincide.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/037.html">Solve it · 037 — Three distances, one function</a></p>
+<h2>Build it in Colab<span class="h2-topic">— the shape of distance</span></h2>
+<p>Runnable, NumPy-only: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/037-norms-and-distances.ipynb">open the notebook in Colab</a> · <a href="../notebooks/037-norms-and-distances.ipynb">local copy</a>. It draws the unit balls and shows a neighbour flipping after standardisation.</p>
+<pre><code>import numpy as np
+a,b = np.array([3.,4.]),np.array([6.,8.])
+d = a - b
+print(np.abs(d).sum())          # L1 = 7.0
+print(np.linalg.norm(d))        # L2 = 5.0
+print(np.abs(d).max())          # L∞ = 4.0</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— the shape of distance</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "Which norm is smallest for a vector with many small non-zero entries spread over 50 dimensions?", "o": ["L∞, because it ignores all but one entry", "L1, because sums grow slowest", "L2, because squares shrink small values", "They are always equal"], "a": 0, "why": "For a spread-out vector, the largest single entry is far below the total, so L∞ is the smallest of the three."}, {"q": "A kNN model's accuracy jumps from 61% to 84% after columns are standardised. What most likely changed?", "o": ["The labels were cleaned", "The distance now weights features comparably", "The model gained parameters", "k increased"], "a": 1, "why": "Before standardising, the largest-scale column dominated every distance, so other features were effectively ignored."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → Topic 38: Distributions &amp; sampling.</strong> Distance tells you how far apart two points are; sampling tells you how much a summary would move if you collected the data again.</p>
+  <div class="pager">
+    <a href="036-eigen-svd.html">← 36 · Eigenvalues, eigenvectors &amp; SVD</a>
+    <a href="038-distributions-and-sampling.html">Next · 38 · Distributions &amp; sampling</a>
+  </div>
+</div>
+
+<p class="source">Primary source: <a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.norm.html">NumPy — <code>linalg.norm</code></a> (the <code>ord</code> argument selects the norm).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

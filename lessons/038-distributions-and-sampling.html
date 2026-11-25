@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>038 — Distributions &amp; sampling</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can compute a standard error, read a confidence interval, and say how much a mean would move if the data were collected again.">
+</head>
+<body data-page="lesson" data-lesson="038" data-book="foundations" data-book-number="1">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 38 / 40</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 1 · Foundations · lesson 6 of 7</p>
+  <h1>Distributions &amp; sampling</h1>
+  <p class="objective">You can compute a standard error, read a confidence interval, and say how much a mean would move if the data were collected again.</p>
+</header>
+<p class="bookline"><a href="../paths/foundations.html">Foundations</a><span class="chip">Probability &amp; Statistics</span></p>
+
+<h2>Why this matters<span class="h2-topic">— where the noise lives</span></h2>
+<p class="lede">A test score is one draw from a process that could have gone differently. Report 84% accuracy without an error bar and the next run's 81% looks like a regression, though nothing changed. Every comparison in machine learning — model A against model B, this prompt against that one, today's evaluation against last week's — is a comparison of noisy numbers. Sampling theory is what turns a bare number into a claim you can defend.</p>
+<p><strong>The failure it prevents.</strong> Two models score 0.71 and 0.72 on 1,000 test items. The difference is one percentage point, about 10 items. With a standard error near 0.014, that gap is well inside the noise, yet a team ships the "winner" and rewrites the roadmap. The same arithmetic explains why a 20-example prototype proves nothing.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>6.0</b><span>mean of the population <code>{2,4,6,8,10}</code></span></div>
+  <div><b>2.83</b><span>its standard deviation</span></div>
+  <div><b>1.41</b><span>standard error of a mean from 4 draws</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— where the noise lives</span></h2>
+<p>A <strong>distribution</strong> says which values are likely and how likely. A <strong>statistic</strong> is a number computed from a sample — a mean, a proportion, an accuracy. Because the sample is random, the statistic is random too: collect the data again and it changes.</p>
+<p>The distribution of that statistic over repeated samples is the <strong>sampling distribution</strong>. Its spread is the <strong>standard error</strong>, written <code>SE</code>. For a mean, <code>SE = σ/√n</code><span class="say" data-sym="σ">(sigma)</span>, where <code>σ</code> (sigma) is the population standard deviation and <code>n</code> is the sample size. The square root is the important part: to halve the noise you need four times the data.</p>
+<p>This is the whole machinery. A confidence interval is just an estimate plus and minus a multiple of its standard error. When you read "0.71 ± 0.03", the 0.03 is a standard error dressed for publication.</p>
+
+<div class="keybox"><span class="sym">SE = σ / √n &nbsp;·&nbsp; 95% interval ≈ estimate ± 1.96 SE</span><p>The spread of the data shrinks as √n <span class="say" data-sym="√">(square root)</span>, not as n. Precision is expensive.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— where the noise lives</span></h2>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-se-t f-se-d">
+    <title id="f-se-t">Sampling distributions for three sample sizes</title>
+    <desc id="f-se-d">Three bell curves centred on the same mean, drawn at equal height. The widest is labelled n equals 4, the middle n equals 16, and the narrowest n equals 64, showing that larger samples give a tighter distribution of the sample mean.</desc>
+    <line x1="80" y1="300" x2="520" y2="300" stroke="var(--ink-faint)" stroke-width="1.2"/>
+    <line x1="300" y1="35" x2="300" y2="305" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="4 4"/>
+    <text x="100" y="322" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">4</text>
+    <text x="200" y="322" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">5</text>
+    <text x="300" y="322" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">6</text>
+    <text x="400" y="322" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">7</text>
+    <text x="500" y="322" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">8</text>
+    <text x="300" y="340" text-anchor="middle" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">sample mean</text>
+    <polyline points="80,285 87,282 95,279 102,276 109,272 117,268 124,264 131,259 139,254 146,248 153,242 161,236 168,229 175,222 183,215 190,207 197,200 205,192 212,185 219,177 227,170 234,163 241,157 249,151 256,146 263,141 271,137 278,134 285,132 293,130 300,130 307,130 315,132 322,134 329,137 337,141 344,146 351,151 359,157 366,163 373,170 381,177 388,185 395,192 403,200 410,207 417,215 425,222 432,229 439,236 447,242 454,248 461,254 469,259 476,264 483,268 491,272 498,276 505,279 513,282 520,285" fill="none" stroke="var(--sym-data)" stroke-width="2"/>
+    <polyline points="80,300 87,300 95,300 102,300 109,300 117,300 124,300 131,299 139,299 146,299 153,298 161,296 168,295 175,292 183,289 190,285 197,279 205,272 212,264 219,254 227,242 234,229 241,215 249,200 256,185 263,170 271,157 278,146 285,137 293,132 300,130 307,132 315,137 322,146 329,157 337,170 344,185 351,200 359,215 366,229 373,242 381,254 388,264 395,272 403,279 410,285 417,289 425,292 432,295 439,296 447,298 454,299 461,299 469,299 476,300 483,300 491,300 498,300 505,300 513,300 520,300" fill="none" stroke="var(--sym-param)" stroke-width="2"/>
+    <polyline points="80,300 87,300 95,300 102,300 109,300 117,300 124,300 131,300 139,300 146,300 153,300 161,300 168,300 175,300 183,300 190,300 197,300 205,300 212,300 219,299 227,298 234,295 241,289 249,279 256,264 263,242 271,215 278,185 285,157 293,137 300,130 307,137 315,157 322,185 329,215 337,242 344,264 351,279 359,289 366,295 373,298 381,299 388,300 395,300 403,300 410,300 417,300 425,300 432,300 439,300 447,300 454,300 461,300 469,300 476,300 483,300 491,300 498,300 505,300 513,300 520,300" fill="none" stroke="var(--sym-pred)" stroke-width="2"/>
+    <text x="540" y="120" font-size="12" fill="var(--sym-data)" font-family="ui-monospace, monospace">n = 4</text>
+    <text x="540" y="196" font-size="12" fill="var(--sym-param)" font-family="ui-monospace, monospace">n = 16</text>
+    <text x="540" y="262" font-size="12" fill="var(--sym-pred)" font-family="ui-monospace, monospace">n = 64</text>
+    
+  </svg>
+  <figcaption><strong>Takeaway.</strong> Every sample mean is drawn from a bell around the true mean; quadrupling the sample halves the bell's width, so extreme results become rare.</figcaption>
+</figure>
+
+<h3>Part 1 — Describe the population with a mean and a spread</h3>
+<p>For the five values <code>{2,4,6,8,10}</code>, the mean is <code>30/5 = 6</code>. The <strong>variance</strong> is the average squared distance from the mean: <code>(16+4+0+4+16)/5 = 8</code>. The <strong>standard deviation</strong> is its square root, <code>√8 = 2.83</code>, which returns to the original units.</p>
+<p>Why this matters: it describes one draw, not the uncertainty of a mean — a smaller quantity, and this lesson's trap.</p>
+
+<h3>Part 2 — Take a sample and compute a statistic</h3>
+<p>Draw four values with replacement, say <code>{2,4,6,10}</code>. Their mean is <code>22/4 = 5.5</code>, not 6. A second sample might give 6.5, a third 5.0. Each sample mean is one observation from the sampling distribution.</p>
+<p>Why this matters: the estimate moves because the sample moved. Reporting a single mean without saying how much it moves presents noise as fact.</p>
+
+<h3>Part 3 — Predict the spread with the standard error</h3>
+<p>With <code>σ = 2.83</code> and <code>n = 4</code>, <code>SE = 2.83/2 = 1.41</code>. For <code>n = 16</code> it is <code>0.71</code>; for <code>n = 64</code>, <code>0.35</code>. This is the curve in the figure: same population, narrower bell.</p>
+<p>Why this matters: it tells you what data volume buys before you collect it. Going from 1,000 to 4,000 examples halves the error bar; 1,000 to 2,000 only shrinks it by 29%.</p>
+
+<h3>Part 4 — Turn the error into an interval</h3>
+<p>For large samples the sampling distribution is close to normal, so about 95% of estimates fall within 1.96 standard errors of the truth. Reverse that and you get a <strong>95% confidence interval</strong>: <code>estimate ± 1.96 × SE</code>. For proportions, replace <code>σ</code> with <code>√(p(1−p))</code>, giving <code>SE = √(p(1−p)/n)</code>.</p>
+<p>Why this matters: it is the smallest honest error bar you can put on an accuracy, a conversion rate or a benchmark score. The <em>central limit theorem</em> is why the bell appears even when the data are not normal.</p>
+
+<h2>Worked example<span class="h2-topic">— where the noise lives</span></h2>
+
+<h3>1. One sample mean and its error bar</h3>
+<p>Population <code>{2,4,6,8,10}</code>, sample <code>{2,4,6,10}</code>. The sample mean is <code>5.5</code>, the population standard deviation is <code>2.83</code>, and <code>n = 4</code>.</p>
+<table>
+  <tr><th>Step</th><th class="num">Value</th></tr>
+  <tr><td><code>SE = 2.83 / √4</code></td><td class="num">1.41</td></tr>
+  <tr><td><code>95% interval = 5.5 ± 1.96(1.41)</code></td><td class="num">5.5 ± 2.77</td></tr>
+  <tr><td>Lower, upper</td><td class="num">2.73, 8.27</td></tr>
+  <tr><td>True mean inside?</td><td class="num">6.0 — yes</td></tr>
+</table>
+<p><strong>Read it as a sentence.</strong> This sample says 5.5, and the procedure that produced it lands within 2.77 of the truth 95% of the time. The interval contains 6.0, so there is no evidence the sample is unusual. Note that the sample mean missed by 0.5, which is only <code>0.5 / 1.41 = 0.35</code> standard errors — an ordinary miss.</p>
+
+<h3>2. Accuracy on 100 test items</h3>
+<p>A model gets 60 of 100 items right. The estimate is <code>p = 0.60</code> and <code>SE = √(0.6 × 0.4 / 100) = √0.0024 = 0.049</code>. The 95% interval is <code>0.60 ± 1.96(0.049) = 0.60 ± 0.096</code>, or <code>[0.504,0.696]</code>.</p>
+<p><strong>Second model.</strong> It scores 66 of 100, <code>p = 0.66</code>, <code>SE = √(0.66 × 0.34 / 100) = 0.047</code>. The difference is 0.06 with a combined standard error of <code>√(0.049² + 0.047²) = 0.068</code>, so the gap is less than one standard error. Two intervals overlap heavily, and the data cannot separate the models. That is the correct conclusion, not "B is 10% better".</p>
+
+<h3>3. Why 1,000 examples still give ±3%</h3>
+<p>At <code>p = 0.7</code> and <code>n = 1,000</code>, <code>SE = 0.0145</code>, so the 95% half-width is about 3 points. Getting down to ±1 point needs roughly 8,000 examples: precision costs quadratically, which is why benchmark gaps under two points are unreadable at 1,000 items.</p>
+
+<h2>The trap<span class="h2-topic">— where the noise lives</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"The standard deviation tells me how uncertain my mean is."</strong> It does not. The standard deviation describes how spread out individual observations are; the standard error describes how spread out <em>means</em> are. They differ by <code>√n</code>.</p>
+  <p>With <code>σ = 2.83</code> the data really are about 2.83 wide, and that does not change with sample size. A mean from 10,000 draws has <code>SE = 0.028</code>, 100× smaller, so quoting 2.83 overstates the uncertainty by 100×.</p>
+  <p><strong>Correction:</strong> error bars on a mean use <code>s/√n</code>. Error bars describing the spread of the data use <code>s</code>. Label the axis so a reader knows which one is drawn.</p>
+</div>
+<p><strong>The tell:</strong> an error bar that stays the same width when you add 100× more data is a standard deviation, not a standard error. A second tell is an error bar wider than the possible range of the quantity — a proportion of 0.6 with a bar of 2.83 is a units mistake, not a wide estimate.</p>
+
+<h2>Retrieval check<span class="h2-topic">— where the noise lives</span></h2>
+<ol class="quiz">
+  <li>Standard deviation 20, sample size 100. What is the standard error, and what happens to it at size 400?
+    <details><summary>Answer</summary>
+      <p><code>SE = 2</code>. At 400, <code>SE = 1</code> — quadrupling the sample halved the error, because the divisor is a square root.</p>
+    </details>
+  </li>
+  <li>What does "95% confidence" actually mean?
+    <details><summary>Answer</summary>
+      <p>It describes the procedure: over many repeated samples, about 95% of intervals built this way contain the true value. It is not a 95% probability that this particular interval does.</p>
+    </details>
+  </li>
+  <li>Model A scores 0.71 and B 0.72 on 1,000 items, with SE about 0.014 each. Is B better?
+    <details><summary>Answer</summary>
+      <p>No evidence of it. The gap is 0.01 and the standard error of the difference is about 0.02, so the gap is half a standard error — the kind of difference a rerun would erase.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/038.html">Solve it · 038 — Standard error, extended</a></p>
+<h2>Build it in Colab<span class="h2-topic">— where the noise lives</span></h2>
+<p>Runnable, NumPy-only: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/038-distributions-and-sampling.ipynb">open the notebook in Colab</a> · <a href="../notebooks/038-distributions-and-sampling.ipynb">local copy</a>. It draws 10,000 sample means at three sample sizes and checks the measured spread against <code>σ/√n</code>.</p>
+<pre><code>import numpy as np
+pop = np.array([2.,4.,6.,8.,10.])
+means = [np.mean(np.random.choice(pop,4)) for _ in range(10000)]
+print(pop.mean(),pop.std())          # 6.0 2.828
+print(np.std(means))                  # about 1.41
+print(pop.std() / np.sqrt(4))         # 1.414</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— where the noise lives</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "You want the standard error of an accuracy estimate to fall by a factor of 3. How much more test data do you need?", "o": ["3 times", "6 times", "9 times", "27 times"], "a": 2, "why": "SE scales as 1/√n, so dividing it by 3 requires multiplying n by 3² = 9."}, {"q": "A 95% interval for a mean is [4.1, 5.9]. A colleague says there is a 95% chance the true mean is inside it. What is the correction?", "o": ["Nothing, that is the definition", "The interval either contains it or not; 95% describes the procedure", "The chance is 5%", "The interval should be ±1 SE"], "a": 1, "why": "Frequentist confidence is a property of repeated intervals, not a probability assigned to this fixed interval after seeing the data."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → Topic 39: Estimation &amp; bias–variance.</strong> Sampling gives you an error bar; estimation theory splits that error into the part caused by bias and the part caused by variance.</p>
+  <div class="pager">
+    <a href="037-norms-and-distances.html">← 37 · Norms &amp; distances</a>
+    <a href="039-estimation-bias-variance.html">Next · 39 · Estimation &amp; bias–variance</a>
+  </div>
+</div>
+
+<p class="source">Primary source: <a href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.choice.html">NumPy — <code>random.choice</code></a> (sampling with and without replacement).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

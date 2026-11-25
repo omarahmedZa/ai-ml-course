@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>044 — Standardise without leaking</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Standardise without leaking — a graded problem on classical-ml.">
+</head>
+<body data-page="problem" data-problem="044">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">044 · medium</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 044 · debug</p>
+  <h1>Standardise without leaking</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Classical Ml</span><span class="chip">Evaluation</span><a href="../lessons/044-feature-engineering-leakage-imbalance.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>standardize(train, test)</code> is supposed to scale every column using the mean and standard deviation of the <strong>training rows only</strong> (divide by <code>n</code>, and use <code>1.0</code> when a column has zero spread).</p>
+<p>It currently computes its statistics from <code>train + test</code>, so the test rows leak into the transform. Fix it.</p>
+<ul><li>keep the signature and the return shape: <code>(scaled_train, scaled_test)</code></li><li>raise <code>ValueError</code> for an empty training set or a row with the wrong number of columns</li><li>do not mutate either input</li></ul>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def standardize(train, test):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def standardize(train, test):
+    &quot;&quot;&quot;Scale columns using the mean and std of the training rows.&quot;&quot;&quot;
+    rows = train + test
+    n = len(rows)
+    d = len(rows[0])
+    means = [sum(r[j] for r in rows) / n for j in range(d)]
+    stds = []
+    for j in range(d):
+        var = sum((r[j] - means[j]) ** 2 for r in rows) / n
+        stds.append(var ** 0.5 or 1.0)
+
+    def scale(data):
+        return [[(r[j] - means[j]) / stds[j] for j in range(d)] for r in data]
+
+    return scale(train), scale(test)
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_train_scaled</code></li><li><code>test_test_uses_train_stats</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 044
+# edit work/044/solution.py
+python3 dml.py run 044
+python3 dml.py submit 044</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-044">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-044" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="043.html">← 043 · Project onto principal components</a><a href="045.html">045 · 2-D convolution with stride and padding →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

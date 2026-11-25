@@ -1,0 +1,30 @@
+{
+  "id": "037",
+  "lesson": "037",
+  "book": "foundations",
+  "title": "Three distances, one function",
+  "difficulty": "easy",
+  "shape": "scratch",
+  "categories": [
+    "linear-algebra"
+  ],
+  "statement_md": "Write `distance(a, b, kind=\"l2\")` returning the distance between two 1-D sequences.\n\n- `\"l1\"`: sum of absolute differences\n- `\"l2\"`: square root of the sum of squared differences (the default)\n- `\"linf\"`: the largest absolute difference\n- raise `ValueError` when the lengths differ or `kind` is unknown\n- always return a `float`, and do not mutate the inputs",
+  "entry": "distance",
+  "signature": "def distance(a, b, kind=\"l2\"):",
+  "starter": "import math\n\n\ndef distance(a, b, kind=\"l2\"):\n    \"\"\"Return the L1, L2 or max distance between a and b.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_l2",
+    "test_l1"
+  ],
+  "hidden": [
+    "test_linf",
+    "test_length_mismatch",
+    "test_unknown_kind",
+    "test_returns_float"
+  ],
+  "tests_py": "def test_l2():\n    assert solution.distance([3, 4], [6, 8]) == 5.0\n\ndef test_l1():\n    assert solution.distance([3, 4], [6, 8], kind=\"l1\") == 7.0\n\ndef test_linf():\n    assert solution.distance([1, 2, 7], [4, 6, 3], kind=\"linf\") == 4.0\n\ndef test_length_mismatch():\n    try:\n        solution.distance([1, 2], [1])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_unknown_kind():\n    try:\n        solution.distance([1], [2], kind=\"cosine\")\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_returns_float():\n    assert isinstance(solution.distance([1], [2]), float)\n",
+  "mutations": [
+    "return sum(abs(x - y) for x, y in zip(a, b))",
+    "return max(abs(x - y) for x, y in zip(a, b))"
+  ]
+}

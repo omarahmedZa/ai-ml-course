@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>041 — SVM &amp; kernels</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/figures.css?v=4">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="You can explain what a margin is, why only support vectors set it, and how a kernel makes a linear classifier non-linear.">
+</head>
+<body data-page="lesson" data-lesson="041" data-book="classical-ml" data-book-number="2">
+<main>
+
+<nav class="topline">
+  <a href="../index.html">← Course map</a>
+  <span class="pill">Topic 41 / 60</span>
+  <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Book 2 · Classical ML · lesson 6 of 9</p>
+  <h1>SVM &amp; kernels</h1>
+  <p class="objective">You can explain what a margin is, why only support vectors set it, and how a kernel makes a linear classifier non-linear.</p>
+</header>
+<p class="bookline"><a href="../paths/classical-ml.html">Classical ML</a><span class="chip">Classical ML</span></p>
+
+<h2>Why this matters<span class="h2-topic">— margins</span></h2>
+<p class="lede">A support vector machine answers a question every classifier faces: when many boundaries separate the data, which one should you ship? Its answer is the one with the widest empty strip on either side. That rule gives the model a property no logistic regression has — the final boundary is decided by a handful of awkward examples, not by all of them. Expressed through a kernel, the same idea handles curved boundaries without building curved features by hand.</p>
+<p><strong>The failure it prevents.</strong> Two models can both score 100% on the training set while behaving differently on Monday's email. One grazes the nearest negative example; the other sits halfway between the classes. An exam question asks exactly this: <em>"Both lines separate the training data — which do you prefer and why?"</em> "The wider margin" is the answer, and it needs a number, not an adjective.</p>
+
+<div class="numstrip" role="group" aria-label="Key numbers">
+  <div><b>200</b><span>labelled emails, 2 features each</span></div>
+  <div><b>37</b><span>support vectors that set the boundary</span></div>
+  <div><b>2 / ‖w‖</b><span>width of the empty strip</span></div>
+</div>
+
+<h2>The one core idea<span class="h2-topic">— margins</span></h2>
+<p>Draw the separating line, then push it away from the nearest point of each class until it cannot move without touching one. The strip it sweeps out is the <strong>margin</strong><span class="say" data-sym="margin">(margin)</span>, and the points it touches are the <strong>support vectors</strong>. Every other point could be deleted and the line would not move. Training is therefore not "fit all 200 emails"; it is "find the line whose nearest examples are as far away as possible".</p>
+<p>In one line: <strong>maximise the empty strip, and the answer depends only on the points at its edge.</strong> A kernel replaces the plain dot product with a similarity score, so the same rule applies in a space with more dimensions — without computing coordinates there.</p>
+
+<div class="keybox"><span class="sym">widest street → few deciding points</span><p>The margin is a safety buffer, and the support vectors are the only rows that price it.</p></div>
+
+<h2>How it actually works<span class="h2-topic">— margins</span></h2>
+
+<figure class="fig">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="f-margin-t f-margin-d">
+    <title id="f-margin-t">The widest street between two classes</title>
+    <desc id="f-margin-d">Red points on the left and blue points on the right sit either side of a solid decision boundary at the centre. Two dashed lines mark the edges of the margin, and the circled points that touch them are the support vectors. A bracket underneath measures the gap between the dashed lines.</desc>
+    <line x1="360" y1="55" x2="360" y2="300" stroke="var(--ink)" stroke-width="1.8"/>
+    <line x1="290" y1="55" x2="290" y2="300" stroke="var(--ink-faint)" stroke-width="1.4" stroke-dasharray="6 5"/>
+    <line x1="430" y1="55" x2="430" y2="300" stroke="var(--ink-faint)" stroke-width="1.4" stroke-dasharray="6 5"/>
+    <circle cx="250" cy="110" r="7" fill="var(--sym-param)"/>
+    <circle cx="205" cy="205" r="7" fill="var(--sym-param)"/>
+    <circle cx="290" cy="258" r="7" fill="var(--sym-param)"/>
+    <circle cx="290" cy="258" r="15" fill="none" stroke="var(--sym-param)" stroke-width="1.6"/>
+    <circle cx="470" cy="105" r="7" fill="var(--sym-pred)"/>
+    <circle cx="535" cy="185" r="7" fill="var(--sym-pred)"/>
+    <circle cx="430" cy="150" r="7" fill="var(--sym-pred)"/>
+    <circle cx="430" cy="150" r="15" fill="none" stroke="var(--sym-pred)" stroke-width="1.6"/>
+    <text x="180" y="80" font-size="13" fill="var(--sym-param)" font-family="ui-monospace, monospace">class −1</text>
+    <text x="490" y="80" font-size="13" fill="var(--sym-pred)" font-family="ui-monospace, monospace">class +1</text>
+    <text x="368" y="285" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">w · x + b = 0</text>
+    <line x1="290" y1="322" x2="430" y2="322" stroke="var(--ink-faint)" stroke-width="1.4"/>
+    <line x1="290" y1="316" x2="290" y2="328" stroke="var(--ink-faint)" stroke-width="1.4"/>
+    <line x1="430" y1="316" x2="430" y2="328" stroke="var(--ink-faint)" stroke-width="1.4"/>
+    <text x="360" y="346" text-anchor="middle" font-size="12" fill="var(--ink-faint)" font-family="ui-monospace, monospace">margin = 2 / ‖w‖</text>
+    <line x1="470" y1="215" x2="470" y2="245" stroke="var(--sym-data)" stroke-width="1.4"/>
+    <polygon points="470,245 466,237 474,237" fill="var(--sym-data)"/>
+    <text x="480" y="240" font-size="11" fill="var(--ink-faint)" font-family="ui-monospace, monospace">w points out</text>
+  </svg>
+  <figcaption><strong>Takeaway.</strong> Only the two circled points touch the strip. Move any other point and the boundary stays put; move a circled one and it turns.</figcaption>
+</figure>
+
+<p>Four ideas carry the whole method: the score, the constraint, the margin width, and the kernel. Take them in that order.</p>
+
+<h3>Part 1 — A score and a sign</h3>
+<p>For an input <code>x</code>, the model computes <code>f(x) = w · x + b</code>. Here <code>w</code> is the weight vector — one number per feature — <code>b</code> is the bias, and <code>w · x</code> is the dot product: multiply matching entries and add. The predicted class is <code>+1</code> when the score is positive and <code>−1</code> when it is negative. The boundary is the set of points scoring zero, and <code>w</code> points perpendicular to it, which is why its length controls the strip.</p>
+<p>Why this matters: the sign is the prediction; the size of the score is the confidence.</p>
+
+<h3>Part 2 — The constraint that defines the strip</h3>
+<p>Encoding the classes as <code>y = +1</code> and <code>y = −1</code> lets one inequality cover both sides: <code>y(w · x + b) ≥ 1</code>. For a positive point this says "score at least +1"; for a negative point it says "score at most −1". Points exactly on the dashed lines satisfy it with equality — those are the support vectors. The fixed 1 is what makes the margin a real distance; without it, scaling <code>w</code> and <code>b</code> would satisfy the inequality forever.</p>
+
+<h3>Part 3 — The margin is a length</h3>
+<p>The gap between the dashed lines is <code>2 / ‖w‖</code>, where <code>‖w‖ = √(w₁² + w₂² + …)</code><span class="say" data-sym="√">(square root)</span> is the length of the weight vector. Widening the strip therefore means shrinking <code>‖w‖</code>. Training solves</p>
+<span class="formula">minimise  ½‖w‖²   subject to  yᵢ(w · xᵢ + b) ≥ 1  for every i</span>
+<p>The half and the square make the objective bowl-shaped without changing where its minimum sits. This is the <strong>hard-margin</strong> SVM. Real data overlaps, so the <strong>soft-margin</strong> version adds a slack <code>ξᵢ ≥ 0</code> per point and a price <code>C</code>: minimise <code>½‖w‖² + C Σξᵢ</code><span class="say" data-sym="Σ">(sigma)</span>. A small <code>C</code> tolerates violations and buys a wide strip; a huge <code>C</code> insists on classifying everything and produces a narrow, wiggly one.</p>
+
+<h3>Part 4 — The kernel trick</h3>
+<p>If no straight boundary works, map the inputs into a richer space and draw a straight boundary there. A <strong>kernel</strong> <code>K(x, z)</code> returns the dot product of two points <em>after</em> that mapping, without performing it: <code>K(x, z) = φ(x) · φ(z)</code><span class="say" data-sym="φ">(phi)</span>. The standard choices are the polynomial kernel <code>K(x, z) = (1 + x · z)^d</code> and the radial basis function <code>K(x, z) = exp(−γ‖x − z‖²)</code><span class="say" data-sym="γ">(gamma)</span>, where <code>γ</code> sets how fast similarity fades with distance.</p>
+<p>Why this works: in the dual form of the optimisation, the data appears only inside dot products. Replace every dot product with <code>K</code> and the solver never needs the mapped coordinates. The prediction becomes <code>f(x) = Σᵢ αᵢ yᵢ K(xᵢ, x) + b</code><span class="say" data-sym="α">(alpha)</span>, where <code>αᵢ</code> is a weight per training point. Most <code>αᵢ</code> come out zero; the nonzero ones are the support vectors.</p>
+
+<h2>Worked example<span class="h2-topic">— margins</span></h2>
+
+<h3>1. A one-dimensional margin, solved by hand</h3>
+<p>Two points, one feature. A negative example at <code>x = −1</code> and a positive one at <code>x = +1</code>. By symmetry the boundary belongs at zero, so <code>b = 0</code>. The support vectors must score exactly <code>+1</code> and <code>−1</code>:</p>
+<table>
+  <tr><th>Step</th><th class="num">Value</th></tr>
+  <tr><td><code>w(1) + 0 = 1</code></td><td class="num">w = 1</td></tr>
+  <tr><td><code>−1(w(−1) + 0)</code></td><td class="num">1 ✓</td></tr>
+  <tr><td><code>margin = 2 / ‖w‖ = 2 / 1</code></td><td class="num">2.0</td></tr>
+</table>
+<p><strong>Read it as a sentence.</strong> The points are two units apart, so the widest separating strip fills the whole gap: width 2. The model <code>f(x) = x</code> puts the edges at ±1, exactly on the points.</p>
+<p><strong>Now score a third point.</strong> Take <code>x = 0.5</code>, a positive example. Its score is <code>0.5</code>: the class is right, but <code>0.5 &lt; 1</code>, so it sits inside the strip. Its hinge loss is <code>max(0, 1 − y f(x)) = max(0, 1 − 0.5) = 0.5</code>. A point at <code>x = 1.4</code> costs <code>max(0, 1 − 1.4) = 0</code>; a positive point at <code>x = −0.2</code> scores −0.2 and costs <code>1 − (−0.2) = 1.2</code>.</p>
+<p><strong>Average the three.</strong> <code>(0.5 + 0 + 1.2) / 3 = 0.567</code>, and training moves <code>w</code> and <code>b</code> to push that number down. Correct and far outside costs nothing; correct inside costs a little; wrong costs more than 1.</p>
+
+<h3>2. What a kernel actually changes</h3>
+<p>Two points, <code>x = 1</code> and <code>z = 0</code>, with an RBF kernel. The squared distance is <code>(1 − 0)² = 1</code>.</p>
+<table>
+  <tr><th>γ</th><th>K(1, 0) = e<sup>−γ</sup></th><th class="num">Value</th></tr>
+  <tr><td>0.5</td><td><code>e<sup>−0.5</sup></code></td><td class="num">0.607</td></tr>
+  <tr><td>1</td><td><code>e<sup>−1</sup></code></td><td class="num">0.368</td></tr>
+  <tr><td>4</td><td><code>e<sup>−4</sup></code></td><td class="num">0.018</td></tr>
+</table>
+<p><strong>Read it as a sentence.</strong> At <code>γ = 1</code>, a point one unit away is 37% similar; at <code>γ = 4</code>, it is 2% similar, so each support vector influences only its own neighbourhood. Small <code>γ</code> gives a smooth boundary; large <code>γ</code> lets it curl around single points.</p>
+<p><strong>What to notice.</strong> The kernel never moves the data. It changes the similarity score, and therefore the boundary's shape. <code>C</code> and <code>γ</code> trade capacity in opposite directions.</p>
+
+<h2>The trap<span class="h2-topic">— margins</span></h2>
+<div class="callout">
+  <span class="label">Most common wrong mental model</span>
+  <p><strong>"A kernel lets the SVM separate anything, so turn γ up until training accuracy is 100%."</strong> A kernel does not add information. It re-expresses distances, and a large <code>γ</code> makes every training point its own tiny island: the boundary wraps around each one, training accuracy hits 100%, and test data meets a model that has memorised nothing useful.</p>
+  <p>It feels right because the training curve responds exactly as promised — more <code>γ</code>, fewer training errors. But what is maximised is the margin in a space defined by <code>γ</code>; shrink the reach far enough and every point's margin is satisfied alone.</p>
+  <p><strong>Correction:</strong> <code>γ</code> and <code>C</code> are capacity dials, not accuracy dials. Tune them on held-out data, and read the support-vector count as a symptom: when nearly every row is one, the model is fitting individual points.</p>
+</div>
+<p><strong>The tell:</strong> training accuracy 100%, test accuracy near chance, and a support-vector count close to the number of rows. A healthy RBF model on a few hundred rows keeps a modest fraction; "almost all of them" is the signature of too much capacity.</p>
+
+<h2>Retrieval check<span class="h2-topic">— margins</span></h2>
+<ol class="quiz">
+  <li>Which training points determine the final boundary, and what happens if you delete one of the others?
+    <details><summary>Answer</summary>
+      <p>The support vectors — points on or inside the margin, with nonzero <code>α</code>. Deleting any other point leaves the boundary unchanged, because its constraint was never active.</p>
+    </details>
+  </li>
+  <li>A linear SVM cannot separate XOR. What exactly does a kernel add?
+    <details><summary>Answer</summary>
+      <p>It adds features implicitly. A degree-2 polynomial kernel includes <code>x₁x₂</code>, and XOR becomes linearly separable. The boundary is straight in the richer space, curved in the original one.</p>
+    </details>
+  </li>
+  <li>What does <code>C</code> control, and which way does the bias–variance trade go as it rises?
+    <details><summary>Answer</summary>
+      <p><code>C</code> prices violations of the margin. Small <code>C</code>: wide strip, more mistakes allowed, higher bias. Large <code>C</code>: narrow strip, few mistakes allowed, higher variance.</p>
+    </details>
+  </li>
+</ol>
+
+<p class="solve-row"><a href="../problems/041.html">Solve it · 041 — Mean hinge loss</a></p>
+<h2>Build it in Colab<span class="h2-topic">— margins</span></h2>
+<p>Runnable, NumPy-only: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/041-svm-and-kernels.ipynb">open the notebook in Colab</a> · <a href="../notebooks/041-svm-and-kernels.ipynb">local copy</a>. It computes a margin, builds an RBF kernel matrix, and plots how <code>γ</code> changes similarity.</p>
+<pre><code>import numpy as np
+X = np.array([[1., 0.], [0., 1.], [2., 2.]])   # three rows, two features
+d2 = ((X[:, None, :] - X[None, :, :]) ** 2).sum(-1)   # squared distances
+K = np.exp(-1.0 * d2)                          # RBF kernel, gamma = 1
+print(np.round(K, 3))</code></pre>
+
+<h2>Extra practice<span class="h2-topic">— margins</span></h2>
+<p class="practice-note">Two harder questions. Three attempts each — the answer unlocks only after the third miss. Correct on the first try is worth 2 points, later 1, revealed 0.</p>
+<div class="practice"><script type="application/json" class="practice-data">[{"q": "A hard-margin SVM has w = [3, 4]. How wide is its margin?", "o": ["0.4", "2.0", "5.0", "10.0"], "a": 0, "why": "‖w‖ = √(9 + 16) = 5, so the margin is 2/5 = 0.4."}, {"q": "You raise γ in an RBF SVM from 0.1 to 10. What should you expect?", "o": ["A smoother boundary and fewer support vectors", "A wigglier boundary and more support vectors", "No change — γ only affects speed", "The margin widens to 2/‖w‖"], "a": 1, "why": "Large γ makes similarity decay fast, so each point influences a smaller neighbourhood; the boundary curls and more points become support vectors."}]</script></div>
+
+<div class="next">
+  <p><strong>Next → Topic 42: Clustering.</strong> SVMs learn from labels. Topic 42 removes them: k-means and Gaussian mixtures find groups using only the geometry of the inputs.</p>
+  <div class="pager">
+    <a href="040-knn-curse-of-dimensionality.html">← 40 · kNN &amp; the curse of dimensionality</a>
+    <a href="042-clustering-kmeans-gmm.html">Next · 42 · Clustering: k-means &amp; GMM</a>
+  </div>
+</div>
+
+<p class="source">Primary source: <a href="https://scikit-learn.org/stable/modules/svm.html">scikit-learn — Support vector machines</a> (margin, kernels and the <code>C</code>/<code>γ</code> dials).</p>
+
+</main>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
+</body>
+</html>

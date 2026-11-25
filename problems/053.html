@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>053 — Value iteration on a chain</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Value iteration on a chain — a graded problem on rl.">
+</head>
+<body data-page="problem" data-problem="053">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">053 · medium</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 053 · from scratch</p>
+  <h1>Value iteration on a chain</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Rl</span><span class="chip">Mdp</span><a href="../lessons/053-mdps-and-dynamic-programming.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p>Write <code>value_iteration(n_states, actions, next_state, reward, gamma, tol=1e-9)</code> for a deterministic MDP.</p>
+<ul><li><code>actions[s]</code> is the list of legal actions in state <code>s</code>; an empty list is terminal</li><li><code>next_state[(s, a)]</code> is the next state and <code>reward[(s, a)]</code> its reward</li><li>apply <code>V(s) = max_a [r + gamma * V(s')]</code> until the largest change is below <code>tol</code></li><li>return a list of <code>n_states</code> floats</li><li>raise <code>ValueError</code> when <code>gamma</code> is outside <code>[0, 1]</code></li></ul>
+<p>Terminal states keep value <code>0.0</code>.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def value_iteration(n_states, actions, next_state, reward, gamma, tol=1e-9):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def value_iteration(n_states, actions, next_state, reward, gamma, tol=1e-9):
+    &quot;&quot;&quot;Return V for a deterministic MDP, by repeated Bellman backups.&quot;&quot;&quot;
+    # Your code here.
+    pass
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_chain</code></li><li><code>test_best_action</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 053
+# edit work/053/solution.py
+python3 dml.py run 053
+python3 dml.py submit 053</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-053">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-053" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="052.html">← 052 · Context budget</a><a href="054.html">054 · UCB with unpulled arms →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>
