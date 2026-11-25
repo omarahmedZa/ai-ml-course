@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>025 — Add PPO&#x27;s clipped objective</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Add PPO&#x27;s clipped objective — a graded problem on reinforcement-learning.">
+</head>
+<body data-page="problem" data-problem="025">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">025 · medium</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 025 · extend</p>
+  <h1>Add PPO&#x27;s clipped objective</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Reinforcement Learning</span><a href="../lessons/025-policy-gradient-at-scale.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>surrogate(ratio, advantage)</code> is the unclipped policy-gradient objective.</p>
+<p>Add <code>clipped_surrogate(ratio, advantage, epsilon=0.2)</code> returning PPO's objective <code>min(r * A, clip(r, 1 - epsilon, 1 + epsilon) * A)</code>.</p>
+<ul><li>the clip is two-sided: <code>1 - epsilon</code> below, <code>1 + epsilon</code> above</li><li>raise <code>ValueError</code> when <code>epsilon</code> is outside <code>[0, 1]</code> or <code>ratio &lt;= 0</code></li><li>return a float</li></ul>
+<p>Do not change <code>surrogate</code>. For a bad action with a negative advantage the lower clip is the binding one, so the objective can be *worse* than <code>r * A</code>.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def clipped_surrogate(ratio, advantage, epsilon=0.2):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def surrogate(ratio, advantage):
+    &quot;&quot;&quot;The unclipped policy-gradient surrogate.&quot;&quot;&quot;
+    return float(ratio * advantage)
+
+
+def clipped_surrogate(ratio, advantage, epsilon=0.2):
+    &quot;&quot;&quot;PPO&#x27;s clipped objective.&quot;&quot;&quot;
+    # Your code here.
+    pass
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_inside_band</code></li><li><code>test_good_action_clipped</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 025
+# edit work/025/solution.py
+python3 dml.py run 025
+python3 dml.py submit 025</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-025">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-025" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="024.html">← 024 · DQN target, terminal fixed</a><a href="026.html">026 · Attention output, scaled and blended →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

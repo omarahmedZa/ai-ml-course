@@ -6,7 +6,8 @@
   "difficulty": "medium",
   "shape": "extend",
   "categories": [
-    "optimization"
+    "calculus-optimization",
+    "deep-learning"
   ],
   "statement_md": "`sgd_step` already takes one plain gradient step. Add `adam_step`, which returns the new weight plus the updated first and second moments.\n\n```\nm = beta1 * m + (1 - beta1) * g\nv = beta2 * v + (1 - beta2) * g * g\nw = w - lr * (m / (1 - beta1**t)) / (sqrt(v / (1 - beta2**t)) + eps)\n```\n\nReturn `(w, m, v)` as floats. Do not change `sgd_step`.",
   "entry": "adam_step",

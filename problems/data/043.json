@@ -6,8 +6,8 @@
   "difficulty": "medium",
   "shape": "scratch",
   "categories": [
-    "classical-ml",
-    "dimensionality-reduction"
+    "linear-algebra",
+    "classical-ml"
   ],
   "statement_md": "Write `project(X, components)` returning the coordinates of the **centred** rows of `X` along each component.\n\n- subtract each column's mean of `X` before projecting\n- for each row, the coordinate on a component is the dot product of the centred row with that component\n- return one list per row, with one coordinate per component, in the given order\n- return `[]` when `X` is empty\n- raise `ValueError` when a component's length differs from the number of columns\n\nInputs are small; loops are fine.",
   "entry": "project",

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>005 — Diagnose the gap</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Diagnose the gap — a graded problem on classical-ml.">
+</head>
+<body data-page="problem" data-problem="005">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">005 · easy</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 005 · debug</p>
+  <h1>Diagnose the gap</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Classical Ml</span><span class="chip">Evaluation Metrics</span><a href="../lessons/005-generalization.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>diagnose</code> reads a train/test pair and names the disease. Both errors lie in <code>[0, 1]</code>.</p>
+<ul><li>both <code>&gt;= high</code> -&gt; <code>"underfit"</code></li><li>train <code>&lt; high</code> and <code>test - train &gt; gap</code> -&gt; <code>"overfit"</code></li><li>otherwise -&gt; <code>"good"</code></li></ul>
+<p>The starter computes the gap as <code>train - test</code>, so it can never see an overfitting gap. Fix the sign without changing the signature.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def diagnose(train_error, test_error, high=0.3, gap=0.1):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def diagnose(train_error, test_error, high=0.3, gap=0.1):
+    &quot;&quot;&quot;Return &#x27;underfit&#x27;, &#x27;overfit&#x27;, or &#x27;good&#x27; from two error levels.&quot;&quot;&quot;
+    if train_error &gt;= high and test_error &gt;= high:
+        return &quot;underfit&quot;
+    if train_error &lt; high and train_error - test_error &gt; gap:  # BUG: gap sign
+        return &quot;overfit&quot;
+    return &quot;good&quot;
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_overfit</code></li><li><code>test_underfit</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 005
+# edit work/005/solution.py
+python3 dml.py run 005
+python3 dml.py submit 005</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-005">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-005" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="004.html">← 004 · The empirical risk, averaged</a><a href="006.html">006 · Sigmoid: score to probability →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

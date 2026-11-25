@@ -6,8 +6,8 @@
   "difficulty": "hard",
   "shape": "extend",
   "categories": [
-    "retrieval",
-    "language-models"
+    "nlp-transformers",
+    "systems"
   ],
   "statement_md": "`score` and `top_k` already rank chunks by cosine similarity.\n\nAdd `select_context(query, chunks, k, budget)` returning the **ids** of chunks to place in the prompt:\n\n- consider only the top `k`, in rank order\n- admit a chunk only if its `tokens` fit the remaining budget\n- skip a chunk that does not fit, then continue down the ranking\n- raise `ValueError` when `budget` is negative\n\nEach chunk is a dict with `id`, `vec` and `tokens`. Do not change `score` or `top_k`.",
   "entry": "select_context",

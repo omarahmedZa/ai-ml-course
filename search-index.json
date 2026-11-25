@@ -1798,6 +1798,427 @@
  },
  {
   "type": "problem",
+  "id": "004",
+  "title": "The empirical risk, averaged",
+  "book": "classical-ml",
+  "bookTitle": "Problems",
+  "categories": [
+   "classical-ml"
+  ],
+  "summary": "`empirical_risk` is the supervised objective: the **average** squared error over the dataset.\n\nThe starter returns the t",
+  "url": "problems/004.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "005",
+  "title": "Diagnose the gap",
+  "book": "classical-ml",
+  "bookTitle": "Problems",
+  "categories": [
+   "classical-ml",
+   "evaluation-metrics"
+  ],
+  "summary": "`diagnose` reads a train/test pair and names the disease. Both errors lie in `[0, 1]`.\n\n- both `>= high` -> `\"underfit\"`",
+  "url": "problems/005.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "006",
+  "title": "Sigmoid: score to probability",
+  "book": "classical-ml",
+  "bookTitle": "Problems",
+  "categories": [
+   "classical-ml"
+  ],
+  "summary": "Write `logistic_probability(w, b, x)`: the logistic model's output for one example.\n\n- compute the score `z = w·x + b`\n-",
+  "url": "problems/006.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "007",
+  "title": "Weighted impurity drop",
+  "book": "classical-ml",
+  "bookTitle": "Problems",
+  "categories": [
+   "classical-ml"
+  ],
+  "summary": "`gini(labels)` already scores a node's impurity. Add `split_gain(parent, left, right)` for one candidate cut.\n\nReturn th",
+  "url": "problems/007.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "008",
+  "title": "Score first, then bend",
+  "book": "neural-networks",
+  "bookTitle": "Problems",
+  "categories": [
+   "deep-learning"
+  ],
+  "summary": "Write one ReLU neuron, `neuron(x, w, b)`.\n\n- score `z = w·x + b`\n- bend with `max(0, z)`\n- return a `float`\n- raise `Val",
+  "url": "problems/008.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "009",
+  "title": "Two-layer forward pass, by hand",
+  "book": "neural-networks",
+  "bookTitle": "Problems",
+  "categories": [
+   "deep-learning"
+  ],
+  "summary": "Write `forward(x, W1, b1, W2, b2)` for one example through `n_in -> n_hidden -> 1`.\n\n1. `z1 = W1 x + b1` (each row of `W",
+  "url": "problems/009.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "010",
+  "title": "Debug the linear-unit gradients",
+  "book": "neural-networks",
+  "bookTitle": "Problems",
+  "categories": [
+   "deep-learning"
+  ],
+  "summary": "`linear_grads(x, w, b, y)` should return `(dL/dw, dL/db)` for the graph `z = wx + b`, `L = (z - y)^2`.\n\nUpstream is `dL/",
+  "url": "problems/010.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "011",
+  "title": "Count the updates",
+  "book": "neural-networks",
+  "bookTitle": "Problems",
+  "categories": [
+   "deep-learning",
+   "calculus-optimization"
+  ],
+  "summary": "`steps_per_epoch(n, batch)` already counts the batches in one pass, rounding up because the last batch may be partial.\n\n",
+  "url": "problems/011.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "012",
+  "title": "Dropout rescale, checked",
+  "book": "neural-networks",
+  "bookTitle": "Problems",
+  "categories": [
+   "deep-learning"
+  ],
+  "summary": "Write `dropout(values, p, mask)` applying one dropout mask, as in training.\n\n- a `True` entry in `mask` keeps the activa",
+  "url": "problems/012.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "013",
+  "title": "Debug gradient-norm clipping",
+  "book": "neural-networks",
+  "bookTitle": "Problems",
+  "categories": [
+   "deep-learning",
+   "calculus-optimization"
+  ],
+  "summary": "`clip_gradient` should clip by **norm**: if the gradient's Euclidean length exceeds `max_norm`, scale the whole vector d",
+  "url": "problems/013.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "014",
+  "title": "Convolution parameter count",
+  "book": "neural-networks",
+  "bookTitle": "Problems",
+  "categories": [
+   "deep-learning"
+  ],
+  "summary": "`conv_output_size` is implemented. Add `conv_params(k, c_in, c_out, bias=False)`, the number of weights in one 2-D convo",
+  "url": "problems/014.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "015",
+  "title": "BPE encode by replaying merges",
+  "book": "language",
+  "bookTitle": "Problems",
+  "categories": [
+   "nlp-transformers"
+  ],
+  "summary": "Write `bpe_encode(word, merges)` that replays an ordered merge list, as a tokenizer does at inference.\n\n- start from the",
+  "url": "problems/015.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "016",
+  "title": "Cosine, not dot product",
+  "book": "language",
+  "bookTitle": "Problems",
+  "categories": [
+   "nlp-transformers"
+  ],
+  "summary": "Write `cosine(a, b)` returning the cosine similarity of two vectors.\n\n- raise `ValueError` when the lengths differ\n- rai",
+  "url": "problems/016.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "017",
+  "title": "Debug the LSTM cell update",
+  "book": "language",
+  "bookTitle": "Problems",
+  "categories": [
+   "nlp-transformers"
+  ],
+  "summary": "`lstm_cell_update` should return the new LSTM cell state:\n\n`c_new = f * c_prev + i * g`\n\nThe current implementation is w",
+  "url": "problems/017.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "018",
+  "title": "Sequence log-probability",
+  "book": "language",
+  "bookTitle": "Problems",
+  "categories": [
+   "nlp-transformers"
+  ],
+  "summary": "`token_log_prob(p)` is implemented. Add `sequence_log_prob(probs)`, the log-probability of a whole token sequence under ",
+  "url": "problems/018.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "019",
+  "title": "Discounted return, checked",
+  "book": "rl",
+  "bookTitle": "Problems",
+  "categories": [
+   "reinforcement-learning"
+  ],
+  "summary": "Write `discounted_return(rewards, gamma)` returning `G_0 = r_0 + gamma*r_1 + gamma^2*r_2 + ...`.\n\n- raise `ValueError` u",
+  "url": "problems/019.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "020",
+  "title": "One Bellman backup sweep",
+  "book": "rl",
+  "bookTitle": "Problems",
+  "categories": [
+   "reinforcement-learning"
+  ],
+  "summary": "Write `backup_all(values, transitions, gamma)` for one sweep of policy evaluation.\n\n- `values` holds the current `V(s)`,",
+  "url": "problems/020.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "021",
+  "title": "Epsilon-greedy action probabilities",
+  "book": "rl",
+  "bookTitle": "Problems",
+  "categories": [
+   "reinforcement-learning"
+  ],
+  "summary": "Write `epsilon_greedy_probs(q_values, epsilon)` returning the probability of each\naction under epsilon-greedy.\n\n- with p",
+  "url": "problems/021.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "022",
+  "title": "Q-learning update, sign fixed",
+  "book": "rl",
+  "bookTitle": "Problems",
+  "categories": [
+   "reinforcement-learning"
+  ],
+  "summary": "`q_update` should move `q` a fraction `alpha` of the way toward the Q-learning\ntarget `reward + gamma * next_max`.\n\n- `n",
+  "url": "problems/022.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "023",
+  "title": "Semi-gradient step for a linear Q",
+  "book": "rl",
+  "bookTitle": "Problems",
+  "categories": [
+   "reinforcement-learning"
+  ],
+  "summary": "`q_linear(weights, features)` already replaces a table cell with a dot product.\n\nAdd `semi_gradient(weights, features, r",
+  "url": "problems/023.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "024",
+  "title": "DQN target, terminal fixed",
+  "book": "rl",
+  "bookTitle": "Problems",
+  "categories": [
+   "reinforcement-learning"
+  ],
+  "summary": "`dqn_target` builds the target `r + gamma * max Q(s', .)` from the frozen target\nnetwork.\n\n- when `done=True` the target",
+  "url": "problems/024.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "025",
+  "title": "Add PPO's clipped objective",
+  "book": "rl",
+  "bookTitle": "Problems",
+  "categories": [
+   "reinforcement-learning"
+  ],
+  "summary": "`surrogate(ratio, advantage)` is the unclipped policy-gradient objective.\n\nAdd `clipped_surrogate(ratio, advantage, epsi",
+  "url": "problems/025.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "026",
+  "title": "Attention output, scaled and blended",
+  "book": "language",
+  "bookTitle": "Problems",
+  "categories": [
+   "nlp-transformers"
+  ],
+  "summary": "Write `attention(query, keys, values)` returning the output vector for one query.\n\n- score each key by `q . k / sqrt(len",
+  "url": "problems/026.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "027",
+  "title": "Count one Transformer block",
+  "book": "language",
+  "bookTitle": "Problems",
+  "categories": [
+   "nlp-transformers",
+   "deep-learning"
+  ],
+  "summary": "Write `block_parameters(d_model, n_heads, expansion=4)` counting matrix weights in\none pre-LN Transformer block.\n\n- atte",
+  "url": "problems/027.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "028",
+  "title": "Masked loss, averaged correctly",
+  "book": "language",
+  "bookTitle": "Problems",
+  "categories": [
+   "nlp-transformers"
+  ],
+  "summary": "Write `masked_nll(log_probs, mask)` returning the **mean** negative log-probability over the positions that are masked.\n",
+  "url": "problems/028.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "029",
+  "title": "Preference loss on a leash",
+  "book": "language",
+  "bookTitle": "Problems",
+  "categories": [
+   "nlp-transformers"
+  ],
+  "summary": "`sigmoid(z)` is already defined. Add `preference_loss(pairs)` returning the **mean** Bradley-Terry loss over preference ",
+  "url": "problems/029.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "030",
+  "title": "The applicant's reasons, only",
+  "book": "trust",
+  "bookTitle": "Problems",
+  "categories": [
+   "explainability"
+  ],
+  "summary": "`applicant_reasons` should return the reasons an applicant can act on.\n\nEach term is `(name, contribution)` in log-odds;",
+  "url": "problems/030.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "031",
+  "title": "Shapley by averaging orderings",
+  "book": "trust",
+  "bookTitle": "Problems",
+  "categories": [
+   "explainability"
+  ],
+  "summary": "Write `shapley_values(value_fn, n)` returning the exact Shapley value of each of `n` players.\n\n- `value_fn` takes a `fro",
+  "url": "problems/031.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "032",
+  "title": "Deletion test against random",
+  "book": "trust",
+  "bookTitle": "Problems",
+  "categories": [
+   "explainability",
+   "evaluation-metrics"
+  ],
+  "summary": "`is_faithful(clean, deleted, deleted_random, margin=0.05)` should say whether an explanation's deletion test beats delet",
+  "url": "problems/032.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "033",
+  "title": "One FedAvg round, weighted by examples",
+  "book": "trust",
+  "bookTitle": "Problems",
+  "categories": [
+   "federated-privacy"
+  ],
+  "summary": "Write `fedavg(models, counts)` returning one aggregated parameter vector.\n\n- `models` is a list of equal-length float li",
+  "url": "problems/033.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "034",
+  "title": "FedProx fixed point, leash attached",
+  "book": "trust",
+  "bookTitle": "Problems",
+  "categories": [
+   "federated-privacy"
+  ],
+  "summary": "`prox_point(w_global, w_local, mu)` should return where one FedProx client stops.\n\nMinimising `0.5 (w - w_local)^2 + (mu",
+  "url": "problems/034.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "035",
+  "title": "Clip a gradient, then add noise",
+  "book": "trust",
+  "bookTitle": "Problems",
+  "categories": [
+   "federated-privacy"
+  ],
+  "summary": "`l2_norm(v)` is already defined. Add `clip_gradient(g, C)` returning the per-example gradient scaled down to length `C`.",
+  "url": "problems/035.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
   "id": "036",
   "title": "Power iteration, step by step",
   "book": "foundations",
@@ -1869,7 +2290,7 @@
   "bookTitle": "Problems",
   "categories": [
    "classical-ml",
-   "svm"
+   "calculus-optimization"
   ],
   "summary": "Write `hinge_loss(scores, labels)` returning the **mean** hinge loss.\n\n- one label per score, each label either `+1` or ",
   "url": "problems/041.html",
@@ -1882,8 +2303,7 @@
   "book": "classical-ml",
   "bookTitle": "Problems",
   "categories": [
-   "classical-ml",
-   "clustering"
+   "classical-ml"
   ],
   "summary": "Write `assign_clusters(points, centroids)` returning, for each point, the index of its nearest centroid.\n\n- distance is ",
   "url": "problems/042.html",
@@ -1896,8 +2316,8 @@
   "book": "classical-ml",
   "bookTitle": "Problems",
   "categories": [
-   "classical-ml",
-   "dimensionality-reduction"
+   "linear-algebra",
+   "classical-ml"
   ],
   "summary": "Write `project(X, components)` returning the coordinates of the **centred** rows of `X` along each component.\n\n- subtrac",
   "url": "problems/043.html",
@@ -1910,8 +2330,7 @@
   "book": "classical-ml",
   "bookTitle": "Problems",
   "categories": [
-   "classical-ml",
-   "evaluation"
+   "classical-ml"
   ],
   "summary": "`standardize(train, test)` is supposed to scale every column using the mean and standard deviation of the **training row",
   "url": "problems/044.html",
@@ -1924,8 +2343,7 @@
   "book": "neural-networks",
   "bookTitle": "Problems",
   "categories": [
-   "neural-networks",
-   "convolution"
+   "deep-learning"
   ],
   "summary": "`conv1d` already computes a valid 1-D convolution. Add `conv2d(image, kernel, stride=1, padding=0)` for a square kernel.",
   "url": "problems/045.html",
@@ -1938,7 +2356,7 @@
   "book": "neural-networks",
   "bookTitle": "Problems",
   "categories": [
-   "neural-networks"
+   "deep-learning"
   ],
   "summary": "The snippet should return the **He initialization** standard deviation `sqrt(2 / fan_in)`, but it returns the Xavier val",
   "url": "problems/046.html",
@@ -1951,7 +2369,8 @@
   "book": "neural-networks",
   "bookTitle": "Problems",
   "categories": [
-   "optimization"
+   "calculus-optimization",
+   "deep-learning"
   ],
   "summary": "`sgd_step` already takes one plain gradient step. Add `adam_step`, which returns the new weight plus the updated first a",
   "url": "problems/047.html",
@@ -1964,7 +2383,7 @@
   "book": "language",
   "bookTitle": "Problems",
   "categories": [
-   "tokenization"
+   "nlp-transformers"
   ],
   "summary": "Write `most_common_pair(words)` for one BPE merge step.\n\n- `words` is a list of symbol lists, e.g. `[[\"l\", \"o\", \"w\"]]`\n-",
   "url": "problems/048.html",
@@ -1977,7 +2396,7 @@
   "book": "language",
   "bookTitle": "Problems",
   "categories": [
-   "decoding"
+   "nlp-transformers"
   ],
   "summary": "`softmax` is implemented. Add `nucleus_indices(probs, p)`, which returns the token ids top-p sampling would keep.\n\n- sor",
   "url": "problems/049.html",
@@ -1990,7 +2409,7 @@
   "book": "language",
   "bookTitle": "Problems",
   "categories": [
-   "attention"
+   "nlp-transformers"
   ],
   "summary": "Write `attention_weights(q, keys)` for one attention head.\n\n- `q` is a query vector and `keys` is a list of key vectors\n",
   "url": "problems/050.html",
@@ -2003,8 +2422,8 @@
   "book": "language",
   "bookTitle": "Problems",
   "categories": [
-   "evaluation",
-   "language-models"
+   "nlp-transformers",
+   "evaluation-metrics"
   ],
   "summary": "Write `perplexity(log_probs)` returning the perplexity of a sequence of natural-log token probabilities: `exp(-mean(log_",
   "url": "problems/051.html",
@@ -2017,8 +2436,8 @@
   "book": "language",
   "bookTitle": "Problems",
   "categories": [
-   "retrieval",
-   "language-models"
+   "nlp-transformers",
+   "systems"
   ],
   "summary": "`score` and `top_k` already rank chunks by cosine similarity.\n\nAdd `select_context(query, chunks, k, budget)` returning ",
   "url": "problems/052.html",
@@ -2031,8 +2450,7 @@
   "book": "rl",
   "bookTitle": "Problems",
   "categories": [
-   "rl",
-   "mdp"
+   "reinforcement-learning"
   ],
   "summary": "Write `value_iteration(n_states, actions, next_state, reward, gamma, tol=1e-9)` for a deterministic MDP.\n\n- `actions[s]`",
   "url": "problems/053.html",
@@ -2045,8 +2463,7 @@
   "book": "rl",
   "bookTitle": "Problems",
   "categories": [
-   "rl",
-   "bandits"
+   "reinforcement-learning"
   ],
   "summary": "`ucb_scores` divides by zero when an arm has never been pulled, and it never checks its inputs. Fix it.\n\n- return `float",
   "url": "problems/054.html",
@@ -2059,8 +2476,7 @@
   "book": "rl",
   "bookTitle": "Problems",
   "categories": [
-   "rl",
-   "offline-rl"
+   "reinforcement-learning"
   ],
   "summary": "`discounted_returns` walks the rewards forwards, so `G_t` is built from the wrong tail. Fix it.\n\n- return `G_t = r_t + g",
   "url": "problems/055.html",
@@ -2074,7 +2490,7 @@
   "bookTitle": "Problems",
   "categories": [
    "evaluation-metrics",
-   "fairness"
+   "explainability"
   ],
   "summary": "Write `bias_gaps(y_true, y_pred, groups)` returning a dict with two floats:\n\n- `demographic_parity`: the largest selecti",
   "url": "problems/056.html",
@@ -2087,8 +2503,7 @@
   "book": "trust",
   "bookTitle": "Problems",
   "categories": [
-   "evaluation-metrics",
-   "calibration"
+   "evaluation-metrics"
   ],
   "summary": "`brier_score(probs, labels)` already works. Add `expected_calibration_error(probs, labels, bins=10)` returning the weigh",
   "url": "problems/057.html",
@@ -2101,8 +2516,7 @@
   "book": "systems",
   "bookTitle": "Problems",
   "categories": [
-   "systems",
-   "latency"
+   "systems"
   ],
   "summary": "`percentile(values, q)` should return the nearest-rank percentile: sort ascending, set `rank = ceil(q / 100 * n)`, and r",
   "url": "problems/058.html",
@@ -2115,8 +2529,7 @@
   "book": "systems",
   "bookTitle": "Problems",
   "categories": [
-   "systems",
-   "compression"
+   "systems"
   ],
   "summary": "Write `quantize_int8(values)` returning `(codes, scale)` for symmetric per-tensor INT8.\n\n- `scale = max(abs(v)) / 127`\n-",
   "url": "problems/059.html",
@@ -2130,7 +2543,7 @@
   "bookTitle": "Problems",
   "categories": [
    "systems",
-   "monitoring"
+   "evaluation-metrics"
   ],
   "summary": "`ks_statistic(a, b)` should return the two-sample Kolmogorov-Smirnov statistic: the largest absolute gap between the emp",
   "url": "problems/060.html",

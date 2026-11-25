@@ -1,0 +1,31 @@
+{
+  "id": "033",
+  "lesson": "033",
+  "book": "trust",
+  "title": "One FedAvg round, weighted by examples",
+  "difficulty": "medium",
+  "shape": "scratch",
+  "categories": [
+    "federated-privacy"
+  ],
+  "statement_md": "Write `fedavg(models, counts)` returning one aggregated parameter vector.\n\n- `models` is a list of equal-length float lists, one per client\n- `counts[k]` is client `k`'s number of examples and weights its vote\n- each output parameter is `sum(n_k * w_k) / sum(n_k)` over the clients\n- raise `ValueError` when there are no clients, when the counts do not match the models, when a count is not positive, or when the model lengths differ\n\nA 700-example client must speak seven times louder than a 100-example one.",
+  "entry": "fedavg",
+  "signature": "def fedavg(models, counts):",
+  "starter": "def fedavg(models, counts):\n    \"\"\"Return the example-weighted average of the client models.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_three_scalars",
+    "test_equal_clients"
+  ],
+  "hidden": [
+    "test_two_parameters_weighted",
+    "test_counts_mismatch",
+    "test_nonpositive_count",
+    "test_ragged_models",
+    "test_no_clients"
+  ],
+  "tests_py": "def test_three_scalars():\n    got = solution.fedavg([[0.1], [0.5], [0.9]], [100, 200, 700])\n    assert abs(got[0] - 0.74) < 1e-12\n\ndef test_equal_clients():\n    got = solution.fedavg([[1.0, 3.0], [3.0, 1.0]], [1, 1])\n    assert abs(got[0] - 2.0) < 1e-12 and abs(got[1] - 2.0) < 1e-12\n\ndef test_two_parameters_weighted():\n    got = solution.fedavg([[0.0, 2.0], [1.0, 0.0]], [1, 3])\n    assert abs(got[0] - 0.75) < 1e-12 and abs(got[1] - 0.5) < 1e-12\n\ndef test_counts_mismatch():\n    try:\n        solution.fedavg([[0.1], [0.2]], [1])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_nonpositive_count():\n    try:\n        solution.fedavg([[0.1], [0.2]], [1, 0])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_ragged_models():\n    try:\n        solution.fedavg([[0.1], [0.2, 0.3]], [1, 1])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_no_clients():\n    try:\n        solution.fedavg([], [])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n",
+  "mutations": [
+    "return [sum(col) / len(col) for col in zip(*a[0])]",
+    "return [sum(c * float(row[j]) for c, row in zip(a[1], a[0])) / len(a[0]) for j in range(len(a[0][0]))]"
+  ]
+}

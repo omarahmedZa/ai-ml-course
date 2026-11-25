@@ -1,0 +1,31 @@
+{
+  "id": "010",
+  "lesson": "010",
+  "book": "neural-networks",
+  "title": "Debug the linear-unit gradients",
+  "difficulty": "medium",
+  "shape": "debug",
+  "categories": [
+    "deep-learning"
+  ],
+  "statement_md": "`linear_grads(x, w, b, y)` should return `(dL/dw, dL/db)` for the graph `z = wx + b`, `L = (z - y)^2`.\n\nUpstream is `dL/dz = 2(z - y)`; multiply it by each local slope: `dL/dw = dL/dz * x`, `dL/db = dL/dz * 1`.\n\nThe starter forgets the local slope of the multiply. Fix both gradients and keep the signature.",
+  "entry": "linear_grads",
+  "signature": "def linear_grads(x, w, b, y):",
+  "starter": "def linear_grads(x, w, b, y):\n    \"\"\"Return (dL/dw, dL/db) for L = (w*x + b - y) ** 2.\"\"\"\n    z = w * x + b\n    upstream = 2.0 * (z - y)\n    return upstream, upstream  # BUG: dw must be scaled by x\n",
+  "visible": [
+    "test_known_value",
+    "test_zero_loss"
+  ],
+  "hidden": [
+    "test_input_scaling",
+    "test_negative_residual",
+    "test_bias_not_scaled",
+    "test_zero_input",
+    "test_returns_pair"
+  ],
+  "tests_py": "def test_known_value():\n    dw, db = solution.linear_grads(2, 3, 1, 10)\n    assert abs(dw - (-12.0)) < 1e-12\n    assert abs(db - (-6.0)) < 1e-12\n\ndef test_zero_loss():\n    dw, db = solution.linear_grads(2, 4, 1, 9)\n    assert dw == 0.0 and db == 0.0\n\ndef test_input_scaling():\n    dw, db = solution.linear_grads(5, 1, 0, 0)\n    assert abs(dw - 50.0) < 1e-12\n    assert abs(db - 10.0) < 1e-12\n\ndef test_negative_residual():\n    dw, db = solution.linear_grads(1, 0, 0, 3)\n    assert abs(dw + 6.0) < 1e-12\n    assert abs(db + 6.0) < 1e-12\n\ndef test_bias_not_scaled():\n    dw, db = solution.linear_grads(4, 1, 0, 0)\n    assert abs(dw - 32.0) < 1e-12\n    assert abs(db - 8.0) < 1e-12\n\ndef test_zero_input():\n    dw, db = solution.linear_grads(0, 3, 2, 7)\n    assert dw == 0.0\n    assert abs(db + 10.0) < 1e-12\n\ndef test_returns_pair():\n    out = solution.linear_grads(1, 1, 0, 0)\n    assert isinstance(out, tuple) and len(out) == 2\n",
+  "mutations": [
+    "return (2 * (a[0] * a[1] + a[2] - a[3]) * a[0], 2 * (a[0] * a[1] + a[2] - a[3]) * a[0])",
+    "return (-2 * (a[0] * a[1] + a[2] - a[3]) * a[0], -2 * (a[0] * a[1] + a[2] - a[3]))"
+  ]
+}

@@ -6,8 +6,8 @@
   "difficulty": "hard",
   "shape": "scratch",
   "categories": [
-    "evaluation",
-    "language-models"
+    "nlp-transformers",
+    "evaluation-metrics"
   ],
   "statement_md": "Write `perplexity(log_probs)` returning the perplexity of a sequence of natural-log token probabilities: `exp(-mean(log_probs))`.\n\n- raise `ValueError` for an empty sequence\n- raise `ValueError` if any log-probability is positive\n- return a `float`\n\nA certain token has log-probability `0`; a uniform choice over ten tokens has `-log(10)`.",
   "entry": "perplexity",

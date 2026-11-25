@@ -6,7 +6,7 @@
   "difficulty": "medium",
   "shape": "scratch",
   "categories": [
-    "tokenization"
+    "nlp-transformers"
   ],
   "statement_md": "Write `most_common_pair(words)` for one BPE merge step.\n\n- `words` is a list of symbol lists, e.g. `[[\"l\", \"o\", \"w\"]]`\n- count every adjacent pair across all words\n- return the pair with the highest total count\n- break ties by choosing the lexicographically smallest pair\n- return `None` when there are no pairs\n- do not mutate `words`",
   "entry": "most_common_pair",

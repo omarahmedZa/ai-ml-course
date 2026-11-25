@@ -1,0 +1,31 @@
+{
+  "id": "025",
+  "lesson": "025",
+  "book": "rl",
+  "title": "Add PPO's clipped objective",
+  "difficulty": "medium",
+  "shape": "extend",
+  "categories": [
+    "reinforcement-learning"
+  ],
+  "statement_md": "`surrogate(ratio, advantage)` is the unclipped policy-gradient objective.\n\nAdd `clipped_surrogate(ratio, advantage, epsilon=0.2)` returning PPO's objective\n`min(r * A, clip(r, 1 - epsilon, 1 + epsilon) * A)`.\n\n- the clip is two-sided: `1 - epsilon` below, `1 + epsilon` above\n- raise `ValueError` when `epsilon` is outside `[0, 1]` or `ratio <= 0`\n- return a float\n\nDo not change `surrogate`. For a bad action with a negative advantage the lower\nclip is the binding one, so the objective can be *worse* than `r * A`.",
+  "entry": "clipped_surrogate",
+  "signature": "def clipped_surrogate(ratio, advantage, epsilon=0.2):",
+  "starter": "def surrogate(ratio, advantage):\n    \"\"\"The unclipped policy-gradient surrogate.\"\"\"\n    return float(ratio * advantage)\n\n\ndef clipped_surrogate(ratio, advantage, epsilon=0.2):\n    \"\"\"PPO's clipped objective.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_inside_band",
+    "test_good_action_clipped"
+  ],
+  "hidden": [
+    "test_bad_action_clipped",
+    "test_custom_epsilon",
+    "test_zero_advantage",
+    "test_invalid_epsilon",
+    "test_invalid_ratio"
+  ],
+  "tests_py": "def test_inside_band():\n    assert solution.clipped_surrogate(1.0, 2.0) == 2.0\n\ndef test_good_action_clipped():\n    assert abs(solution.clipped_surrogate(1.3, 2.0) - 2.4) < 1e-12\n\ndef test_bad_action_clipped():\n    assert abs(solution.clipped_surrogate(0.5, -2.0) + 1.6) < 1e-12\n\ndef test_custom_epsilon():\n    assert abs(solution.clipped_surrogate(2.0, 1.0, 0.5) - 1.5) < 1e-12\n\ndef test_zero_advantage():\n    assert solution.clipped_surrogate(3.0, 0.0) == 0.0\n\ndef test_invalid_epsilon():\n    try:\n        solution.clipped_surrogate(1.0, 1.0, 1.5)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_invalid_ratio():\n    try:\n        solution.clipped_surrogate(0.0, 1.0)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n",
+  "mutations": [
+    "return ratio * advantage",
+    "return max(ratio * advantage, min(max(ratio, 1 - epsilon), 1 + epsilon) * advantage)"
+  ]
+}

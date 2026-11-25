@@ -6,8 +6,7 @@
   "difficulty": "easy",
   "shape": "debug",
   "categories": [
-    "systems",
-    "latency"
+    "systems"
   ],
   "statement_md": "`percentile(values, q)` should return the nearest-rank percentile: sort ascending, set `rank = ceil(q / 100 * n)`, and return the value at that 1-based position as a float.\n\nThe starter uses a floor index, so p50 is off by one and p100 crashes. Fix it. Raise `ValueError` for an empty sequence or a `q` outside `(0, 100]`. Do not mutate `values`.",
   "entry": "percentile",

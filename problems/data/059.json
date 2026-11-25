@@ -6,8 +6,7 @@
   "difficulty": "medium",
   "shape": "scratch",
   "categories": [
-    "systems",
-    "compression"
+    "systems"
   ],
   "statement_md": "Write `quantize_int8(values)` returning `(codes, scale)` for symmetric per-tensor INT8.\n\n- `scale = max(abs(v)) / 127`\n- each code is `round(v / scale)`, clamped to `[-127, 127]`, stored as an `int`\n- an all-zero input returns all-zero codes and `scale == 0.0`\n\nRaise `ValueError` for an empty sequence. Return the codes in input order and do not mutate `values`. A code restored as `q * scale` must be within `scale / 2` of the original.",
   "entry": "quantize_int8",

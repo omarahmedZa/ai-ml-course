@@ -1,0 +1,31 @@
+{
+  "id": "022",
+  "lesson": "022",
+  "book": "rl",
+  "title": "Q-learning update, sign fixed",
+  "difficulty": "easy",
+  "shape": "debug",
+  "categories": [
+    "reinforcement-learning"
+  ],
+  "statement_md": "`q_update` should move `q` a fraction `alpha` of the way toward the Q-learning\ntarget `reward + gamma * next_max`.\n\n- `next_max=None` marks a terminal transition, so the target is just `reward`\n- raise `ValueError` when `alpha` is outside `[0, 1]`\n- return a float\n\nThe starter adds the target to `q` instead of moving toward it. Find the bug,\nfix it, and keep the signature.",
+  "entry": "q_update",
+  "signature": "def q_update(q, reward, gamma, next_max, alpha):",
+  "starter": "def q_update(q, reward, gamma, next_max, alpha):\n    \"\"\"Return Q(s, a) after one Q-learning update.\"\"\"\n    return q + alpha * (reward + gamma * next_max)\n",
+  "visible": [
+    "test_known_value",
+    "test_moves_toward_target"
+  ],
+  "hidden": [
+    "test_alpha_one_reaches_target",
+    "test_alpha_zero_unchanged",
+    "test_terminal_no_bootstrap",
+    "test_invalid_alpha",
+    "test_returns_float"
+  ],
+  "tests_py": "def test_known_value():\n    got = solution.q_update(0.5, 1.0, 0.9, 0.8, 0.1)\n    assert abs(got - 0.622) < 1e-12\n\ndef test_moves_toward_target():\n    q = 0.5\n    target = 1.0 + 0.9 * 0.8\n    assert q < solution.q_update(q, 1.0, 0.9, 0.8, 0.1) < target\n\ndef test_alpha_one_reaches_target():\n    assert abs(solution.q_update(0.5, 1.0, 0.9, 0.8, 1.0) - 1.72) < 1e-12\n\ndef test_alpha_zero_unchanged():\n    assert solution.q_update(0.7, 2.0, 0.9, 5.0, 0.0) == 0.7\n\ndef test_terminal_no_bootstrap():\n    assert abs(solution.q_update(0.5, 1.0, 0.9, None, 0.5) - 0.75) < 1e-12\n\ndef test_invalid_alpha():\n    try:\n        solution.q_update(0.5, 1.0, 0.9, 0.8, 1.5)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_returns_float():\n    assert isinstance(solution.q_update(1, 1, 0.9, 1, 0.5), float)\n",
+  "mutations": [
+    "return q + alpha * (reward + gamma * next_max)",
+    "return reward + gamma * next_max"
+  ]
+}

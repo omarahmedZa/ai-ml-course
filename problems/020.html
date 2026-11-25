@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>020 — One Bellman backup sweep</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="One Bellman backup sweep — a graded problem on reinforcement-learning.">
+</head>
+<body data-page="problem" data-problem="020">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">020 · easy</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 020 · from scratch</p>
+  <h1>One Bellman backup sweep</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Reinforcement Learning</span><a href="../lessons/020-value-functions-bellman.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p>Write <code>backup_all(values, transitions, gamma)</code> for one sweep of policy evaluation.</p>
+<ul><li><code>values</code> holds the current <code>V(s)</code>, one entry per state</li><li><code>transitions</code> is aligned with <code>values</code>; each entry is <code>(reward, next_index)</code></li><li>a <code>next_index</code> of <code>-1</code> marks a terminal state, so that state gets only its reward</li><li>otherwise return <code>reward + gamma * values[next_index]</code></li><li>return a list of floats, same length as <code>values</code>, and do not mutate it</li></ul>
+<p>Raise <code>ValueError</code> when <code>gamma</code> is outside <code>[0, 1]</code>, when the two lists differ in length, or when a non-terminal index is out of range.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def backup_all(values, transitions, gamma):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def backup_all(values, transitions, gamma):
+    &quot;&quot;&quot;One Bellman backup sweep over every state.&quot;&quot;&quot;
+    # Your code here.
+    pass
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_known_backup</code></li><li><code>test_two_states</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 020
+# edit work/020/solution.py
+python3 dml.py run 020
+python3 dml.py submit 020</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-020">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-020" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="019.html">← 019 · Discounted return, checked</a><a href="021.html">021 · Epsilon-greedy action probabilities →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

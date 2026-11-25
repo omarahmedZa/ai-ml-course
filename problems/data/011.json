@@ -1,0 +1,32 @@
+{
+  "id": "011",
+  "lesson": "011",
+  "book": "neural-networks",
+  "title": "Count the updates",
+  "difficulty": "easy",
+  "shape": "extend",
+  "categories": [
+    "deep-learning",
+    "calculus-optimization"
+  ],
+  "statement_md": "`steps_per_epoch(n, batch)` already counts the batches in one pass, rounding up because the last batch may be partial.\n\nAdd `count_updates(n, batch, epochs)` returning the number of parameter updates in a full run:\n\n`ceil(n / batch) * epochs`\n\n- return `0` when `n` or `epochs` is `0`\n- raise `ValueError` when `batch < 1` or `epochs < 0`\n- return an `int`\n\nDo not change `steps_per_epoch`.",
+  "entry": "count_updates",
+  "signature": "def count_updates(n, batch, epochs):",
+  "starter": "def steps_per_epoch(n, batch):\n    \"\"\"Batches in one pass; the last batch may be partial.\"\"\"\n    if batch < 1:\n        raise ValueError(\"batch must be positive\")\n    return -(-n // batch)\n\n\ndef count_updates(n, batch, epochs):\n    # Your code here: one pass times the number of passes.\n    pass\n",
+  "visible": [
+    "test_exact_division",
+    "test_partial_batch"
+  ],
+  "hidden": [
+    "test_batch_larger_than_data",
+    "test_zero_epochs",
+    "test_zero_examples",
+    "test_invalid_batch",
+    "test_returns_int"
+  ],
+  "tests_py": "def test_exact_division():\n    assert solution.count_updates(10000, 100, 20) == 2000\n\ndef test_partial_batch():\n    assert solution.count_updates(10, 4, 3) == 9\n\ndef test_batch_larger_than_data():\n    assert solution.count_updates(3, 10, 5) == 5\n\ndef test_zero_epochs():\n    assert solution.count_updates(100, 10, 0) == 0\n\ndef test_zero_examples():\n    assert solution.count_updates(0, 10, 5) == 0\n\ndef test_invalid_batch():\n    try:\n        solution.count_updates(100, 0, 2)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_returns_int():\n    assert isinstance(solution.count_updates(100, 10, 2), int)\n",
+  "mutations": [
+    "return a[0] * a[2]",
+    "return (a[0] // max(a[1], 1)) * a[2]"
+  ]
+}

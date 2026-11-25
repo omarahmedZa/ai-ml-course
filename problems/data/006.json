@@ -1,0 +1,31 @@
+{
+  "id": "006",
+  "lesson": "006",
+  "book": "classical-ml",
+  "title": "Sigmoid: score to probability",
+  "difficulty": "easy",
+  "shape": "scratch",
+  "categories": [
+    "classical-ml"
+  ],
+  "statement_md": "Write `logistic_probability(w, b, x)`: the logistic model's output for one example.\n\n- compute the score `z = w·x + b`\n- return `1 / (1 + exp(-z))` as a `float`\n- stay finite for large negative scores (do not overflow)\n- raise `ValueError` when `len(w) != len(x)`\n\nThe decision boundary is at `z = 0`, where the probability is exactly `0.5`.",
+  "entry": "logistic_probability",
+  "signature": "def logistic_probability(w, b, x):",
+  "starter": "import math\n\n\ndef logistic_probability(w, b, x):\n    \"\"\"Return sigma(w dot x + b) for one example.\"\"\"\n    # Your code here: dot product, add bias, squash without overflow.\n    pass\n",
+  "visible": [
+    "test_zero_score",
+    "test_lesson_example"
+  ],
+  "hidden": [
+    "test_nonzero_bias",
+    "test_symmetry",
+    "test_large_negative",
+    "test_length_mismatch",
+    "test_returns_float"
+  ],
+  "tests_py": "import math\n\ndef test_zero_score():\n    assert solution.logistic_probability([0, 0], 0, [5, 7]) == 0.5\n\ndef test_lesson_example():\n    p = solution.logistic_probability([1, -1], 0, [2, 0.5])\n    assert abs(p - 0.8175744761936437) < 1e-12\n\ndef test_nonzero_bias():\n    p = solution.logistic_probability([1], -2, [1])\n    assert abs(p - 0.2689414213699951) < 1e-12\n\ndef test_symmetry():\n    hi = solution.logistic_probability([1], 0, [3])\n    lo = solution.logistic_probability([1], 0, [-3])\n    assert abs(hi + lo - 1.0) < 1e-12\n\ndef test_large_negative():\n    assert solution.logistic_probability([1], 0, [-1000]) == 0.0\n\ndef test_length_mismatch():\n    try:\n        solution.logistic_probability([1, 2], 0, [1])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_returns_float():\n    assert isinstance(solution.logistic_probability([1], 0, [0]), float)\n",
+  "mutations": [
+    "return 0.5 + 0.5 * math.tanh(sum(wi * xi for wi, xi in zip(a[0], a[2])) / 2)",
+    "return sum(wi * xi for wi, xi in zip(a[0], a[2])) + a[1]"
+  ]
+}

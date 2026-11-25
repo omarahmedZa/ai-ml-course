@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>024 — DQN target, terminal fixed</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="DQN target, terminal fixed — a graded problem on reinforcement-learning.">
+</head>
+<body data-page="problem" data-problem="024">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">024 · easy</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 024 · debug</p>
+  <h1>DQN target, terminal fixed</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Reinforcement Learning</span><a href="../lessons/024-dqn.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>dqn_target</code> builds the target <code>r + gamma * max Q(s', .)</code> from the frozen target network.</p>
+<ul><li>when <code>done=True</code> the target is just <code>reward</code> — a terminal state has no future</li><li>raise <code>ValueError</code> when <code>next_q</code> is empty and the transition is not terminal</li><li>return a float</li></ul>
+<p>The starter bootstraps past terminal states, crediting finished episodes with value that does not exist. Fix it and keep the signature.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def dqn_target(reward, gamma, next_q, done=False):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def dqn_target(reward, gamma, next_q, done=False):
+    &quot;&quot;&quot;Target for one transition, built from the frozen target network.&quot;&quot;&quot;
+    return reward + gamma * max(next_q)
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_known_target</code></li><li><code>test_takes_best_next</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 024
+# edit work/024/solution.py
+python3 dml.py run 024
+python3 dml.py submit 024</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-024">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-024" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="023.html">← 023 · Semi-gradient step for a linear Q</a><a href="025.html">025 · Add PPO&#x27;s clipped objective →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

@@ -7,7 +7,7 @@
   "shape": "scratch",
   "categories": [
     "classical-ml",
-    "svm"
+    "calculus-optimization"
   ],
   "statement_md": "Write `hinge_loss(scores, labels)` returning the **mean** hinge loss.\n\n- one label per score, each label either `+1` or `-1`\n- per row the loss is `max(0, 1 - label * score)`\n- raise `ValueError` when the lengths differ or a label is not `+1`/`-1`\n- return `0.0` for empty inputs\n\nLoops are fine; no NumPy needed.",
   "entry": "hinge_loss",

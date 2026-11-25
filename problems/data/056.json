@@ -7,7 +7,7 @@
   "shape": "scratch",
   "categories": [
     "evaluation-metrics",
-    "fairness"
+    "explainability"
   ],
   "statement_md": "Write `bias_gaps(y_true, y_pred, groups)` returning a dict with two floats:\n\n- `demographic_parity`: the largest selection rate minus the smallest, where a group's selection rate is the share of its rows with `y_pred == 1`\n- `equal_opportunity`: the same gap computed over true-positive rates, where a group's TPR is the share predicted 1 among rows with `y_true == 1`\n\nGroups with no positive labels are skipped when computing equal opportunity; if fewer than two groups remain, report `0.0` for it.\n\nRaise `ValueError` when the three sequences differ in length or fewer than two distinct groups are present. Do not mutate the inputs.",
   "entry": "bias_gaps",

@@ -1,0 +1,30 @@
+{
+  "id": "014",
+  "lesson": "014",
+  "book": "neural-networks",
+  "title": "Convolution parameter count",
+  "difficulty": "easy",
+  "shape": "extend",
+  "categories": [
+    "deep-learning"
+  ],
+  "statement_md": "`conv_output_size` is implemented. Add `conv_params(k, c_in, c_out, bias=False)`, the number of weights in one 2-D convolution layer.\n\n- weights: `k * k * c_in * c_out` — one filter per output channel, shared across positions\n- when `bias` is true, add one bias per output channel\n- raise `ValueError` if `k`, `c_in` or `c_out` is below 1\n- return an `int`\n\nDo not change `conv_output_size`.",
+  "entry": "conv_params",
+  "signature": "def conv_params(k, c_in, c_out, bias=False):",
+  "starter": "def conv_output_size(size, k, stride=1, padding=0):\n    \"\"\"Side length of a square output map.\"\"\"\n    return (size - k + 2 * padding) // stride + 1\n\n\ndef conv_params(k, c_in, c_out, bias=False):\n    # Your code here: count k*k weights per input-output channel pair.\n    pass\n",
+  "visible": [
+    "test_3x3_64_to_64",
+    "test_1x1"
+  ],
+  "hidden": [
+    "test_default_excludes_bias",
+    "test_bias_added",
+    "test_5x5",
+    "test_nonpositive_raises"
+  ],
+  "tests_py": "def test_3x3_64_to_64():\n    assert solution.conv_params(3, 64, 64) == 36864\n\ndef test_1x1():\n    assert solution.conv_params(1, 16, 32) == 512\n\ndef test_default_excludes_bias():\n    assert solution.conv_params(3, 8, 8) == 576\n\ndef test_bias_added():\n    assert solution.conv_params(3, 64, 64, bias=True) == 36928\n\ndef test_5x5():\n    assert solution.conv_params(5, 3, 8) == 600\n\ndef test_nonpositive_raises():\n    for args in ((0, 3, 4), (3, 0, 4), (3, 4, -1)):\n        try:\n            solution.conv_params(*args)\n        except ValueError:\n            continue\n        raise AssertionError(\"expected ValueError for %r\" % (args,))\n",
+  "mutations": [
+    "return a[0] * a[0] * a[1] * a[2] + a[2]",
+    "return a[0] * a[1] * a[2]"
+  ]
+}

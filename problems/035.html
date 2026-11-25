@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>035 — Clip a gradient, then add noise</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Clip a gradient, then add noise — a graded problem on federated-privacy.">
+</head>
+<body data-page="problem" data-problem="035">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">035 · medium</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 035 · extend</p>
+  <h1>Clip a gradient, then add noise</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Federated Privacy</span><a href="../lessons/035-privacy-and-threat-model.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>l2_norm(v)</code> is already defined. Add <code>clip_gradient(g, C)</code> returning the per-example gradient scaled down to length <code>C</code>.</p>
+<ul><li>if the norm of <code>g</code> is at most <code>C</code>, return it unchanged</li><li>otherwise multiply the whole vector by <code>C / norm</code> - direction survives, size is capped</li><li>return a new list of floats and do not mutate <code>g</code></li><li>raise <code>ValueError</code> when <code>C &lt;= 0</code></li></ul>
+<p>Clipped at <code>C = 1</code>, both <code>[6, 8]</code> and <code>[3, 4]</code> land on the same point: no single example can contribute more than the number the noise is calibrated against.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def clip_gradient(g, C):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>import math
+
+
+def l2_norm(v):
+    return math.sqrt(sum(x * x for x in v))
+
+
+def clip_gradient(g, C):
+    &quot;&quot;&quot;Return g scaled down to norm C when it is longer than C.&quot;&quot;&quot;
+    # Your code here.
+    pass
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_clips_long_vector</code></li><li><code>test_keeps_short_vector</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 035
+# edit work/035/solution.py
+python3 dml.py run 035
+python3 dml.py submit 035</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-035">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-035" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="034.html">← 034 · FedProx fixed point, leash attached</a><a href="036.html">036 · Power iteration, step by step →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

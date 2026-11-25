@@ -1,0 +1,31 @@
+{
+  "id": "030",
+  "lesson": "030",
+  "book": "trust",
+  "title": "The applicant's reasons, only",
+  "difficulty": "medium",
+  "shape": "debug",
+  "categories": [
+    "explainability"
+  ],
+  "statement_md": "`applicant_reasons` should return the reasons an applicant can act on.\n\nEach term is `(name, contribution)` in log-odds; `actionable` is the set of names the applicant can change. The function must\n\n- keep only actionable terms - selection, not simplification\n- rank those by **absolute** contribution, largest first\n- return at most `k` names, ties keeping their input order\n- raise `ValueError` when `k < 1`\n\nThe starter filters *after* it slices, so a large `income` term eats a slot and the applicant is told nothing they can change. Fix it and keep the signature.",
+  "entry": "applicant_reasons",
+  "signature": "def applicant_reasons(terms, actionable, k=2):",
+  "starter": "def applicant_reasons(terms, actionable, k=2):\n    \"\"\"Return the k largest-magnitude contributions the applicant can act on.\"\"\"\n    ranked = sorted(terms, key=lambda pair: -abs(pair[1]))[:k]\n    return [name for name, _ in ranked if name in actionable]\n",
+  "visible": [
+    "test_known_selection",
+    "test_fewer_actionable_than_k"
+  ],
+  "hidden": [
+    "test_nothing_actionable",
+    "test_ranked_by_magnitude",
+    "test_k_below_one_raises",
+    "test_ties_keep_input_order",
+    "test_does_not_mutate"
+  ],
+  "tests_py": "def test_known_selection():\n    terms = [(\"income\", -1.20), (\"debt-to-income\", 0.95), (\"missed payments\", 0.70)]\n    got = solution.applicant_reasons(terms, {\"debt-to-income\", \"missed payments\"}, 2)\n    assert got == [\"debt-to-income\", \"missed payments\"]\n\ndef test_fewer_actionable_than_k():\n    terms = [(\"income\", -0.35), (\"account age\", 0.00), (\"missed payments\", 0.70)]\n    assert solution.applicant_reasons(terms, {\"missed payments\"}, 3) == [\"missed payments\"]\n\ndef test_nothing_actionable():\n    terms = [(\"income\", -0.35), (\"account age\", 0.12)]\n    assert solution.applicant_reasons(terms, {\"missed payments\"}, 2) == []\n\ndef test_ranked_by_magnitude():\n    terms = [(\"a\", 0.20), (\"b\", -0.90), (\"c\", 0.55)]\n    assert solution.applicant_reasons(terms, {\"a\", \"b\", \"c\"}, 2) == [\"b\", \"c\"]\n\ndef test_k_below_one_raises():\n    try:\n        solution.applicant_reasons([(\"a\", 1.0)], {\"a\"}, 0)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_ties_keep_input_order():\n    terms = [(\"x\", 0.5), (\"y\", -0.5)]\n    assert solution.applicant_reasons(terms, {\"x\", \"y\"}, 2) == [\"x\", \"y\"]\n\ndef test_does_not_mutate():\n    terms = [(\"a\", 0.2), (\"b\", 0.9)]\n    solution.applicant_reasons(terms, {\"a\", \"b\"}, 1)\n    assert terms == [(\"a\", 0.2), (\"b\", 0.9)]\n",
+  "mutations": [
+    "return [n for n, v in sorted(a[0], key=lambda t: -t[1]) if n in a[1]][:a[2]]",
+    "return [n for n, v in sorted(a[0], key=lambda t: -abs(t[1]))][:a[2]]"
+  ]
+}

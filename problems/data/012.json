@@ -1,0 +1,31 @@
+{
+  "id": "012",
+  "lesson": "012",
+  "book": "neural-networks",
+  "title": "Dropout rescale, checked",
+  "difficulty": "medium",
+  "shape": "scratch",
+  "categories": [
+    "deep-learning"
+  ],
+  "statement_md": "Write `dropout(values, p, mask)` applying one dropout mask, as in training.\n\n- a `True` entry in `mask` keeps the activation, divided by `1 - p`\n- a `False` entry returns `0.0`\n- raise `ValueError` unless `0 <= p < 1`\n- raise `ValueError` when `mask` and `values` differ in length\n- return floats and do not mutate the inputs\n\nInference needs no rescale, because the correction is paid during training.",
+  "entry": "dropout",
+  "signature": "def dropout(values, p, mask):",
+  "starter": "def dropout(values, p, mask):\n    \"\"\"Return activations after one dropout mask, rescaled for training.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_mixed_mask",
+    "test_all_dropped"
+  ],
+  "hidden": [
+    "test_p_zero_identity",
+    "test_scales_survivors",
+    "test_bad_p_raises",
+    "test_bad_mask_raises",
+    "test_no_mutation"
+  ],
+  "tests_py": "def test_mixed_mask():\n    got = solution.dropout([2.0, 1.0, 0.5, 4.0], 0.3, [True, False, True, True])\n    assert len(got) == 4\n    assert abs(got[0] - 2.857142857142857) < 1e-9\n    assert got[1] == 0.0\n    assert abs(got[2] - 0.7142857142857143) < 1e-9\n    assert abs(got[3] - 5.714285714285714) < 1e-9\n\ndef test_all_dropped():\n    assert solution.dropout([1.0, 2.0], 0.5, [False, False]) == [0.0, 0.0]\n\ndef test_p_zero_identity():\n    assert solution.dropout([1.5, 2.5], 0.0, [True, True]) == [1.5, 2.5]\n\ndef test_scales_survivors():\n    assert abs(solution.dropout([2.0], 0.5, [True])[0] - 4.0) < 1e-12\n\ndef test_bad_p_raises():\n    for p in (-0.1, 1.0, 1.5):\n        try:\n            solution.dropout([1.0], p, [True])\n        except ValueError:\n            continue\n        raise AssertionError(\"expected ValueError for p=%r\" % (p,))\n\ndef test_bad_mask_raises():\n    try:\n        solution.dropout([1.0, 2.0], 0.2, [True])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_no_mutation():\n    values, mask = [2.0, 1.0], [True, False]\n    before = values[:]\n    solution.dropout(values, 0.25, mask)\n    assert values == before and mask == [True, False]\n",
+  "mutations": [
+    "return [float(v) for v in a[0]]",
+    "return [0.0 if not m else float(v) for v, m in zip(a[0], a[2])]"
+  ]
+}

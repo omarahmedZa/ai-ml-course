@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>023 — Semi-gradient step for a linear Q</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Semi-gradient step for a linear Q — a graded problem on reinforcement-learning.">
+</head>
+<body data-page="problem" data-problem="023">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">023 · medium</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 023 · extend</p>
+  <h1>Semi-gradient step for a linear Q</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Reinforcement Learning</span><a href="../lessons/023-function-approximation.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>q_linear(weights, features)</code> already replaces a table cell with a dot product.</p>
+<p>Add <code>semi_gradient(weights, features, reward, gamma, next_features, lr)</code> for one semi-gradient step:</p>
+<p>- <code>q = q_linear(weights, features)</code> - <code>target = reward + gamma * q_linear(weights, next_features)</code>, or just <code>reward</code> when <code>next_features</code> is <code>None</code> - return new weights <code>w + lr * (target - q) * f</code>, leaving the input list unchanged</p>
+<p>Raise <code>ValueError</code> when the feature lengths disagree. Return floats. One update must nudge every feature the state shares — that is generalisation.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def semi_gradient(weights, features, reward, gamma, next_features, lr):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def q_linear(weights, features):
+    &quot;&quot;&quot;One Q-value computed from weights and features.&quot;&quot;&quot;
+    return float(sum(w * f for w, f in zip(weights, features)))
+
+
+def semi_gradient(weights, features, reward, gamma, next_features, lr):
+    &quot;&quot;&quot;One semi-gradient step on a linear Q function.&quot;&quot;&quot;
+    # Your code here.
+    pass
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_known_update</code></li><li><code>test_zero_error</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 023
+# edit work/023/solution.py
+python3 dml.py run 023
+python3 dml.py submit 023</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-023">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-023" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="022.html">← 022 · Q-learning update, sign fixed</a><a href="024.html">024 · DQN target, terminal fixed →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

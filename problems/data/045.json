@@ -6,8 +6,7 @@
   "difficulty": "medium",
   "shape": "extend",
   "categories": [
-    "neural-networks",
-    "convolution"
+    "deep-learning"
   ],
   "statement_md": "`conv1d` already computes a valid 1-D convolution. Add `conv2d(image, kernel, stride=1, padding=0)` for a square kernel.\n\n- slide the kernel over the image with the given `stride`\n- pad with zeros: `padding` rows/columns on every side\n- each output cell is the sum of elementwise products over its patch\n- output side: `(H + 2*padding - k) // stride + 1`\n- raise `ValueError` when `stride < 1`, when the kernel is not square, or when the kernel is larger than the padded image\n\nDo not change `conv1d`.",
   "entry": "conv2d",

@@ -1,0 +1,31 @@
+{
+  "id": "029",
+  "lesson": "029",
+  "book": "language",
+  "title": "Preference loss on a leash",
+  "difficulty": "medium",
+  "shape": "extend",
+  "categories": [
+    "nlp-transformers"
+  ],
+  "statement_md": "`sigmoid(z)` is already defined. Add `preference_loss(pairs)` returning the **mean** Bradley-Terry loss over preference pairs.\n\n- each pair is `(r_better, r_worse)`, two reward-model scores\n- the loss on one pair is `-ln sigmoid(r_better - r_worse)`\n- raise `ValueError` for an empty list\n- return a `float`, and stay stable when the score gap is huge\n\nOnly the difference matters: moving both scores by the same amount leaves the loss unchanged.",
+  "entry": "preference_loss",
+  "signature": "def preference_loss(pairs):",
+  "starter": "import math\n\n\ndef sigmoid(z):\n    if z >= 0:\n        return 1.0 / (1.0 + math.exp(-z))\n    e = math.exp(z)\n    return e / (1.0 + e)\n\n\ndef preference_loss(pairs):\n    \"\"\"Return the mean -ln sigmoid(r_better - r_worse) over the pairs.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_known_pair",
+    "test_tie_costs_log_two"
+  ],
+  "hidden": [
+    "test_mean_over_pairs",
+    "test_only_the_difference_matters",
+    "test_empty_raises",
+    "test_large_gap_is_stable",
+    "test_returns_float"
+  ],
+  "tests_py": "import math\n\ndef test_known_pair():\n    got = solution.preference_loss([(2.0, 1.0)])\n    assert abs(got - 0.3132616875182228) < 1e-9\n\ndef test_tie_costs_log_two():\n    got = solution.preference_loss([(1.0, 1.0)])\n    assert abs(got - math.log(2.0)) < 1e-9\n\ndef test_mean_over_pairs():\n    got = solution.preference_loss([(2.0, 1.0), (1.2, 1.0)])\n    assert abs(got - 0.4557002784499073) < 1e-9\n\ndef test_only_the_difference_matters():\n    a = solution.preference_loss([(5.0, 4.0)])\n    b = solution.preference_loss([(2.0, 1.0)])\n    assert abs(a - b) < 1e-12\n\ndef test_empty_raises():\n    try:\n        solution.preference_loss([])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_large_gap_is_stable():\n    assert solution.preference_loss([(1000.0, 0.0)]) < 1e-9\n\ndef test_returns_float():\n    assert isinstance(solution.preference_loss([(0.0, 0.0)]), float)\n",
+  "mutations": [
+    "return -math.log(sigmoid(a[0][0][0] - a[0][0][1]))",
+    "return sum(-math.log(1.0 - sigmoid(b - w)) for b, w in a[0]) / len(a[0])"
+  ]
+}

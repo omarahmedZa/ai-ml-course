@@ -1,0 +1,31 @@
+{
+  "id": "023",
+  "lesson": "023",
+  "book": "rl",
+  "title": "Semi-gradient step for a linear Q",
+  "difficulty": "medium",
+  "shape": "extend",
+  "categories": [
+    "reinforcement-learning"
+  ],
+  "statement_md": "`q_linear(weights, features)` already replaces a table cell with a dot product.\n\nAdd `semi_gradient(weights, features, reward, gamma, next_features, lr)` for one\nsemi-gradient step:\n\n- `q = q_linear(weights, features)`\n- `target = reward + gamma * q_linear(weights, next_features)`, or just `reward`\n  when `next_features` is `None`\n- return new weights `w + lr * (target - q) * f`, leaving the input list unchanged\n\nRaise `ValueError` when the feature lengths disagree. Return floats.\nOne update must nudge every feature the state shares — that is generalisation.",
+  "entry": "semi_gradient",
+  "signature": "def semi_gradient(weights, features, reward, gamma, next_features, lr):",
+  "starter": "def q_linear(weights, features):\n    \"\"\"One Q-value computed from weights and features.\"\"\"\n    return float(sum(w * f for w, f in zip(weights, features)))\n\n\ndef semi_gradient(weights, features, reward, gamma, next_features, lr):\n    \"\"\"One semi-gradient step on a linear Q function.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_known_update",
+    "test_zero_error"
+  ],
+  "hidden": [
+    "test_bootstraps_from_current_weights",
+    "test_terminal_target_is_reward",
+    "test_generalises_to_similar_features",
+    "test_does_not_mutate",
+    "test_length_mismatch"
+  ],
+  "tests_py": "def test_known_update():\n    w = solution.semi_gradient([0.0, 0.0], [1.0, 2.0], 1.0, 0.9, [0.0, 0.0], 0.1)\n    assert abs(w[0] - 0.1) < 1e-12 and abs(w[1] - 0.2) < 1e-12\n\ndef test_zero_error():\n    w = solution.semi_gradient([1.0, 0.0], [1.0, 0.0], 0.0, 0.5, [1.0, 0.0], 0.1)\n    assert abs(w[0] - 0.95) < 1e-12 and abs(w[1]) < 1e-12\n\ndef test_bootstraps_from_current_weights():\n    w = solution.semi_gradient([1.0, 1.0], [1.0, 0.0], 0.0, 0.5, [0.0, 1.0], 0.1)\n    assert abs(w[0] - 0.95) < 1e-12 and abs(w[1] - 1.0) < 1e-12\n\ndef test_terminal_target_is_reward():\n    w = solution.semi_gradient([0.0, 0.0], [1.0, 1.0], 2.0, 0.9, None, 0.5)\n    assert abs(w[0] - 1.0) < 1e-12 and abs(w[1] - 1.0) < 1e-12\n\ndef test_generalises_to_similar_features():\n    w = solution.semi_gradient([0.0, 0.0], [1.0, 1.0], 1.0, 0.9, [0.0, 0.0], 0.1)\n    assert abs(w[0] - w[1]) < 1e-12\n    assert w[0] > 0.0\n\ndef test_does_not_mutate():\n    weights = [0.5, 0.5]\n    solution.semi_gradient(weights, [1.0, 0.0], 1.0, 0.9, None, 0.1)\n    assert weights == [0.5, 0.5]\n\ndef test_length_mismatch():\n    try:\n        solution.semi_gradient([0.0], [1.0, 2.0], 0.0, 0.9, None, 0.1)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n",
+  "mutations": [
+    "return [w + lr * (reward + gamma * sum(a * b for a, b in zip(weights, next_features)) - sum(a * b for a, b in zip(weights, features))) for w in weights]",
+    "return [w + lr * (reward - w) * f for w, f in zip(weights, features)]"
+  ]
+}

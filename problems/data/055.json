@@ -6,8 +6,7 @@
   "difficulty": "hard",
   "shape": "debug",
   "categories": [
-    "rl",
-    "offline-rl"
+    "reinforcement-learning"
   ],
   "statement_md": "`discounted_returns` walks the rewards forwards, so `G_t` is built from the wrong tail. Fix it.\n\n- return `G_t = r_t + gamma * G_{t+1}` for every step, in the original order\n- return `[]` for empty input\n- raise `ValueError` when `gamma` is outside `[0, 1]`\n- return a list of floats",
   "entry": "discounted_returns",

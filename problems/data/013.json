@@ -1,0 +1,31 @@
+{
+  "id": "013",
+  "lesson": "013",
+  "book": "neural-networks",
+  "title": "Debug gradient-norm clipping",
+  "difficulty": "medium",
+  "shape": "debug",
+  "categories": [
+    "deep-learning",
+    "calculus-optimization"
+  ],
+  "statement_md": "`clip_gradient` should clip by **norm**: if the gradient's Euclidean length exceeds `max_norm`, scale the whole vector down to that length; otherwise leave it alone.\n\nThe current implementation is wrong. Fix it without changing the signature.\n\n- the direction must be preserved; only the length changes\n- `max_norm <= 0` raises `ValueError`\n- return floats and do not mutate `grad`\n\nClipping only caps how far a step can travel; a short gradient passes through untouched.",
+  "entry": "clip_gradient",
+  "signature": "def clip_gradient(grad, max_norm=1.0):",
+  "starter": "import math\n\n\ndef clip_gradient(grad, max_norm=1.0):\n    \"\"\"Scale grad down so its norm is at most max_norm.\"\"\"\n    norm = math.sqrt(sum(x * x for x in grad))\n    return [x / norm for x in grad]   # BUG: always rescales, even when short\n",
+  "visible": [
+    "test_clips_long_vector",
+    "test_empty"
+  ],
+  "hidden": [
+    "test_short_untouched",
+    "test_result_norm",
+    "test_bad_max_norm_raises",
+    "test_no_mutation"
+  ],
+  "tests_py": "import math\n\ndef test_clips_long_vector():\n    got = solution.clip_gradient([3.0, 4.0], 1.0)\n    assert abs(got[0] - 0.6) < 1e-12\n    assert abs(got[1] - 0.8) < 1e-12\n\ndef test_empty():\n    assert solution.clip_gradient([], 1.0) == []\n\ndef test_short_untouched():\n    assert solution.clip_gradient([0.3, 0.4], 1.0) == [0.3, 0.4]\n\ndef test_result_norm():\n    got = solution.clip_gradient([6.0, 8.0], 0.5)\n    assert abs(math.sqrt(sum(x * x for x in got)) - 0.5) < 1e-12\n    assert abs(got[0] / got[1] - 0.75) < 1e-12\n\ndef test_bad_max_norm_raises():\n    for m in (0.0, -1.0):\n        try:\n            solution.clip_gradient([1.0], m)\n        except ValueError:\n            continue\n        raise AssertionError(\"expected ValueError for max_norm=%r\" % (m,))\n\ndef test_no_mutation():\n    g = [3.0, 4.0]\n    solution.clip_gradient(g, 1.0)\n    assert g == [3.0, 4.0]\n",
+  "mutations": [
+    "return [x * a[1] / math.sqrt(sum(y * y for y in a[0])) for x in a[0]]",
+    "return [min(x, a[1]) for x in a[0]]"
+  ]
+}

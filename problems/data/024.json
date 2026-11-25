@@ -1,0 +1,31 @@
+{
+  "id": "024",
+  "lesson": "024",
+  "book": "rl",
+  "title": "DQN target, terminal fixed",
+  "difficulty": "easy",
+  "shape": "debug",
+  "categories": [
+    "reinforcement-learning"
+  ],
+  "statement_md": "`dqn_target` builds the target `r + gamma * max Q(s', .)` from the frozen target\nnetwork.\n\n- when `done=True` the target is just `reward` — a terminal state has no future\n- raise `ValueError` when `next_q` is empty and the transition is not terminal\n- return a float\n\nThe starter bootstraps past terminal states, crediting finished episodes with value\nthat does not exist. Fix it and keep the signature.",
+  "entry": "dqn_target",
+  "signature": "def dqn_target(reward, gamma, next_q, done=False):",
+  "starter": "def dqn_target(reward, gamma, next_q, done=False):\n    \"\"\"Target for one transition, built from the frozen target network.\"\"\"\n    return reward + gamma * max(next_q)\n",
+  "visible": [
+    "test_known_target",
+    "test_takes_best_next"
+  ],
+  "hidden": [
+    "test_terminal_stops",
+    "test_terminal_empty_next_q",
+    "test_zero_gamma",
+    "test_empty_nonterminal_raises",
+    "test_returns_float"
+  ],
+  "tests_py": "def test_known_target():\n    assert abs(solution.dqn_target(1.0, 0.9, [0.8]) - 1.72) < 1e-12\n\ndef test_takes_best_next():\n    assert solution.dqn_target(0.0, 1.0, [0.5, 2.0]) == 2.0\n\ndef test_terminal_stops():\n    assert solution.dqn_target(1.0, 0.9, [5.0, 7.0], True) == 1.0\n\ndef test_terminal_empty_next_q():\n    assert solution.dqn_target(3.0, 0.9, [], done=True) == 3.0\n\ndef test_zero_gamma():\n    assert solution.dqn_target(2.0, 0.0, [100.0]) == 2.0\n\ndef test_empty_nonterminal_raises():\n    try:\n        solution.dqn_target(1.0, 0.9, [])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_returns_float():\n    assert isinstance(solution.dqn_target(1, 0.9, [1]), float)\n",
+  "mutations": [
+    "return reward + gamma * max(next_q)",
+    "return reward + max(next_q)"
+  ]
+}

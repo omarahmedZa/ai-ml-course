@@ -6,8 +6,7 @@
   "difficulty": "medium",
   "shape": "extend",
   "categories": [
-    "evaluation-metrics",
-    "calibration"
+    "evaluation-metrics"
   ],
   "statement_md": "`brier_score(probs, labels)` already works. Add `expected_calibration_error(probs, labels, bins=10)` returning the weighted average gap between confidence and observed frequency.\n\n- bin index is `min(int(p * bins), bins - 1)`, so `p == 1.0` lands in the last bin\n- for each non-empty bin, gap is `abs(mean(probs) - mean(labels))` and weight is `count / n`\n- ECE is the sum of `weight * gap`\n\nRaise `ValueError` if the sequences differ in length, are empty, `bins < 1`, or any probability lies outside `[0, 1]`. Do not change `brier_score`.",
   "entry": "expected_calibration_error",

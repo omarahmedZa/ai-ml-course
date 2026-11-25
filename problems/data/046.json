@@ -6,7 +6,7 @@
   "difficulty": "easy",
   "shape": "debug",
   "categories": [
-    "neural-networks"
+    "deep-learning"
   ],
   "statement_md": "The snippet should return the **He initialization** standard deviation `sqrt(2 / fan_in)`, but it returns the Xavier value and crashes on invalid input.\n\n- return `sqrt(2 / fan_in)` for `fan_in >= 1`\n- raise `ValueError` when `fan_in < 1`\n\nFix the function; do not change its name or signature.",
   "entry": "he_std",

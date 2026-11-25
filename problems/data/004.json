@@ -1,0 +1,30 @@
+{
+  "id": "004",
+  "lesson": "004",
+  "book": "classical-ml",
+  "title": "The empirical risk, averaged",
+  "difficulty": "easy",
+  "shape": "debug",
+  "categories": [
+    "classical-ml"
+  ],
+  "statement_md": "`empirical_risk` is the supervised objective: the **average** squared error over the dataset.\n\nThe starter returns the total squared error instead of the mean. Fix it without changing the signature.\n\n- `sum((pred - target) ** 2) / n`\n- raise `ValueError` when the lengths differ\n- return a `float`",
+  "entry": "empirical_risk",
+  "signature": "def empirical_risk(preds, targets):",
+  "starter": "def empirical_risk(preds, targets):\n    \"\"\"Average squared error over the dataset (the empirical risk).\"\"\"\n    if len(preds) != len(targets):\n        raise ValueError(\"lengths differ\")\n    return float(sum((p - y) ** 2 for p, y in zip(preds, targets)))  # BUG: total, not average\n",
+  "visible": [
+    "test_known_value",
+    "test_perfect_fit"
+  ],
+  "hidden": [
+    "test_average_not_sum",
+    "test_length_mismatch",
+    "test_single_pair",
+    "test_returns_float"
+  ],
+  "tests_py": "def test_known_value():\n    assert solution.empirical_risk([1.0, 2.0], [0.0, 0.0]) == 2.5\n\ndef test_perfect_fit():\n    assert solution.empirical_risk([1, 2, 3], [1, 2, 3]) == 0.0\n\ndef test_average_not_sum():\n    assert solution.empirical_risk([0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0]) == 1.0\n\ndef test_length_mismatch():\n    try:\n        solution.empirical_risk([1.0, 2.0], [1.0])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_single_pair():\n    assert solution.empirical_risk([2.0], [0.0]) == 4.0\n\ndef test_returns_float():\n    assert isinstance(solution.empirical_risk([1], [1]), float)\n",
+  "mutations": [
+    "return float(sum((p - y) ** 2 for p, y in zip(a[0], a[1])))",
+    "return float(sum(abs(p - y) for p, y in zip(a[0], a[1])) / len(a[0]))"
+  ]
+}

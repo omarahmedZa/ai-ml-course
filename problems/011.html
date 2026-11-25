@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>011 — Count the updates</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Count the updates — a graded problem on deep-learning.">
+</head>
+<body data-page="problem" data-problem="011">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">011 · easy</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 011 · extend</p>
+  <h1>Count the updates</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Deep Learning</span><span class="chip">Calculus Optimization</span><a href="../lessons/011-training-loop.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>steps_per_epoch(n, batch)</code> already counts the batches in one pass, rounding up because the last batch may be partial.</p>
+<p>Add <code>count_updates(n, batch, epochs)</code> returning the number of parameter updates in a full run:</p>
+<p><code>ceil(n / batch) * epochs</code></p>
+<ul><li>return <code>0</code> when <code>n</code> or <code>epochs</code> is <code>0</code></li><li>raise <code>ValueError</code> when <code>batch &lt; 1</code> or <code>epochs &lt; 0</code></li><li>return an <code>int</code></li></ul>
+<p>Do not change <code>steps_per_epoch</code>.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def count_updates(n, batch, epochs):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def steps_per_epoch(n, batch):
+    &quot;&quot;&quot;Batches in one pass; the last batch may be partial.&quot;&quot;&quot;
+    if batch &lt; 1:
+        raise ValueError(&quot;batch must be positive&quot;)
+    return -(-n // batch)
+
+
+def count_updates(n, batch, epochs):
+    # Your code here: one pass times the number of passes.
+    pass
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_exact_division</code></li><li><code>test_partial_batch</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 011
+# edit work/011/solution.py
+python3 dml.py run 011
+python3 dml.py submit 011</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-011">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-011" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="010.html">← 010 · Debug the linear-unit gradients</a><a href="012.html">012 · Dropout rescale, checked →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

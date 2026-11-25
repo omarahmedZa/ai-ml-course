@@ -1,0 +1,30 @@
+{
+  "id": "008",
+  "lesson": "008",
+  "book": "neural-networks",
+  "title": "Score first, then bend",
+  "difficulty": "easy",
+  "shape": "scratch",
+  "categories": [
+    "deep-learning"
+  ],
+  "statement_md": "Write one ReLU neuron, `neuron(x, w, b)`.\n\n- score `z = w·x + b`\n- bend with `max(0, z)`\n- return a `float`\n- raise `ValueError` when `len(x) != len(w)`\n\nThe weights are what training moves; the bend is fixed.",
+  "entry": "neuron",
+  "signature": "def neuron(x, w, b):",
+  "starter": "def neuron(x, w, b):\n    \"\"\"Return ReLU(w dot x + b).\"\"\"\n    # Your code here: weighted sum, add bias, clamp at zero.\n    pass\n",
+  "visible": [
+    "test_positive_score",
+    "test_negative_score"
+  ],
+  "hidden": [
+    "test_bias_lifts",
+    "test_zero_score",
+    "test_length_mismatch",
+    "test_returns_float"
+  ],
+  "tests_py": "def test_positive_score():\n    assert solution.neuron([1, -1], [2, -3], 1) == 6.0\n\ndef test_negative_score():\n    assert solution.neuron([-2, 1], [2, -3], 1) == 0.0\n\ndef test_bias_lifts():\n    assert solution.neuron([-1], [1], 2) == 1.0\n\ndef test_zero_score():\n    assert solution.neuron([0, 0], [5, -4], 0) == 0.0\n\ndef test_length_mismatch():\n    try:\n        solution.neuron([1, 2], [1], 0)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_returns_float():\n    assert isinstance(solution.neuron([1], [2], 0), float)\n",
+  "mutations": [
+    "return sum(wi * xi for wi, xi in zip(a[0], a[1])) + a[2] * 1.0",
+    "return float(max(0.0, sum(wi * xi for wi, xi in zip(a[0], a[1]))))"
+  ]
+}

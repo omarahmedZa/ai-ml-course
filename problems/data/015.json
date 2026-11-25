@@ -1,0 +1,30 @@
+{
+  "id": "015",
+  "lesson": "015",
+  "book": "language",
+  "title": "BPE encode by replaying merges",
+  "difficulty": "medium",
+  "shape": "scratch",
+  "categories": [
+    "nlp-transformers"
+  ],
+  "statement_md": "Write `bpe_encode(word, merges)` that replays an ordered merge list, as a tokenizer does at inference.\n\n- start from the characters of `word`\n- apply `merges` in the given order; for each pair `(left, right)`, scan left to right and replace every adjacent `left, right` with the single symbol `left + right`\n- a symbol cannot be reused inside one pass: left to right, no overlap\n- later merges see the symbols produced by earlier ones\n- return the final list of symbols; `\"\"` returns `[]`\n- do not mutate `merges`\n\nThe order is the algorithm; nothing is counted at encode time.",
+  "entry": "bpe_encode",
+  "signature": "def bpe_encode(word, merges):",
+  "starter": "def bpe_encode(word, merges):\n    \"\"\"Replay the ordered merges over word and return the final symbols.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_no_merges",
+    "test_single_merge"
+  ],
+  "hidden": [
+    "test_merge_order_matters",
+    "test_no_overlap",
+    "test_empty_word",
+    "test_does_not_mutate_merges"
+  ],
+  "tests_py": "def test_no_merges():\n    assert solution.bpe_encode(\"cat\", []) == [\"c\", \"a\", \"t\"]\n\ndef test_single_merge():\n    assert solution.bpe_encode(\"the\", [(\"t\", \"h\"), (\"th\", \"e\")]) == [\"the\"]\n\ndef test_merge_order_matters():\n    assert solution.bpe_encode(\"abc\", [(\"a\", \"b\"), (\"b\", \"c\")]) == [\"ab\", \"c\"]\n    assert solution.bpe_encode(\"abc\", [(\"b\", \"c\"), (\"a\", \"bc\")]) == [\"abc\"]\n\ndef test_no_overlap():\n    assert solution.bpe_encode(\"aaa\", [(\"a\", \"a\")]) == [\"aa\", \"a\"]\n\ndef test_empty_word():\n    assert solution.bpe_encode(\"\", [(\"a\", \"b\")]) == []\n\ndef test_does_not_mutate_merges():\n    merges = [(\"t\", \"h\"), (\"th\", \"e\")]\n    before = list(merges)\n    solution.bpe_encode(\"the\", merges)\n    assert merges == before\n",
+  "mutations": [
+    "return list(a[0])",
+    "return _orig(*a, **k)[:-1]"
+  ]
+}

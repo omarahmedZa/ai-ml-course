@@ -1,0 +1,32 @@
+{
+  "id": "032",
+  "lesson": "032",
+  "book": "trust",
+  "title": "Deletion test against random",
+  "difficulty": "medium",
+  "shape": "debug",
+  "categories": [
+    "explainability",
+    "evaluation-metrics"
+  ],
+  "statement_md": "`is_faithful(clean, deleted, deleted_random, margin=0.05)` should say whether an explanation's deletion test beats deleting random features of the same count.\n\n- `clean` is the score with nothing removed\n- `deleted` is the score after removing the top-k attributed features\n- `deleted_random` is the score after removing k random features\n- return `True` only when the drop from the attributed features exceeds the random drop by at least `margin`\n- raise `ValueError` for any score outside `[0, 1]`, or for a negative `margin`\n\nThe starter compares the raw drop with `margin` and never asks what random removal costs - which is how a decorative heatmap passes review.",
+  "entry": "is_faithful",
+  "signature": "def is_faithful(clean, deleted, deleted_random, margin=0.05):",
+  "starter": "def is_faithful(clean, deleted, deleted_random, margin=0.05):\n    \"\"\"Return True when deleting attributed features costs more than random.\"\"\"\n    for score in (clean, deleted, deleted_random):\n        if not 0.0 <= score <= 1.0:\n            raise ValueError(\"scores must lie in [0, 1]\")\n    if margin < 0:\n        raise ValueError(\"margin must be non-negative\")\n    return clean - deleted > margin\n",
+  "visible": [
+    "test_faithful_map",
+    "test_deletion_must_beat_random"
+  ],
+  "hidden": [
+    "test_decorative_map",
+    "test_random_hurt_more",
+    "test_custom_margin",
+    "test_exact_margin_counts",
+    "test_score_out_of_range"
+  ],
+  "tests_py": "def test_faithful_map():\n    assert solution.is_faithful(0.94, 0.71, 0.91) is True\n\ndef test_deletion_must_beat_random():\n    assert solution.is_faithful(0.94, 0.88, 0.85) is False\n\ndef test_decorative_map():\n    assert solution.is_faithful(0.94, 0.91, 0.91) is False\n\ndef test_random_hurt_more():\n    assert solution.is_faithful(0.94, 0.80, 0.70) is False\n\ndef test_custom_margin():\n    assert solution.is_faithful(1.0, 0.7, 0.5, margin=0.3) is False\n    assert solution.is_faithful(1.0, 0.5, 0.65, margin=0.1) is True\n\ndef test_exact_margin_counts():\n    assert solution.is_faithful(1.0, 0.6, 0.7, margin=0.1) is True\n\ndef test_score_out_of_range():\n    try:\n        solution.is_faithful(1.2, 0.7, 0.6)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n",
+  "mutations": [
+    "return (a[0] - a[1]) > a[3]",
+    "return (a[2] - a[1]) >= -a[3]"
+  ]
+}

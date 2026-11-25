@@ -1,0 +1,31 @@
+{
+  "id": "035",
+  "lesson": "035",
+  "book": "trust",
+  "title": "Clip a gradient, then add noise",
+  "difficulty": "medium",
+  "shape": "extend",
+  "categories": [
+    "federated-privacy"
+  ],
+  "statement_md": "`l2_norm(v)` is already defined. Add `clip_gradient(g, C)` returning the per-example gradient scaled down to length `C`.\n\n- if the norm of `g` is at most `C`, return it unchanged\n- otherwise multiply the whole vector by `C / norm` - direction survives, size is capped\n- return a new list of floats and do not mutate `g`\n- raise `ValueError` when `C <= 0`\n\nClipped at `C = 1`, both `[6, 8]` and `[3, 4]` land on the same point: no single example can contribute more than the number the noise is calibrated against.",
+  "entry": "clip_gradient",
+  "signature": "def clip_gradient(g, C):",
+  "starter": "import math\n\n\ndef l2_norm(v):\n    return math.sqrt(sum(x * x for x in v))\n\n\ndef clip_gradient(g, C):\n    \"\"\"Return g scaled down to norm C when it is longer than C.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_clips_long_vector",
+    "test_keeps_short_vector"
+  ],
+  "hidden": [
+    "test_result_norm_equals_c",
+    "test_small_norm_large_budget",
+    "test_zero_vector",
+    "test_nonpositive_c_raises",
+    "test_no_mutation"
+  ],
+  "tests_py": "import math\n\ndef test_clips_long_vector():\n    got = solution.clip_gradient([6.0, 8.0], 1.0)\n    assert abs(got[0] - 0.6) < 1e-12 and abs(got[1] - 0.8) < 1e-12\n\ndef test_keeps_short_vector():\n    got = solution.clip_gradient([0.3, 0.4], 1.0)\n    assert abs(got[0] - 0.3) < 1e-12 and abs(got[1] - 0.4) < 1e-12\n\ndef test_result_norm_equals_c():\n    got = solution.clip_gradient([3.0, 4.0], 2.0)\n    assert abs(math.hypot(got[0], got[1]) - 2.0) < 1e-12\n\ndef test_small_norm_large_budget():\n    got = solution.clip_gradient([0.6, 0.8], 2.0)\n    assert abs(got[0] - 0.6) < 1e-12 and abs(got[1] - 0.8) < 1e-12\n\ndef test_zero_vector():\n    assert solution.clip_gradient([0.0, 0.0], 1.0) == [0.0, 0.0]\n\ndef test_nonpositive_c_raises():\n    try:\n        solution.clip_gradient([1.0], 0.0)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_no_mutation():\n    g = [6.0, 8.0]\n    solution.clip_gradient(g, 1.0)\n    assert g == [6.0, 8.0]\n",
+  "mutations": [
+    "return [float(x) for x in a[0]]",
+    "return [a[1] * x for x in a[0]]"
+  ]
+}

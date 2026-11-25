@@ -1,0 +1,31 @@
+{
+  "id": "031",
+  "lesson": "031",
+  "book": "trust",
+  "title": "Shapley by averaging orderings",
+  "difficulty": "hard",
+  "shape": "scratch",
+  "categories": [
+    "explainability"
+  ],
+  "statement_md": "Write `shapley_values(value_fn, n)` returning the exact Shapley value of each of `n` players.\n\n- `value_fn` takes a `frozenset` of player indices and returns the coalition's value\n- for each of the `n!` orderings, add each player's marginal gain as it joins\n- average the gains over all orderings and return a list of `n` floats in player order\n- return `[]` for `n == 0`, and raise `ValueError` for `n < 0`\n\nUse `itertools.permutations`; the tests use at most four players, so at most 24 orderings. The parts must add up to `value_fn(all players)`.",
+  "entry": "shapley_values",
+  "signature": "def shapley_values(value_fn, n):",
+  "starter": "import itertools\n\n\ndef shapley_values(value_fn, n):\n    \"\"\"Return the exact Shapley value of each of n players.\"\"\"\n    # Your code here: average each player's marginal gain over every ordering.\n    pass\n",
+  "visible": [
+    "test_two_features",
+    "test_three_additive"
+  ],
+  "hidden": [
+    "test_non_additive_pair",
+    "test_efficiency",
+    "test_dummy_player_gets_nothing",
+    "test_zero_players",
+    "test_negative_count_raises"
+  ],
+  "tests_py": "import itertools\n\n_PAIR = {\n    frozenset(): 0.0,\n    frozenset({0}): 0.6,\n    frozenset({1}): 0.4,\n    frozenset({0, 1}): 1.0,\n}\n\n_TRIPLE = {\n    frozenset(): 0.0,\n    frozenset({0}): 1.0,\n    frozenset({1}): 2.0,\n    frozenset({2}): 0.5,\n    frozenset({0, 1}): 4.0,\n    frozenset({0, 2}): 1.5,\n    frozenset({1, 2}): 3.0,\n    frozenset({0, 1, 2}): 5.5,\n}\n\n\ndef test_two_features():\n    got = solution.shapley_values(lambda S: _PAIR[frozenset(S)], 2)\n    assert abs(got[0] - 0.6) < 1e-12 and abs(got[1] - 0.4) < 1e-12\n\ndef test_three_additive():\n    got = solution.shapley_values(lambda S: float(len(S)), 3)\n    assert all(abs(v - 1.0) < 1e-12 for v in got)\n\ndef test_non_additive_pair():\n    table = dict(_PAIR)\n    table[frozenset({0, 1})] = 0.9\n    got = solution.shapley_values(lambda S: table[frozenset(S)], 2)\n    assert abs(got[0] - 0.55) < 1e-12 and abs(got[1] - 0.35) < 1e-12\n\ndef test_efficiency():\n    got = solution.shapley_values(lambda S: _TRIPLE[frozenset(S)], 3)\n    assert abs(sum(got) - 5.5) < 1e-9\n\ndef test_dummy_player_gets_nothing():\n    def value(S):\n        S = frozenset(S)\n        total = 0.0\n        if 0 in S:\n            total += 1.0\n        if 1 in S:\n            total += 2.0\n        if 0 in S and 1 in S:\n            total += 1.0\n        return total\n    got = solution.shapley_values(value, 3)\n    assert abs(got[2]) < 1e-12\n\ndef test_zero_players():\n    assert solution.shapley_values(lambda S: 0.0, 0) == []\n\ndef test_negative_count_raises():\n    try:\n        solution.shapley_values(lambda S: 0.0, -1)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n",
+  "mutations": [
+    "return [float(a[0](frozenset([i]))) for i in range(a[1])]",
+    "return [float(a[0](frozenset(range(a[1])))) / a[1] for _ in range(a[1])]"
+  ]
+}

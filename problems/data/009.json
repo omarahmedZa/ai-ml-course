@@ -1,0 +1,30 @@
+{
+  "id": "009",
+  "lesson": "009",
+  "book": "neural-networks",
+  "title": "Two-layer forward pass, by hand",
+  "difficulty": "medium",
+  "shape": "scratch",
+  "categories": [
+    "deep-learning"
+  ],
+  "statement_md": "Write `forward(x, W1, b1, W2, b2)` for one example through `n_in -> n_hidden -> 1`.\n\n1. `z1 = W1 x + b1` (each row of `W1` is one hidden unit)\n2. `a1 = ReLU(z1)`\n3. `z2 = W2 a1 + b2`\n4. return `sigmoid(z2)` as a `float`\n\nRaise `ValueError` if the shapes do not line up (`W1` is `n_hidden x n_in`, `W2` is `1 x n_hidden`).",
+  "entry": "forward",
+  "signature": "def forward(x, W1, b1, W2, b2):",
+  "starter": "import math\n\n\ndef forward(x, W1, b1, W2, b2):\n    \"\"\"Run one example through affine, ReLU, affine, sigmoid.\"\"\"\n    # Your code here: check shapes, then relay the two layers.\n    pass\n",
+  "visible": [
+    "test_worked_example",
+    "test_hidden_positive"
+  ],
+  "hidden": [
+    "test_relu_clamps",
+    "test_second_layer_bias",
+    "test_shape_mismatch",
+    "test_output_range"
+  ],
+  "tests_py": "import math\n\ndef test_worked_example():\n    out = solution.forward([1, -1], [[1, 2], [-1, 0]], [0, 1], [[1, 1]], [-0.5])\n    assert abs(out - 0.3775406687981454) < 1e-9\n\ndef test_hidden_positive():\n    out = solution.forward([1, 1], [[1, 0], [0, 1]], [0, 0], [[1, 1]], [0])\n    assert abs(out - 0.8807970779778823) < 1e-9\n\ndef test_relu_clamps():\n    out = solution.forward([-1, -1], [[1, 0], [0, 1]], [0, 0], [[1, 1]], [0])\n    assert abs(out - 0.5) < 1e-12\n\ndef test_second_layer_bias():\n    out = solution.forward([0, 0], [[1, 0], [0, 1]], [1, 2], [[1, 0]], [-0.5])\n    assert abs(out - 0.6224593312018546) < 1e-9\n\ndef test_shape_mismatch():\n    try:\n        solution.forward([1, 2], [[1, 0]], [0], [[1, 0]], [0])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_output_range():\n    out = solution.forward([1, -1], [[1, 2], [-1, 0]], [0, 1], [[1, 1]], [-0.5])\n    assert 0.0 < out < 1.0\n",
+  "mutations": [
+    "return _sigmoid(_affine(_affine(a[0], a[1], a[2]), a[3], a[4])[0])",
+    "return _affine(_relu(_affine(a[0], a[1], a[2])), a[3], a[4])[0] * 1.0"
+  ]
+}

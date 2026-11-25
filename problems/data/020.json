@@ -1,0 +1,31 @@
+{
+  "id": "020",
+  "lesson": "020",
+  "book": "rl",
+  "title": "One Bellman backup sweep",
+  "difficulty": "easy",
+  "shape": "scratch",
+  "categories": [
+    "reinforcement-learning"
+  ],
+  "statement_md": "Write `backup_all(values, transitions, gamma)` for one sweep of policy evaluation.\n\n- `values` holds the current `V(s)`, one entry per state\n- `transitions` is aligned with `values`; each entry is `(reward, next_index)`\n- a `next_index` of `-1` marks a terminal state, so that state gets only its reward\n- otherwise return `reward + gamma * values[next_index]`\n- return a list of floats, same length as `values`, and do not mutate it\n\nRaise `ValueError` when `gamma` is outside `[0, 1]`, when the two lists differ in\nlength, or when a non-terminal index is out of range.",
+  "entry": "backup_all",
+  "signature": "def backup_all(values, transitions, gamma):",
+  "starter": "def backup_all(values, transitions, gamma):\n    \"\"\"One Bellman backup sweep over every state.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_known_backup",
+    "test_two_states"
+  ],
+  "hidden": [
+    "test_terminal_gets_no_future",
+    "test_gamma_zero",
+    "test_does_not_mutate",
+    "test_length_mismatch",
+    "test_invalid_gamma"
+  ],
+  "tests_py": "def test_known_backup():\n    assert solution.backup_all([2.0], [(1.0, 0)], 0.9) == [2.8]\n\ndef test_two_states():\n    new = solution.backup_all([0.0, 5.0], [(0.0, 1), (1.0, -1)], 0.5)\n    assert new == [2.5, 1.0]\n\ndef test_terminal_gets_no_future():\n    assert solution.backup_all([100.0], [(1.0, -1)], 0.9) == [1.0]\n\ndef test_gamma_zero():\n    assert solution.backup_all([3.0], [(2.0, 0)], 0.0) == [2.0]\n\ndef test_does_not_mutate():\n    values = [1.0, 2.0]\n    solution.backup_all(values, [(0.0, 1), (0.0, 0)], 0.9)\n    assert values == [1.0, 2.0]\n\ndef test_length_mismatch():\n    try:\n        solution.backup_all([1.0], [(0.0, 0), (0.0, 0)], 0.9)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_invalid_gamma():\n    try:\n        solution.backup_all([1.0], [(0.0, 0)], 1.5)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n",
+  "mutations": [
+    "return [r + gamma * values[i] for r, i in transitions]",
+    "return [r + gamma * values[i] if i >= 0 else r + gamma for r, i in transitions]"
+  ]
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>004 — The empirical risk, averaged</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="The empirical risk, averaged — a graded problem on classical-ml.">
+</head>
+<body data-page="problem" data-problem="004">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">004 · easy</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 004 · debug</p>
+  <h1>The empirical risk, averaged</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Classical Ml</span><a href="../lessons/004-supervised-learning.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>empirical_risk</code> is the supervised objective: the <strong>average</strong> squared error over the dataset.</p>
+<p>The starter returns the total squared error instead of the mean. Fix it without changing the signature.</p>
+<ul><li><code>sum((pred - target) ** 2) / n</code></li><li>raise <code>ValueError</code> when the lengths differ</li><li>return a <code>float</code></li></ul>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def empirical_risk(preds, targets):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def empirical_risk(preds, targets):
+    &quot;&quot;&quot;Average squared error over the dataset (the empirical risk).&quot;&quot;&quot;
+    if len(preds) != len(targets):
+        raise ValueError(&quot;lengths differ&quot;)
+    return float(sum((p - y) ** 2 for p, y in zip(preds, targets)))  # BUG: total, not average
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_known_value</code></li><li><code>test_perfect_fit</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 004
+# edit work/004/solution.py
+python3 dml.py run 004
+python3 dml.py submit 004</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-004">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-004" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="003.html">← 003 · Log-likelihood without underflow</a><a href="005.html">005 · Diagnose the gap →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

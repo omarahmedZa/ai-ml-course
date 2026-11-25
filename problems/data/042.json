@@ -6,8 +6,7 @@
   "difficulty": "medium",
   "shape": "scratch",
   "categories": [
-    "classical-ml",
-    "clustering"
+    "classical-ml"
   ],
   "statement_md": "Write `assign_clusters(points, centroids)` returning, for each point, the index of its nearest centroid.\n\n- distance is **squared Euclidean**: sum the squared differences feature by feature\n- ties go to the **lowest** index\n- return `[]` when there are no points\n- raise `ValueError` when `centroids` is empty\n\nDo not mutate the inputs.",
   "entry": "assign_clusters",

@@ -7,7 +7,7 @@
   "shape": "debug",
   "categories": [
     "systems",
-    "monitoring"
+    "evaluation-metrics"
   ],
   "statement_md": "`ks_statistic(a, b)` should return the two-sample Kolmogorov-Smirnov statistic: the largest absolute gap between the empirical CDFs of the two samples.\n\nThe starter compares paired sorted values, which is not a CDF and breaks when the samples have different lengths. Fix it. Raise `ValueError` if either sample is empty. Do not mutate the inputs, and the result must be symmetric in `a` and `b`.",
   "entry": "ks_statistic",

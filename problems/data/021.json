@@ -1,0 +1,31 @@
+{
+  "id": "021",
+  "lesson": "021",
+  "book": "rl",
+  "title": "Epsilon-greedy action probabilities",
+  "difficulty": "easy",
+  "shape": "scratch",
+  "categories": [
+    "reinforcement-learning"
+  ],
+  "statement_md": "Write `epsilon_greedy_probs(q_values, epsilon)` returning the probability of each\naction under epsilon-greedy.\n\n- with probability `1 - epsilon` play a greedy action; split that mass evenly\n  among tied best actions\n- with probability `epsilon` pick uniformly at random over all `k` actions\n- the returned list must have one probability per action and sum to 1\n\nRaise `ValueError` for an empty `q_values` or an `epsilon` outside `[0, 1]`.\nReturn floats. For `epsilon = 0.2` and four arms, the greedy arm gets `0.85`.",
+  "entry": "epsilon_greedy_probs",
+  "signature": "def epsilon_greedy_probs(q_values, epsilon):",
+  "starter": "def epsilon_greedy_probs(q_values, epsilon):\n    \"\"\"Action probabilities under epsilon-greedy.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_known_probs",
+    "test_sums_to_one"
+  ],
+  "hidden": [
+    "test_pure_greedy",
+    "test_pure_random",
+    "test_ties_split",
+    "test_invalid_epsilon",
+    "test_empty"
+  ],
+  "tests_py": "def test_known_probs():\n    p = solution.epsilon_greedy_probs([2.8, 1.5, 1.0, 0.2], 0.2)\n    assert abs(p[0] - 0.85) < 1e-12\n    assert abs(p[1] - 0.05) < 1e-12\n\ndef test_sums_to_one():\n    p = solution.epsilon_greedy_probs([1.0, 2.0, 3.0], 0.3)\n    assert abs(sum(p) - 1.0) < 1e-12\n\ndef test_pure_greedy():\n    assert solution.epsilon_greedy_probs([1.0, 5.0, 3.0], 0.0) == [0.0, 1.0, 0.0]\n\ndef test_pure_random():\n    p = solution.epsilon_greedy_probs([1.0, 2.0, 3.0, 4.0], 1.0)\n    assert all(abs(x - 0.25) < 1e-12 for x in p)\n\ndef test_ties_split():\n    p = solution.epsilon_greedy_probs([1.0, 1.0, 0.0], 0.2)\n    assert abs(p[0] - p[1]) < 1e-12\n    assert abs(p[0] - (0.4 + 0.2 / 3)) < 1e-12\n    assert abs(p[2] - 0.2 / 3) < 1e-12\n\ndef test_invalid_epsilon():\n    try:\n        solution.epsilon_greedy_probs([1.0, 2.0], 1.5)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_empty():\n    try:\n        solution.epsilon_greedy_probs([], 0.1)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n",
+  "mutations": [
+    "return [epsilon / len(q_values) for _ in q_values]",
+    "return [1.0 if v == max(q_values) else 0.0 for v in q_values]"
+  ]
+}

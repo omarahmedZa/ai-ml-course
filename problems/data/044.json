@@ -6,8 +6,7 @@
   "difficulty": "medium",
   "shape": "debug",
   "categories": [
-    "classical-ml",
-    "evaluation"
+    "classical-ml"
   ],
   "statement_md": "`standardize(train, test)` is supposed to scale every column using the mean and standard deviation of the **training rows only** (divide by `n`, and use `1.0` when a column has zero spread).\n\nIt currently computes its statistics from `train + test`, so the test rows leak into the transform. Fix it.\n\n- keep the signature and the return shape: `(scaled_train, scaled_test)`\n- raise `ValueError` for an empty training set or a row with the wrong number of columns\n- do not mutate either input",
   "entry": "standardize",

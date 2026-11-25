@@ -1,0 +1,30 @@
+{
+  "id": "018",
+  "lesson": "018",
+  "book": "language",
+  "title": "Sequence log-probability",
+  "difficulty": "medium",
+  "shape": "extend",
+  "categories": [
+    "nlp-transformers"
+  ],
+  "statement_md": "`token_log_prob(p)` is implemented. Add `sequence_log_prob(probs)`, the log-probability of a whole token sequence under the chain rule.\n\n- return the sum of `token_log_prob(p)` over the sequence\n- raise `ValueError` for an empty sequence\n- let `token_log_prob` reject probabilities outside `(0, 1]`\n- return a `float` and do not mutate `probs`\n\nDo not change `token_log_prob`.",
+  "entry": "sequence_log_prob",
+  "signature": "def sequence_log_prob(probs):",
+  "starter": "import math\n\n\ndef token_log_prob(p):\n    if not 0.0 < p <= 1.0:\n        raise ValueError(\"probability must be in (0, 1]\")\n    return math.log(p)\n\n\ndef sequence_log_prob(probs):\n    # Your code here: the log of a product is the sum of the logs.\n    pass\n",
+  "visible": [
+    "test_two_tokens",
+    "test_certain_tokens"
+  ],
+  "hidden": [
+    "test_three_tokens",
+    "test_bad_probability_raises",
+    "test_empty_raises",
+    "test_no_mutation"
+  ],
+  "tests_py": "import math\n\ndef test_two_tokens():\n    assert abs(solution.sequence_log_prob([0.5, 0.25]) - math.log(0.125)) < 1e-12\n\ndef test_certain_tokens():\n    assert solution.sequence_log_prob([1.0, 1.0]) == 0.0\n\ndef test_three_tokens():\n    want = math.log(0.9) + math.log(0.8) + math.log(0.5)\n    assert abs(solution.sequence_log_prob([0.9, 0.8, 0.5]) - want) < 1e-12\n\ndef test_bad_probability_raises():\n    for probs in ([0.5, 0.0], [0.5, 1.2], [-0.1]):\n        try:\n            solution.sequence_log_prob(probs)\n        except ValueError:\n            continue\n        raise AssertionError(\"expected ValueError for %r\" % (probs,))\n\ndef test_empty_raises():\n    try:\n        solution.sequence_log_prob([])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_no_mutation():\n    probs = [0.5, 0.25]\n    solution.sequence_log_prob(probs)\n    assert probs == [0.5, 0.25]\n",
+  "mutations": [
+    "return float(sum(a[0]))",
+    "return float(math.log(sum(a[0])))"
+  ]
+}

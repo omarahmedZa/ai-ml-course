@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>010 — Debug the linear-unit gradients</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Debug the linear-unit gradients — a graded problem on deep-learning.">
+</head>
+<body data-page="problem" data-problem="010">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">010 · medium</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 010 · debug</p>
+  <h1>Debug the linear-unit gradients</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Deep Learning</span><a href="../lessons/010-backpropagation.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>linear_grads(x, w, b, y)</code> should return <code>(dL/dw, dL/db)</code> for the graph <code>z = wx + b</code>, <code>L = (z - y)^2</code>.</p>
+<p>Upstream is <code>dL/dz = 2(z - y)</code>; multiply it by each local slope: <code>dL/dw = dL/dz * x</code>, <code>dL/db = dL/dz * 1</code>.</p>
+<p>The starter forgets the local slope of the multiply. Fix both gradients and keep the signature.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def linear_grads(x, w, b, y):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def linear_grads(x, w, b, y):
+    &quot;&quot;&quot;Return (dL/dw, dL/db) for L = (w*x + b - y) ** 2.&quot;&quot;&quot;
+    z = w * x + b
+    upstream = 2.0 * (z - y)
+    return upstream, upstream  # BUG: dw must be scaled by x
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_known_value</code></li><li><code>test_zero_loss</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 010
+# edit work/010/solution.py
+python3 dml.py run 010
+python3 dml.py submit 010</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-010">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-010" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="009.html">← 009 · Two-layer forward pass, by hand</a><a href="011.html">011 · Count the updates →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

@@ -6,7 +6,7 @@
   "difficulty": "medium",
   "shape": "extend",
   "categories": [
-    "decoding"
+    "nlp-transformers"
   ],
   "statement_md": "`softmax` is implemented. Add `nucleus_indices(probs, p)`, which returns the token ids top-p sampling would keep.\n\n- sort ids by probability, highest first; break ties by smaller id\n- keep adding ids until the running total reaches at least `p`\n- always keep at least one id\n- `p >= 1` keeps every id; `p <= 0` keeps only the first\n- return ids in that sorted order; do not mutate `probs`\n\nDo not change `softmax`.",
   "entry": "nucleus_indices",

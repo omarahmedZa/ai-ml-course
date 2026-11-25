@@ -1,0 +1,32 @@
+{
+  "id": "005",
+  "lesson": "005",
+  "book": "classical-ml",
+  "title": "Diagnose the gap",
+  "difficulty": "easy",
+  "shape": "debug",
+  "categories": [
+    "classical-ml",
+    "evaluation-metrics"
+  ],
+  "statement_md": "`diagnose` reads a train/test pair and names the disease. Both errors lie in `[0, 1]`.\n\n- both `>= high` -> `\"underfit\"`\n- train `< high` and `test - train > gap` -> `\"overfit\"`\n- otherwise -> `\"good\"`\n\nThe starter computes the gap as `train - test`, so it can never see an overfitting gap. Fix the sign without changing the signature.",
+  "entry": "diagnose",
+  "signature": "def diagnose(train_error, test_error, high=0.3, gap=0.1):",
+  "starter": "def diagnose(train_error, test_error, high=0.3, gap=0.1):\n    \"\"\"Return 'underfit', 'overfit', or 'good' from two error levels.\"\"\"\n    if train_error >= high and test_error >= high:\n        return \"underfit\"\n    if train_error < high and train_error - test_error > gap:  # BUG: gap sign\n        return \"overfit\"\n    return \"good\"\n",
+  "visible": [
+    "test_overfit",
+    "test_underfit"
+  ],
+  "hidden": [
+    "test_good",
+    "test_small_gap",
+    "test_threshold_inclusive",
+    "test_custom_thresholds",
+    "test_returns_str"
+  ],
+  "tests_py": "def test_overfit():\n    assert solution.diagnose(0.05, 0.40) == \"overfit\"\n\ndef test_underfit():\n    assert solution.diagnose(0.50, 0.55) == \"underfit\"\n\ndef test_good():\n    assert solution.diagnose(0.10, 0.15) == \"good\"\n\ndef test_small_gap():\n    assert solution.diagnose(0.05, 0.14) == \"good\"\n\ndef test_threshold_inclusive():\n    assert solution.diagnose(0.30, 0.30) == \"underfit\"\n\ndef test_custom_thresholds():\n    assert solution.diagnose(0.20, 0.50, high=0.5, gap=0.2) == \"overfit\"\n\ndef test_returns_str():\n    assert isinstance(solution.diagnose(0.1, 0.1), str)\n",
+  "mutations": [
+    "return 'underfit' if a[0] > a[2] and a[1] > a[2] else ('overfit' if a[0] < a[2] and a[1] - a[0] > a[3] else 'good')",
+    "return 'underfit' if a[0] >= a[2] and a[1] >= a[2] else ('overfit' if a[1] > a[0] else 'good')"
+  ]
+}

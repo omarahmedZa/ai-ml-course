@@ -6,8 +6,7 @@
   "difficulty": "hard",
   "shape": "debug",
   "categories": [
-    "rl",
-    "bandits"
+    "reinforcement-learning"
   ],
   "statement_md": "`ucb_scores` divides by zero when an arm has never been pulled, and it never checks its inputs. Fix it.\n\n- return `float('inf')` for any arm with `counts[i] == 0`\n- otherwise return `mean + sqrt(2 * log(sum(counts)) / count)`\n- raise `ValueError` if the two lists have different lengths\n- raise `ValueError` if the total number of pulls is zero\n- return a list of floats",
   "entry": "ucb_scores",

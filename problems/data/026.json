@@ -1,0 +1,31 @@
+{
+  "id": "026",
+  "lesson": "026",
+  "book": "language",
+  "title": "Attention output, scaled and blended",
+  "difficulty": "medium",
+  "shape": "scratch",
+  "categories": [
+    "nlp-transformers"
+  ],
+  "statement_md": "Write `attention(query, keys, values)` returning the output vector for one query.\n\n- score each key by `q . k / sqrt(len(q))`\n- softmax the scores per row (subtract the max before exponentiating)\n- return the weighted blend of the value vectors, one float per value dimension\n\nRaise `ValueError` when `keys` is empty, a key's length differs from `len(query)`,\nor the number of values differs from the number of keys. Do not mutate the inputs.\n\nWith `q = [1, 0]`, `k1 = [1, 0]`, `k2 = [0, 1]`, `v1 = [10, 0]`, `v2 = [0, 10]`\nthe weights are `0.670 / 0.330` and the output is `[6.70, 3.30]`.",
+  "entry": "attention",
+  "signature": "def attention(query, keys, values):",
+  "starter": "import math\n\n\ndef attention(query, keys, values):\n    \"\"\"Soft lookup: score keys against the query, then blend the values.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_two_tokens",
+    "test_single_key_returns_value"
+  ],
+  "hidden": [
+    "test_uniform_scores_average",
+    "test_scaling_softens_peaks",
+    "test_dimension_mismatch",
+    "test_empty_keys",
+    "test_value_count_mismatch"
+  ],
+  "tests_py": "import math\n\ndef test_two_tokens():\n    out = solution.attention([1.0, 0.0], [[1.0, 0.0], [0.0, 1.0]], [[10.0, 0.0], [0.0, 10.0]])\n    assert abs(out[0] - 6.698) < 1e-2\n    assert abs(out[1] - 3.302) < 1e-2\n\ndef test_single_key_returns_value():\n    out = solution.attention([1.0, 1.0], [[2.0, 2.0]], [[3.0, 4.0]])\n    assert abs(out[0] - 3.0) < 1e-12 and abs(out[1] - 4.0) < 1e-12\n\ndef test_uniform_scores_average():\n    out = solution.attention([1.0, 0.0], [[1.0, 0.0], [1.0, 0.0]], [[2.0, 0.0], [0.0, 2.0]])\n    assert abs(out[0] - 1.0) < 1e-12 and abs(out[1] - 1.0) < 1e-12\n\ndef test_scaling_softens_peaks():\n    out = solution.attention([1.0, 1.0, 1.0, 1.0],\n                             [[1.0, 1.0, 1.0, 1.0], [0.0, 0.0, 0.0, 0.0]],\n                             [[1.0, 0.0], [0.0, 1.0]])\n    assert out[0] < 0.9\n    assert abs(out[0] + out[1] - 1.0) < 1e-12\n\ndef test_dimension_mismatch():\n    try:\n        solution.attention([1.0, 0.0], [[1.0, 0.0], [1.0]], [[1.0], [1.0]])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_empty_keys():\n    try:\n        solution.attention([1.0], [], [])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_value_count_mismatch():\n    try:\n        solution.attention([1.0], [[1.0]], [[1.0], [2.0]])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n",
+  "mutations": [
+    "return _blend(_weights(query, keys, False), values)",
+    "return _blend([1.0 / len(keys)] * len(keys), values)"
+  ]
+}

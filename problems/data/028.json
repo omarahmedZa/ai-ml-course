@@ -1,0 +1,30 @@
+{
+  "id": "028",
+  "lesson": "028",
+  "book": "language",
+  "title": "Masked loss, averaged correctly",
+  "difficulty": "medium",
+  "shape": "scratch",
+  "categories": [
+    "nlp-transformers"
+  ],
+  "statement_md": "Write `masked_nll(log_probs, mask)` returning the **mean** negative log-probability over the positions that are masked.\n\n- `log_probs[i]` is the natural-log probability the model gave the true token at position `i`\n- `mask[i]` is truthy only for the positions the objective scores\n- unmasked positions contribute nothing, not even to the denominator\n- raise `ValueError` when the lengths differ, or when no position is masked\n- return a `float`\n\nThis is the average a masked objective takes: the 15% that are hidden, not all 100% of the window.",
+  "entry": "masked_nll",
+  "signature": "def masked_nll(log_probs, mask):",
+  "starter": "def masked_nll(log_probs, mask):\n    \"\"\"Return the mean negative log-probability over masked positions.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_single_masked",
+    "test_mean_over_masked"
+  ],
+  "hidden": [
+    "test_unmasked_positions_ignored",
+    "test_length_mismatch",
+    "test_no_masked_raises",
+    "test_returns_float"
+  ],
+  "tests_py": "def test_single_masked():\n    assert solution.masked_nll([-0.5, -2.0], [1, 0]) == 0.5\n\ndef test_mean_over_masked():\n    assert abs(solution.masked_nll([-0.1, -0.2, -0.3], [1, 1, 0]) - 0.15) < 1e-12\n\ndef test_unmasked_positions_ignored():\n    got = solution.masked_nll([-0.1, -9.0, -0.3], [True, False, True])\n    assert abs(got - 0.2) < 1e-12\n\ndef test_length_mismatch():\n    try:\n        solution.masked_nll([-0.1, -0.2], [1])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_no_masked_raises():\n    try:\n        solution.masked_nll([-0.1, -0.2], [0, 0])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_returns_float():\n    assert isinstance(solution.masked_nll([-0.5], [1]), float)\n",
+  "mutations": [
+    "return sum(-x for x in a[0]) / len(a[0])",
+    "return sum(-x for x, m in zip(a[0], a[1]) if m)"
+  ]
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>017 — Debug the LSTM cell update</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Debug the LSTM cell update — a graded problem on nlp-transformers.">
+</head>
+<body data-page="problem" data-problem="017">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">017 · medium</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 017 · debug</p>
+  <h1>Debug the LSTM cell update</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Nlp Transformers</span><a href="../lessons/017-rnn-to-lstm.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>lstm_cell_update</code> should return the new LSTM cell state:</p>
+<p><code>c_new = f * c_prev + i * g</code></p>
+<p>The current implementation is wrong. Fix it without changing the signature.</p>
+<ul><li><code>f</code> and <code>i</code> are gates in <code>[0, 1]</code>; raise <code>ValueError</code> when either is outside that range</li><li><code>g</code> is any real candidate value</li><li>return a <code>float</code></li></ul>
+<p>The additive path, not the multiplied one, is what lets the state survive many steps.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def lstm_cell_update(c_prev, f, i, g):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def lstm_cell_update(c_prev, f, i, g):
+    &quot;&quot;&quot;Return the new cell state f * c_prev + i * g.&quot;&quot;&quot;
+    return f * c_prev * i * g   # BUG: the update should add the write term
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_carry_when_no_write</code></li><li><code>test_write_from_zero</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 017
+# edit work/017/solution.py
+python3 dml.py run 017
+python3 dml.py submit 017</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-017">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-017" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="016.html">← 016 · Cosine, not dot product</a><a href="018.html">018 · Sequence log-probability →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

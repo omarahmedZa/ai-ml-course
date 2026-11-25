@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>012 — Dropout rescale, checked</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Dropout rescale, checked — a graded problem on deep-learning.">
+</head>
+<body data-page="problem" data-problem="012">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">012 · medium</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 012 · from scratch</p>
+  <h1>Dropout rescale, checked</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Deep Learning</span><a href="../lessons/012-overfitting-in-deep-learning.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p>Write <code>dropout(values, p, mask)</code> applying one dropout mask, as in training.</p>
+<ul><li>a <code>True</code> entry in <code>mask</code> keeps the activation, divided by <code>1 - p</code></li><li>a <code>False</code> entry returns <code>0.0</code></li><li>raise <code>ValueError</code> unless <code>0 &lt;= p &lt; 1</code></li><li>raise <code>ValueError</code> when <code>mask</code> and <code>values</code> differ in length</li><li>return floats and do not mutate the inputs</li></ul>
+<p>Inference needs no rescale, because the correction is paid during training.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def dropout(values, p, mask):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def dropout(values, p, mask):
+    &quot;&quot;&quot;Return activations after one dropout mask, rescaled for training.&quot;&quot;&quot;
+    # Your code here.
+    pass
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_mixed_mask</code></li><li><code>test_all_dropped</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 012
+# edit work/012/solution.py
+python3 dml.py run 012
+python3 dml.py submit 012</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-012">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-012" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="011.html">← 011 · Count the updates</a><a href="013.html">013 · Debug gradient-norm clipping →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "id": "017",
+  "lesson": "017",
+  "book": "language",
+  "title": "Debug the LSTM cell update",
+  "difficulty": "medium",
+  "shape": "debug",
+  "categories": [
+    "nlp-transformers"
+  ],
+  "statement_md": "`lstm_cell_update` should return the new LSTM cell state:\n\n`c_new = f * c_prev + i * g`\n\nThe current implementation is wrong. Fix it without changing the signature.\n\n- `f` and `i` are gates in `[0, 1]`; raise `ValueError` when either is outside that range\n- `g` is any real candidate value\n- return a `float`\n\nThe additive path, not the multiplied one, is what lets the state survive many steps.",
+  "entry": "lstm_cell_update",
+  "signature": "def lstm_cell_update(c_prev, f, i, g):",
+  "starter": "def lstm_cell_update(c_prev, f, i, g):\n    \"\"\"Return the new cell state f * c_prev + i * g.\"\"\"\n    return f * c_prev * i * g   # BUG: the update should add the write term\n",
+  "visible": [
+    "test_carry_when_no_write",
+    "test_write_from_zero"
+  ],
+  "hidden": [
+    "test_partial_gates",
+    "test_negative_candidate",
+    "test_bad_gate_raises",
+    "test_returns_float"
+  ],
+  "tests_py": "def test_carry_when_no_write():\n    assert solution.lstm_cell_update(2.5, 1.0, 0.0, 7.0) == 2.5\n\ndef test_write_from_zero():\n    assert solution.lstm_cell_update(0.0, 0.0, 1.0, 2.0) == 2.0\n\ndef test_partial_gates():\n    assert abs(solution.lstm_cell_update(1.0, 0.5, 0.25, 4.0) - 1.5) < 1e-12\n\ndef test_negative_candidate():\n    assert abs(solution.lstm_cell_update(0.0, 0.5, 0.5, -1.0) + 0.5) < 1e-12\n\ndef test_bad_gate_raises():\n    for f, i in ((1.5, 0.5), (0.5, -0.1)):\n        try:\n            solution.lstm_cell_update(0.0, f, i, 1.0)\n        except ValueError:\n            continue\n        raise AssertionError(\"expected ValueError for gates %r, %r\" % (f, i))\n\ndef test_returns_float():\n    assert isinstance(solution.lstm_cell_update(1, 1.0, 0.0, 0.0), float)\n",
+  "mutations": [
+    "return float(a[1] * a[0] * a[2] * a[3])",
+    "return float(a[1] * a[0])"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "034",
+  "lesson": "034",
+  "book": "trust",
+  "title": "FedProx fixed point, leash attached",
+  "difficulty": "easy",
+  "shape": "debug",
+  "categories": [
+    "federated-privacy"
+  ],
+  "statement_md": "`prox_point(w_global, w_local, mu)` should return where one FedProx client stops.\n\nMinimising `0.5 (w - w_local)^2 + (mu/2) (w - w_global)^2` gives the fixed point `(w_local + mu * w_global) / (1 + mu)`.\n\n- `mu` is the leash stiffness: `0` means no leash, large `mu` stays near `w_global`\n- raise `ValueError` when `mu` is negative\n- return a `float`\n\nThe starter has the coefficients swapped, so the leash pulls toward the client's own optimum instead of the global model. Fix it and keep the signature.",
+  "entry": "prox_point",
+  "signature": "def prox_point(w_global, w_local, mu):",
+  "starter": "def prox_point(w_global, w_local, mu):\n    \"\"\"Return the fixed point of the FedProx local objective.\"\"\"\n    if mu < 0:\n        raise ValueError(\"mu must be non-negative\")\n    return (mu * w_local + w_global) / (1.0 + mu)\n",
+  "visible": [
+    "test_no_leash",
+    "test_halfway_at_mu_one"
+  ],
+  "hidden": [
+    "test_strong_leash",
+    "test_global_not_zero",
+    "test_negative_mu_raises",
+    "test_stays_between",
+    "test_returns_float"
+  ],
+  "tests_py": "def test_no_leash():\n    assert solution.prox_point(0.0, -1.0, 0.0) == -1.0\n\ndef test_halfway_at_mu_one():\n    assert abs(solution.prox_point(0.0, -1.0, 1.0) + 0.5) < 1e-12\n\ndef test_strong_leash():\n    assert abs(solution.prox_point(0.0, -1.0, 4.0) + 0.2) < 1e-12\n\ndef test_global_not_zero():\n    assert abs(solution.prox_point(2.0, 0.0, 1.0) - 1.0) < 1e-12\n\ndef test_negative_mu_raises():\n    try:\n        solution.prox_point(0.0, -1.0, -0.5)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_stays_between():\n    w = solution.prox_point(1.0, -3.0, 3.0)\n    assert -3.0 < w < 1.0\n\ndef test_returns_float():\n    assert isinstance(solution.prox_point(0, -1, 1), float)\n",
+  "mutations": [
+    "return (a[1] * a[2] + a[0]) / (1.0 + a[2])",
+    "return float(a[1])"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "027",
+  "lesson": "027",
+  "book": "language",
+  "title": "Count one Transformer block",
+  "difficulty": "medium",
+  "shape": "scratch",
+  "categories": [
+    "nlp-transformers",
+    "deep-learning"
+  ],
+  "statement_md": "Write `block_parameters(d_model, n_heads, expansion=4)` counting matrix weights in\none pre-LN Transformer block.\n\n- attention projections: `4 * d_model ** 2` (Q, K, V and output)\n- feed-forward: `2 * expansion * d_model ** 2` (up and down)\n- return `{\"attention\": ..., \"ffn\": ..., \"total\": ...}` with integer counts\n\nRaise `ValueError` when any argument is not a positive integer, or when `d_model`\nis not divisible by `n_heads`. Biases and embeddings are not counted, so the head\ncount never changes the total: at `d_model=512` the total is `3,145,728`.",
+  "entry": "block_parameters",
+  "signature": "def block_parameters(d_model, n_heads, expansion=4):",
+  "starter": "def block_parameters(d_model, n_heads, expansion=4):\n    \"\"\"Matrix parameter count for one pre-LN Transformer block.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_worked_example",
+    "test_ffn_expands"
+  ],
+  "hidden": [
+    "test_head_count_irrelevant",
+    "test_custom_expansion",
+    "test_total_is_sum",
+    "test_indivisible_heads",
+    "test_bad_width"
+  ],
+  "tests_py": "def test_worked_example():\n    p = solution.block_parameters(512, 8)\n    assert p[\"attention\"] == 1048576\n    assert p[\"ffn\"] == 2097152\n    assert p[\"total\"] == 3145728\n\ndef test_ffn_expands():\n    assert solution.block_parameters(64, 4)[\"ffn\"] == 2 * 4 * 64 * 64\n\ndef test_head_count_irrelevant():\n    assert (solution.block_parameters(512, 16)[\"total\"]\n            == solution.block_parameters(512, 4)[\"total\"])\n\ndef test_custom_expansion():\n    p = solution.block_parameters(64, 4, 2)\n    assert p[\"attention\"] == 16384\n    assert p[\"ffn\"] == 16384\n    assert p[\"total\"] == 32768\n\ndef test_total_is_sum():\n    p = solution.block_parameters(256, 8)\n    assert p[\"total\"] == p[\"attention\"] + p[\"ffn\"]\n\ndef test_indivisible_heads():\n    try:\n        solution.block_parameters(10, 3)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_bad_width():\n    try:\n        solution.block_parameters(0, 1)\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n",
+  "mutations": [
+    "return {\"attention\": 4 * d_model * d_model, \"ffn\": 2 * d_model * d_model, \"total\": 6 * d_model * d_model}",
+    "return {\"attention\": 4 * d_model * d_model, \"ffn\": 2 * expansion * d_model * d_model, \"total\": 4 * d_model * d_model}"
+  ]
+}
