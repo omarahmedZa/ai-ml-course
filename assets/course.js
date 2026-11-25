@@ -625,6 +625,112 @@
     });
   }
 
+  /* ---------- bookshelf dashboard ---------- */
+  function initShelf() {
+    readbar();
+    var index = (window.SEARCH_INDEX || []).filter(function (e) { return e.type === "lesson"; });
+    var byBook = {};
+    index.forEach(function (e) { (byBook[e.book] = byBook[e.book] || []).push(e); });
+
+    var totalDone = 0;
+    Object.keys(byBook).forEach(function (book) {
+      var list = byBook[book], done = 0;
+      list.forEach(function (e) {
+        var st = store.lessons[e.id];
+        if (st && st.sections && Object.keys(st.sections).length >= 8) done++;
+      });
+      var pct = list.length ? Math.round((done / list.length) * 100) : 0;
+      var bar = document.querySelector('[data-book-progress="' + book + '"]');
+      if (bar) bar.style.width = pct + "%";
+      var score = document.querySelector('[data-book-score="' + book + '"]');
+      if (score) score.textContent = pct + "%";
+      totalDone += done;
+    });
+
+    var pctAll = index.length ? Math.round((totalDone / index.length) * 100) : 0;
+    var ring = document.querySelector(".ring");
+    if (ring) ring.style.setProperty("--p", pctAll);
+    var pctEl = document.querySelector(".ring .pct");
+    if (pctEl) pctEl.textContent = pctAll + "%";
+    var capEl = document.querySelector(".ring .cap");
+    if (capEl) capEl.textContent = totalDone + " / " + index.length;
+
+    var streak = document.querySelector("[data-streak]");
+    if (streak) streak.textContent = ((store.streak && store.streak.days.length) || 0) + "-day streak";
+    var probs = document.querySelector('[data-count="problems"]');
+    if (probs) probs.textContent = Object.keys(store.problems || {}).length + " / 60";
+
+    var cont = document.querySelector("[data-continue]");
+    if (cont && index.length) {
+      var next = null;
+      index.forEach(function (e) {
+        if (next) return;
+        var st = store.lessons[e.id];
+        if (!st || !st.sections || Object.keys(st.sections).length < 8) next = e;
+      });
+      var target = next || index[0];
+      cont.href = target.url;
+      cont.textContent = (next ? "Continue → " : "Review → ") + target.title;
+    }
+
+    var themeBtn = document.querySelector("[data-theme-toggle]");
+    if (themeBtn) {
+      themeBtn.addEventListener("click", function () {
+        applyTheme(!store.theme ? "dark" : store.theme === "dark" ? "light" : "auto");
+      });
+      themeBtn.setAttribute("data-bound", "1");
+    }
+
+    var rows = index.map(function (e) {
+      return {
+        getAttribute: function (k) {
+          if (k === "data-lesson") return e.id;
+          if (k === "data-title") return e.title;
+          return null;
+        },
+        querySelector: function () { return { textContent: e.title }; }
+      };
+    });
+    var exp = document.querySelector("[data-export]");
+    if (exp) {
+      exp.addEventListener("click", function () { exportRecord(rows); });
+      exp.setAttribute("data-bound", "1");
+    }
+    var reset = document.querySelector("[data-reset]");
+    if (reset) reset.addEventListener("click", function () {
+      if (confirm("Erase all scores on this device? This cannot be undone.")) {
+        store = { lessons: {}, labs: {}, problems: {}, streak: { days: [], best: 0 }, theme: store.theme };
+        persist();
+        location.reload();
+      }
+    });
+    document.body.setAttribute("data-bound", "1");
+  }
+
+  /* ---------- one book page ---------- */
+  function initBook() {
+    var items = [].slice.call(document.querySelectorAll('.spine-item[data-lesson]'))
+      .filter(function (li) { return li.getAttribute("data-planned") !== "true"; });
+    var done = 0;
+    items.forEach(function (li) {
+      var st = store.lessons[li.getAttribute("data-lesson")];
+      var dot = li.querySelector("[data-status]");
+      var n = st && st.sections ? Object.keys(st.sections).length : 0;
+      if (n >= 8) { done++; if (dot) dot.classList.add("done"); }
+      else if (n > 0 && dot) dot.classList.add("part");
+    });
+    var pct = items.length ? Math.round((done / items.length) * 100) : 0;
+    var bar = document.querySelector("[data-path-progress]");
+    if (bar) bar.style.width = pct + "%";
+    var count = document.querySelector("[data-path-count]");
+    if (count) count.textContent = done + " / " + items.length + " lessons";
+    var themeBtn = document.querySelector("[data-theme-toggle]");
+    if (themeBtn) themeBtn.addEventListener("click", function () {
+      applyTheme(!store.theme ? "dark" : store.theme === "dark" ? "light" : "auto");
+    });
+    document.body.setAttribute("data-bound", "1");
+  }
+
   /* ---------- export a learning record ---------- */
   function exportRecord(rows) {
     var lines = [];
@@ -638,7 +744,8 @@
     rows.forEach(function (row) {
       var id = row.getAttribute("data-lesson");
       var st = store.lessons[id];
-      var title = row.querySelector(".topic-link, .topic-title").textContent.trim();
+      var titleEl = row.querySelector(".topic-link, .topic-title");
+      var title = titleEl ? titleEl.textContent.trim() : (row.getAttribute("data-title") || id);
       if (!st) {
         lines.push("| " + id + " | " + title + " | 0/20 | 0% | – | not started |");
         return;
@@ -732,13 +839,38 @@
   highlightCode();
   initFigureZoom();
   var page = document.body.getAttribute("data-page");
-  if (page === "index") initIndex();
+  if (page === "index") initShelf();
+  else if (page === "path") initBook();
   else if (page === "lab") initLab();
+  else if (page === "search") initLesson();
   else initLesson();
 })();
 
 /* ---------- search overlay ---------- */
 (function () {
+  function rankIndex(index, q) {
+    q = q.trim().toLowerCase();
+    if (!q) return [];
+    var words = q.split(/\s+/), hits = [];
+    index.forEach(function (e) {
+      var t = e.title.toLowerCase(), sm = (e.summary || "").toLowerCase(), n = 0;
+      words.forEach(function (w) {
+        if (t.indexOf(w) > -1) n += 3;
+        if (sm.indexOf(w) > -1) n += 1;
+        (e.categories || []).forEach(function (c) { if (c.indexOf(w) > -1) n += 1; });
+        (e.symbols || []).forEach(function (x) { if (x.toLowerCase() === w) n += 2; });
+      });
+      if (n) hits.push([n + (e.type === "lesson" ? 1 : 0), e]);
+    });
+    hits.sort(function (a, b) { return b[0] - a[0] || a[1].title.localeCompare(b[1].title); });
+    return hits.slice(0, 8).map(function (h) { return h[1]; });
+  }
+
+  function rootPrefix() {
+    var link = document.querySelector('link[rel="stylesheet"]');
+    return link ? link.getAttribute("href").replace(/assets\/lesson\.css.*$/, "") : "";
+  }
+
   function initSearch() {
     var index = window.SEARCH_INDEX || [];
     document.querySelectorAll("[data-search]").forEach(function (input) {
@@ -748,23 +880,7 @@
       input.parentNode.style.position = "relative";
       input.parentNode.appendChild(box);
 
-      function rank(q) {
-        q = q.trim().toLowerCase();
-        if (!q) return [];
-        var words = q.split(/\s+/), hits = [];
-        index.forEach(function (e) {
-          var t = e.title.toLowerCase(), s = (e.summary || "").toLowerCase(), n = 0;
-          words.forEach(function (w) {
-            if (t.indexOf(w) > -1) n += 3;
-            if (s.indexOf(w) > -1) n += 1;
-            (e.categories || []).forEach(function (c) { if (c.indexOf(w) > -1) n += 1; });
-            (e.symbols || []).forEach(function (x) { if (x.toLowerCase() === w) n += 2; });
-          });
-          if (n) hits.push([n + (e.type === "lesson" ? 1 : 0), e]);
-        });
-        hits.sort(function (a, b) { return b[0] - a[0]; });
-        return hits.slice(0, 8).map(function (h) { return h[1]; });
-      }
+      function rank(q) { return rankIndex(index, q); }
 
       function render(results) {
         box.innerHTML = "";
@@ -772,9 +888,7 @@
         results.forEach(function (e) {
           var li = document.createElement("li");
           var a = document.createElement("a");
-          a.href = (input.closest("main") && e.url.indexOf("lessons/") === 0 ? e.url : e.url);
-          var base = document.body.getAttribute("data-page") === "index" ? "" : "../";
-          a.href = base + e.url;
+          a.href = rootPrefix() + e.url;
           var small = document.createElement("span");
           small.textContent = e.type === "lesson" ? e.bookTitle : e.type;
           a.textContent = e.title;
@@ -799,7 +913,37 @@
       });
     });
   }
+  function initSearchPage() {
+    var input = document.querySelector("[data-search]");
+    var out = document.querySelector("[data-search-page]");
+    if (!input || !out) return;
+    var index = window.SEARCH_INDEX || [];
+    function render() {
+      var hits = rankIndex(index, input.value);
+      out.innerHTML = "";
+      if (!input.value.trim()) return;
+      if (!hits.length) { out.innerHTML = "<li>No match. Try \"attention\" or \"loss\".</li>"; return; }
+      hits.forEach(function (e) {
+        var li = document.createElement("li");
+        var a = document.createElement("a");
+        a.href = rootPrefix() + e.url;
+        a.textContent = e.title;
+        var small = document.createElement("span");
+        small.textContent = e.bookTitle || e.type;
+        li.appendChild(a);
+        li.appendChild(small);
+        out.appendChild(li);
+      });
+    }
+    input.addEventListener("input", render);
+    input.focus();
+  }
+
+  function bootSearch() {
+    initSearch();
+    initSearchPage();
+  }
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initSearch);
-  } else { initSearch(); }
+    document.addEventListener("DOMContentLoaded", bootSearch);
+  } else { bootSearch(); }
 })();
