@@ -1074,3 +1074,14 @@ body.library .topline { border-bottom: 1px solid var(--rule); padding-bottom: .5
 .toc-state .toc-mark { margin: 0; }
 .toc-mark.here { background: #c9a227; box-shadow: 0 0 0 3px rgba(201,162,39,.18); }
 .toc-here { color: #a8842a; }
+
+/* ---------- prev / next bar (labs and problems) ---------- */
+.labnav {
+  display: flex; flex-wrap: wrap; gap: .75rem 1.5rem;
+  align-items: baseline; justify-content: space-between;
+  margin: 2.4rem 0 0; padding-top: 1.1rem;
+  border-top: 1px solid var(--rule); font-size: .82rem;
+}
+.labnav a { text-decoration: none; }
+.labnav a:hover { text-decoration: underline; }
+.labnav a:last-child { margin-left: auto; text-align: right; }
