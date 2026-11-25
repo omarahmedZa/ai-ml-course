@@ -139,6 +139,19 @@
     return pages;
   }
 
+  function turnCorner(kind, dir) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "page-turn " + kind;
+    b.setAttribute("aria-label", dir > 0 ? "Next page" : "Previous page");
+    b.addEventListener("click", function (ev) {
+      ev.stopPropagation();
+      if (dir > 0 && page < spreads.length - 1) { page++; render(); }
+      if (dir < 0 && page > 0) { page--; render(); }
+    });
+    return b;
+  }
+
   function render() {
     var book = BOOKS[current];
     spreads = build(book);
@@ -149,6 +162,8 @@
     right.classList.add("page-right");
     spread.appendChild(left);
     spread.appendChild(right);
+    if (page > 0) left.appendChild(turnCorner("prev", -1));
+    if (page < spreads.length - 1) right.appendChild(turnCorner("next", 1));
     counter.textContent = (page + 1) + " / " + spreads.length;
     document.querySelector("[data-prev]").disabled = page === 0;
     document.querySelector("[data-next]").disabled = page === spreads.length - 1;
