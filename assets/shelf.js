@@ -56,7 +56,7 @@
     var rule = el("span", "plate-rule");
     frame.appendChild(rule);
     frame.appendChild(el("p", "plate-meta",
-      book.total + " lessons · " + book.labs + " labs · " + book.problems + " problems"));
+      book.total + " lessons · " + book.problems + " problems · " + book.labs + " labs"));
     frame.appendChild(el("p", "plate-imprint", "AI·ML"));
     page.appendChild(frame);
     return page;
@@ -73,8 +73,8 @@
     p.appendChild(el("p", "page-kicker gap", "Conventions"));
     var table = el("dl", "conv");
     [["Lessons", "Read once, then score the retrieval check.", book.total],
-     ["Equation labs", "One symbol each, draggable figures.", book.labs],
-     ["Problems", "One function, checked against hidden tests.", book.problems]]
+     ["Problems", "One function, checked against hidden tests.", book.problems],
+     ["Equation labs", "One symbol each, draggable figures.", book.labs]]
       .forEach(function (row) {
         var dt = el("dt", null, row[0]);
         var dd = el("dd", null, row[1]);

@@ -1146,3 +1146,105 @@ body { padding-top: 5.8rem; }
 .spine-problem + .spine-problem { margin-top: .05rem; }
 .book-row { border: 1px solid transparent; transition: background .15s ease, border-color .15s ease, transform .15s ease; }
 .book-row:hover { background: var(--card); border-color: var(--rule); transform: translateY(-1px); }
+
+/* ---------- cover counts: centred, explicit ---------- */
+.book-meta {
+  position: absolute; top: 100%; left: 0; right: 0;
+  margin-top: 1.15rem; text-align: center;
+  font: .66rem/1.45 ui-monospace, monospace; letter-spacing: .02em;
+  color: var(--ink-soft); text-decoration: none; white-space: normal;
+  padding: 0 .2rem;
+}
+.book-meta:hover { color: var(--accent); }
+
+/* ---------- reader: keep clear of the fixed bar ---------- */
+.reader {
+  z-index: 120; align-items: start;
+  padding: clamp(4.6rem, 9vh, 6.5rem) 1rem 1.4rem;
+}
+.book-spread { max-height: calc(100dvh - 9.5rem); }
+body.reading .topline { opacity: .18; pointer-events: none; transition: opacity .2s ease; }
+.reader-nav { margin-top: .8rem; }
+
+/* ---------- mobile sweep ---------- */
+@media (max-width: 720px) {
+  .reader { padding: 4.4rem .5rem .8rem; }
+  .book-spread { max-height: calc(100dvh - 7rem); border-radius: 6px; }
+  .page { padding: 1.1rem 1rem; }
+  .part-name { font-size: 1.35rem; }
+  .toc-row { grid-template-columns: 1.3rem 1fr auto; gap: .35rem; }
+  .toc-title { font-size: .8rem; line-height: 1.3; }
+  .toc-problem, .toc-lab { font-size: .58rem; line-height: 1.3; }
+  .reader-nav { position: sticky; bottom: .4rem; }
+  .shelf-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .book-meta { font-size: .58rem; }
+  .library-head h1 { font-size: clamp(1.7rem, 8vw, 2.4rem); }
+  .masthead h1 { font-size: clamp(1.5rem, 7vw, 2rem); }
+  .problem-grid { grid-template-columns: 1fr; }
+  .book-spread { grid-template-columns: 1fr; }
+  .page-left { border-right: 0; border-bottom: 1px solid #d5cab2; }
+  .labnav { flex-direction: column; align-items: stretch; }
+  .labnav a:last-child { text-align: left; margin-left: 0; }
+}
+@media (max-width: 430px) {
+  body { padding-left: .8rem; padding-right: .8rem; }
+  .topline { gap: .45rem; }
+  .topline a, .topline button { font-size: .56rem; letter-spacing: .06em; }
+  .search-input { font-size: .72rem; }
+  .page { padding: .9rem .8rem; }
+  .toc-here, .toc-wave { display: none; }
+  .shelf-row { gap: .55rem; }
+}
+@media (max-width: 720px) { .page-turn { display: none; } }
+
+/* shelf: cover, rail, then the three counts — bottom-anchored */
+.shelf-row { padding-bottom: 4rem; }
+.rail { top: auto; bottom: 2.85rem; }
+.book-meta {
+  position: absolute; bottom: 0; left: 0; right: 0; top: auto;
+  margin: 0; text-align: center; font-size: .66rem; line-height: 1.4;
+  color: var(--ink-soft); white-space: normal;
+}
+@media (max-width: 720px) { .shelf-row { padding-bottom: 3.6rem; } .rail { bottom: 2.5rem; } }
+
+/* labels live in the wrap's bottom padding, rail at the cover edge */
+.book-wrap { padding-bottom: 2.2rem; }
+.book-meta { position: absolute; bottom: 0; left: 0; right: 0; margin: 0; }
+.shelf-row { padding-bottom: 0; }
+.rail { bottom: 2.2rem; }
+@media (max-width: 720px) {
+  .book-wrap { padding-bottom: 2.4rem; }
+  .rail { bottom: 2.4rem; }
+}
+.book-wrap { position: relative; }
+.book-meta { text-align: center; }
+@media (max-width: 720px) { .book-wrap { padding-bottom: 2.9rem; } .rail { bottom: 2.9rem; } .book-meta { font-size: .6rem; } }
+.book-meta span { display: block; }
+.book-wrap { padding-bottom: 2.9rem; }
+.rail { bottom: 2.9rem; }
+@media (max-width: 720px) { .book-wrap { padding-bottom: 3.1rem; } .rail { bottom: 3.1rem; } }
+
+/* shelf rebuilt deterministically: rail hangs off each cover, labels flow */
+.rail { display: none; }
+.book-cover { position: relative; }
+.book-cover::after {
+  content: ""; position: absolute; left: -12%; right: -12%; bottom: -7px; height: 13px;
+  background: linear-gradient(#43331f, #241a10 65%, #1a120b);
+  border-radius: 2px; box-shadow: 0 10px 16px rgba(0,0,0,.45);
+}
+.book-wrap { padding-bottom: 0; display: flex; flex-direction: column; }
+.book-meta {
+  position: static; margin: 1.15rem 0 0; text-align: center;
+  font: .6rem/1.35 ui-monospace, monospace; color: var(--ink-soft);
+  white-space: nowrap; letter-spacing: .01em;
+}
+.book-meta span { display: block; }
+.shelf-row { padding-bottom: 1.6rem; gap: 1.1rem 1.35rem; }
+@media (max-width: 720px) {
+  .book-meta { font-size: .56rem; margin-top: .9rem; }
+  .shelf-row { padding-bottom: 1.2rem; }
+}
+.book-meta { white-space: normal; }
+.book-meta span { white-space: nowrap; font-size: .56rem; }
+.book-meta span { display: block !important; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.book-meta { display: block; width: 100%; }
