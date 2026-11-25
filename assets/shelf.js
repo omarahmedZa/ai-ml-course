@@ -10,6 +10,11 @@
   var counter = document.querySelector("[data-pagecount]");
   var current = 0, page = 0, spreads = [];
 
+  function base() {
+    var link = document.querySelector('link[rel="stylesheet"]');
+    return link ? link.getAttribute("href").replace(/assets\/lesson\.css.*$/, "") : "";
+  }
+
   function store() {
     return (window.Course && window.Course.store) || { lessons: {} };
   }
@@ -94,7 +99,7 @@
     var startRow = level.start;
     if (startRow) {
       var a = el("a", "start-btn", "START | " + startRow.title);
-      a.setAttribute("href", "../" + startRow.url);
+      a.setAttribute("href", base() + startRow.url);
       p.appendChild(a);
     } else {
       p.appendChild(el("span", "start-btn off", "opens in a later wave"));
@@ -106,7 +111,7 @@
       var li = el("li", "toc-row" + (c.planned ? " planned" : ""));
       li.appendChild(el("span", "toc-n", String(c.n)));
       var title = el(c.planned ? "span" : "a", "toc-title", c.title);
-      if (!c.planned) title.setAttribute("href", "../" + c.url);
+      if (!c.planned) title.setAttribute("href", base() + c.url);
       li.appendChild(title);
       var mark = el("span", "toc-mark");
       var st = s[c.id];
