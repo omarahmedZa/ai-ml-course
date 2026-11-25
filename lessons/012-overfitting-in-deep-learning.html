@@ -4,26 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>012 — Overfitting in deep learning</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=9">
+<link rel="stylesheet" href="../assets/lesson.css?v=10">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can choose among dropout, weight decay, augmentation and early stopping for a given symptom.">
 </head>
-<body data-lesson="012">
+<body data-lesson="012" data-book="neural-networks" data-book-number="3">
 <main>
 
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 12 / 35</span>
   <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
 </nav>
 
 <header class="masthead">
-  <p class="kicker">Unit 3 · Making deep learning work · Topic 12 of 35</p>
+  <p class="kicker">Book 3 · Neural Networks · lesson 5 of 10</p>
   <h1>Overfitting in deep learning</h1>
   <p class="objective">You can choose among dropout, weight decay, augmentation and early stopping for a given symptom.</p>
 </header>
+<p class="bookline"><a href="../paths/neural-networks.html">Neural Networks</a><span class="chip">Deep Learning</span></p>
 
 <h2>Why this matters<span class="h2-topic">— overfitting</span></h2>
 <p class="lede">Regularisation is the set of techniques that stop a network from memorising its training set. You reach for it on every real project, because the moment your labelled data is finite — which is always — the model has more adjustable knobs than it has constraints.</p>
@@ -192,6 +194,7 @@ y = np.sin(2 * np.pi * x) + rng.normal(0, .3, 12)</code></pre>
 <p class="source">Primary source: Goodfellow, Bengio &amp; Courville, <a href="https://www.deeplearningbook.org">Deep Learning</a>, ch. 7.</p>
 
 </main>
-  <script src="../assets/course.js?v=13" defer></script>
+  <script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
 </body>
 </html>

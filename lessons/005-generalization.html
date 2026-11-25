@@ -4,26 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>005 — Generalization</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=9">
+<link rel="stylesheet" href="../assets/lesson.css?v=10">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can diagnose over- vs underfitting from train/test curves and pick the fix that matches the diagnosis.">
 </head>
-<body data-lesson="005">
+<body data-lesson="005" data-book="classical-ml" data-book-number="2">
 <main>
 
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 05 / 35</span>
   <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
 </nav>
 
 <header class="masthead">
-  <p class="kicker">Unit 1 · Machine learning foundations · Topic 5 of 35</p>
+  <p class="kicker">Book 2 · Classical ML · lesson 2 of 9</p>
   <h1>Generalization: overfitting, underfitting, and the gap</h1>
   <p class="objective">You can diagnose over- vs underfitting from train/test curves and pick the fix that matches the diagnosis.</p>
 </header>
+<p class="bookline"><a href="../paths/classical-ml.html">Classical ML</a><span class="chip">Classical ML</span><span class="chip">Evaluation & Metrics</span></p>
 
 <h2>Why this matters<span class="h2-topic">— generalization</span></h2>
 <p class="lede">This is the single most examined idea in Unit 1, and the first thing that will go wrong in your project. A model that scores 99% on data it has seen is a memory; a model that scores 85% on data it has not seen is a product. Every shipping decision is a bet about rows nobody has collected yet: does this hold up next month, in another hospital, on another customer? Generalization is the word for that bet, and the train/validation/test split is the only honest way to price it. When a paper claims "state of the art", this is the machinery the claim rests on.</p>
@@ -188,6 +190,7 @@ for d in (1, 3, 9):</code></pre>
 
 </main>
   <script src="../assets/graph.js?v=4" defer></script>
-  <script src="../assets/course.js?v=13" defer></script>
+  <script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
 </body>
 </html>

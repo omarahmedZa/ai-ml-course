@@ -1,0 +1,866 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "slug": "linear-algebra",
+      "name": "Linear Algebra"
+    },
+    {
+      "slug": "calculus-optimization",
+      "name": "Calculus & Optimization"
+    },
+    {
+      "slug": "probability-statistics",
+      "name": "Probability & Statistics"
+    },
+    {
+      "slug": "classical-ml",
+      "name": "Classical ML"
+    },
+    {
+      "slug": "deep-learning",
+      "name": "Deep Learning"
+    },
+    {
+      "slug": "nlp-transformers",
+      "name": "NLP & Transformers"
+    },
+    {
+      "slug": "reinforcement-learning",
+      "name": "Reinforcement Learning"
+    },
+    {
+      "slug": "evaluation-metrics",
+      "name": "Evaluation & Metrics"
+    },
+    {
+      "slug": "explainability",
+      "name": "Explainability"
+    },
+    {
+      "slug": "federated-privacy",
+      "name": "Federated & Privacy"
+    },
+    {
+      "slug": "systems",
+      "name": "Systems"
+    }
+  ],
+  "books": [
+    {
+      "slug": "foundations",
+      "number": 1,
+      "title": "Foundations",
+      "promise": "The maths everything else assumes, rebuilt from arithmetic.",
+      "lessons": [
+        "001",
+        "002",
+        "003",
+        "036",
+        "037",
+        "038",
+        "039"
+      ]
+    },
+    {
+      "slug": "classical-ml",
+      "number": 2,
+      "title": "Classical ML",
+      "promise": "Models that fit a table before anything has a GPU.",
+      "lessons": [
+        "004",
+        "005",
+        "006",
+        "007",
+        "040",
+        "041",
+        "042",
+        "043",
+        "044"
+      ]
+    },
+    {
+      "slug": "neural-networks",
+      "number": 3,
+      "title": "Neural Networks",
+      "promise": "One mechanism, built in order: neuron, backward pass, training.",
+      "lessons": [
+        "008",
+        "009",
+        "010",
+        "011",
+        "012",
+        "013",
+        "014",
+        "045",
+        "046",
+        "047"
+      ]
+    },
+    {
+      "slug": "language",
+      "number": 4,
+      "title": "Language & Transformers",
+      "promise": "Text to tokens to attention to a model you can talk to.",
+      "lessons": [
+        "015",
+        "016",
+        "017",
+        "018",
+        "026",
+        "027",
+        "028",
+        "029",
+        "048",
+        "049",
+        "050",
+        "051",
+        "052"
+      ]
+    },
+    {
+      "slug": "rl",
+      "number": 5,
+      "title": "Reinforcement Learning",
+      "promise": "Decisions with consequences, from bandits to PPO.",
+      "lessons": [
+        "019",
+        "020",
+        "021",
+        "022",
+        "023",
+        "024",
+        "025",
+        "053",
+        "054",
+        "055"
+      ]
+    },
+    {
+      "slug": "trust",
+      "number": 6,
+      "title": "Trust, Privacy & Scale",
+      "promise": "Explain it, attack it, federate it, keep it honest.",
+      "lessons": [
+        "030",
+        "031",
+        "032",
+        "033",
+        "034",
+        "035",
+        "056",
+        "057"
+      ]
+    },
+    {
+      "slug": "systems",
+      "number": 7,
+      "title": "Systems",
+      "promise": "Serving, compressing and watching a model after it ships.",
+      "lessons": [
+        "058",
+        "059",
+        "060"
+      ]
+    }
+  ],
+  "lessons": {
+    "001": {
+      "title": "Vectors, matrices, dot product",
+      "categories": [
+        "linear-algebra"
+      ],
+      "minutes": 8,
+      "prereq": [],
+      "planned": false
+    },
+    "002": {
+      "title": "Slope → gradient",
+      "categories": [
+        "calculus-optimization"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "001"
+      ],
+      "planned": false
+    },
+    "003": {
+      "title": "Probability, expectation, likelihood",
+      "categories": [
+        "probability-statistics"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "001"
+      ],
+      "planned": false
+    },
+    "004": {
+      "title": "Supervised learning as function fitting",
+      "categories": [
+        "classical-ml"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "001",
+        "003"
+      ],
+      "planned": false
+    },
+    "005": {
+      "title": "Generalization",
+      "categories": [
+        "classical-ml",
+        "evaluation-metrics"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "004"
+      ],
+      "planned": false
+    },
+    "006": {
+      "title": "Linear & logistic regression",
+      "categories": [
+        "classical-ml"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "001",
+        "002",
+        "003"
+      ],
+      "planned": false
+    },
+    "007": {
+      "title": "Trees & ensembles",
+      "categories": [
+        "classical-ml"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "005"
+      ],
+      "planned": false
+    },
+    "008": {
+      "title": "The neuron",
+      "categories": [
+        "deep-learning"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "001",
+        "006"
+      ],
+      "planned": false
+    },
+    "009": {
+      "title": "Layers & the forward pass",
+      "categories": [
+        "deep-learning"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "008"
+      ],
+      "planned": false
+    },
+    "010": {
+      "title": "Backpropagation",
+      "categories": [
+        "deep-learning"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "002",
+        "009"
+      ],
+      "planned": false
+    },
+    "011": {
+      "title": "The training loop",
+      "categories": [
+        "deep-learning",
+        "calculus-optimization"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "010"
+      ],
+      "planned": false
+    },
+    "012": {
+      "title": "Overfitting in DL",
+      "categories": [
+        "deep-learning"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "005",
+        "011"
+      ],
+      "planned": false
+    },
+    "013": {
+      "title": "Optimization failure modes",
+      "categories": [
+        "deep-learning",
+        "calculus-optimization"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "011"
+      ],
+      "planned": false
+    },
+    "014": {
+      "title": "Architecture families",
+      "categories": [
+        "deep-learning"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "009"
+      ],
+      "planned": false
+    },
+    "015": {
+      "title": "Tokenization",
+      "categories": [
+        "nlp-transformers"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "001"
+      ],
+      "planned": false
+    },
+    "016": {
+      "title": "Embeddings",
+      "categories": [
+        "nlp-transformers"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "015"
+      ],
+      "planned": false
+    },
+    "017": {
+      "title": "RNN → LSTM",
+      "categories": [
+        "nlp-transformers"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "010",
+        "014"
+      ],
+      "planned": false
+    },
+    "018": {
+      "title": "Seq2seq & encoder–decoder",
+      "categories": [
+        "nlp-transformers"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "017"
+      ],
+      "planned": false
+    },
+    "019": {
+      "title": "The RL frame",
+      "categories": [
+        "reinforcement-learning"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "003"
+      ],
+      "planned": false
+    },
+    "020": {
+      "title": "Value functions & the Bellman equation",
+      "categories": [
+        "reinforcement-learning"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "019"
+      ],
+      "planned": false
+    },
+    "021": {
+      "title": "Exploration vs exploitation",
+      "categories": [
+        "reinforcement-learning"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "019"
+      ],
+      "planned": false
+    },
+    "022": {
+      "title": "Two solution families",
+      "categories": [
+        "reinforcement-learning"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "020",
+        "021"
+      ],
+      "planned": false
+    },
+    "023": {
+      "title": "Function approximation",
+      "categories": [
+        "reinforcement-learning"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "022"
+      ],
+      "planned": false
+    },
+    "024": {
+      "title": "DQN",
+      "categories": [
+        "reinforcement-learning"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "023"
+      ],
+      "planned": false
+    },
+    "025": {
+      "title": "Policy gradient at scale",
+      "categories": [
+        "reinforcement-learning"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "022",
+        "023"
+      ],
+      "planned": false
+    },
+    "026": {
+      "title": "Attention",
+      "categories": [
+        "nlp-transformers"
+      ],
+      "minutes": 12,
+      "prereq": [
+        "001",
+        "018"
+      ],
+      "planned": false
+    },
+    "027": {
+      "title": "The Transformer block",
+      "categories": [
+        "nlp-transformers",
+        "deep-learning"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "026",
+        "013"
+      ],
+      "planned": false
+    },
+    "028": {
+      "title": "Pretraining",
+      "categories": [
+        "nlp-transformers"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "027",
+        "011"
+      ],
+      "planned": false
+    },
+    "029": {
+      "title": "Alignment & inference",
+      "categories": [
+        "nlp-transformers"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "028",
+        "022"
+      ],
+      "planned": false
+    },
+    "030": {
+      "title": "Why explainability",
+      "categories": [
+        "explainability"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "007",
+        "011"
+      ],
+      "planned": false
+    },
+    "031": {
+      "title": "Attribution methods",
+      "categories": [
+        "explainability"
+      ],
+      "minutes": 12,
+      "prereq": [
+        "030",
+        "002"
+      ],
+      "planned": false
+    },
+    "032": {
+      "title": "Evaluating explanations",
+      "categories": [
+        "explainability",
+        "evaluation-metrics"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "031"
+      ],
+      "planned": false
+    },
+    "033": {
+      "title": "Federated setting & FedAvg",
+      "categories": [
+        "federated-privacy"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "011"
+      ],
+      "planned": false
+    },
+    "034": {
+      "title": "Non-IID data & convergence",
+      "categories": [
+        "federated-privacy"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "033",
+        "005"
+      ],
+      "planned": false
+    },
+    "035": {
+      "title": "Privacy & threat model",
+      "categories": [
+        "federated-privacy"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "033"
+      ],
+      "planned": false
+    },
+    "036": {
+      "title": "Eigenvalues, eigenvectors & SVD",
+      "categories": [
+        "linear-algebra"
+      ],
+      "minutes": 12,
+      "prereq": [
+        "001"
+      ],
+      "planned": true
+    },
+    "037": {
+      "title": "Norms & distances",
+      "categories": [
+        "linear-algebra"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "001"
+      ],
+      "planned": true
+    },
+    "038": {
+      "title": "Distributions & sampling",
+      "categories": [
+        "probability-statistics"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "003"
+      ],
+      "planned": true
+    },
+    "039": {
+      "title": "Estimation & bias–variance",
+      "categories": [
+        "probability-statistics"
+      ],
+      "minutes": 12,
+      "prereq": [
+        "003",
+        "005"
+      ],
+      "planned": true
+    },
+    "040": {
+      "title": "kNN & the curse of dimensionality",
+      "categories": [
+        "classical-ml"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "004",
+        "037"
+      ],
+      "planned": true
+    },
+    "041": {
+      "title": "SVM & kernels",
+      "categories": [
+        "classical-ml",
+        "calculus-optimization"
+      ],
+      "minutes": 12,
+      "prereq": [
+        "002",
+        "006"
+      ],
+      "planned": true
+    },
+    "042": {
+      "title": "Clustering: k-means & GMM",
+      "categories": [
+        "classical-ml"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "002",
+        "038"
+      ],
+      "planned": true
+    },
+    "043": {
+      "title": "PCA & dimensionality reduction",
+      "categories": [
+        "linear-algebra",
+        "classical-ml"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "036"
+      ],
+      "planned": true
+    },
+    "044": {
+      "title": "Feature engineering, leakage & imbalance",
+      "categories": [
+        "classical-ml"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "004",
+        "005"
+      ],
+      "planned": true
+    },
+    "045": {
+      "title": "Convolutions & CNNs",
+      "categories": [
+        "deep-learning"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "009"
+      ],
+      "planned": true
+    },
+    "046": {
+      "title": "Initialization & normalization",
+      "categories": [
+        "deep-learning"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "013"
+      ],
+      "planned": true
+    },
+    "047": {
+      "title": "Optimizers: SGD → Adam",
+      "categories": [
+        "calculus-optimization",
+        "deep-learning"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "011"
+      ],
+      "planned": true
+    },
+    "048": {
+      "title": "Subword tokenizers (BPE)",
+      "categories": [
+        "nlp-transformers"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "015"
+      ],
+      "planned": true
+    },
+    "049": {
+      "title": "Decoding & sampling",
+      "categories": [
+        "nlp-transformers"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "028"
+      ],
+      "planned": true
+    },
+    "050": {
+      "title": "Multi-head attention & positions",
+      "categories": [
+        "nlp-transformers"
+      ],
+      "minutes": 12,
+      "prereq": [
+        "026"
+      ],
+      "planned": true
+    },
+    "051": {
+      "title": "Evaluating language models",
+      "categories": [
+        "nlp-transformers",
+        "evaluation-metrics"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "028",
+        "032"
+      ],
+      "planned": true
+    },
+    "052": {
+      "title": "RAG & tool use",
+      "categories": [
+        "nlp-transformers",
+        "systems"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "029",
+        "051"
+      ],
+      "planned": true
+    },
+    "053": {
+      "title": "MDPs & dynamic programming",
+      "categories": [
+        "reinforcement-learning"
+      ],
+      "minutes": 12,
+      "prereq": [
+        "020"
+      ],
+      "planned": true
+    },
+    "054": {
+      "title": "Bandits beyond ε-greedy",
+      "categories": [
+        "reinforcement-learning"
+      ],
+      "minutes": 8,
+      "prereq": [
+        "021"
+      ],
+      "planned": true
+    },
+    "055": {
+      "title": "Offline RL & imitation",
+      "categories": [
+        "reinforcement-learning"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "022",
+        "025"
+      ],
+      "planned": true
+    },
+    "056": {
+      "title": "Fairness & bias measurement",
+      "categories": [
+        "evaluation-metrics",
+        "explainability"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "032"
+      ],
+      "planned": true
+    },
+    "057": {
+      "title": "Calibration & uncertainty",
+      "categories": [
+        "evaluation-metrics"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "006",
+        "032"
+      ],
+      "planned": true
+    },
+    "058": {
+      "title": "Serving & latency",
+      "categories": [
+        "systems"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "011",
+        "014"
+      ],
+      "planned": true
+    },
+    "059": {
+      "title": "Quantization & distillation",
+      "categories": [
+        "systems"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "027"
+      ],
+      "planned": true
+    },
+    "060": {
+      "title": "Monitoring, drift & data quality",
+      "categories": [
+        "systems",
+        "evaluation-metrics"
+      ],
+      "minutes": 10,
+      "prereq": [
+        "005",
+        "057"
+      ],
+      "planned": true
+    }
+  }
+}

@@ -4,26 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>004 — Supervised learning</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=9">
+<link rel="stylesheet" href="../assets/lesson.css?v=10">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can write down (X, y, f_θ, L) for any supervised task and say what is being learned.">
 </head>
-<body data-lesson="004">
+<body data-lesson="004" data-book="classical-ml" data-book-number="2">
 <main>
 
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 04 / 35</span>
   <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
 </nav>
 
 <header class="masthead">
-  <p class="kicker">Unit 1 · Machine learning foundations · Topic 4 of 35</p>
+  <p class="kicker">Book 2 · Classical ML · lesson 1 of 9</p>
   <h1>Supervised learning as function fitting</h1>
   <p class="objective">You can write down <code>(X, y, f_θ, L)</code><span class="say" data-sym="θ">(theta)</span> for any supervised task and say what is being learned.</p>
 </header>
+<p class="bookline"><a href="../paths/classical-ml.html">Classical ML</a><span class="chip">Classical ML</span></p>
 
 <h2>Why this matters<span class="h2-topic">— the objective</span></h2>
 <p class="lede">Every model in this course — a spam filter, a translation system, a Q-network — is the same four-part object. Name the four parts and you can read a paper's method section instead of guessing at it. Supervised learning is the pattern behind them all: a bank scores loan applications, a hospital flags scans, a phone predicts the next word. In each case somebody collected examples where the right answer was known, and the work is to find a rule that reproduces those answers and keeps holding on new ones. The vocabulary changes by field — "regression", "classification", "fine-tuning" — while the structure underneath stays put.</p>
@@ -230,6 +232,7 @@ for y in (1, 0):</code></pre>
 <p class="source">Primary source: <a href="https://scikit-learn.org/stable/supervised_learning.html">scikit-learn — Supervised learning</a> (the taxonomy, with runnable examples).</p>
 
 </main>
-  <script src="../assets/course.js?v=13" defer></script>
+  <script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
 </body>
 </html>

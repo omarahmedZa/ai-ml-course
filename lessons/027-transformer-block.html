@@ -4,26 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>027 — The Transformer block</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=9">
+<link rel="stylesheet" href="../assets/lesson.css?v=10">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can name every sub-layer, its purpose, and why residual + LayerNorm are required.">
 </head>
-<body data-lesson="027">
+<body data-lesson="027" data-book="language" data-book-number="4">
 <main>
 
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 27 / 35</span>
   <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
 </nav>
 
 <header class="masthead">
-  <p class="kicker">Unit 7 · Attention and LLMs · Topic 27 of 35</p>
+  <p class="kicker">Book 4 · Language & Transformers · lesson 6 of 13</p>
   <h1>The Transformer block</h1>
   <p class="objective">You can name every sub-layer, its purpose, and why residual + LayerNorm are required.</p>
 </header>
+<p class="bookline"><a href="../paths/language.html">Language & Transformers</a><span class="chip">NLP & Transformers</span><span class="chip">Deep Learning</span></p>
 
 <h2>Why this matters<span class="h2-topic">— the transformer</span></h2>
 <p class="lede">A Transformer block is the repeating unit inside every large language model. A config file names 96 layers, a width of 12,288 and 96 heads; this lesson is the map from those three numbers to the four sub-layers that do the work.</p>
@@ -233,6 +235,7 @@ rng = np.random.default_rng(0)</code></pre>
 <p class="source">Primary source: Vaswani et al., <a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a> (2017), §3.</p>
 
 </main>
-  <script src="../assets/course.js?v=13" defer></script>
+  <script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
 </body>
 </html>

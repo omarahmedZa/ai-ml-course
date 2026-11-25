@@ -4,26 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>019 — The RL frame</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=9">
+<link rel="stylesheet" href="../assets/lesson.css?v=10">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can formalize a task as (S, A, P, R, γ) and compute a return.">
 </head>
-<body data-lesson="019">
+<body data-lesson="019" data-book="rl" data-book-number="5">
 <main>
 
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 19 / 35</span>
   <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
 </nav>
 
 <header class="masthead">
-  <p class="kicker">Unit 5 · Reinforcement learning · Topic 19 of 35</p>
+  <p class="kicker">Book 5 · Reinforcement Learning · lesson 1 of 10</p>
   <h1>The RL frame: states, actions, rewards</h1>
   <p class="objective">You can formalize a task as <code>(S, A, P, R, γ)</code><span class="say" data-sym="γ">(gamma)</span> and compute a return.</p>
 </header>
+<p class="bookline"><a href="../paths/rl.html">Reinforcement Learning</a><span class="chip">Reinforcement Learning</span></p>
 
 <h2>Why this matters<span class="h2-topic">— the RL frame</span></h2>
 <p class="lede">Reinforcement learning trains by reward instead of by a labelled answer key. That is the only option when the right move depends on a long future: a robot arm stacking cups, a scheduler picking the next job, a game engine hunting a winning line. Nobody can label each decision as correct, because correctness only shows up in how the episode ends.</p>
@@ -220,6 +222,7 @@ print(&quot;effective horizon 1/(1-gamma):&quot;, [round(1/(1-g), 1) for g in (0
 <p class="source">Primary source: Sutton &amp; Barto, <a href="http://incompleteideas.net/book/the-book-2nd.html">Reinforcement Learning: An Introduction</a>, ch. 3.</p>
 
 </main>
-  <script src="../assets/course.js?v=13" defer></script>
+  <script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
 </body>
 </html>

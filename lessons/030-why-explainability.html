@@ -4,26 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>030 — Why explainability</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=9">
+<link rel="stylesheet" href="../assets/lesson.css?v=10">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can distinguish intrinsic vs post-hoc and local vs global, and name the accountability use case.">
 </head>
-<body data-lesson="030">
+<body data-lesson="030" data-book="trust" data-book-number="6">
 <main>
 
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 30 / 35</span>
   <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
 </nav>
 
 <header class="masthead">
-  <p class="kicker">Unit 8 · Explainable AI · Topic 30 of 35</p>
+  <p class="kicker">Book 6 · Trust, Privacy & Scale · lesson 1 of 8</p>
   <h1>Why explainability exists</h1>
   <p class="objective">You can distinguish intrinsic vs post-hoc and local vs global, and name the accountability use case.</p>
 </header>
+<p class="bookline"><a href="../paths/trust.html">Trust, Privacy & Scale</a><span class="chip">Explainability</span></p>
 
 <h2>Why this matters<span class="h2-topic">— explainability</span></h2>
 <p class="lede">A model that outputs <code>0.31</code> has not given anyone a reason. Explainability is the practice of producing one: which inputs drove this output, how much each contributed, and what the model would have said without them. You need it whenever a number turns into a decision a human must defend — a loan declined, a scan flagged, a claim denied. It is also the fastest way to debug a model that scores well and behaves absurdly.</p>
@@ -195,6 +197,7 @@ A = np.c_[income, debt, np.ones(n)]</code></pre>
 <p class="source">Primary source: Molnar, <a href="https://christophm.github.io/interpretable-ml-book/">Interpretable Machine Learning</a>, ch. 1–2.</p>
 
 </main>
-  <script src="../assets/course.js?v=13" defer></script>
+  <script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
 </body>
 </html>

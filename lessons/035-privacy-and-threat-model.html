@@ -4,26 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>035 — Privacy and threat model</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=9">
+<link rel="stylesheet" href="../assets/lesson.css?v=10">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can explain DP noise, secure aggregation, and poisoning/backdoor attacks.">
 </head>
-<body data-lesson="035">
+<body data-lesson="035" data-book="trust" data-book-number="6">
 <main>
 
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 35 / 35</span>
   <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
 </nav>
 
 <header class="masthead">
-  <p class="kicker">Unit 9 · Federated learning · Topic 35 of 35</p>
+  <p class="kicker">Book 6 · Trust, Privacy & Scale · lesson 6 of 8</p>
   <h1>Privacy &amp; threat model</h1>
   <p class="objective">You can explain DP noise, secure aggregation, and poisoning/backdoor attacks.</p>
 </header>
+<p class="bookline"><a href="../paths/trust.html">Trust, Privacy & Scale</a><span class="chip">Federated & Privacy</span></p>
 
 <h2>Why this matters<span class="h2-topic">— privacy</span></h2>
 <p class="lede">Every organisation that trains on personal data eventually has to write a sentence a lawyer, an auditor or a regulator will read: "this model was trained without exposing individual records." It is also about three claims you will be asked to defend: that a single update does not reveal its example, that the server cannot read a device's contribution, and that one hostile client cannot rewrite the model.</p>
@@ -204,6 +206,7 @@ print(f&quot;norm {norm:.2f} -&gt; clipped norm {np.linalg.norm(clipped):.2f}&qu
 
 </main>
   <script src="../assets/graph.js?v=4" defer></script>
-  <script src="../assets/course.js?v=13" defer></script>
+  <script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
 </body>
 </html>

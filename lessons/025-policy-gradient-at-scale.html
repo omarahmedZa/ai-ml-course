@@ -4,26 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>025 — Policy gradient at scale</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=9">
+<link rel="stylesheet" href="../assets/lesson.css?v=10">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can trace REINFORCE → baseline → actor–critic → PPO and explain the variance problem.">
 </head>
-<body data-lesson="025">
+<body data-lesson="025" data-book="rl" data-book-number="5">
 <main>
 
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 25 / 35</span>
   <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
 </nav>
 
 <header class="masthead">
-  <p class="kicker">Unit 6 · Deep reinforcement learning · Topic 25 of 35</p>
+  <p class="kicker">Book 5 · Reinforcement Learning · lesson 7 of 10</p>
   <h1>Policy gradient at scale: REINFORCE → PPO</h1>
   <p class="objective">You can trace REINFORCE → baseline → actor–critic → PPO and explain the variance problem.</p>
 </header>
+<p class="bookline"><a href="../paths/rl.html">Reinforcement Learning</a><span class="chip">Reinforcement Learning</span></p>
 
 <h2>Why this matters<span class="h2-topic">— policy gradient</span></h2>
 <p class="lede">PPO is the default algorithm behind robot control, game agents, and the RLHF step that made chat models usable. If you understand three upgrades to REINFORCE, you understand all of it.</p>
@@ -226,6 +228,7 @@ for r in (0.5, 1.0, 1.3):
 <p class="source">Primary source: Schulman et al., <a href="https://arxiv.org/abs/1707.06347">Proximal Policy Optimization Algorithms</a> (2017).</p>
 
 </main>
-  <script src="../assets/course.js?v=13" defer></script>
+  <script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
 </body>
 </html>

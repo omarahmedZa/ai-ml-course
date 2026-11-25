@@ -3,21 +3,52 @@
 (function () {
   "use strict";
 
-  var KEY = "ai35.progress.v1";
-  var store = { lessons: {}, theme: null };
+  var KEY = "ai35.progress.v2";
+  var OLD = "ai35.progress.v1";
 
+  function blank() {
+    return { lessons: {}, labs: {}, problems: {}, streak: { days: [], best: 0 }, theme: null };
+  }
+
+  function migrate(v1) {
+    var out = blank();
+    if (!v1 || typeof v1 !== "object") return out;
+    if (v1.lessons) out.lessons = v1.lessons;
+    if (v1.labs) out.labs = v1.labs;
+    out.theme = v1.theme || null;
+    return out;
+  }
+
+  var store = blank();
   try {
     var raw = localStorage.getItem(KEY);
     if (raw) {
       var parsed = JSON.parse(raw);
       if (parsed && typeof parsed === "object") store = parsed;
+    } else {
+      var v1raw = localStorage.getItem(OLD);
+      if (v1raw) {
+        localStorage.setItem(OLD + ".bak", v1raw);
+        store = migrate(JSON.parse(v1raw));
+        localStorage.setItem(KEY, JSON.stringify(store));
+      }
     }
   } catch (e) { /* private mode / file:// */ }
   if (!store.lessons) store.lessons = {};
+  if (!store.labs) store.labs = {};
+  if (!store.problems) store.problems = {};
+  if (!store.streak) store.streak = { days: [], best: 0 };
 
   function persist() {
     try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {}
   }
+
+  window.Course = {
+    migrate: migrate,
+    get store() { return store; },
+    persist: persist,
+    KEY: KEY
+  };
 
   function lessonState(id) {
     if (!store.lessons[id]) store.lessons[id] = { sections: {}, quiz: {}, ts: 0 };
@@ -704,4 +735,71 @@
   if (page === "index") initIndex();
   else if (page === "lab") initLab();
   else initLesson();
+})();
+
+/* ---------- search overlay ---------- */
+(function () {
+  function initSearch() {
+    var index = window.SEARCH_INDEX || [];
+    document.querySelectorAll("[data-search]").forEach(function (input) {
+      var box = document.createElement("ul");
+      box.className = "search-results";
+      box.hidden = true;
+      input.parentNode.style.position = "relative";
+      input.parentNode.appendChild(box);
+
+      function rank(q) {
+        q = q.trim().toLowerCase();
+        if (!q) return [];
+        var words = q.split(/\s+/), hits = [];
+        index.forEach(function (e) {
+          var t = e.title.toLowerCase(), s = (e.summary || "").toLowerCase(), n = 0;
+          words.forEach(function (w) {
+            if (t.indexOf(w) > -1) n += 3;
+            if (s.indexOf(w) > -1) n += 1;
+            (e.categories || []).forEach(function (c) { if (c.indexOf(w) > -1) n += 1; });
+            (e.symbols || []).forEach(function (x) { if (x.toLowerCase() === w) n += 2; });
+          });
+          if (n) hits.push([n + (e.type === "lesson" ? 1 : 0), e]);
+        });
+        hits.sort(function (a, b) { return b[0] - a[0]; });
+        return hits.slice(0, 8).map(function (h) { return h[1]; });
+      }
+
+      function render(results) {
+        box.innerHTML = "";
+        if (!results.length) { box.hidden = true; return; }
+        results.forEach(function (e) {
+          var li = document.createElement("li");
+          var a = document.createElement("a");
+          a.href = (input.closest("main") && e.url.indexOf("lessons/") === 0 ? e.url : e.url);
+          var base = document.body.getAttribute("data-page") === "index" ? "" : "../";
+          a.href = base + e.url;
+          var small = document.createElement("span");
+          small.textContent = e.type === "lesson" ? e.bookTitle : e.type;
+          a.textContent = e.title;
+          li.appendChild(a);
+          li.appendChild(small);
+          box.appendChild(li);
+        });
+        box.hidden = false;
+      }
+
+      input.addEventListener("input", function () { render(rank(input.value)); });
+      input.addEventListener("focus", function () { if (input.value) render(rank(input.value)); });
+      input.addEventListener("keydown", function (ev) {
+        if (ev.key === "Escape") { box.hidden = true; input.blur(); }
+        if (ev.key === "Enter") {
+          var first = box.querySelector("a");
+          if (first) { ev.preventDefault(); location.href = first.href; }
+        }
+      });
+      document.addEventListener("click", function (ev) {
+        if (!input.parentNode.contains(ev.target)) box.hidden = true;
+      });
+    });
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initSearch);
+  } else { initSearch(); }
 })();

@@ -4,26 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>006 — Linear and logistic regression</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=9">
+<link rel="stylesheet" href="../assets/lesson.css?v=10">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can derive a logistic decision boundary, and say why squared error is the wrong loss for classification.">
 </head>
-<body data-lesson="006">
+<body data-lesson="006" data-book="classical-ml" data-book-number="2">
 <main>
 
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 06 / 35</span>
   <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
 </nav>
 
 <header class="masthead">
-  <p class="kicker">Unit 1 · Machine learning foundations · Topic 6 of 35</p>
+  <p class="kicker">Book 2 · Classical ML · lesson 3 of 9</p>
   <h1>Linear &amp; logistic regression</h1>
   <p class="objective">You can derive a logistic decision boundary, and say why squared error is the wrong loss for classification.</p>
 </header>
+<p class="bookline"><a href="../paths/classical-ml.html">Classical ML</a><span class="chip">Classical ML</span></p>
 
 <h2>Why this matters<span class="h2-topic">— regression</span></h2>
 <p class="lede">These are the baselines every project must beat before deep learning is justified, and logistic regression is literally the last layer of every classifier in Unit 7. Same dot product, one extra function. A linear model predicts a quantity — tomorrow's demand, a house price, a dose. A logistic model predicts a probability — will this customer default, is this scan abnormal — and thresholds it into yes or no. Between them they cover most tabular problems you will meet, and a stack of fifty neural layers still ends in <code>σ(w·x + b)</code><span class="say" data-sym="σ">(sigma)</span>.</p>
@@ -206,6 +208,7 @@ coef, *_ = np.linalg.lstsq(A, y, rcond=None)</code></pre>
 
 </main>
   <script src="../assets/graph.js?v=4" defer></script>
-  <script src="../assets/course.js?v=13" defer></script>
+  <script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
 </body>
 </html>

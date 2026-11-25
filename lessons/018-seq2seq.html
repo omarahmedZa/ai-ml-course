@@ -4,26 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>018 — Seq2seq</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=9">
+<link rel="stylesheet" href="../assets/lesson.css?v=10">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can explain translation as encode-then-decode, and state the alignment problem attention solves.">
 </head>
-<body data-lesson="018">
+<body data-lesson="018" data-book="language" data-book-number="4">
 <main>
 
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 18 / 35</span>
   <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
 </nav>
 
 <header class="masthead">
-  <p class="kicker">Unit 4 · Natural language processing · Topic 18 of 35</p>
+  <p class="kicker">Book 4 · Language & Transformers · lesson 4 of 13</p>
   <h1>Seq2seq &amp; encoder–decoder</h1>
   <p class="objective">You can explain translation as encode-then-decode, and state the alignment problem attention solves.</p>
 </header>
+<p class="bookline"><a href="../paths/language.html">Language & Transformers</a><span class="chip">NLP & Transformers</span></p>
 
 <h2>Why this matters<span class="h2-topic">— seq2seq</span></h2>
 <p class="lede">Encoder–decoder is the shape of every generative system you will use: translation, summarisation, speech-to-text, optical character reading, chat. One half reads, the other half writes, and they meet at a single vector. The decoder in a 2014 translation model and the decoder in a chat model are the same object with different plumbing.</p>
@@ -211,6 +213,7 @@ for n in (4, 16, 64):
 <p class="source">Primary source: Sutskever, Vinyals &amp; Le, <a href="https://arxiv.org/abs/1409.3215">Sequence to Sequence Learning with Neural Networks</a> (2014).</p>
 
 </main>
-  <script src="../assets/course.js?v=13" defer></script>
+  <script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
 </body>
 </html>

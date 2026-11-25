@@ -4,26 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>033 — Federated setting and FedAvg</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=9">
+<link rel="stylesheet" href="../assets/lesson.css?v=10">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="You can describe the round protocol, write the averaging rule, and justify data locality.">
 </head>
-<body data-lesson="033">
+<body data-lesson="033" data-book="trust" data-book-number="6">
 <main>
 
 <nav class="topline">
   <a href="../index.html">← Course map</a>
   <span class="pill">Topic 33 / 35</span>
   <a class="nav-sym" href="../symbols.html">Symbols</a>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
 </nav>
 
 <header class="masthead">
-  <p class="kicker">Unit 9 · Federated learning · Topic 33 of 35</p>
+  <p class="kicker">Book 6 · Trust, Privacy & Scale · lesson 4 of 8</p>
   <h1>Federated learning &amp; FedAvg</h1>
   <p class="objective">You can describe the round protocol, write the averaging rule, and justify data locality.</p>
 </header>
+<p class="bookline"><a href="../paths/trust.html">Trust, Privacy & Scale</a><span class="chip">Federated & Privacy</span></p>
 
 <h2>Why this matters<span class="h2-topic">— FedAvg</span></h2>
 <p class="lede">Federated learning is how you train when the examples cannot be collected in one place: a phone keyboard that improves without uploading your messages, a hospital network that shares a tumour model but never the scans, a bank consortium that shares a fraud detector but never transactions. The data stays with its owner; only the model's numbers travel.</p>
@@ -236,6 +238,7 @@ print(f&quot;weighted FedAvg: {weighted:.3f}  (equal weighting: {equal:.3f})&quo
 </main>
   <script src="../assets/graph.js?v=4" defer></script>
   <script src="../assets/anim.js?v=3" defer></script>
-  <script src="../assets/course.js?v=13" defer></script>
+  <script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=14" defer></script>
 </body>
 </html>
