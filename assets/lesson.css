@@ -1248,3 +1248,68 @@ body.reading .topline { opacity: .18; pointer-events: none; transition: opacity 
 .book-meta span { white-space: nowrap; font-size: .56rem; }
 .book-meta span { display: block !important; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .book-meta { display: block; width: 100%; }
+
+/* ================= phone layout (rebuild, not patch) ================= */
+@media (max-width: 720px) {
+  /* bar: two compact rows, no rarely-used controls */
+  .topline {
+    flex-wrap: wrap; gap: .4rem; padding: .5rem .65rem;
+    border-radius: 16px; top: .35rem;
+  }
+  .topline [data-export], .topline [data-reset], .topline .pill { display: none; }
+  .topline .search-input { order: 9; width: 100%; margin: .15rem 0 0; }
+  body { padding-top: 8.4rem; }
+  .library-head { padding-top: .2rem; }
+  .library-head .sub { font-size: .92rem; }
+
+  /* covers: fixed type scale, no clipping, no ellipsis */
+  .shelf-row { gap: 1.1rem .8rem; padding-bottom: 1rem; }
+  .book-wrap { padding-bottom: 2.7rem; }
+  .cover-frame { inset: 8px; padding: .45rem .3rem; }
+  .cover-steps { font-size: .4rem; letter-spacing: .1em; }
+  .cover-motif { width: 62%; }
+  .cover-title {
+    font-size: .7rem; line-height: 1.2; padding: 0 .1rem;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden; text-wrap: balance;
+  }
+  .cover-imprint { font-size: .42rem; letter-spacing: .16em; margin-top: .35rem; padding-top: .22rem; }
+  .book-cover::after { height: 10px; bottom: -5px; }
+  .book-meta {
+    font-size: .55rem; line-height: 1.3; margin-top: .8rem;
+    white-space: normal;
+  }
+  .book-meta span { overflow: visible; text-overflow: clip; white-space: nowrap; }
+
+  /* reader: a scrollable sheet, never a clipped page */
+  body.reading { overflow: hidden; }
+  .reader { padding: 4.3rem .4rem .5rem; align-items: stretch; }
+  .book-spread {
+    display: block; width: 100%; max-height: calc(100dvh - 5.6rem);
+    overflow-y: auto; overscroll-behavior: contain; border-radius: 8px;
+  }
+  .page { min-height: 0; padding: 1rem .9rem 1.4rem; }
+  .page-left { border-right: 0; border-bottom: 1px solid #d5cab2; box-shadow: none; }
+  .page-right { box-shadow: none; }
+  .plate-frame { padding: 1.6rem 1rem; width: min(86%, 320px); }
+  .part-name { font-size: 1.3rem; }
+  .reader-nav {
+    position: sticky; bottom: .2rem; margin: .55rem auto 0;
+    background: rgba(20,16,11,.72); padding: .3rem .7rem; border-radius: 999px;
+    backdrop-filter: blur(6px);
+  }
+
+  /* lessons: keep meas, kill side gaps */
+  body { padding-left: .85rem; padding-right: .85rem; }
+  .masthead h1 { font-size: clamp(1.45rem, 7vw, 1.9rem); }
+  .fig, .playground { border-radius: 10px; }
+}
+@media (max-width: 720px) {
+  .shelf-row.last { display: grid; }
+  .shelf-row.last .book-wrap { width: auto; }
+  .cover-title { -webkit-line-clamp: 4; font-size: .68rem; }
+}
+@media (max-width: 720px) {
+  .shelf-row.last { display: grid !important; grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .shelf-row.last .book-wrap { width: auto !important; }
+}
