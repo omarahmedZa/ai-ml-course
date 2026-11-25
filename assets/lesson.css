@@ -8,8 +8,8 @@
   --ink-soft: #5a626d;
   --ink-faint: #6b7480;
   --rule: #e2e6ea;
-  --paper: #fdfcfa;
-  --card: #ffffff;
+  --paper: #fbf7ee;
+  --card: #fffdf8;
   --accent: #a3231f;
   --accent-2: #1f5f7a;
   --accent-soft: #f7ece9;
@@ -756,3 +756,175 @@ img, svg { max-width: 100%; }
 }
 .search-page a { font-size: .95rem; }
 .search-page span { font-size: .74rem; color: var(--ink-faint); }
+
+/* ================= library theme ================= */
+h1, h2, .masthead h1, .library-head h1 {
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  letter-spacing: -.01em;
+}
+
+body.library {
+  --paper: #14110d;
+  --card: #1c1813;
+  --ink: #f0e8d9;
+  --ink-soft: #bbae99;
+  --ink-faint: #9d907c;
+  --rule: #352c22;
+  --accent: #c9a227;
+  --accent-2: #7fb6a8;
+  --accent-soft: #2a2015;
+  --code-bg: #1f1a14;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(201,162,39,.10), transparent 60%),
+    linear-gradient(#17130e, #0f0c09 70%);
+  color: var(--ink);
+}
+html[data-theme="light"] body.library {
+  --paper: #f7f1e4; --card: #fbf6ea; --ink: #241d15; --ink-soft: #6b5c46;
+  --ink-faint: #7d6d55; --rule: #e0d3ba; --accent: #8a5a1f; --code-bg: #efe6d3;
+  background: linear-gradient(#faf5e9, #f1e9d8);
+}
+body.library .topline { border-bottom: 1px solid var(--rule); padding-bottom: .6rem; }
+
+.library-head { padding: 2.2rem 0 1rem; }
+.library-head h1 { font-size: clamp(2rem, 5vw, 3rem); margin: .3rem 0 .6rem; }
+.library-head .sub { color: var(--ink-soft); max-width: 40rem; }
+.shelf-note { font-size: .82rem; color: var(--ink-faint); }
+.shelf-note a { color: var(--accent); }
+
+.shelves { display: grid; gap: 2.8rem; margin: 2.2rem 0 2.4rem; }
+.shelf-row {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1.1rem; position: relative; padding-bottom: 2.4rem; align-items: end;
+}
+.shelf-row.last { display: flex; justify-content: center; }
+.shelf-row.last .book-card { width: calc((100% - 4 * 1.1rem) / 5); }
+.rail {
+  position: absolute; left: -1.5%; right: -1.5%; bottom: 1.9rem; height: 15px;
+  background: linear-gradient(#43331f, #241a10 60%, #1a120b);
+  border-radius: 2px; box-shadow: 0 12px 20px rgba(0,0,0,.55);
+}
+.shelf-row:last-of-type { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+.book-card {
+  background: none; border: 0; padding: 0; cursor: pointer; text-align: center;
+  perspective: 1000px; position: relative; z-index: 1;
+}
+.book-cover {
+  position: relative; display: block; aspect-ratio: 3 / 4.4;
+  background:
+    radial-gradient(120% 90% at 30% 8%, rgba(255,255,255,.12), transparent 55%),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.12) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 1px, transparent 1px 4px),
+    var(--cloth);
+  border-left: 7px solid rgba(0,0,0,.28);
+  border-radius: 3px 6px 6px 3px;
+  box-shadow: inset -10px 0 16px rgba(0,0,0,.35), 0 16px 24px rgba(0,0,0,.5);
+  transform: rotateY(-7deg);
+  transition: transform .28s ease, box-shadow .28s ease;
+}
+.book-card:hover .book-cover, .book-card:focus-visible .book-cover {
+  transform: rotateY(0) translateY(-8px); box-shadow: inset -6px 0 12px rgba(0,0,0,.3), 0 24px 34px rgba(0,0,0,.6);
+}
+.book-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+.cover-frame {
+  position: absolute; inset: 11px; border: 1px solid var(--foil);
+  opacity: .95; display: flex; flex-direction: column; align-items: center;
+  padding: .75rem .55rem; color: var(--foil);
+}
+.cover-steps { font: .5rem/1 ui-monospace, monospace; letter-spacing: .18em; text-transform: uppercase; opacity: .85; }
+.cover-motif { width: 72%; margin: auto 0; color: var(--foil); opacity: .95; }
+.cover-title {
+  font-family: "Iowan Old Style", Georgia, serif; font-size: clamp(.72rem, 1.15vw, .98rem);
+  line-height: 1.25; text-align: center; margin-top: auto; text-wrap: balance;
+}
+.cover-imprint {
+  margin-top: .55rem; padding-top: .4rem; width: 72%; text-align: center;
+  font: .5rem/1 ui-monospace, monospace; letter-spacing: .22em; border-top: 1px solid var(--foil);
+  opacity: .8;
+}
+.cover-spine { position: absolute; left: -7px; top: 0; bottom: 0; width: 7px; background: linear-gradient(90deg, rgba(0,0,0,.55), rgba(255,255,255,.14)); }
+.cover-pages {
+  position: absolute; right: -4px; top: 4px; bottom: 4px; width: 4px;
+  background: repeating-linear-gradient(180deg, #ece4d2 0 2px, #cfc4ab 2px 3px);
+  border-radius: 0 2px 2px 0;
+}
+.book-meta {
+  display: block; margin-top: .5rem; font-size: .64rem; color: var(--ink-faint);
+  text-decoration: none; white-space: nowrap;
+}
+.book-meta:hover { color: var(--accent); }
+.shelf-foot { text-align: center; color: var(--ink-faint); font-size: .82rem; margin: 1rem 0 3rem; }
+
+/* reader */
+.reader[hidden] { display: none; }
+.reader { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 1rem; }
+.reader-backdrop { position: absolute; inset: 0; background: rgba(8,6,4,.74); backdrop-filter: blur(7px); }
+.book-spread {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr;
+  width: min(940px, 96vw); max-height: 84vh; overflow: auto;
+  background: #efe8d8; color: #241d15; border-radius: 3px;
+  box-shadow: 0 40px 90px rgba(0,0,0,.65);
+}
+.page {
+  background: linear-gradient(#f5f0e4, #ebe4d3); padding: 2.1rem 2.2rem;
+  font-family: "Iowan Old Style", Georgia, serif; min-height: 520px; position: relative;
+}
+.page-left { border-right: 1px solid #d5cab2; box-shadow: inset -18px 0 24px -22px rgba(0,0,0,.5); }
+.page-right { box-shadow: inset 18px 0 24px -22px rgba(0,0,0,.5); }
+.page h3 { font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; color: #7a6a4e; margin: 1.2rem 0 .4rem; font-family: ui-monospace, monospace; }
+.page-kicker { font: .62rem/1 ui-monospace, monospace; letter-spacing: .2em; text-transform: uppercase; color: #8a7a5c; margin: 0 0 1rem; }
+.page-kicker.gap { margin-top: 1.6rem; }
+.serif-body { font-size: .93rem; line-height: 1.55; color: #3a3226; margin: .2rem 0 .8rem; }
+.page-foot { margin-top: 2rem; font-size: .72rem; color: #8a7a5c; }
+
+.plate { display: grid; place-items: center; }
+.plate-frame { border: 1px solid #c9bda2; outline: 1px solid #e2d8c2; outline-offset: 4px; padding: 2.2rem 1.6rem; text-align: center; width: min(78%, 300px); }
+.plate-kicker { font: .58rem/1 ui-monospace, monospace; letter-spacing: .24em; text-transform: uppercase; color: #8a7a5c; margin: 0 0 .9rem; }
+.plate-title { font-size: 1.05rem; line-height: 1.35; margin: 0 0 .9rem; }
+.plate-rule { display: block; width: 40px; height: 1px; background: #b8a986; margin: 0 auto 1rem; }
+.plate-meta { font: .66rem/1.5 ui-monospace, monospace; color: #7a6a4e; margin: 0 0 .8rem; }
+.plate-imprint { font: .56rem/1 ui-monospace, monospace; letter-spacing: .28em; color: #9a8a6a; margin: 0; }
+
+.conv { margin: 0; }
+.conv dt { font-size: .82rem; font-weight: 700; color: #2f281d; display: flex; justify-content: space-between; gap: 1rem; }
+.conv dt .conv-n { font: .72rem ui-monospace, monospace; color: #8a7a5c; font-weight: 400; }
+.conv dd { margin: .1rem 0 .8rem; font-size: .78rem; line-height: 1.4; color: #5a4f3c; }
+
+.toc { list-style: none; margin: 0; padding: 0; }
+.toc-row { display: grid; grid-template-columns: 1.6rem 1fr auto auto; gap: .4rem; align-items: baseline; padding: .28rem 0; border-bottom: 1px solid #e4dac6; }
+.toc-n { font: .66rem ui-monospace, monospace; color: #8a7a5c; }
+.toc-title { font-size: .84rem; color: #2b2418; text-decoration: none; }
+.toc-row.planned .toc-title { color: #9b8e78; }
+.toc-mark { width: .45rem; height: .45rem; border-radius: 50%; background: #d9cfb8; }
+.toc-mark.part { background: #b08d3f; }
+.toc-mark.done { background: #2f6b4f; }
+.toc-here { font: .54rem/1 ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; color: #a3231f; }
+.toc-wave { font: .52rem/1 ui-monospace, monospace; letter-spacing: .1em; color: #9b8e78; }
+.folio { position: absolute; bottom: .7rem; right: 1rem; font: .62rem ui-monospace, monospace; color: #9a8a6a; }
+.page-left .folio { right: auto; left: 1rem; }
+.page.blank { display: flex; flex-direction: column; justify-content: center; color: #5a4f3c; }
+
+.reader-nav {
+  position: relative; display: flex; align-items: center; gap: 1rem; margin-top: 1rem;
+  color: #efe6d2; font: .74rem ui-monospace, monospace;
+}
+.reader-nav button {
+  width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 1px solid rgba(239,230,210,.35);
+  background: rgba(20,16,11,.6); color: #efe6d2; font-size: 1.1rem; cursor: pointer;
+}
+.reader-nav button:disabled { opacity: .3; cursor: default; }
+body.reading { overflow: hidden; }
+
+@media (max-width: 900px) {
+  .shelf-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .shelf-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
+  .shelf-row.last { display: grid; }
+  .shelf-row.last .book-card { width: auto; }
+  .book-spread { grid-template-columns: 1fr; max-height: 88vh; }
+  .page { min-height: 0; padding: 1.3rem 1.1rem; }
+  .page-left { border-right: 0; border-bottom: 1px solid #d5cab2; }
+  .reader-nav { margin-top: .6rem; }
+}

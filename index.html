@@ -3,151 +3,142 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI/ML, in seven books</title>
-<link rel="stylesheet" href="assets/lesson.css?v=11">
+<title>AI/ML — the library</title>
+<link rel="stylesheet" href="assets/lesson.css?v=12">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta name="description" content="Seven books, 60 lessons, 60 graded problems. Read a lesson, solve its problem, keep the score.">
+<meta name="description" content="Seven books, 60 lessons, 60 graded problems. Take one down, read it, solve its problems.">
 </head>
-<body data-page="index">
+<body data-page="index" class="library">
 <main>
 
 <nav class="topline">
-  <a href="./">Course map</a>
-  <a href="paths/index.html">Books</a>
-  <span class="chip">Problems · wave 0B</span>
-  <a class="nav-sym" href="symbols.html">Symbols</a>
+  <a href="./">Library</a>
+  <a href="paths/index.html">Contents</a>
   <a href="search.html">Search</a>
-  <span class="grow"></span>
   <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
-  <span class="pill hide-sm">35 lessons</span>
+  <a class="nav-sym" href="symbols.html">Symbols</a>
+  <span class="grow"></span>
   <button type="button" data-theme-toggle>◐ auto</button>
   <button type="button" data-export>Export record</button>
   <button type="button" data-reset>Reset</button>
 </nav>
 
-<header class="hero">
-  <div>
-    <p class="kicker">7 books · 35 lessons live · 25 planned · 60 problems</p>
-    <h1>AI/ML, in the order it actually makes sense</h1>
-    <p class="sub">Read a lesson, solve its problem, keep the score. <strong data-streak>0-day streak</strong> · <strong data-count="problems">0 / 60</strong> problems solved.</p>
-    <a class="continue" data-continue href="lessons/001-vectors-matrices-dot-product.html">Start with Book 1 →</a>
-  </div>
-  <div class="ring" style="--p:0">
-    <div class="inner">
-      <span class="pct">0%</span>
-      <span class="cap">complete</span>
-    </div>
-  </div>
+<header class="library-head">
+  <p class="kicker">The course, shelved · 35 of 60 lessons written</p>
+  <h1>Take one down.</h1>
+  <p class="sub">Seven books. Beginner through advanced is inside each one. <strong data-streak>0-day streak</strong> · <strong data-count="problems">0 / 60</strong> problems solved.</p>
+  <p class="shelf-note">Progress is stored in this browser. <a data-continue href="lessons/001-vectors-matrices-dot-product.html">Continue →</a></p>
 </header>
 
-<a class="tour-banner" href="tour.html">
-  <span class="k">New here?</span>
-  <span class="body"><strong>Take the 2-minute tour</strong> — what a lesson contains, what the figures do, how labs, code and scoring work.</span>
-  <span class="go">Open →</span>
-</a>
-
-<h2 class="shelf-title">The shelf<span class="h2-topic">— pick a book</span></h2>
-<section class="shelf">
-  <article class="book-card" data-book="foundations">
-    <a class="book-cover" href="paths/foundations.html" aria-label="Open Foundations">
-      <span class="book-num">01</span>
-      <span class="book-title">Foundations</span>
-      <span class="book-chips"><span class="chip">Linear Algebra</span><span class="chip">Calculus & Optimization</span><span class="chip">Probability & Statistics</span></span>
-    </a>
-    <p class="book-promise">The maths everything else assumes, rebuilt from arithmetic.</p>
-    <div class="book-meta">
-      <span><strong data-book-live="foundations">3</strong> / 7 lessons</span>
-      <span data-book-score="foundations">0%</span>
-    </div>
-    <span class="bar"><span data-book-progress="foundations"></span></span>
-    <a class="book-start" href="paths/foundations.html">Open book →</a>
-  </article>
-  <article class="book-card" data-book="classical-ml">
-    <a class="book-cover" href="paths/classical-ml.html" aria-label="Open Classical ML">
-      <span class="book-num">02</span>
-      <span class="book-title">Classical ML</span>
-      <span class="book-chips"><span class="chip">Classical ML</span><span class="chip">Evaluation & Metrics</span><span class="chip">Calculus & Optimization</span><span class="chip">Linear Algebra</span></span>
-    </a>
-    <p class="book-promise">Models that fit a table before anything has a GPU.</p>
-    <div class="book-meta">
-      <span><strong data-book-live="classical-ml">4</strong> / 9 lessons</span>
-      <span data-book-score="classical-ml">0%</span>
-    </div>
-    <span class="bar"><span data-book-progress="classical-ml"></span></span>
-    <a class="book-start" href="paths/classical-ml.html">Open book →</a>
-  </article>
-  <article class="book-card" data-book="neural-networks">
-    <a class="book-cover" href="paths/neural-networks.html" aria-label="Open Neural Networks">
-      <span class="book-num">03</span>
-      <span class="book-title">Neural Networks</span>
-      <span class="book-chips"><span class="chip">Deep Learning</span><span class="chip">Calculus & Optimization</span></span>
-    </a>
-    <p class="book-promise">One mechanism, built in order: neuron, backward pass, training.</p>
-    <div class="book-meta">
-      <span><strong data-book-live="neural-networks">7</strong> / 10 lessons</span>
-      <span data-book-score="neural-networks">0%</span>
-    </div>
-    <span class="bar"><span data-book-progress="neural-networks"></span></span>
-    <a class="book-start" href="paths/neural-networks.html">Open book →</a>
-  </article>
-  <article class="book-card" data-book="language">
-    <a class="book-cover" href="paths/language.html" aria-label="Open Language & Transformers">
-      <span class="book-num">04</span>
-      <span class="book-title">Language & Transformers</span>
-      <span class="book-chips"><span class="chip">NLP & Transformers</span><span class="chip">Deep Learning</span><span class="chip">Evaluation & Metrics</span><span class="chip">Systems</span></span>
-    </a>
-    <p class="book-promise">Text to tokens to attention to a model you can talk to.</p>
-    <div class="book-meta">
-      <span><strong data-book-live="language">8</strong> / 13 lessons</span>
-      <span data-book-score="language">0%</span>
-    </div>
-    <span class="bar"><span data-book-progress="language"></span></span>
-    <a class="book-start" href="paths/language.html">Open book →</a>
-  </article>
-  <article class="book-card" data-book="rl">
-    <a class="book-cover" href="paths/rl.html" aria-label="Open Reinforcement Learning">
-      <span class="book-num">05</span>
-      <span class="book-title">Reinforcement Learning</span>
-      <span class="book-chips"><span class="chip">Reinforcement Learning</span></span>
-    </a>
-    <p class="book-promise">Decisions with consequences, from bandits to PPO.</p>
-    <div class="book-meta">
-      <span><strong data-book-live="rl">7</strong> / 10 lessons</span>
-      <span data-book-score="rl">0%</span>
-    </div>
-    <span class="bar"><span data-book-progress="rl"></span></span>
-    <a class="book-start" href="paths/rl.html">Open book →</a>
-  </article>
-  <article class="book-card" data-book="trust">
-    <a class="book-cover" href="paths/trust.html" aria-label="Open Trust, Privacy & Scale">
-      <span class="book-num">06</span>
-      <span class="book-title">Trust, Privacy & Scale</span>
-      <span class="book-chips"><span class="chip">Explainability</span><span class="chip">Evaluation & Metrics</span><span class="chip">Federated & Privacy</span></span>
-    </a>
-    <p class="book-promise">Explain it, attack it, federate it, keep it honest.</p>
-    <div class="book-meta">
-      <span><strong data-book-live="trust">6</strong> / 8 lessons</span>
-      <span data-book-score="trust">0%</span>
-    </div>
-    <span class="bar"><span data-book-progress="trust"></span></span>
-    <a class="book-start" href="paths/trust.html">Open book →</a>
-  </article>
-  <article class="book-card" data-book="systems">
-    <a class="book-cover" href="paths/systems.html" aria-label="Open Systems">
-      <span class="book-num">07</span>
-      <span class="book-title">Systems</span>
-      <span class="book-chips"><span class="chip">Systems</span><span class="chip">Evaluation & Metrics</span></span>
-    </a>
-    <p class="book-promise">Serving, compressing and watching a model after it ships.</p>
-    <div class="book-meta">
-      <span><strong data-book-live="systems">0</strong> / 3 lessons</span>
-      <span data-book-score="systems">0%</span>
-    </div>
-    <span class="bar"><span data-book-progress="systems"></span></span>
-    <a class="book-start" href="paths/systems.html">Open book →</a>
-  </article>
+<section class="shelves" aria-label="Books">
+<div class="shelf-row">
+      <button class="book-card" type="button" data-open="0"
+              style="--cloth:#2f6b4f;--foil:#e6dcb8" aria-label="Open Foundations">
+        <span class="book-cover">
+          <span class="cover-frame">
+            <span class="cover-steps">18 steps</span>
+            <svg class="cover-motif" viewBox="0 0 88 64" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.3" opacity=".8"><path d="M6 34 L18 22 L30 30 L42 16 L54 26 L66 18 L78 28"/><circle cx="6" cy="34" r="2.4" fill="currentColor"/><circle cx="30" cy="30" r="2.4" fill="currentColor"/><circle cx="54" cy="26" r="2.4" fill="currentColor"/><circle cx="78" cy="28" r="2.4" fill="currentColor"/></g></svg>
+            <span class="cover-title">Foundations</span>
+            <span class="cover-imprint">AI·ML</span>
+          </span>
+          <span class="cover-spine"></span>
+          <span class="cover-pages"></span>
+        </span>
+        <a class="book-meta" href="paths/foundations.html" data-contents>3/7 · 4 labs</a>
+      </button>
+      <button class="book-card" type="button" data-open="1"
+              style="--cloth:#4b3b7a;--foil:#ded4f0" aria-label="Open Classical ML">
+        <span class="book-cover">
+          <span class="cover-frame">
+            <span class="cover-steps">30 steps</span>
+            <svg class="cover-motif" viewBox="0 0 88 64" aria-hidden="true"><g stroke="currentColor" stroke-width="1" opacity=".35"><line x1="8" y1="12" x2="80" y2="12"/><line x1="14" y1="8" x2="14" y2="58"/><line x1="8" y1="26" x2="80" y2="26"/><line x1="31" y1="8" x2="31" y2="58"/><line x1="8" y1="40" x2="80" y2="40"/><line x1="48" y1="8" x2="48" y2="58"/><line x1="8" y1="54" x2="80" y2="54"/><line x1="65" y1="8" x2="65" y2="58"/></g><g fill="none" stroke="currentColor" stroke-width="1.3" opacity=".8"><path d="M10 50 L30 40 L46 42 L66 24"/><circle cx="66" cy="24" r="2.6" fill="currentColor"/></g></svg>
+            <span class="cover-title">Classical ML</span>
+            <span class="cover-imprint">AI·ML</span>
+          </span>
+          <span class="cover-spine"></span>
+          <span class="cover-pages"></span>
+        </span>
+        <a class="book-meta" href="paths/classical-ml.html" data-contents>4/9 · 12 labs</a>
+      </button>
+      <button class="book-card" type="button" data-open="2"
+              style="--cloth:#6b2f52;--foil:#f0d6e2" aria-label="Open Neural Networks">
+        <span class="book-cover">
+          <span class="cover-frame">
+            <span class="cover-steps">27 steps</span>
+            <svg class="cover-motif" viewBox="0 0 88 64" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.3" opacity=".8"><circle cx="16" cy="16" r="3"/><circle cx="16" cy="32" r="3"/><circle cx="16" cy="48" r="3"/><circle cx="44" cy="16" r="3"/><circle cx="44" cy="32" r="3"/><circle cx="44" cy="48" r="3"/><circle cx="72" cy="32" r="3"/><line x1="19" y1="16" x2="41" y2="16" opacity=".35"/><line x1="19" y1="16" x2="41" y2="32" opacity=".35"/><line x1="19" y1="16" x2="41" y2="48" opacity=".35"/><line x1="47" y1="16" x2="69" y2="32" opacity=".5"/><line x1="19" y1="32" x2="41" y2="16" opacity=".35"/><line x1="19" y1="32" x2="41" y2="32" opacity=".35"/><line x1="19" y1="32" x2="41" y2="48" opacity=".35"/><line x1="47" y1="32" x2="69" y2="32" opacity=".5"/><line x1="19" y1="48" x2="41" y2="16" opacity=".35"/><line x1="19" y1="48" x2="41" y2="32" opacity=".35"/><line x1="19" y1="48" x2="41" y2="48" opacity=".35"/><line x1="47" y1="48" x2="69" y2="32" opacity=".5"/></g></svg>
+            <span class="cover-title">Neural Networks</span>
+            <span class="cover-imprint">AI·ML</span>
+          </span>
+          <span class="cover-spine"></span>
+          <span class="cover-pages"></span>
+        </span>
+        <a class="book-meta" href="paths/neural-networks.html" data-contents>7/10 · 7 labs</a>
+      </button>
+      <button class="book-card" type="button" data-open="3"
+              style="--cloth:#1f5f6b;--foil:#cfe8ea" aria-label="Open Language & Transformers">
+        <span class="book-cover">
+          <span class="cover-frame">
+            <span class="cover-steps">34 steps</span>
+            <svg class="cover-motif" viewBox="0 0 88 64" aria-hidden="true"><g stroke="currentColor" fill="none" opacity=".7"><path stroke-width="1.0" d="M6 {y} q 10 -6 18 0 t 18 0 t 18 0 t 18 0" transform="translate(0 6)"/><path stroke-width="1.2" d="M6 {y} q 10 -6 18 0 t 18 0 t 18 0 t 18 0" transform="translate(0 17)"/><path stroke-width="1.4" d="M6 {y} q 10 -6 18 0 t 18 0 t 18 0 t 18 0" transform="translate(0 28)"/><path stroke-width="1.6" d="M6 {y} q 10 -6 18 0 t 18 0 t 18 0 t 18 0" transform="translate(0 39)"/><path stroke-width="1.8" d="M6 {y} q 10 -6 18 0 t 18 0 t 18 0 t 18 0" transform="translate(0 50)"/></g></svg>
+            <span class="cover-title">Language & Transformers</span>
+            <span class="cover-imprint">AI·ML</span>
+          </span>
+          <span class="cover-spine"></span>
+          <span class="cover-pages"></span>
+        </span>
+        <a class="book-meta" href="paths/language.html" data-contents>8/13 · 8 labs</a>
+      </button>
+      <button class="book-card" type="button" data-open="4"
+              style="--cloth:#4a5c2f;--foil:#e2e6c4" aria-label="Open Reinforcement Learning">
+        <span class="book-cover">
+          <span class="cover-frame">
+            <span class="cover-steps">28 steps</span>
+            <svg class="cover-motif" viewBox="0 0 88 64" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.3" opacity=".8"><ellipse cx="44" cy="32" rx="32" ry="15" transform="rotate(-18 44 32)"/><ellipse cx="44" cy="32" rx="20" ry="9" transform="rotate(-18 44 32)" opacity=".6"/><circle cx="44" cy="32" r="2.6" fill="currentColor"/><circle cx="69" cy="22" r="3.2" fill="currentColor"/></g></svg>
+            <span class="cover-title">Reinforcement Learning</span>
+            <span class="cover-imprint">AI·ML</span>
+          </span>
+          <span class="cover-spine"></span>
+          <span class="cover-pages"></span>
+        </span>
+        <a class="book-meta" href="paths/rl.html" data-contents>7/10 · 8 labs</a>
+      </button>
+  <span class="rail" aria-hidden="true"></span>
+</div>
+<div class="shelf-row last">
+      <button class="book-card" type="button" data-open="5"
+              style="--cloth:#3b4a63;--foil:#d7e0ee" aria-label="Open Trust, Privacy & Scale">
+        <span class="book-cover">
+          <span class="cover-frame">
+            <span class="cover-steps">19 steps</span>
+            <svg class="cover-motif" viewBox="0 0 88 64" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.3" opacity=".8"><circle cx="44" cy="32" r="8"/><circle cx="44" cy="32" r="18" opacity=".6"/><circle cx="44" cy="32" r="28" opacity=".35"/><path d="M36 32 l6 7 l10 -14"/></g></svg>
+            <span class="cover-title">Trust, Privacy & Scale</span>
+            <span class="cover-imprint">AI·ML</span>
+          </span>
+          <span class="cover-spine"></span>
+          <span class="cover-pages"></span>
+        </span>
+        <a class="book-meta" href="paths/trust.html" data-contents>6/8 · 3 labs</a>
+      </button>
+      <button class="book-card" type="button" data-open="6"
+              style="--cloth:#6b4a2f;--foil:#ebdcc6" aria-label="Open Systems">
+        <span class="book-cover">
+          <span class="cover-frame">
+            <span class="cover-steps">6 steps</span>
+            <svg class="cover-motif" viewBox="0 0 88 64" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.3" opacity=".8"><rect x="12" y="30" width="12" height="20"/><rect x="28" y="22" width="12" height="28"/><rect x="44" y="14" width="12" height="36"/><rect x="60" y="26" width="12" height="24"/></g></svg>
+            <span class="cover-title">Systems</span>
+            <span class="cover-imprint">AI·ML</span>
+          </span>
+          <span class="cover-spine"></span>
+          <span class="cover-pages"></span>
+        </span>
+        <a class="book-meta" href="paths/systems.html" data-contents>0/3 · 0 labs</a>
+      </button>
+  <span class="rail" aria-hidden="true"></span>
+</div>
 </section>
+
+<p class="shelf-foot">Pick a cover. Every book opens to its ex-libris plate, preface, and contents.</p>
 
 <section class="unit" id="labs-list">
   <div class="unit-head"><h2>Equation labs</h2>
@@ -159,12 +150,22 @@
 <section class="unit"><div class="unit-head"><h2>Unit artefacts</h2><span class="meta">reference, not lessons</span></div><div class="table-wrap"><table><tr><th>Unit</th><th>Files</th></tr><tr><td class="num">Unit 0</td><td><a href="output/cheatsheet-unit-0.pdf">cheat sheet</a> · <a href="decks/unit-0.pptx">deck</a></td></tr><tr><td class="num">Unit 1</td><td><a href="output/cheatsheet-unit-1.pdf">cheat sheet</a> · <a href="decks/unit-1.pptx">deck</a></td></tr><tr><td class="num">Unit 2</td><td><a href="output/cheatsheet-unit-2.pdf">cheat sheet</a> · <a href="decks/unit-2.pptx">deck</a></td></tr><tr><td class="num">Unit 3</td><td><a href="output/cheatsheet-unit-3.pdf">cheat sheet</a> · <a href="decks/unit-3.pptx">deck</a></td></tr><tr><td class="num">Unit 4</td><td><a href="output/cheatsheet-unit-4.pdf">cheat sheet</a> · <a href="decks/unit-4.pptx">deck</a></td></tr><tr><td class="num">Unit 5</td><td><a href="output/cheatsheet-unit-5.pdf">cheat sheet</a> · <a href="decks/unit-5.pptx">deck</a></td></tr><tr><td class="num">Unit 6</td><td><a href="output/cheatsheet-unit-6.pdf">cheat sheet</a> · <a href="decks/unit-6.pptx">deck</a></td></tr><tr><td class="num">Unit 7</td><td><a href="output/cheatsheet-unit-7.pdf">cheat sheet</a> · <a href="decks/unit-7.pptx">deck</a></td></tr><tr><td class="num">Unit 8</td><td><a href="output/cheatsheet-unit-8.pdf">cheat sheet</a> · <a href="decks/unit-8.pptx">deck</a></td></tr><tr><td class="num">Unit 9</td><td><a href="output/cheatsheet-unit-9.pdf">cheat sheet</a> · <a href="decks/unit-9.pptx">deck</a></td></tr></table></div></section>
 
 <div class="next">
-  <p><strong>How to actually use this.</strong> Read a lesson with the retrieval answers closed, score each section honestly, then run the problem for that lesson locally and submit the token. Anything below 70% goes on the revisit list in your exported record.</p>
-  <p class="meta">Progress is stored in this browser only. Export the record to move it between devices.</p>
+  <p><strong>How to use a book.</strong> Read a lesson with the retrieval answers closed, score each section honestly, then run that lesson's problem locally and paste the token back.</p>
 </div>
 
-</main>
+<div class="reader" data-reader hidden>
+  <div class="reader-backdrop" data-close></div>
+  <div class="book-spread" role="dialog" aria-modal="true" aria-label="Book preview" data-spread></div>
+  <div class="reader-nav">
+    <button type="button" data-prev aria-label="Previous page">‹</button>
+    <span data-pagecount>1 / 2</span>
+    <button type="button" data-next aria-label="Next page">›</button>
+  </div>
+</div>
+
+<script type="application/json" class="book-data">[{"slug": "foundations", "number": 1, "title": "Foundations", "promise": "The maths everything else assumes, rebuilt from arithmetic.", "preface": ["Nothing beyond arithmetic.", "Read a slope, a probability and a vector as three views of the same number, then compute a gradient by hand."], "steps": 18, "lessons": 3, "total": 7, "labs": 4, "problems": 7, "contents": [{"n": 1, "id": "001", "title": "Vectors, matrices, dot product", "minutes": 8, "planned": false, "url": "lessons/001-vectors-matrices-dot-product.html"}, {"n": 2, "id": "002", "title": "Slope → gradient", "minutes": 10, "planned": false, "url": "lessons/002-slope-to-gradient.html"}, {"n": 3, "id": "003", "title": "Probability, expectation, likelihood", "minutes": 10, "planned": false, "url": "lessons/003-probability-expectation-likelihood.html"}, {"n": 4, "id": "036", "title": "Eigenvalues, eigenvectors & SVD", "minutes": 12, "planned": true, "url": ""}, {"n": 5, "id": "037", "title": "Norms & distances", "minutes": 8, "planned": true, "url": ""}, {"n": 6, "id": "038", "title": "Distributions & sampling", "minutes": 10, "planned": true, "url": ""}, {"n": 7, "id": "039", "title": "Estimation & bias–variance", "minutes": 12, "planned": true, "url": ""}]}, {"slug": "classical-ml", "number": 2, "title": "Classical ML", "promise": "Models that fit a table before anything has a GPU.", "preface": ["One variable of calculus; a spreadsheet is enough.", "Fit a line, read a train/test gap, and pick a model because of its failure mode, not its reputation."], "steps": 30, "lessons": 4, "total": 9, "labs": 12, "problems": 9, "contents": [{"n": 1, "id": "004", "title": "Supervised learning as function fitting", "minutes": 8, "planned": false, "url": "lessons/004-supervised-learning.html"}, {"n": 2, "id": "005", "title": "Generalization", "minutes": 10, "planned": false, "url": "lessons/005-generalization.html"}, {"n": 3, "id": "006", "title": "Linear & logistic regression", "minutes": 10, "planned": false, "url": "lessons/006-linear-and-logistic-regression.html"}, {"n": 4, "id": "007", "title": "Trees & ensembles", "minutes": 10, "planned": false, "url": "lessons/007-trees-and-ensembles.html"}, {"n": 5, "id": "040", "title": "kNN & the curse of dimensionality", "minutes": 8, "planned": true, "url": ""}, {"n": 6, "id": "041", "title": "SVM & kernels", "minutes": 12, "planned": true, "url": ""}, {"n": 7, "id": "042", "title": "Clustering: k-means & GMM", "minutes": 10, "planned": true, "url": ""}, {"n": 8, "id": "043", "title": "PCA & dimensionality reduction", "minutes": 10, "planned": true, "url": ""}, {"n": 9, "id": "044", "title": "Feature engineering, leakage & imbalance", "minutes": 10, "planned": true, "url": ""}]}, {"slug": "neural-networks", "number": 3, "title": "Neural Networks", "promise": "One mechanism, built in order: neuron, backward pass, training.", "preface": ["Book 1, plus one derivative.", "Trace a forward pass, derive a backward pass, and diagnose a training run that will not learn."], "steps": 27, "lessons": 7, "total": 10, "labs": 7, "problems": 10, "contents": [{"n": 1, "id": "008", "title": "The neuron", "minutes": 8, "planned": false, "url": "lessons/008-the-neuron.html"}, {"n": 2, "id": "009", "title": "Layers & the forward pass", "minutes": 10, "planned": false, "url": "lessons/009-layers-and-forward-pass.html"}, {"n": 3, "id": "010", "title": "Backpropagation", "minutes": 10, "planned": false, "url": "lessons/010-backpropagation.html"}, {"n": 4, "id": "011", "title": "The training loop", "minutes": 8, "planned": false, "url": "lessons/011-training-loop.html"}, {"n": 5, "id": "012", "title": "Overfitting in DL", "minutes": 8, "planned": false, "url": "lessons/012-overfitting-in-deep-learning.html"}, {"n": 6, "id": "013", "title": "Optimization failure modes", "minutes": 10, "planned": false, "url": "lessons/013-optimization-failure-modes.html"}, {"n": 7, "id": "014", "title": "Architecture families", "minutes": 8, "planned": false, "url": "lessons/014-architecture-families.html"}, {"n": 8, "id": "045", "title": "Convolutions & CNNs", "minutes": 10, "planned": true, "url": ""}, {"n": 9, "id": "046", "title": "Initialization & normalization", "minutes": 10, "planned": true, "url": ""}, {"n": 10, "id": "047", "title": "Optimizers: SGD → Adam", "minutes": 10, "planned": true, "url": ""}]}, {"slug": "language", "number": 4, "title": "Language & Transformers", "promise": "Text to tokens to attention to a model you can talk to.", "preface": ["Book 3, plus one matrix multiply.", "Turn text into tokens, tokens into vectors, and vectors into attention — then into a model that answers."], "steps": 34, "lessons": 8, "total": 13, "labs": 8, "problems": 13, "contents": [{"n": 1, "id": "015", "title": "Tokenization", "minutes": 8, "planned": false, "url": "lessons/015-tokenization.html"}, {"n": 2, "id": "016", "title": "Embeddings", "minutes": 8, "planned": false, "url": "lessons/016-embeddings.html"}, {"n": 3, "id": "017", "title": "RNN → LSTM", "minutes": 10, "planned": false, "url": "lessons/017-rnn-to-lstm.html"}, {"n": 4, "id": "018", "title": "Seq2seq & encoder–decoder", "minutes": 8, "planned": false, "url": "lessons/018-seq2seq.html"}, {"n": 5, "id": "026", "title": "Attention", "minutes": 12, "planned": false, "url": "lessons/026-attention.html"}, {"n": 6, "id": "027", "title": "The Transformer block", "minutes": 10, "planned": false, "url": "lessons/027-transformer-block.html"}, {"n": 7, "id": "028", "title": "Pretraining", "minutes": 10, "planned": false, "url": "lessons/028-pretraining.html"}, {"n": 8, "id": "029", "title": "Alignment & inference", "minutes": 10, "planned": false, "url": "lessons/029-alignment-and-inference.html"}, {"n": 9, "id": "048", "title": "Subword tokenizers (BPE)", "minutes": 10, "planned": true, "url": ""}, {"n": 10, "id": "049", "title": "Decoding & sampling", "minutes": 8, "planned": true, "url": ""}, {"n": 11, "id": "050", "title": "Multi-head attention & positions", "minutes": 12, "planned": true, "url": ""}, {"n": 12, "id": "051", "title": "Evaluating language models", "minutes": 10, "planned": true, "url": ""}, {"n": 13, "id": "052", "title": "RAG & tool use", "minutes": 10, "planned": true, "url": ""}]}, {"slug": "rl", "number": 5, "title": "Reinforcement Learning", "promise": "Decisions with consequences, from bandits to PPO.", "preface": ["Book 1's probability, plus Book 2's evaluation loop.", "Write a return, a value, and a policy update; know why deep RL needs replay and targets."], "steps": 28, "lessons": 7, "total": 10, "labs": 8, "problems": 10, "contents": [{"n": 1, "id": "019", "title": "The RL frame", "minutes": 10, "planned": false, "url": "lessons/019-rl-frame.html"}, {"n": 2, "id": "020", "title": "Value functions & the Bellman equation", "minutes": 10, "planned": false, "url": "lessons/020-value-functions-bellman.html"}, {"n": 3, "id": "021", "title": "Exploration vs exploitation", "minutes": 8, "planned": false, "url": "lessons/021-exploration-vs-exploitation.html"}, {"n": 4, "id": "022", "title": "Two solution families", "minutes": 10, "planned": false, "url": "lessons/022-two-solution-families.html"}, {"n": 5, "id": "023", "title": "Function approximation", "minutes": 8, "planned": false, "url": "lessons/023-function-approximation.html"}, {"n": 6, "id": "024", "title": "DQN", "minutes": 10, "planned": false, "url": "lessons/024-dqn.html"}, {"n": 7, "id": "025", "title": "Policy gradient at scale", "minutes": 10, "planned": false, "url": "lessons/025-policy-gradient-at-scale.html"}, {"n": 8, "id": "053", "title": "MDPs & dynamic programming", "minutes": 12, "planned": true, "url": ""}, {"n": 9, "id": "054", "title": "Bandits beyond ε-greedy", "minutes": 8, "planned": true, "url": ""}, {"n": 10, "id": "055", "title": "Offline RL & imitation", "minutes": 10, "planned": true, "url": ""}]}, {"slug": "trust", "number": 6, "title": "Trust, Privacy & Scale", "promise": "Explain it, attack it, federate it, keep it honest.", "preface": ["Books 2 and 3.", "Explain a prediction, attack a model, federate training, and state what privacy you actually bought."], "steps": 19, "lessons": 6, "total": 8, "labs": 3, "problems": 8, "contents": [{"n": 1, "id": "030", "title": "Why explainability", "minutes": 8, "planned": false, "url": "lessons/030-why-explainability.html"}, {"n": 2, "id": "031", "title": "Attribution methods", "minutes": 12, "planned": false, "url": "lessons/031-attribution-methods.html"}, {"n": 3, "id": "032", "title": "Evaluating explanations", "minutes": 10, "planned": false, "url": "lessons/032-evaluating-explanations.html"}, {"n": 4, "id": "033", "title": "Federated setting & FedAvg", "minutes": 10, "planned": false, "url": "lessons/033-federated-setting-fedavg.html"}, {"n": 5, "id": "034", "title": "Non-IID data & convergence", "minutes": 10, "planned": false, "url": "lessons/034-non-iid-and-convergence.html"}, {"n": 6, "id": "035", "title": "Privacy & threat model", "minutes": 10, "planned": false, "url": "lessons/035-privacy-and-threat-model.html"}, {"n": 7, "id": "056", "title": "Fairness & bias measurement", "minutes": 10, "planned": true, "url": ""}, {"n": 8, "id": "057", "title": "Calibration & uncertainty", "minutes": 10, "planned": true, "url": ""}]}, {"slug": "systems", "number": 7, "title": "Systems", "promise": "Serving, compressing and watching a model after it ships.", "preface": ["A working model from any earlier book.", "Serve it, compress it, and watch it in production without lying to yourself about drift."], "steps": 6, "lessons": 0, "total": 3, "labs": 0, "problems": 3, "contents": [{"n": 1, "id": "058", "title": "Serving & latency", "minutes": 10, "planned": true, "url": ""}, {"n": 2, "id": "059", "title": "Quantization & distillation", "minutes": 10, "planned": true, "url": ""}, {"n": 3, "id": "060", "title": "Monitoring, drift & data quality", "minutes": 10, "planned": true, "url": ""}]}]</script>
 <script src="assets/search-index.js" defer></script>
+<script src="assets/shelf.js" defer></script>
 <script src="assets/course.js?v=14" defer></script>
 </body>
 </html>
