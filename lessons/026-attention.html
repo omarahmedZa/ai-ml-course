@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>026 — Attention</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -197,6 +197,10 @@
 
 <p><strong>What to notice.</strong> Doubling the sequence multiplies the work by four, not two. Each entry is also kept in memory for the backward pass, so the same factor applies to activations: a context that fits in 8 GB at 1,000 tokens needs roughly 32 GB at 2,000.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">softmax — scores into weights — drag, step, then read the numbers.</p></div><a class="pg-link" href="026a-softmax.html">Open full screen →</a></div>
+  <iframe src="026a-softmax.html" title="Interactive lab: softmax — scores into weights" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— attention</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -229,7 +233,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/026.html">Solve it · 026 — Attention output, scaled and blended</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 026<span class="solve-diff">medium</span></p>
+  <p class="solve-title">Attention output, scaled and blended</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/026.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— attention</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/026-attention.ipynb">open the notebook in Colab</a> · <a href="../notebooks/026-attention.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -264,6 +273,6 @@ V = np.array([[10., 0.], [0., 10.]])</code></pre>
   <script src="../assets/graph.js?v=4" defer></script>
   <script src="../assets/anim.js?v=3" defer></script>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

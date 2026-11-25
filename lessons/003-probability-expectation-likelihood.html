@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>003 — Probability, expectation, likelihood</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -126,6 +126,10 @@
 
 <p><strong>What to notice.</strong> The total 3.101 depends on how many rows you have; the mean, <code>3.101 / 3 = 1.034</code>, does not, and 1.034 is the figure a framework reports. Undo the log and the average probability given to the truth is <code>e^−1.034 ≈ 0.356</code> — not the 0.5 you get by averaging 0.9, 0.5 and 0.1. Averages of probabilities and averages of log-probabilities answer different questions.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">−log p — the price of surprise — drag, step, then read the numbers.</p></div><a class="pg-link" href="003a-surprise.html">Open full screen →</a></div>
+  <iframe src="003a-surprise.html" title="Interactive lab: −log p — the price of surprise" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— probability and likelihood</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -157,7 +161,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/003.html">Solve it · 003 — Log-likelihood without underflow</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 003<span class="solve-diff">easy</span></p>
+  <p class="solve-title">Log-likelihood without underflow</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/003.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— probability and likelihood</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/003-probability-expectation-likelihood.ipynb">open the notebook in Colab</a> · <a href="../notebooks/003-probability-expectation-likelihood.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -191,6 +200,6 @@ print(&quot;softmax:&quot;, probs.round(3))</code></pre>
 </main>
   <script src="../assets/graph.js?v=4" defer></script>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

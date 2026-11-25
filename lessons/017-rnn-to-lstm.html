@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>017 — RNN to LSTM</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -177,6 +177,10 @@
 
 <p><strong>What to notice.</strong> The 416,256 difference is larger than the entire input matrix, which is why "just use an LSTM" is not free advice on a small dataset. It also shows where the gate cost comes from: every gate is a full copy of the same two matrices, so a fourth gate is a 25% tax on the layer, paid once and then multiplied by depth and by every layer you stack.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">h_t — one state, rewritten — drag, step, then read the numbers.</p></div><a class="pg-link" href="017a-recurrence.html">Open full screen →</a></div>
+  <iframe src="017a-recurrence.html" title="Interactive lab: h_t — one state, rewritten" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— RNN and LSTM</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -208,7 +212,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/017.html">Solve it · 017 — Debug the LSTM cell update</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 017<span class="solve-diff">easy</span></p>
+  <p class="solve-title">Debug the LSTM cell update</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/017.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— RNN and LSTM</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/017-rnn-to-lstm.ipynb">open the notebook in Colab</a> · <a href="../notebooks/017-rnn-to-lstm.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -243,6 +252,6 @@ for t in range(20):
   <script src="../assets/graph.js?v=4" defer></script>
   <script src="../assets/anim.js?v=3" defer></script>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

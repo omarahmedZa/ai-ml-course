@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>014 — Architecture families</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -150,6 +150,10 @@
 
 <p><strong>What to notice.</strong> Unrolled over 200 timesteps, a network with separate weights per step would need <code>200 × 24,704 = 4,940,800</code> parameters and could never generalise to step 201. Sharing keeps the count at 24,704 for any length. What you pay instead is time: 200 steps means 200 sequential passes, which is exactly the cost attention removes.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">k²·Cin·Cout — where convolution parameters come from — drag, step, then read the numbers.</p></div><a class="pg-link" href="014a-conv-params.html">Open full screen →</a></div>
+  <iframe src="014a-conv-params.html" title="Interactive lab: k²·Cin·Cout — where convolution parameters come from" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— architectures</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -182,7 +186,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/014.html">Solve it · 014 — Convolution parameter count</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 014<span class="solve-diff">hard</span></p>
+  <p class="solve-title">Convolution parameter count</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/014.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— architectures</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/014-architecture-families.ipynb">open the notebook in Colab</a> · <a href="../notebooks/014-architecture-families.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -215,6 +224,6 @@ img = np.arange(16.).reshape(4, 4)</code></pre>
 
 </main>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

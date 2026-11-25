@@ -118,6 +118,11 @@
         sub.setAttribute("href", base() + "problems/" + c.id + ".html");
         li.appendChild(sub);
       }
+      (c.labs || []).forEach(function (lab) {
+        var l = el("a", "toc-lab", "Lab · " + lab.title);
+        l.setAttribute("href", base() + "lessons/" + lab.file);
+        li.appendChild(l);
+      });
       var state = el("span", "toc-state");
       var mark = el("span", "toc-mark");
       var st = s[c.id];

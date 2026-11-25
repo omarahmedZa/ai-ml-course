@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>020 — Value functions and Bellman</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -138,6 +138,10 @@
 
 <p><strong>What to notice.</strong> The reward happened to be 1 in both branches, so the probabilities sum to 1 and it survives intact at 1.0; only the future is averaged, giving <code>1 + 0.9 × (1.6 − 0.2) = 2.26</code>. Make the pit pay 0 instead and the value falls to <code>2.24 − 0.18 = 2.06</code>, because now the branch-specific reward is being averaged too.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">V(s) = r + γV(s′) (gamma) — bootstrapping — drag, step, then read the numbers.</p></div><a class="pg-link" href="020a-bootstrap.html">Open full screen →</a></div>
+  <iframe src="020a-bootstrap.html" title="Interactive lab: V(s) = r + γV(s′) (gamma) — bootstrapping" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— value functions</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -170,7 +174,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/020.html">Solve it · 020 — One Bellman backup sweep</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 020<span class="solve-diff">easy</span></p>
+  <p class="solve-title">One Bellman backup sweep</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/020.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— value functions</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/020-value-functions-bellman.ipynb">open the notebook in Colab</a> · <a href="../notebooks/020-value-functions-bellman.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -203,6 +212,6 @@ for sweep in range(50):
 
 </main>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

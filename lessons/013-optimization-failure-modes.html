@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>013 — Optimization failure modes</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -140,6 +140,10 @@
 
 <p><strong>What to notice.</strong> The ratio of the two components is unchanged — 3:4 before, 0.6:0.8 after — so clipping preserves the direction the gradient asked for and only caps how far it can travel. A gradient of norm 0.7 would pass through untouched, which is why clipping is safe to leave on permanently. What it cannot fix is a gradient that is consistently huge: that is an initialisation or learning-rate problem, and clipping only hides it.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">gL — how much gradient survives — drag, step, then read the numbers.</p></div><a class="pg-link" href="013a-decay.html">Open full screen →</a></div>
+  <iframe src="013a-decay.html" title="Interactive lab: gL — how much gradient survives" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— optimization failures</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -172,7 +176,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/013.html">Solve it · 013 — Debug gradient-norm clipping</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 013<span class="solve-diff">hard</span></p>
+  <p class="solve-title">Debug gradient-norm clipping</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/013.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— optimization failures</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/013-optimization-failure-modes.ipynb">open the notebook in Colab</a> · <a href="../notebooks/013-optimization-failure-modes.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -205,7 +214,7 @@ for depth in (5, 50):
 
 </main>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
   <script src="../assets/graph.js?v=4" defer></script>
 </body>
 </html>

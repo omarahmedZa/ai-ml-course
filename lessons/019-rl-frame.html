@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>019 — The RL frame</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -158,6 +158,10 @@
 
 <p><strong>What to notice.</strong> Moving γ from 0.99 to 0.999 multiplies the horizon by ten while looking like a rounding change. The cost is variance: distant rewards that were crushed to nothing now count at nearly full value, so an estimate from a few sampled episodes gets much noisier. Long-horizon tasks are hard for this reason, not because the algebra is harder.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">γ (gamma) — the price of waiting — drag, step, then read the numbers.</p></div><a class="pg-link" href="019a-gamma.html">Open full screen →</a></div>
+  <iframe src="019a-gamma.html" title="Interactive lab: γ (gamma) — the price of waiting" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— the RL frame</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -190,7 +194,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/019.html">Solve it · 019 — Discounted return, checked</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 019<span class="solve-diff">easy</span></p>
+  <p class="solve-title">Discounted return, checked</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/019.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— the RL frame</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/019-rl-frame.ipynb">open the notebook in Colab</a> · <a href="../notebooks/019-rl-frame.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -223,6 +232,6 @@ print(&quot;effective horizon 1/(1-gamma):&quot;, [round(1/(1-g), 1) for g in (0
 
 </main>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

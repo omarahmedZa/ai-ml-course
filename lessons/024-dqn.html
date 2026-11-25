@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>024 — DQN</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -167,6 +167,10 @@
 
 <p><strong>What to notice.</strong> Action B's 3.9 is lucky noise, and taking a maximum deliberately seeks out lucky noise. Selection by θ picks A, which is also noise, but scoring it with the other network does not reward the luck. Bias falls from 0.81 to 0.09 — smaller, not zero. If both networks share the same blind spot, both pick the same wrong action and the bias returns.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">r + γ (gamma) max Q(s′,a′) — the frozen answer key — drag, step, then read the numbers.</p></div><a class="pg-link" href="024a-target.html">Open full screen →</a></div>
+  <iframe src="024a-target.html" title="Interactive lab: r + γ (gamma) max Q(s′,a′) — the frozen answer key" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— DQN</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -200,7 +204,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/024.html">Solve it · 024 — DQN target, terminal fixed</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 024<span class="solve-diff">medium</span></p>
+  <p class="solve-title">DQN target, terminal fixed</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/024.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— DQN</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/024-dqn.ipynb">open the notebook in Colab</a> · <a href="../notebooks/024-dqn.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -233,6 +242,6 @@ for _ in range(1000):
 
 </main>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

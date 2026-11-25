@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>006 — Linear and logistic regression</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -143,6 +143,10 @@
 
 <p><strong>What to notice.</strong> The useless predictor wins on accuracy, 97.0% against 95.0%, while missing every case anyone cares about. Model A costs 9 false positives to catch 5 true positives, and accuracy is blind to that trade. Report precision and recall against the trivial baseline; otherwise the metric rewards the model that does nothing.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">σ(z) (sigma) — from score to probability — drag, step, then read the numbers.</p></div><a class="pg-link" href="006a-sigmoid.html">Open full screen →</a></div>
+  <iframe src="006a-sigmoid.html" title="Interactive lab: σ(z) (sigma) — from score to probability" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— regression</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -175,7 +179,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/006.html">Solve it · 006 — Sigmoid: score to probability</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 006<span class="solve-diff">easy</span></p>
+  <p class="solve-title">Sigmoid: score to probability</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/006.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— regression</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/006-linear-and-logistic-regression.ipynb">open the notebook in Colab</a> · <a href="../notebooks/006-linear-and-logistic-regression.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -209,6 +218,6 @@ coef, *_ = np.linalg.lstsq(A, y, rcond=None)</code></pre>
 </main>
   <script src="../assets/graph.js?v=4" defer></script>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

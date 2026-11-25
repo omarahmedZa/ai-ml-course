@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>051 — Evaluating language models</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -179,7 +179,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/051.html">Solve it · 051 — Perplexity, checked</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 051<span class="solve-diff">hard</span></p>
+  <p class="solve-title">Perplexity, checked</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/051.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— the notebook</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/051-evaluating-language-models.ipynb">open the notebook in Colab</a> · <a href="../notebooks/051-evaluating-language-models.ipynb">local copy</a>. It computes perplexity by hand and plots the error bar against sample size.</p>
 <pre><code>import numpy as np
@@ -206,6 +211,6 @@ print(f&quot;accuracy = {hits/n:.3f} +/- {se:.3f}&quot;)</code></pre>
 
 </main>
 <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Book 3 — Neural Networks</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="One mechanism, built in order: neuron, backward pass, training.">
@@ -33,17 +33,17 @@
 <ol class="spine">
     <li class="spine-item" data-lesson="008" data-planned="false">
       <span class="spine-num">01</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/008-the-neuron.html">The neuron</a><span class="meta">8 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/008.html">Problem · Score first, then bend</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/008-the-neuron.html">The neuron</a><span class="meta">8 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/008.html">Problem · Score first, then bend</a><a class="spine-problem" href="../lessons/008a-activation.html">Lab · Why φ (phi) cannot be removed</a></div>
       <span class="spine-status" data-status="008" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="009" data-planned="false">
       <span class="spine-num">02</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/009-layers-and-forward-pass.html">Layers &amp; the forward pass</a><span class="meta">10 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/009.html">Problem · Two-layer forward pass, by hand</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/009-layers-and-forward-pass.html">Layers &amp; the forward pass</a><span class="meta">10 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/009.html">Problem · Two-layer forward pass, by hand</a><a class="spine-problem" href="../lessons/009a-shapes.html">Lab · Shape algebra — the inner dimensions must meet</a></div>
       <span class="spine-status" data-status="009" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="010" data-planned="false">
       <span class="spine-num">03</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/010-backpropagation.html">Backpropagation</a><span class="meta">10 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/010.html">Problem · Debug the linear-unit gradients</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/010-backpropagation.html">Backpropagation</a><span class="meta">10 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/010.html">Problem · Debug the linear-unit gradients</a><a class="spine-problem" href="../lessons/010a-chain.html">Lab · The chain rule — one slope at a time</a><a class="spine-problem" href="../lessons/010b-fanout.html">Lab · Fan-out — gradients add, they do not compete</a></div>
       <span class="spine-status" data-status="010" aria-label="progress"></span>
     </li>
 </ol>
@@ -51,7 +51,7 @@
 <ol class="spine">
     <li class="spine-item" data-lesson="011" data-planned="false">
       <span class="spine-num">01</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/011-training-loop.html">The training loop</a><span class="meta">8 min · <span class="chip">Deep Learning</span><span class="chip">Calculus & Optimization</span></span><a class="spine-problem" href="../problems/011.html">Problem · Count the updates</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/011-training-loop.html">The training loop</a><span class="meta">8 min · <span class="chip">Deep Learning</span><span class="chip">Calculus & Optimization</span></span><a class="spine-problem" href="../problems/011.html">Problem · Count the updates</a><a class="spine-problem" href="../lessons/011a-epochs.html">Lab · Steps, batches, epochs — three words, one division</a></div>
       <span class="spine-status" data-status="011" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="012" data-planned="false">
@@ -69,12 +69,12 @@
 <ol class="spine">
     <li class="spine-item" data-lesson="013" data-planned="false">
       <span class="spine-num">01</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/013-optimization-failure-modes.html">Optimization failure modes</a><span class="meta">10 min · <span class="chip">Deep Learning</span><span class="chip">Calculus & Optimization</span></span><a class="spine-problem" href="../problems/013.html">Problem · Debug gradient-norm clipping</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/013-optimization-failure-modes.html">Optimization failure modes</a><span class="meta">10 min · <span class="chip">Deep Learning</span><span class="chip">Calculus & Optimization</span></span><a class="spine-problem" href="../problems/013.html">Problem · Debug gradient-norm clipping</a><a class="spine-problem" href="../lessons/013a-decay.html">Lab · gL — how much gradient survives</a></div>
       <span class="spine-status" data-status="013" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="014" data-planned="false">
       <span class="spine-num">02</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/014-architecture-families.html">Architecture families</a><span class="meta">8 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/014.html">Problem · Convolution parameter count</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/014-architecture-families.html">Architecture families</a><span class="meta">8 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/014.html">Problem · Convolution parameter count</a><a class="spine-problem" href="../lessons/014a-conv-params.html">Lab · k²·Cin·Cout — where convolution parameters come from</a></div>
       <span class="spine-status" data-status="014" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="046" data-planned="false">
@@ -94,6 +94,6 @@ that wave. Nothing is hidden: the plan is public.</p>
 
 </main>
 <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

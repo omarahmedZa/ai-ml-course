@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>005 — Generalization</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -124,6 +124,10 @@
 
 <p><strong>What to notice.</strong> Model C has almost no bias, 0.05, and loses badly — its variance of 2.00 is over three times B's 0.60. Model A has low variance and still loses, because bias of 1.00 is squared into a full point. B wins at 0.84, and 0.20 of that is noise no model can touch, so the real headroom is 0.64. Adding rows attacks variance only: it would help C a lot, B a little, and A not at all.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">Bias², variance, noise — the three parts of a miss — drag, step, then read the numbers.</p></div><a class="pg-link" href="005a-bias-variance.html">Open full screen →</a></div>
+  <iframe src="005a-bias-variance.html" title="Interactive lab: Bias², variance, noise — the three parts of a miss" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— generalization</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -157,7 +161,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/005.html">Solve it · 005 — Diagnose the gap</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 005<span class="solve-diff">easy</span></p>
+  <p class="solve-title">Diagnose the gap</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/005.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— generalization</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/005-generalization.ipynb">open the notebook in Colab</a> · <a href="../notebooks/005-generalization.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -191,6 +200,6 @@ for d in (1, 3, 9):</code></pre>
 </main>
   <script src="../assets/graph.js?v=4" defer></script>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

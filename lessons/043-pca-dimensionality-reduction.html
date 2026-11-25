@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>043 — PCA &amp; dimensionality reduction</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -144,7 +144,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/043.html">Solve it · 043 — Project onto principal components</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 043<span class="solve-diff">hard</span></p>
+  <p class="solve-title">Project onto principal components</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/043.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— variance</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/043-pca-dimensionality-reduction.ipynb">open the notebook in Colab</a> · <a href="../notebooks/043-pca-dimensionality-reduction.ipynb">local copy</a>. It centres a small matrix, takes its SVD, and plots the projection and the variance each component keeps.</p>
 <pre><code>import numpy as np
@@ -170,6 +175,6 @@ print(var, var / var.sum())              # [5. 0.] [1. 0.]</code></pre>
 
 </main>
 <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

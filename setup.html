@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set up the problem runner</title>
+<link rel="stylesheet" href="assets/lesson.css?v=23">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Install Python, download dml.py, pull a problem, run its tests and submit the score — step by step.">
+</head>
+<body data-page="setup" class="library">
+<main>
+
+<nav class="topline">
+  <a href="index.html">← Library</a>
+  <a href="problems/index.html">Problems</a>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">First time · about 5 minutes</p>
+  <h1>Set up the problem runner</h1>
+  <p class="objective">You need Python and one file. After this page, every problem is: pull, edit, run, submit.</p>
+</header>
+
+<h2>What you need<span class="h2-topic">— the whole list</span></h2>
+<ul>
+  <li><strong>Python 3.10 or newer</strong> — <code>python3 --version</code> should print 3.10+.</li>
+  <li><strong>A terminal</strong> — Terminal (macOS/Linux) or PowerShell (Windows).</li>
+  <li><strong>NumPy</strong> — only some problems need it; install it now and forget it.</li>
+  <li><strong>Internet once</strong> — to download <code>dml.py</code> and each problem. After that, <code>run</code> works offline.</li>
+</ul>
+
+<h2>Step 1 — install Python and NumPy<span class="h2-topic">— once per machine</span></h2>
+<pre><code># macOS (Homebrew) or Linux
+brew install python          # macOS
+sudo apt install python3 python3-pip   # Debian/Ubuntu
+
+# Windows: install from python.org, tick "Add python.exe to PATH"
+
+# all systems
+python3 -m pip install numpy</code></pre>
+<p>Check both:</p>
+<pre><code>python3 --version
+python3 -c "import numpy; print(numpy.__version__)"</code></pre>
+<p>On Windows the command is usually <code>py</code> instead of <code>python3</code>. Use <code>py</code> in every command below.</p>
+
+<h2>Step 2 — download <code>dml.py</code><span class="h2-topic">— one file, no install</span></h2>
+<pre><code>mkdir ~/ml-problems &amp;&amp; cd ~/ml-problems
+curl -O https://omarahmedza.github.io/ai-ml-course/dml.py
+
+# no curl? open the URL in a browser and save the file here.
+# Windows PowerShell:
+#   Invoke-WebRequest https://omarahmedza.github.io/ai-ml-course/dml.py -OutFile dml.py</code></pre>
+<p>Check it:</p>
+<pre><code>python3 dml.py doctor</code></pre>
+<p>You should see your Python version, NumPy, <em>site reachable</em>, and <em>work writable</em>. If any line fails, the fix is in the troubleshooting table below.</p>
+
+<h2>Step 3 — pull your first problem<span class="h2-topic">— a starter and its tests</span></h2>
+<pre><code>python3 dml.py pull 001</code></pre>
+<p>This creates:</p>
+<pre><code>ml-problems/
+  dml.py
+  work/001/
+    solution.py     ← you edit this
+    tests.py        ← the tests, readable
+    STATEMENT.md</code></pre>
+
+<h2>Step 4 — edit, run, submit<span class="h2-topic">— the loop you repeat</span></h2>
+<pre><code># open work/001/solution.py in any editor and write the function
+python3 dml.py run 001        # per-test pass/fail
+python3 dml.py submit 001     # score + a link and a token</code></pre>
+<p>You will see:</p>
+<pre><code>Score 5.0/5 on attempt 1 (best 5.0/5)
+Open:  https://…/problems/001.html#r=…
+Paste: eyJ2IjoxLCJpZCI6IjAwMSIs…~8f3a1c2d</code></pre>
+<p>Open the link, or copy the token into the problem page. The page checks the token's checksum and stores the score in this browser. That is what <em>verified locally</em> means: the site cannot prove your run, it can only check that the token was not altered.</p>
+
+<h2>How scoring works<span class="h2-topic">— no surprises</span></h2>
+<table>
+  <tr><th>Rule</th><th>Value</th></tr>
+  <tr><td>Points per problem</td><td>5</td></tr>
+  <tr><td>Visible tests</td><td>40% of the score</td></tr>
+  <tr><td>Hidden tests</td><td>60% of the score</td></tr>
+  <tr><td>Attempt decay</td><td>−10% per failed submit, floor 50%</td></tr>
+  <tr><td>Best score</td><td>kept; attempts keep counting</td></tr>
+</table>
+
+<h2>Troubleshooting<span class="h2-topic">— the five usual failures</span></h2>
+<table>
+  <tr><th>Message</th><th>Fix</th></tr>
+  <tr><td><code>python3: command not found</code></td><td>Windows: use <code>py</code>. macOS: <code>brew install python</code>. Linux: <code>sudo apt install python3</code>.</td></tr>
+  <tr><td><code>No module named numpy</code></td><td><code>python3 -m pip install numpy</code> (or <code>py -m pip install numpy</code>).</td></tr>
+  <tr><td><code>could not download …</code></td><td>No internet or a proxy. Clone the repo once and use <code>--bundle-dir repo/problems/data</code> on every command.</td></tr>
+  <tr><td><code>Permission denied</code></td><td>You are in a read-only folder. <code>cd ~</code> and make a work folder there.</td></tr>
+  <tr><td>Token rejected</td><td>Copy it again from the <code>Paste:</code> line — a partial copy fails the checksum.</td></tr>
+</table>
+
+<h2>Offline mode<span class="h2-topic">— no network at all</span></h2>
+<pre><code>git clone https://github.com/omarahmedZa/ai-ml-course
+cd ml-problems
+python3 dml.py pull 001 --bundle-dir ../ai-ml-course/problems/data
+python3 dml.py submit 001 --bundle-dir ../ai-ml-course/problems/data --no-open</code></pre>
+<p>The bundle directory contains every problem's statement and tests, so nothing is downloaded.</p>
+
+<div class="next">
+  <p><strong>Ready.</strong> Pick a problem and follow steps 3–4. If a lesson points at a problem, its number is the same as the lesson's.</p>
+  <div class="pager">
+    <a href="problems/index.html">← All problems</a>
+    <a href="index.html">Library →</a>
+  </div>
+</div>
+
+</main>
+<script src="assets/course.js?v=18" defer></script>
+</body>
+</html>

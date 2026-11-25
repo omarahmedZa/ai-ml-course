@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>027 — The Transformer block</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -172,6 +172,10 @@
 
 <p><strong>What to notice.</strong> The output has mean 0 and variance 1, and the gaps between neighbours have changed from 2 to 0.894: information about the original size is gone. That is the point — the next matrix multiply cares about direction, not magnitude — and it is also why the residual matters, since <code>x</code> itself still holds <code>[2, 4, 6, 8]</code> for the addition that follows.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">x + MHA(LN(x)) — the residual path — drag, step, then read the numbers.</p></div><a class="pg-link" href="027a-residual.html">Open full screen →</a></div>
+  <iframe src="027a-residual.html" title="Interactive lab: x + MHA(LN(x)) — the residual path" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— the transformer</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -203,7 +207,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/027.html">Solve it · 027 — Count one Transformer block</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 027<span class="solve-diff">medium</span></p>
+  <p class="solve-title">Count one Transformer block</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/027.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— the transformer</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/027-transformer-block.ipynb">open the notebook in Colab</a> · <a href="../notebooks/027-transformer-block.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -236,6 +245,6 @@ rng = np.random.default_rng(0)</code></pre>
 
 </main>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

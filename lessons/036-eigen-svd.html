@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>036 — Eigenvalues, eigenvectors &amp; SVD</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -138,7 +138,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/036.html">Solve it · 036 — Power iteration, step by step</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 036<span class="solve-diff">hard</span></p>
+  <p class="solve-title">Power iteration, step by step</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/036.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— directions that survive a matrix</span></h2>
 <p>Runnable, NumPy-only: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/036-eigen-svd.ipynb">open the notebook in Colab</a> · <a href="../notebooks/036-eigen-svd.ipynb">local copy</a>. It checks <code>A v = λ v</code> numerically and rebuilds a matrix from its top singular value.</p>
 <pre><code>import numpy as np
@@ -165,6 +170,6 @@ print(vecs[:,-1] @ A @ vecs[:,-1])   # 4.0</code></pre>
 
 </main>
 <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

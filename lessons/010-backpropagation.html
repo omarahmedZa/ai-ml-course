@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>010 — Backpropagation</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -142,6 +142,10 @@
 
 <p><strong>What to notice.</strong> The check is a finite difference, so it is always slightly off and always the same sign. Use it on one weight when a hand-derived gradient and the library disagree; a large gap means a missing term, a wrong sign, or a tensor that was detached before the graph noticed it.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">The chain rule — one slope at a time — drag, step, then read the numbers.</p></div><a class="pg-link" href="010a-chain.html">Open full screen →</a></div>
+  <iframe src="010a-chain.html" title="Interactive lab: The chain rule — one slope at a time" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— backpropagation</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -174,7 +178,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/010.html">Solve it · 010 — Debug the linear-unit gradients</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 010<span class="solve-diff">easy</span></p>
+  <p class="solve-title">Debug the linear-unit gradients</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/010.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— backpropagation</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/010-backpropagation.ipynb">open the notebook in Colab</a> · <a href="../notebooks/010-backpropagation.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -209,6 +218,6 @@ print(f&quot;pred={pred} loss={loss} dL/dw={d_w} dL/db={d_b}&quot;)</code></pre>
   <script src="../assets/graph.js?v=4" defer></script>
   <script src="../assets/anim.js?v=3" defer></script>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

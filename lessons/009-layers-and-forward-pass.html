@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>009 — Layers and the forward pass</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -140,6 +140,10 @@
 
 <p><strong>What to notice.</strong> Almost every parameter sits in the first layer, because 784 inputs is a wide door. The hidden layer is only 128 units, so the second layer is 78 times smaller. If a model with this shape runs out of memory, the fix is a smaller first layer — not a smaller batch of classes.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">Shape algebra — the inner dimensions must meet — drag, step, then read the numbers.</p></div><a class="pg-link" href="009a-shapes.html">Open full screen →</a></div>
+  <iframe src="009a-shapes.html" title="Interactive lab: Shape algebra — the inner dimensions must meet" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— the forward pass</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -172,7 +176,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/009.html">Solve it · 009 — Two-layer forward pass, by hand</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 009<span class="solve-diff">easy</span></p>
+  <p class="solve-title">Two-layer forward pass, by hand</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/009.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— the forward pass</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/009-layers-and-forward-pass.ipynb">open the notebook in Colab</a> · <a href="../notebooks/009-layers-and-forward-pass.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -207,6 +216,6 @@ z2 = W2 @ a1 + b2</code></pre>
   <script src="../assets/graph.js?v=4" defer></script>
   <script src="../assets/anim.js?v=3" defer></script>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

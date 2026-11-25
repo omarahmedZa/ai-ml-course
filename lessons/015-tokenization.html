@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>015 — Tokenization</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -144,6 +144,10 @@
 
 <p><strong>What to notice.</strong> Check the request count by multiplication rather than trust: 128,000 × 2 = 256,000, which is below 325,000, so three requests are the minimum for the prose row. The identical file costs three times more as base64, and nothing about the model changed — only the tokenizer did.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">BPE — merge the most frequent pair — drag, step, then read the numbers.</p></div><a class="pg-link" href="015a-bpe.html">Open full screen →</a></div>
+  <iframe src="015a-bpe.html" title="Interactive lab: BPE — merge the most frequent pair" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— tokenization</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -175,7 +179,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/015.html">Solve it · 015 — BPE encode by replaying merges</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 015<span class="solve-diff">easy</span></p>
+  <p class="solve-title">BPE encode by replaying merges</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/015.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— tokenization</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/015-tokenization.ipynb">open the notebook in Colab</a> · <a href="../notebooks/015-tokenization.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>from collections import Counter
@@ -208,6 +217,6 @@ for w in words:
 
 </main>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>033 — Federated setting and FedAvg</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -172,6 +172,10 @@
 
 <p><strong>What to notice.</strong> Sampling a tenth of the clients cuts the bill by 90% without changing the algorithm's shape, which is why partial participation is standard rather than an optimisation. Centralised training moves the dataset once; this run moves 100 GB. Every extra local epoch is an attempt to buy back one of those rounds.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">w ← Σ (nₖ/N) (sigma) wₖ — the weighted average — drag, step, then read the numbers.</p></div><a class="pg-link" href="033a-fedavg.html">Open full screen →</a></div>
+  <iframe src="033a-fedavg.html" title="Interactive lab: w ← Σ (nₖ/N) (sigma) wₖ — the weighted average" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— FedAvg</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -204,7 +208,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/033.html">Solve it · 033 — One FedAvg round, weighted by examples</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 033<span class="solve-diff">easy</span></p>
+  <p class="solve-title">One FedAvg round, weighted by examples</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/033.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— FedAvg</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/033-federated-setting-fedavg.ipynb">open the notebook in Colab</a> · <a href="../notebooks/033-federated-setting-fedavg.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -239,6 +248,6 @@ print(f&quot;weighted FedAvg: {weighted:.3f}  (equal weighting: {equal:.3f})&quo
   <script src="../assets/graph.js?v=4" defer></script>
   <script src="../assets/anim.js?v=3" defer></script>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

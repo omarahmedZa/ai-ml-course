@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Book 5 — Reinforcement Learning</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="Decisions with consequences, from bandits to PPO.">
@@ -33,17 +33,17 @@
 <ol class="spine">
     <li class="spine-item" data-lesson="019" data-planned="false">
       <span class="spine-num">01</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/019-rl-frame.html">The RL frame</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/019.html">Problem · Discounted return, checked</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/019-rl-frame.html">The RL frame</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/019.html">Problem · Discounted return, checked</a><a class="spine-problem" href="../lessons/019a-gamma.html">Lab · γ (gamma) — the price of waiting</a><a class="spine-problem" href="../lessons/019b-horizon.html">Lab · 1/(1−γ) (gamma) — how far the agent looks</a></div>
       <span class="spine-status" data-status="019" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="020" data-planned="false">
       <span class="spine-num">02</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/020-value-functions-bellman.html">Value functions &amp; the Bellman equation</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/020.html">Problem · One Bellman backup sweep</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/020-value-functions-bellman.html">Value functions &amp; the Bellman equation</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/020.html">Problem · One Bellman backup sweep</a><a class="spine-problem" href="../lessons/020a-bootstrap.html">Lab · V(s) = r + γV(s′) (gamma) — bootstrapping</a><a class="spine-problem" href="../lessons/020b-optimality.html">Lab · max — the value of the best action</a></div>
       <span class="spine-status" data-status="020" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="021" data-planned="false">
       <span class="spine-num">03</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/021-exploration-vs-exploitation.html">Exploration vs exploitation</a><span class="meta">8 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/021.html">Problem · Epsilon-greedy action probabilities</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/021-exploration-vs-exploitation.html">Exploration vs exploitation</a><span class="meta">8 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/021.html">Problem · Epsilon-greedy action probabilities</a><a class="spine-problem" href="../lessons/021a-ucb.html">Lab · UCB — the optimism bonus</a></div>
       <span class="spine-status" data-status="021" aria-label="progress"></span>
     </li>
 </ol>
@@ -51,7 +51,7 @@
 <ol class="spine">
     <li class="spine-item" data-lesson="022" data-planned="false">
       <span class="spine-num">01</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/022-two-solution-families.html">Two solution families</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/022.html">Problem · Q-learning update, sign fixed</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/022-two-solution-families.html">Two solution families</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/022.html">Problem · Q-learning update, sign fixed</a><a class="spine-problem" href="../lessons/022a-td-error.html">Lab · TD error — target minus estimate</a></div>
       <span class="spine-status" data-status="022" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="023" data-planned="false">
@@ -61,7 +61,7 @@
     </li>
     <li class="spine-item" data-lesson="024" data-planned="false">
       <span class="spine-num">03</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/024-dqn.html">DQN</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/024.html">Problem · DQN target, terminal fixed</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/024-dqn.html">DQN</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/024.html">Problem · DQN target, terminal fixed</a><a class="spine-problem" href="../lessons/024a-target.html">Lab · r + γ (gamma) max Q(s′,a′) — the frozen answer key</a></div>
       <span class="spine-status" data-status="024" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="053" data-planned="false">
@@ -74,7 +74,7 @@
 <ol class="spine">
     <li class="spine-item" data-lesson="025" data-planned="false">
       <span class="spine-num">01</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/025-policy-gradient-at-scale.html">Policy gradient at scale</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/025.html">Problem · Add PPO's clipped objective</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/025-policy-gradient-at-scale.html">Policy gradient at scale</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/025.html">Problem · Add PPO's clipped objective</a><a class="spine-problem" href="../lessons/025a-clip.html">Lab · r — the ratio, clipped to 1 ± 0.2</a></div>
       <span class="spine-status" data-status="025" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="054" data-planned="false">
@@ -94,6 +94,6 @@ that wave. Nothing is hidden: the plan is public.</p>
 
 </main>
 <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

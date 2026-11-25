@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Book 4 — Language & Transformers</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="Text to tokens to attention to a model you can talk to.">
@@ -33,7 +33,7 @@
 <ol class="spine">
     <li class="spine-item" data-lesson="015" data-planned="false">
       <span class="spine-num">01</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/015-tokenization.html">Tokenization</a><span class="meta">8 min · <span class="chip">NLP & Transformers</span></span><a class="spine-problem" href="../problems/015.html">Problem · BPE encode by replaying merges</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/015-tokenization.html">Tokenization</a><span class="meta">8 min · <span class="chip">NLP & Transformers</span></span><a class="spine-problem" href="../problems/015.html">Problem · BPE encode by replaying merges</a><a class="spine-problem" href="../lessons/015a-bpe.html">Lab · BPE — merge the most frequent pair</a></div>
       <span class="spine-status" data-status="015" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="016" data-planned="false">
@@ -43,12 +43,12 @@
     </li>
     <li class="spine-item" data-lesson="017" data-planned="false">
       <span class="spine-num">03</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/017-rnn-to-lstm.html">RNN → LSTM</a><span class="meta">10 min · <span class="chip">NLP & Transformers</span></span><a class="spine-problem" href="../problems/017.html">Problem · Debug the LSTM cell update</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/017-rnn-to-lstm.html">RNN → LSTM</a><span class="meta">10 min · <span class="chip">NLP & Transformers</span></span><a class="spine-problem" href="../problems/017.html">Problem · Debug the LSTM cell update</a><a class="spine-problem" href="../lessons/017a-recurrence.html">Lab · h_t — one state, rewritten</a><a class="spine-problem" href="../lessons/017b-gates.html">Lab · f, i, o — the gates</a></div>
       <span class="spine-status" data-status="017" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="018" data-planned="false">
       <span class="spine-num">04</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/018-seq2seq.html">Seq2seq &amp; encoder–decoder</a><span class="meta">8 min · <span class="chip">NLP & Transformers</span></span><a class="spine-problem" href="../problems/018.html">Problem · Sequence log-probability</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/018-seq2seq.html">Seq2seq &amp; encoder–decoder</a><span class="meta">8 min · <span class="chip">NLP & Transformers</span></span><a class="spine-problem" href="../problems/018.html">Problem · Sequence log-probability</a><a class="spine-problem" href="../lessons/018a-chain-prob.html">Lab · p(y|x) — the chain rule</a></div>
       <span class="spine-status" data-status="018" aria-label="progress"></span>
     </li>
 </ol>
@@ -56,12 +56,12 @@
 <ol class="spine">
     <li class="spine-item" data-lesson="026" data-planned="false">
       <span class="spine-num">01</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/026-attention.html">Attention</a><span class="meta">12 min · <span class="chip">NLP & Transformers</span></span><a class="spine-problem" href="../problems/026.html">Problem · Attention output, scaled and blended</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/026-attention.html">Attention</a><span class="meta">12 min · <span class="chip">NLP & Transformers</span></span><a class="spine-problem" href="../problems/026.html">Problem · Attention output, scaled and blended</a><a class="spine-problem" href="../lessons/026a-softmax.html">Lab · softmax — scores into weights</a><a class="spine-problem" href="../lessons/026b-scaling.html">Lab · 1/√dk(square root) — keeping scores in range</a></div>
       <span class="spine-status" data-status="026" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="027" data-planned="false">
       <span class="spine-num">02</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/027-transformer-block.html">The Transformer block</a><span class="meta">10 min · <span class="chip">NLP & Transformers</span><span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/027.html">Problem · Count one Transformer block</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/027-transformer-block.html">The Transformer block</a><span class="meta">10 min · <span class="chip">NLP & Transformers</span><span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/027.html">Problem · Count one Transformer block</a><a class="spine-problem" href="../lessons/027a-residual.html">Lab · x + MHA(LN(x)) — the residual path</a></div>
       <span class="spine-status" data-status="027" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="048" data-planned="false">
@@ -84,7 +84,7 @@
     </li>
     <li class="spine-item" data-lesson="029" data-planned="false">
       <span class="spine-num">02</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/029-alignment-and-inference.html">Alignment &amp; inference</a><span class="meta">10 min · <span class="chip">NLP & Transformers</span></span><a class="spine-problem" href="../problems/029.html">Problem · Preference loss on a leash</a></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/029-alignment-and-inference.html">Alignment &amp; inference</a><span class="meta">10 min · <span class="chip">NLP & Transformers</span></span><a class="spine-problem" href="../problems/029.html">Problem · Preference loss on a leash</a><a class="spine-problem" href="../lessons/029a-temperature.html">Lab · softmax(z/T) — temperature</a></div>
       <span class="spine-status" data-status="029" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="050" data-planned="false">
@@ -109,6 +109,6 @@ that wave. Nothing is hidden: the plan is public.</p>
 
 </main>
 <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

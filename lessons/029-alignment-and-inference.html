@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>029 — Alignment and inference</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -147,6 +147,10 @@
 
 <p><strong>What to notice.</strong> The saving grows with the prefix, so caching matters most exactly where it is hardest — long conversations. The cache costs memory instead: keys and values for every layer and every past token must be stored, which is why a long chat can exhaust GPU memory even though the model itself fits comfortably.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">softmax(z/T) — temperature — drag, step, then read the numbers.</p></div><a class="pg-link" href="029a-temperature.html">Open full screen →</a></div>
+  <iframe src="029a-temperature.html" title="Interactive lab: softmax(z/T) — temperature" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— alignment</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -178,7 +182,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/029.html">Solve it · 029 — Preference loss on a leash</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 029<span class="solve-diff">hard</span></p>
+  <p class="solve-title">Preference loss on a leash</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/029.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— alignment</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/029-alignment-and-inference.ipynb">open the notebook in Colab</a> · <a href="../notebooks/029-alignment-and-inference.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -211,6 +220,6 @@ for T in (0.5, 1.0, 2.0):
 
 </main>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>

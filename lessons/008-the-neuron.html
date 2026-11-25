@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>008 — The neuron</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=21">
+<link rel="stylesheet" href="../assets/lesson.css?v=23">
 <link rel="stylesheet" href="../assets/figures.css?v=4">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -173,6 +173,10 @@
 
 <p><strong>What to notice.</strong> The ReLU network agrees with the straight line on two of the three inputs and breaks from it on the middle one. That disagreement is the whole gain: the function is now piecewise, flat on one region and sloped on another. No single matrix can produce <code>10</code>, <code>−2</code> and <code>2</code> at those inputs unless it is exactly <code>[4, 6]</code>, and <code>[4, 6]</code> gets the middle row wrong.</p>
 
+<section class="playground">
+  <div class="pg-head"><div><p class="pg-kicker">Playground</p><p class="pg-sub">Why φ (phi) cannot be removed — drag, step, then read the numbers.</p></div><a class="pg-link" href="008a-activation.html">Open full screen →</a></div>
+  <iframe src="008a-activation.html" title="Interactive lab: Why φ (phi) cannot be removed" loading="lazy"></iframe>
+</section>
 <h2>The trap<span class="h2-topic">— the neuron</span></h2>
 <div class="callout">
   <span class="label">Most common wrong mental model</span>
@@ -205,7 +209,12 @@
   </li>
 </ol>
 
-<p class="solve-row"><a href="../problems/008.html">Solve it · 008 — Score first, then bend</a></p>
+<section class="solve-block">
+  <p class="solve-kicker">Practice · problem 008<span class="solve-diff">easy</span></p>
+  <p class="solve-title">Score first, then bend</p>
+  <p class="solve-sub">One function, checked against hidden tests — run it locally, paste the token back.</p>
+  <p class="solve-actions"><a class="solve-go" href="../problems/008.html">Open problem →</a><a class="solve-alt" href="../setup.html">First time? Setup guide</a></p>
+</section>
 <h2>Build it in Colab<span class="h2-topic">— the neuron</span></h2>
 <p>Runnable, NumPy-only, no setup: <a href="https://colab.research.google.com/github/omarahmedZa/ai-ml-course/blob/main/notebooks/008-the-neuron.ipynb">open the notebook in Colab</a> · <a href="../notebooks/008-the-neuron.ipynb">local copy</a>. Sections, plots, sliders and line-by-line notes — run the cells in order, then change one number and rerun.</p>
 <pre><code>import numpy as np
@@ -238,6 +247,6 @@ for W2 in (np.array([[1., -1.]]), np.array([[1., 1.]])):
 
 </main>
   <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=17" defer></script>
+<script src="../assets/course.js?v=18" defer></script>
 </body>
 </html>
