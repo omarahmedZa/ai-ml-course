@@ -798,7 +798,7 @@ body.library .topline { border-bottom: 1px solid var(--rule); padding-bottom: .6
   gap: 1.1rem; position: relative; padding-bottom: 2.4rem; align-items: end;
 }
 .shelf-row.last { display: flex; justify-content: center; }
-.shelf-row.last .book-card { width: calc((100% - 4 * 1.1rem) / 5); }
+.shelf-row.last .book-wrap { width: calc((100% - 4 * 1.1rem) / 5); }
 .rail {
   position: absolute; left: -1.5%; right: -1.5%; bottom: 1.9rem; height: 15px;
   background: linear-gradient(#43331f, #241a10 60%, #1a120b);
@@ -806,6 +806,7 @@ body.library .topline { border-bottom: 1px solid var(--rule); padding-bottom: .6
 }
 .shelf-row:last-of-type { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 
+.book-wrap { display: flex; flex-direction: column; }
 .book-card {
   background: none; border: 0; padding: 0; cursor: pointer; text-align: center;
   perspective: 1000px; position: relative; z-index: 1;
@@ -922,7 +923,7 @@ body.reading { overflow: hidden; }
 @media (max-width: 640px) {
   .shelf-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
   .shelf-row.last { display: grid; }
-  .shelf-row.last .book-card { width: auto; }
+  .shelf-row.last .book-wrap { width: auto; }
   .book-spread { grid-template-columns: 1fr; max-height: 88vh; }
   .page { min-height: 0; padding: 1.3rem 1.1rem; }
   .page-left { border-right: 0; border-bottom: 1px solid #d5cab2; }
