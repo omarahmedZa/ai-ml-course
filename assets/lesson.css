@@ -1046,3 +1046,19 @@ body.library .spine-item { border-color: var(--rule); }
 body.library .problem-card { background: var(--card); }
 body.library .filter-label { color: var(--ink-faint); }
 body.library .filters button { color: var(--ink-soft); border-color: var(--rule); }
+
+/* ---------- floating pill top bar ---------- */
+.topline {
+  position: sticky; top: .6rem;
+  border: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: .5rem .95rem;
+  margin: 0 0 1.9rem;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+}
+body.library .topline { border-bottom: 1px solid var(--rule); padding-bottom: .5rem; }
+@media (max-width: 640px) {
+  .topline { border-radius: 18px; padding: .55rem .7rem; top: .4rem; }
+}
