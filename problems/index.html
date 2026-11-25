@@ -4,19 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Problems — graded practice</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=16">
+<link rel="stylesheet" href="../assets/lesson.css?v=17">
 <link rel="stylesheet" href="../assets/problems.css?v=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="Graded problems for every lesson: run locally, submit a token, keep the score.">
 </head>
-<body data-page="problems">
+<body data-page="problems" class="library">
 <main>
 <nav class="topline">
   <a href="../index.html">← Library</a>
   <a href="../paths/index.html">Books</a>
   <span class="pill">60 problems</span>
   <span class="grow"></span>
+  <input class="search-input" type="search" placeholder="Search…" aria-label="Search lessons and problems" data-search>
   <button type="button" data-theme-toggle>◐ auto</button>
 </nav>
 
@@ -406,7 +407,8 @@
   <p><strong>How it works.</strong> <code>dml.py</code> runs the same tests the page describes, scores 5 points weighted 2 visible / 3 hidden, and decays 10% per failed submit to a floor of half. The page checks the token's checksum, stores the score here, and labels it <em>verified locally</em> — a static site cannot prove your run.</p>
 </div>
 </main>
-<script src="../assets/course.js?v=15" defer></script>
+<script src="../assets/search-index.js" defer></script>
+<script src="../assets/course.js?v=16" defer></script>
 <script src="../assets/problems.js?v=1" defer></script>
 </body>
 </html>

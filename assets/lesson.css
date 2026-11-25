@@ -998,3 +998,51 @@ body.reading { overflow: hidden; }
   text-transform: none; letter-spacing: .01em;
 }
 .search-results li:hover a { color: var(--accent); }
+
+/* ================= unified top bar ================= */
+.topline {
+  gap: .7rem; align-items: center; padding-bottom: .7rem;
+  border-bottom: 1px solid var(--rule); margin-bottom: 1.6rem;
+}
+.topline a { font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+.topline a:hover { color: var(--accent); }
+.topline .pill {
+  font-size: .62rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-faint); border: 1px solid var(--rule); border-radius: 999px;
+  padding: .18rem .55rem; background: none;
+}
+.topline .search-input {
+  width: clamp(7.5rem, 22vw, 17rem); margin-left: .2rem;
+  text-transform: none; letter-spacing: 0;
+}
+.topline button {
+  font-size: .64rem; letter-spacing: .08em; text-transform: uppercase;
+  padding: .28rem .6rem; border-radius: 999px;
+}
+@media (max-width: 640px) {
+  .topline { flex-wrap: wrap; row-gap: .45rem; }
+  .topline .search-input { order: 9; width: 100%; margin-left: 0; }
+}
+
+/* ================= problem subtitles ================= */
+.toc-problem {
+  grid-column: 2 / -1; display: block; margin-top: .1rem;
+  font: .64rem/1.3 ui-monospace, monospace; letter-spacing: .02em;
+  color: #8a7a5c; text-decoration: none;
+}
+.toc-problem:hover { color: #6b3f1d; text-decoration: underline; }
+.spine-problem {
+  display: block; margin-top: .18rem; font: .68rem/1.35 ui-monospace, monospace;
+  color: var(--ink-faint); text-decoration: none;
+}
+.spine-problem:hover { color: var(--accent); }
+
+/* ================= library theme on inner pages ================= */
+body.library .masthead h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+body.library table { border-color: var(--rule); }
+body.library th { color: var(--ink-soft); }
+body.library .book-row:hover { background: var(--card); }
+body.library .spine-item { border-color: var(--rule); }
+body.library .problem-card { background: var(--card); }
+body.library .filter-label { color: var(--ink-faint); }
+body.library .filters button { color: var(--ink-soft); border-color: var(--rule); }

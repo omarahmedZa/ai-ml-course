@@ -113,6 +113,11 @@
       var title = el(c.planned ? "span" : "a", "toc-title", c.title);
       if (!c.planned) title.setAttribute("href", base() + c.url);
       li.appendChild(title);
+      if (c.problem) {
+        var sub = el("a", "toc-problem", "Problem · " + c.problem);
+        sub.setAttribute("href", base() + "problems/" + c.id + ".html");
+        li.appendChild(sub);
+      }
       var mark = el("span", "toc-mark");
       var st = s[c.id];
       if (st && st.sections && Object.keys(st.sections).length >= 8) mark.classList.add("done");

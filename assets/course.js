@@ -892,7 +892,7 @@
           var small = document.createElement("span");
           small.textContent = e.type === "lesson"
             ? e.bookTitle
-            : e.type + " · " + (e.bookTitle || "");
+            : (e.type === "problem" ? "problem" : "lab · " + (e.bookTitle || ""));
           a.textContent = e.title;
           li.appendChild(a);
           li.appendChild(small);
@@ -920,6 +920,8 @@
     var out = document.querySelector("[data-search-page]");
     if (!input || !out) return;
     var index = window.SEARCH_INDEX || [];
+    var q = new URLSearchParams(location.search).get("q");
+    if (q) input.value = q;
     function render() {
       var hits = rankIndex(index, input.value);
       out.innerHTML = "";
@@ -938,11 +940,12 @@
       });
     }
     input.addEventListener("input", render);
+    render();
     input.focus();
   }
 
   function bootSearch() {
-    initSearch();
+    if (document.body.getAttribute("data-page") !== "search") initSearch();
     initSearchPage();
   }
   if (document.readyState === "loading") {

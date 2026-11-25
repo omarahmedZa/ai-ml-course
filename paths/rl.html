@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Book 5 — Reinforcement Learning</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=16">
+<link rel="stylesheet" href="../assets/lesson.css?v=17">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="Decisions with consequences, from bandits to PPO.">
-</head><body data-page="path" data-book="rl">
+</head><body data-page="path" data-book="rl" class="library">
 <main>
 <nav class="topline">
-  <a href="../index.html">← Course map</a>
+  <a href="../index.html">← Library</a>
   <a href="../paths/index.html">All books</a>
   <span class="pill">Book 5 / 7</span>
   <span class="grow"></span>
@@ -33,17 +33,17 @@
 <ol class="spine">
     <li class="spine-item" data-lesson="019" data-planned="false">
       <span class="spine-num">01</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/019-rl-frame.html">The RL frame</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/019-rl-frame.html">The RL frame</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/019.html">Problem · Discounted return, checked</a></div>
       <span class="spine-status" data-status="019" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="020" data-planned="false">
       <span class="spine-num">02</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/020-value-functions-bellman.html">Value functions &amp; the Bellman equation</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/020-value-functions-bellman.html">Value functions &amp; the Bellman equation</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/020.html">Problem · One Bellman backup sweep</a></div>
       <span class="spine-status" data-status="020" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="021" data-planned="false">
       <span class="spine-num">03</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/021-exploration-vs-exploitation.html">Exploration vs exploitation</a><span class="meta">8 min · <span class="chip">Reinforcement Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/021-exploration-vs-exploitation.html">Exploration vs exploitation</a><span class="meta">8 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/021.html">Problem · Epsilon-greedy action probabilities</a></div>
       <span class="spine-status" data-status="021" aria-label="progress"></span>
     </li>
 </ol>
@@ -51,22 +51,22 @@
 <ol class="spine">
     <li class="spine-item" data-lesson="022" data-planned="false">
       <span class="spine-num">01</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/022-two-solution-families.html">Two solution families</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/022-two-solution-families.html">Two solution families</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/022.html">Problem · Q-learning update, sign fixed</a></div>
       <span class="spine-status" data-status="022" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="023" data-planned="false">
       <span class="spine-num">02</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/023-function-approximation.html">Function approximation</a><span class="meta">8 min · <span class="chip">Reinforcement Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/023-function-approximation.html">Function approximation</a><span class="meta">8 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/023.html">Problem · Semi-gradient step for a linear Q</a></div>
       <span class="spine-status" data-status="023" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="024" data-planned="false">
       <span class="spine-num">03</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/024-dqn.html">DQN</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/024-dqn.html">DQN</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/024.html">Problem · DQN target, terminal fixed</a></div>
       <span class="spine-status" data-status="024" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="053" data-planned="false">
       <span class="spine-num">04</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/053-mdps-and-dynamic-programming.html">MDPs &amp; dynamic programming</a><span class="meta">12 min · <span class="chip">Reinforcement Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/053-mdps-and-dynamic-programming.html">MDPs &amp; dynamic programming</a><span class="meta">12 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/053.html">Problem · Value iteration on a chain</a></div>
       <span class="spine-status" data-status="053" aria-label="progress"></span>
     </li>
 </ol>
@@ -74,17 +74,17 @@
 <ol class="spine">
     <li class="spine-item" data-lesson="025" data-planned="false">
       <span class="spine-num">01</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/025-policy-gradient-at-scale.html">Policy gradient at scale</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/025-policy-gradient-at-scale.html">Policy gradient at scale</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/025.html">Problem · Add PPO's clipped objective</a></div>
       <span class="spine-status" data-status="025" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="054" data-planned="false">
       <span class="spine-num">02</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/054-bandits-beyond-epsilon-greedy.html">Bandits beyond ε-greedy</a><span class="meta">8 min · <span class="chip">Reinforcement Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/054-bandits-beyond-epsilon-greedy.html">Bandits beyond ε-greedy</a><span class="meta">8 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/054.html">Problem · UCB with unpulled arms</a></div>
       <span class="spine-status" data-status="054" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="055" data-planned="false">
       <span class="spine-num">03</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/055-offline-rl-and-imitation.html">Offline RL &amp; imitation</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/055-offline-rl-and-imitation.html">Offline RL &amp; imitation</a><span class="meta">10 min · <span class="chip">Reinforcement Learning</span></span><a class="spine-problem" href="../problems/055.html">Problem · Discounted returns, backwards</a></div>
       <span class="spine-status" data-status="055" aria-label="progress"></span>
     </li>
 </ol>
@@ -94,6 +94,6 @@ that wave. Nothing is hidden: the plan is public.</p>
 
 </main>
 <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=15" defer></script>
+<script src="../assets/course.js?v=16" defer></script>
 </body>
 </html>

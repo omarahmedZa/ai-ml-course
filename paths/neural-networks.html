@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Book 3 — Neural Networks</title>
-<link rel="stylesheet" href="../assets/lesson.css?v=16">
+<link rel="stylesheet" href="../assets/lesson.css?v=17">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="One mechanism, built in order: neuron, backward pass, training.">
-</head><body data-page="path" data-book="neural-networks">
+</head><body data-page="path" data-book="neural-networks" class="library">
 <main>
 <nav class="topline">
-  <a href="../index.html">← Course map</a>
+  <a href="../index.html">← Library</a>
   <a href="../paths/index.html">All books</a>
   <span class="pill">Book 3 / 7</span>
   <span class="grow"></span>
@@ -33,17 +33,17 @@
 <ol class="spine">
     <li class="spine-item" data-lesson="008" data-planned="false">
       <span class="spine-num">01</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/008-the-neuron.html">The neuron</a><span class="meta">8 min · <span class="chip">Deep Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/008-the-neuron.html">The neuron</a><span class="meta">8 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/008.html">Problem · Score first, then bend</a></div>
       <span class="spine-status" data-status="008" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="009" data-planned="false">
       <span class="spine-num">02</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/009-layers-and-forward-pass.html">Layers &amp; the forward pass</a><span class="meta">10 min · <span class="chip">Deep Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/009-layers-and-forward-pass.html">Layers &amp; the forward pass</a><span class="meta">10 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/009.html">Problem · Two-layer forward pass, by hand</a></div>
       <span class="spine-status" data-status="009" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="010" data-planned="false">
       <span class="spine-num">03</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/010-backpropagation.html">Backpropagation</a><span class="meta">10 min · <span class="chip">Deep Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/010-backpropagation.html">Backpropagation</a><span class="meta">10 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/010.html">Problem · Debug the linear-unit gradients</a></div>
       <span class="spine-status" data-status="010" aria-label="progress"></span>
     </li>
 </ol>
@@ -51,17 +51,17 @@
 <ol class="spine">
     <li class="spine-item" data-lesson="011" data-planned="false">
       <span class="spine-num">01</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/011-training-loop.html">The training loop</a><span class="meta">8 min · <span class="chip">Deep Learning</span><span class="chip">Calculus & Optimization</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/011-training-loop.html">The training loop</a><span class="meta">8 min · <span class="chip">Deep Learning</span><span class="chip">Calculus & Optimization</span></span><a class="spine-problem" href="../problems/011.html">Problem · Count the updates</a></div>
       <span class="spine-status" data-status="011" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="012" data-planned="false">
       <span class="spine-num">02</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/012-overfitting-in-deep-learning.html">Overfitting in DL</a><span class="meta">8 min · <span class="chip">Deep Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/012-overfitting-in-deep-learning.html">Overfitting in DL</a><span class="meta">8 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/012.html">Problem · Dropout rescale, checked</a></div>
       <span class="spine-status" data-status="012" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="045" data-planned="false">
       <span class="spine-num">03</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/045-convolutions-cnns.html">Convolutions &amp; CNNs</a><span class="meta">10 min · <span class="chip">Deep Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/045-convolutions-cnns.html">Convolutions &amp; CNNs</a><span class="meta">10 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/045.html">Problem · 2-D convolution with stride and padding</a></div>
       <span class="spine-status" data-status="045" aria-label="progress"></span>
     </li>
 </ol>
@@ -69,22 +69,22 @@
 <ol class="spine">
     <li class="spine-item" data-lesson="013" data-planned="false">
       <span class="spine-num">01</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/013-optimization-failure-modes.html">Optimization failure modes</a><span class="meta">10 min · <span class="chip">Deep Learning</span><span class="chip">Calculus & Optimization</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/013-optimization-failure-modes.html">Optimization failure modes</a><span class="meta">10 min · <span class="chip">Deep Learning</span><span class="chip">Calculus & Optimization</span></span><a class="spine-problem" href="../problems/013.html">Problem · Debug gradient-norm clipping</a></div>
       <span class="spine-status" data-status="013" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="014" data-planned="false">
       <span class="spine-num">02</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/014-architecture-families.html">Architecture families</a><span class="meta">8 min · <span class="chip">Deep Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/014-architecture-families.html">Architecture families</a><span class="meta">8 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/014.html">Problem · Convolution parameter count</a></div>
       <span class="spine-status" data-status="014" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="046" data-planned="false">
       <span class="spine-num">03</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/046-initialization-and-normalization.html">Initialization &amp; normalization</a><span class="meta">10 min · <span class="chip">Deep Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/046-initialization-and-normalization.html">Initialization &amp; normalization</a><span class="meta">10 min · <span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/046.html">Problem · He initialization, debugged</a></div>
       <span class="spine-status" data-status="046" aria-label="progress"></span>
     </li>
     <li class="spine-item" data-lesson="047" data-planned="false">
       <span class="spine-num">04</span>
-      <div class="spine-body"><a class="spine-title" href="../lessons/047-optimizers-sgd-adam.html">Optimizers: SGD → Adam</a><span class="meta">10 min · <span class="chip">Calculus & Optimization</span><span class="chip">Deep Learning</span></span></div>
+      <div class="spine-body"><a class="spine-title" href="../lessons/047-optimizers-sgd-adam.html">Optimizers: SGD → Adam</a><span class="meta">10 min · <span class="chip">Calculus & Optimization</span><span class="chip">Deep Learning</span></span><a class="spine-problem" href="../problems/047.html">Problem · Add Adam to the update loop</a></div>
       <span class="spine-status" data-status="047" aria-label="progress"></span>
     </li>
 </ol>
@@ -94,6 +94,6 @@ that wave. Nothing is hidden: the plan is public.</p>
 
 </main>
 <script src="../assets/search-index.js" defer></script>
-<script src="../assets/course.js?v=15" defer></script>
+<script src="../assets/course.js?v=16" defer></script>
 </body>
 </html>
