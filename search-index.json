@@ -1424,5 +1424,44 @@
   "symbols": [
    "±"
   ]
+ },
+ {
+  "type": "problem",
+  "id": "001",
+  "title": "Dot product, checked",
+  "book": "foundations",
+  "bookTitle": "Problems",
+  "categories": [
+   "linear-algebra"
+  ],
+  "summary": "Write `dot(a, b)` returning the dot product of two 1-D sequences.\n\n- raise `ValueError` when the lengths differ\n- return",
+  "url": "problems/001.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "002",
+  "title": "One descent step, sign fixed",
+  "book": "foundations",
+  "bookTitle": "Problems",
+  "categories": [
+   "calculus-optimization"
+  ],
+  "summary": "`descent_step` should return `w - lr * grad` — a step *against* the gradient.\n\nThe starter adds instead of subtracting. ",
+  "url": "problems/002.html",
+  "symbols": []
+ },
+ {
+  "type": "problem",
+  "id": "003",
+  "title": "Log-likelihood without underflow",
+  "book": "foundations",
+  "bookTitle": "Problems",
+  "categories": [
+   "probability-statistics"
+  ],
+  "summary": "`likelihood(probs, labels)` already multiplies probabilities — and underflows to zero.\n\nAdd `log_likelihood(probs, label",
+  "url": "problems/003.html",
+  "symbols": []
  }
 ]

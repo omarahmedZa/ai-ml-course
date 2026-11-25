@@ -1,0 +1,30 @@
+{
+  "id": "003",
+  "lesson": "003",
+  "book": "foundations",
+  "title": "Log-likelihood without underflow",
+  "difficulty": "medium",
+  "shape": "extend",
+  "categories": [
+    "probability-statistics"
+  ],
+  "statement_md": "`likelihood(probs, labels)` already multiplies probabilities — and underflows to zero.\n\nAdd `log_likelihood(probs, labels)` returning the **sum of logs**: `log p` where the label is 1, `log(1 - p)` where it is 0. Do not change `likelihood`.",
+  "entry": "log_likelihood",
+  "signature": "def log_likelihood(probs, labels):",
+  "starter": "import math\n\n\ndef likelihood(probs, labels):\n    total = 1.0\n    for p, y in zip(probs, labels):\n        total *= p if y == 1 else (1 - p)\n    return total\n\n\ndef log_likelihood(probs, labels):\n    # Your code here: sum the logs instead of multiplying.\n    pass\n",
+  "visible": [
+    "test_perfect",
+    "test_matches_likelihood"
+  ],
+  "hidden": [
+    "test_small_probs_no_underflow",
+    "test_label_zero",
+    "test_invalid_prob",
+    "test_returns_float"
+  ],
+  "tests_py": "import math\n\ndef test_perfect():\n    assert solution.log_likelihood([1.0, 0.0], [1, 0]) == 0.0\n\ndef test_matches_likelihood():\n    probs, labels = [0.9, 0.2, 0.6], [1, 0, 1]\n    assert abs(solution.log_likelihood(probs, labels) - math.log(solution.likelihood(probs, labels))) < 1e-9\n\ndef test_small_probs_no_underflow():\n    probs, labels = [1e-4, 1 - 1e-4], [1, 0]\n    assert solution.log_likelihood(probs, labels) < -9\n\ndef test_label_zero():\n    assert abs(solution.log_likelihood([0.25], [0]) - math.log(0.75)) < 1e-12\n\ndef test_invalid_prob():\n    try:\n        solution.log_likelihood([1.5], [1])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_returns_float():\n    assert isinstance(solution.log_likelihood([0.5], [1]), float)\n",
+  "mutations": [
+    "return sum(math.log(p) for p in probs)",
+    "return likelihood(probs, labels)"
+  ]
+}

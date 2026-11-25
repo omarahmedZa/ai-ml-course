@@ -1,0 +1,12 @@
+{
+  "id": "002", "lesson": "002", "book": "foundations",
+  "title": "One descent step, sign fixed",
+  "difficulty": "easy", "shape": "debug", "categories": ["calculus-optimization"],
+  "statement_md": "`descent_step` should return `w - lr * grad` — a step *against* the gradient.\n\nThe starter adds instead of subtracting. Find the bug, fix it, and keep the signature.",
+  "entry": "descent_step", "signature": "def descent_step(w, grad, lr):",
+  "starter": "def descent_step(w, grad, lr):\n    \"\"\"Return the weight after one gradient-descent step.\"\"\"\n    return w + lr * grad\n",
+  "visible": ["test_known_value", "test_direction"],
+  "hidden": ["test_zero_grad", "test_negative_grad", "test_lr_scaling", "test_returns_float"],
+  "tests_py": "def test_known_value():\n    assert solution.descent_step(3.0, 6.0, 0.1) == 2.4\n\ndef test_direction():\n    assert solution.descent_step(1.0, 2.0, 0.5) < 1.0\n\ndef test_zero_grad():\n    assert solution.descent_step(5.0, 0.0, 0.9) == 5.0\n\ndef test_negative_grad():\n    assert abs(solution.descent_step(1.0, -2.0, 0.5) - 2.0) < 1e-12\n\ndef test_lr_scaling():\n    assert abs(solution.descent_step(0.0, 1.0, 0.25) + 0.25) < 1e-12\n\ndef test_returns_float():\n    assert isinstance(solution.descent_step(1, 1, 0.5), float)\n",
+  "mutations": ["return w + lr * grad", "return w - grad"]
+}

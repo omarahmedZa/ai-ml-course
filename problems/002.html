@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>002 — One descent step, sign fixed</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="One descent step, sign fixed — a graded problem on calculus-optimization.">
+</head>
+<body data-page="problem" data-problem="002">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="index.html">Problems</a>
+  <span class="pill">002 · easy</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">Problem 002 · debug</p>
+  <h1>One descent step, sign fixed</h1>
+  <p class="objective">One function, checked against hidden tests. Run it locally, paste the token back.</p>
+  <p class="bookline"><span class="chip">Calculus Optimization</span><a href="../lessons/002-slope-to-gradient.html">read the lesson →</a></p>
+</header>
+
+<section class="statement">
+<p><code>descent_step</code> should return <code>w - lr * grad</code> — a step *against* the gradient.</p>
+<p>The starter adds instead of subtracting. Find the bug, fix it, and keep the signature.</p>
+</section>
+
+<h2>The contract</h2>
+<pre><code>def descent_step(w, grad, lr):</code></pre>
+
+<h2>Starter</h2>
+<pre><code>def descent_step(w, grad, lr):
+    &quot;&quot;&quot;Return the weight after one gradient-descent step.&quot;&quot;&quot;
+    return w + lr * grad
+</code></pre>
+
+<h2>Visible tests</h2>
+<p>These ship with the starter, so you can check your work before submitting:</p>
+<ul class="tests"><li><code>test_known_value</code></li><li><code>test_direction</code></li></ul>
+
+<h2>Run it</h2>
+<pre><code>python3 dml.py pull 002
+# edit work/002/solution.py
+python3 dml.py run 002
+python3 dml.py submit 002</code></pre>
+
+<section class="result-box" data-score-box>
+  <h2>Your score</h2>
+  <p class="score-line"><strong data-score>—</strong> <span data-score-meta>not submitted yet</span></p>
+  <div class="bar"><span data-score-bar></span></div>
+  <form class="paste" onsubmit="return false">
+    <label for="tok-002">Paste the token from <code>dml.py submit</code></label>
+    <input id="tok-002" type="text" data-token-input placeholder="eyJ2IjoxLCJpZCI6…~8f3a1c2d" autocomplete="off">
+  </form>
+  <p class="verify-note" data-result>Verified locally: your browser checks the token's checksum and stores the score on this device.</p>
+</section>
+
+<div class="labnav">
+  <a href="001.html">← 001 · Dot product, checked</a><a href="003.html">003 · Log-likelihood without underflow →</a>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

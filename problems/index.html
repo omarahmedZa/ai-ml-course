@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Problems — graded practice</title>
+<link rel="stylesheet" href="../assets/lesson.css?v=15">
+<link rel="stylesheet" href="../assets/problems.css?v=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Graded problems for every lesson: run locally, submit a token, keep the score.">
+</head>
+<body data-page="problems">
+<main>
+<nav class="topline">
+  <a href="../index.html">← Library</a>
+  <a href="../paths/index.html">Books</a>
+  <span class="pill">3 problems</span>
+  <span class="grow"></span>
+  <button type="button" data-theme-toggle>◐ auto</button>
+</nav>
+
+<header class="masthead">
+  <p class="kicker">One per lesson · checked against hidden tests</p>
+  <h1>Problems</h1>
+  <p class="objective">Pull the starter, solve it in your own editor, submit the token. <strong data-count="problems">0 / 3</strong> solved.</p>
+</header>
+
+<div class="filters" role="group" aria-label="Filters">
+  <span class="filter-label">Difficulty</span>
+  <button type="button" data-filter="difficulty" data-value="easy" aria-pressed="false">easy</button>
+  <button type="button" data-filter="difficulty" data-value="medium" aria-pressed="false">medium</button>
+  <button type="button" data-filter="difficulty" data-value="hard" aria-pressed="false">hard</button>
+  <span class="filter-label">Shape</span>
+  <button type="button" data-filter="shape" data-value="scratch" aria-pressed="false">scratch</button>
+  <button type="button" data-filter="shape" data-value="debug" aria-pressed="false">debug</button>
+  <button type="button" data-filter="shape" data-value="extend" aria-pressed="false">extend</button>
+</div>
+
+<section class="problem-grid">
+  <a class="problem-card" href="001.html" data-id="001" data-difficulty="easy" data-categories="linear-algebra" data-shape="scratch">
+    <span class="pc-id">001</span>
+    <span class="pc-title">Dot product, checked</span>
+    <span class="pc-meta">easy · scratch · linear algebra</span>
+    <span class="pc-score" data-card-score="001">—</span>
+  </a>
+  <a class="problem-card" href="002.html" data-id="002" data-difficulty="easy" data-categories="calculus-optimization" data-shape="debug">
+    <span class="pc-id">002</span>
+    <span class="pc-title">One descent step, sign fixed</span>
+    <span class="pc-meta">easy · debug · calculus optimization</span>
+    <span class="pc-score" data-card-score="002">—</span>
+  </a>
+  <a class="problem-card" href="003.html" data-id="003" data-difficulty="medium" data-categories="probability-statistics" data-shape="extend">
+    <span class="pc-id">003</span>
+    <span class="pc-title">Log-likelihood without underflow</span>
+    <span class="pc-meta">medium · extend · probability statistics</span>
+    <span class="pc-score" data-card-score="003">—</span>
+  </a>
+</section>
+
+<p class="empty" data-empty hidden>No problems match those filters.</p>
+
+<div class="next">
+  <p><strong>How it works.</strong> <code>dml.py</code> runs the same tests the page describes, scores 5 points weighted 2 visible / 3 hidden, and decays 10% per failed submit to a floor of half. The page checks the token's checksum, stores the score here, and labels it <em>verified locally</em> — a static site cannot prove your run.</p>
+</div>
+</main>
+<script src="../assets/course.js?v=14" defer></script>
+<script src="../assets/problems.js?v=1" defer></script>
+</body>
+</html>

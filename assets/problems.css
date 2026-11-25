@@ -1,0 +1,31 @@
+/* problem pages + hub */
+.statement p { max-width: var(--measure); }
+.tests { font-family: ui-monospace, monospace; font-size: .82rem; color: var(--ink-soft); }
+.result-box { border: 1px solid var(--rule); border-radius: 12px; padding: 1rem 1.1rem; background: var(--card); margin: 1.6rem 0; }
+.score-line { display: flex; gap: .6rem; align-items: baseline; margin: .2rem 0 .6rem; }
+.score-line strong { font-size: 1.6rem; font-family: "Iowan Old Style", Georgia, serif; }
+.score-line span { color: var(--ink-soft); font-size: .82rem; }
+.result-box .bar { height: 8px; background: var(--code-bg); border-radius: 99px; overflow: hidden; }
+.result-box .bar > span { display: block; height: 100%; width: 0; background: var(--ok); transition: width .3s ease; }
+.paste { display: grid; gap: .35rem; margin-top: 1rem; }
+.paste label { font-size: .78rem; color: var(--ink-soft); }
+.paste input { font-family: ui-monospace, monospace; font-size: .72rem; padding: .45rem .6rem; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); color: var(--ink); }
+.verify-note { font-size: .74rem; color: var(--ink-faint); margin: .6rem 0 0; }
+
+.problem-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: .8rem; margin: 1.4rem 0; }
+.problem-card { display: grid; gap: .15rem; padding: .9rem; border: 1px solid var(--rule); border-radius: 12px; background: var(--card); text-decoration: none; }
+.problem-card:hover { border-color: var(--accent); }
+.pc-id { font: .66rem ui-monospace, monospace; color: var(--ink-faint); }
+.pc-title { font-weight: 600; color: var(--ink); font-size: .95rem; }
+.pc-meta { font-size: .72rem; color: var(--ink-soft); }
+.pc-score { font: .7rem ui-monospace, monospace; color: var(--ink-faint); }
+.pc-score.done { color: var(--ok); }
+.filters { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; margin: 1rem 0; }
+.filter-label { font: .62rem ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin-left: .6rem; }
+.filters button { font-size: .74rem; padding: .22rem .6rem; border: 1px solid var(--rule); border-radius: 999px; background: none; color: var(--ink-soft); cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.empty { color: var(--ink-faint); font-size: .85rem; }
+@media (max-width: 640px) {
+  .problem-grid { grid-template-columns: 1fr; }
+  .paste input { font-size: .68rem; }
+}

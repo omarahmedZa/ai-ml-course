@@ -1,0 +1,30 @@
+{
+  "id": "001",
+  "lesson": "001",
+  "book": "foundations",
+  "title": "Dot product, checked",
+  "difficulty": "easy",
+  "shape": "scratch",
+  "categories": [
+    "linear-algebra"
+  ],
+  "statement_md": "Write `dot(a, b)` returning the dot product of two 1-D sequences.\n\n- raise `ValueError` when the lengths differ\n- return `0.0` for empty inputs\n- do not mutate the inputs\n\nNo NumPy needed; loops are fine.",
+  "entry": "dot",
+  "signature": "def dot(a, b):",
+  "starter": "def dot(a, b):\n    \"\"\"Return the dot product of a and b.\"\"\"\n    # Your code here.\n    pass\n",
+  "visible": [
+    "test_basic",
+    "test_single_pair"
+  ],
+  "hidden": [
+    "test_length_mismatch",
+    "test_empty",
+    "test_no_mutation",
+    "test_floats"
+  ],
+  "tests_py": "def test_basic():\n    assert solution.dot([1, 2, 3], [4, 5, 6]) == 32\n\ndef test_single_pair():\n    assert solution.dot([2.0], [0.5]) == 1.0\n\ndef test_length_mismatch():\n    try:\n        solution.dot([1, 2], [1])\n    except ValueError:\n        return\n    raise AssertionError(\"expected ValueError\")\n\ndef test_empty():\n    assert solution.dot([], []) == 0.0\n\ndef test_no_mutation():\n    a, b = [1, 2], [3, 4]\n    solution.dot(a, b)\n    assert a == [1, 2] and b == [3, 4]\n\ndef test_floats():\n    assert abs(solution.dot([0.1, 0.2], [10, 10]) - 3.0) < 1e-9\n",
+  "mutations": [
+    "return sum(x * y for x, y in zip(a, b)) - 1",
+    "return sum(x * y for x, y in zip(a, b)) + 1e-3"
+  ]
+}
